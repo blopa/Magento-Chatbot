@@ -12,45 +12,73 @@
 			$this->_init('chatbot/chatdata'); // this is location of the resource file.
 		}
 
-		public function checkEnabled($apiType) // check if bot integration is enabled
+		public function requestHandler($apiType) // handle request
+		{
+			$api = $this->getApikey($apiType);
+			if ($apiType == $this->tg_bot && $api) // telegram api
+			{
+				// all logic goes here
+				$this->handleTelegram($api);
+			}
+			else if ($apiType == $this->fb_bot && $api) // facebook api
+			{
+				// all logic goes here
+				$this->handleFacebook($api);
+			}
+			else
+				return "error 101"; // TODO
+		}
+
+		public function getApikey($apiType) // check if bot integration is enabled
 		{
 			if ($apiType == $this->tg_bot) // telegram api
 			{
 				$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
-				if ($enabled != 1) // is disabled
-					return false;
+				$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+				if ($enabled == 1 && $apikey) // is enabled and has API
+					return $apikey;
 			}
 			else if ($apiType == $this->fb_bot)
 			{
-				$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
-				if ($enabled != 1) // is disabled
-					return false;
+//				$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
+//				$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+//				if ($enabled == 1 && $apikey) // is enabled and has API
+//					return $apikey;
+				return "error 101"; // TODO
 			}
-
-			return $apiType;
+			return false;
 		}
 
-		public function sendTextMessage($apiType, $text)
+		public function handleTelegram($api)
 		{
-			if ($apiType == $this->checkEnabled($this->tg_bot)) // telegram api
+			// Instances the class
+			$telegram = new Telegram($api);
+
+			// Take text and chat_id from the message
+			$text = $telegram->Text();
+			$chat_id = $telegram->ChatID();
+
+			if (!is_null($text) && !is_null($chat_id))
 			{
-				$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
-				if ($enabled) // is enabled
-				{
-					$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-					return $apikey . $text;
+				if ($text == "/list_cat") {
+					 // started the bot for the first time
 				}
+				else if ($text == "/list_prod") {}
+				else if ($text == "/search") {}
+				else if ($text == "/login") {}
+				else if ($text == "/list_orders") {}
+				else if ($text == "/reorder") {}
+				else if ($text == "/add2cart") {}
+				else if ($text == "/show_cart") {}
+				else if ($text == "/checkout") {}
+				else if ($text == "/track_order") {}
+				else if ($text == "/support") {}
+				else if ($text == "/send_email") {}
 			}
-			else if ($apiType == $this->checkEnabled($this->fb_bot))
-			{
-				$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
-				if ($enabled) // is enabled
-				{
-					$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-					return $apikey . $text;
-				}
-			}
-			else
-				return 'error'; // TODO
+		}
+
+		public function handleFacebook()
+		{
+
 		}
 	}

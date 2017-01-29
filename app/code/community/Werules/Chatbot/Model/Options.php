@@ -15,12 +15,11 @@ class Werules_Chatbot_Model_Options
 			array('value'=>3, 'label'=>'Login'),
 			array('value'=>4, 'label'=>'List Orders'),
 			array('value'=>5, 'label'=>'Reorder'),
-			array('value'=>6, 'label'=>'Add Products to Cart'),
-			array('value'=>7, 'label'=>'Add Product To Cart'),
-			array('value'=>8, 'label'=>'Checkout On Site'),
-			array('value'=>9, 'label'=>'Track Order Status'),
-			array('value'=>10, 'label'=>'Talk to Support'),
-			array('value'=>11, 'label'=>'Send Email')
+			array('value'=>6, 'label'=>'Add Product To Cart'),
+			array('value'=>7, 'label'=>'Checkout On Site'),
+			array('value'=>8, 'label'=>'Track Order Status'),
+			array('value'=>9, 'label'=>'Talk to Support'),
+			array('value'=>10, 'label'=>'Send Email')
 		);
 	}
 }
