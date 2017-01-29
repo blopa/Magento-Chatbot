@@ -1,3 +1,5 @@
 <?php
-	echo 'hello world 2';
+	$action = $this->getRequest()->getActionName();
+
+	echo Mage::getModel('chatbot/chatdata')->sendTextMessage($action, 'pablinho - ');
 ?>

@@ -12,7 +12,7 @@
 					<file>werules_chatbot.xml</file>
 				</werules_chatbot>
 			</updates>
-		</layout>	
+		</layout>
 		<routers>
 			<chatbot>
 				<use>standard</use>
