@@ -60,9 +60,14 @@
 
 			if (!is_null($text) && !is_null($chat_id))
 			{
-				if ($text == "/list_cat") {
-					 // started the bot for the first time
+				if ($text == "/start")
+				{
+					// started the bot for the first time
+					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg');
+					$content = array('chat_id' => $chat_id, 'text' => $message);
+					$telegram->sendMessage($content);
 				}
+				else if ($text == "/list_cat") {}
 				else if ($text == "/list_prod") {}
 				else if ($text == "/search") {}
 				else if ($text == "/login") {}
@@ -74,6 +79,7 @@
 				else if ($text == "/track_order") {}
 				else if ($text == "/support") {}
 				else if ($text == "/send_email") {}
+				else return "error 101"; // TODO
 			}
 		}
 
