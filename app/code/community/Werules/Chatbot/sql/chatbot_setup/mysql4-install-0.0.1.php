@@ -8,14 +8,14 @@ $installer->run("
 	CREATE TABLE {$this->getTable('wr_chatbot')} (
 	  `entity_id` int(11) unsigned NOT NULL auto_increment,
 	  `customer_id` int(11) NULL,
-	  `nickname` varchar(120) NULL,
-	  `profile_img` varchar(255) NULL,
-	  `level` varchar(20) NULL,
-	  `show_level` smallint(1) NOT NULL default '0',
-	  `show_birthday` smallint(1) NOT NULL default '0',
-	  `show_fav` smallint(1) NOT NULL default '0',
-	  `last_bought` smallint(1) NOT NULL default '0',
-	  `status` smallint(1) NOT NULL default '0',
+	  `telegram_chat_id` varchar(50) NULL,
+	  `telegram_conv_state` int(10) NOT NULL default '0',
+	  `facebook_chat_id` varchar(50) NULL,
+	  `facebook_conv_state` int(10) NOT NULL default '0',
+	  `whatsapp_chat_id` varchar(50) NULL,
+	  `whatsapp_conv_state` int(10) NOT NULL default '0',
+	  `hash_key` varchar(150) NULL,
+	  `is_logged` smallint(1) NOT NULL default '0',
 	  key (entity_id)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	");

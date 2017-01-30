@@ -6,6 +6,21 @@
 		public $tg_bot = "telegram";
 		public $fb_bot = "facebook";
 
+		// CONVERSATION STATES
+		public $start_state = 0;
+		public $list_cat_state = 1;
+		public $list_prod_state = 2;
+		public $search_state = 3;
+		public $login_state = 4;
+		public $list_orders_state = 5;
+		public $reorder_state = 6;
+		public $add2cart_state = 7;
+		public $show_cart_state = 8;
+		public $checkout_state = 9;
+		public $track_order_state = 10;
+		public $support_state = 11;
+		public $send_email_state = 12;
+
 		public function _construct()
 		{
 			//parent::_construct();
@@ -49,6 +64,40 @@
 			return false;
 		}
 
+		public function getState($chat_id, $apiType)
+		{
+			if ($apiType == $this->tg_bot) // telegram api
+			{
+				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
+				return $chatdata->getTelegramConvState();
+			}
+			else if ($apiType == $this->fb_bot)
+			{
+				return "error 101"; // TODO
+			}
+		}
+
+		public function setState($chat_id, $apiType, $state)
+		{
+			if ($apiType == $this->tg_bot) // telegram api
+			{
+				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
+				if ($chatdata->getTelegramChatId()) // TODO
+				{
+					$data = array(
+						//'customer_id' => $customerId,
+						'telegram_conv_state' => $state
+					); // data to be insert on database
+					$chatdata->addData($data);
+					$chatdata->save();
+				}
+			}
+			else if ($apiType == $this->fb_bot)
+			{
+				return "error 101"; // TODO
+			}
+		}
+
 		public function handleTelegram($api)
 		{
 			// Instances the class
@@ -63,22 +112,95 @@
 				if ($text == "/start")
 				{
 					// started the bot for the first time
-					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg');
-					$content = array('chat_id' => $chat_id, 'text' => $message);
-					$telegram->sendMessage($content);
+					$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
+					if ($chatdata->getTelegramChatId()) // TODO
+					{
+						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
+						$content = array('chat_id' => $chat_id, 'text' => $message);
+						$telegram->sendMessage($content);
+
+//						$data = array(
+//							//'customer_id' => $customerId,
+//							'telegram_chat_id' => $chat_id
+//						); // data to be insert on database
+//						$model = Mage::getModel('chatbot/chatdata')->load($chatdata->getId())->addData($data); // insert data on database
+//						$model->setId($chatdata->getId())->save(); // save (duh)
+					}
+					else // if customer id isnt on our database, means that we need to insert his data
+					{
+						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
+						$content = array('chat_id' => $chat_id, 'text' => $message);
+						$telegram->sendMessage($content);
+						try
+						{
+							$hash = substr(md5(uniqid($chat_id, true)), 0, 150);
+							Mage::getModel('chatbot/chatdata') // using magento model to insert data into database the proper way
+								->setTelegramChatId($chat_id)
+								->setHashKey($hash) // TODO
+								->save();
+						}
+						catch (Exception $e)
+						{
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again.")); // TODO
+						}
+					}
 				}
-				else if ($text == "/list_cat") {}
-				else if ($text == "/list_prod") {}
-				else if ($text == "/search") {}
-				else if ($text == "/login") {}
-				else if ($text == "/list_orders") {}
-				else if ($text == "/reorder") {}
-				else if ($text == "/add2cart") {}
-				else if ($text == "/show_cart") {}
-				else if ($text == "/checkout") {}
-				else if ($text == "/track_order") {}
-				else if ($text == "/support") {}
-				else if ($text == "/send_email") {}
+				else if ($text == "/list_cat")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->list_cat_state);
+					$helper = Mage::helper('catalog/category');
+					$categories = $helper->getStoreCategories();
+					foreach ($categories as $_category)
+					{
+						$message = $_category->getName();
+						$content = array('chat_id' => $chat_id, 'text' => $message);
+						$telegram->sendMessage($content);
+					}
+				}
+				else if ($text == "/list_prod")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->list_prod_state);
+				}
+				else if ($text == "/search")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->search_state);
+				}
+				else if ($text == "/login")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->login_state);
+				}
+				else if ($text == "/list_orders")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->list_orders_state);
+				}
+				else if ($text == "/reorder")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->reorder_state);
+				}
+				else if ($text == "/add2cart")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->add2cart_state);
+				}
+				else if ($text == "/show_cart")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->show_cart_state);
+				}
+				else if ($text == "/checkout")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->checkout_state);
+				}
+				else if ($text == "/track_order")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->track_order_state);
+				}
+				else if ($text == "/support")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->support_state);
+				}
+				else if ($text == "/send_email")
+				{
+					$this->setState($chat_id, $this->tg_bot, $this->send_email_state);
+				}
 				else return "error 101"; // TODO
 			}
 		}
