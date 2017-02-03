@@ -109,6 +109,19 @@
 
 			if (!is_null($text) && !is_null($chat_id))
 			{
+				if ($this->getState($chat_id, $this->tg_bot) == $this->list_cat_state)
+				{
+					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($_category, true)));
+
+					$productIDs = $_category->getProductCollection()->getAllIds();
+					foreach ($productIDs as $productID)
+					{
+						$_product = Mage::getModel('catalog/product')->load($productID);
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $_product->getName()));
+					}
+				}
+				// commands
 				if ($text == "/start")
 				{
 					// started the bot for the first time
@@ -150,12 +163,15 @@
 					$this->setState($chat_id, $this->tg_bot, $this->list_cat_state);
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories();
-					foreach ($categories as $_category)
+					$option = array();
+					foreach ($categories as $_category) // TODO fix max size
 					{
-						$message = $_category->getName();
-						$content = array('chat_id' => $chat_id, 'text' => $message);
-						$telegram->sendMessage($content);
+						array_push($option, $_category->getName());
 					}
+
+					$keyb = $telegram->buildKeyBoard(array($option));
+					$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Pick a Category");
+					$telegram->sendMessage($content);
 				}
 				else if ($text == "/list_prod")
 				{
