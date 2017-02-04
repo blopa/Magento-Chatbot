@@ -34,16 +34,16 @@
 
 		public function requestHandler($apiType) // handle request
 		{
-			$api = $this->getApikey($apiType);
-			if ($apiType == $this->tg_bot && $api) // telegram api
+			$apiKey = $this->getApikey($apiType);
+			if ($apiType == $this->tg_bot && $apiKey) // telegram api
 			{
 				// all logic goes here
-				$this->handleTelegram($api);
+				$this->telegramHandler($apiKey);
 			}
-			else if ($apiType == $this->fb_bot && $api) // facebook api
+			else if ($apiType == $this->fb_bot && $apiKey) // facebook api
 			{
 				// all logic goes here
-				$this->handleFacebook($api);
+				$this->facebookHandler($apiKey);
 			}
 			else
 				return "error 101"; // TODO
@@ -67,19 +67,6 @@
 				return "error 101"; // TODO
 			}
 			return false;
-		}
-
-		public function getState($chat_id, $apiType)
-		{
-			if ($apiType == $this->tg_bot) // telegram api
-			{
-				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
-				return $chatdata->getTelegramConvState();
-			}
-			else if ($apiType == $this->fb_bot)
-			{
-				return "error 101"; // TODO
-			}
 		}
 
 		public function addProd2Cart($prodId) // TODO add try / except
@@ -106,31 +93,17 @@
 			return substr($text, 0, strlen($cmd)) == $cmd;
 		}
 
-		public function setState($chat_id, $apiType, $state)
+		public function setState($apiType, $state)
 		{
-			if ($apiType == $this->tg_bot) // telegram api
-			{
-				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
-				if ($chatdata->getTelegramChatId()) // TODO
-				{
-					$data = array(
-						//'customer_id' => $customerId,
-						'telegram_conv_state' => $state
-					); // data to be insert on database
-					$chatdata->addData($data);
-					$chatdata->save();
-				}
-			}
-			else if ($apiType == $this->fb_bot)
-			{
-				return "error 101"; // TODO
-			}
+			$data = array($apiType => $state); // data to be insert on database
+			$this->addData($data);
+			$this->save();
 		}
 
-		public function handleTelegram($api)
+		public function telegramHandler($apiKey)
 		{
 			// Instances the Telegram class
-			$telegram = new Telegram($api);
+			$telegram = new Telegram($apiKey);
 
 			// Take text and chat_id from the message
 			$text = $telegram->Text();
@@ -142,7 +115,7 @@
 			if (!is_null($text) && !is_null($chat_id))
 			{
 				// states
-				if ($this->getState($chat_id, $this->tg_bot) == $this->list_cat_state)
+				if ($chatdata->getTelegramConvState() == $this->list_cat_state)
 				{
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($_category, true))); // TODO debug
@@ -155,11 +128,11 @@
 						$message = $_product->getName() . "\n/add2cart" . $_product->getId(); // TODO
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
 					}
-					$this->setState($chat_id, $this->tg_bot, $this->list_prod_state);
+					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
 				}
-				else if ($this->getState($chat_id, $this->tg_bot) == $this->list_prod_state && $this->checkCommand($text, $this->add2card_cmd)) // TODO
+				else if ($chatdata->getTelegramConvState() == $this->list_prod_state && $chatdata->checkCommand($text, $this->add2card_cmd)) // TODO
 				{
-					$sessionId = $this->addProd2Cart($this->getCommandValue($text, $this->add2card_cmd));
+					$sessionId = $chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2card_cmd));
 					$sessionUrl = Mage::getBaseUrl();
 					if (!isset(parse_url($sessionUrl)['SID']))
 						$sessionUrl .= "?SID=" . $sessionId; // add session id to url
@@ -205,7 +178,7 @@
 				}
 				else if ($text == "/list_cat")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->list_cat_state);
+					$chatdata->setState('telegram_conv_state', $this->list_cat_state);
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories();
 					$option = array();
@@ -220,58 +193,58 @@
 				}
 				else if ($text == "/list_prod")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->list_prod_state);
+					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
 				}
 				else if ($text == "/search")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->search_state);
+					$chatdata->setState('telegram_conv_state', $this->search_state);
 				}
 				else if ($text == "/login")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->login_state);
+					$chatdata->setState('telegram_conv_state', $this->login_state);
 				}
 				else if ($text == "/list_orders")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->list_orders_state);
+					$chatdata->setState('telegram_conv_state', $this->list_orders_state);
 				}
 				else if ($text == "/reorder")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->reorder_state);
+					$chatdata->setState('telegram_conv_state', $this->reorder_state);
 				}
 				else if ($text == "/add2cart")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->add2cart_state);
+					$chatdata->setState('telegram_conv_state', $this->add2cart_state);
 				}
 				else if ($text == "/show_cart")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->show_cart_state);
+					$chatdata->setState('telegram_conv_state', $this->show_cart_state);
 				}
 				else if ($text == "/checkout")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->checkout_state);
+					$chatdata->setState('telegram_conv_state', $this->checkout_state);
 				}
 				else if ($text == "/track_order")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->track_order_state);
+					$chatdata->setState('telegram_conv_state', $this->track_order_state);
 				}
 				else if ($text == "/support")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->support_state);
+					$chatdata->setState('telegram_conv_state', $this->support_state);
 				}
 				else if ($text == "/send_email")
 				{
-					$this->setState($chat_id, $this->tg_bot, $this->send_email_state);
+					$chatdata->setState('telegram_conv_state', $this->send_email_state);
 				}
 				else return "error 101"; // TODO
 			}
 		}
 
-		public function handleFacebook()
+		public function facebookHandler()
 		{
 
 		}
 
-		public function handleWhatsapp()
+		public function whatsappHandler()
 		{
 
 		}
