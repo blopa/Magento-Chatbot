@@ -8,6 +8,7 @@ $installer->run("
 	CREATE TABLE {$this->getTable('wr_chatbot')} (
 	  `entity_id` int(11) unsigned NOT NULL auto_increment,
 	  `customer_id` int(11) NULL,
+	  `session_id` varchar(150) NULL,
 	  `telegram_chat_id` varchar(50) NULL,
 	  `telegram_conv_state` int(10) NOT NULL default '0',
 	  `facebook_chat_id` varchar(50) NULL,
