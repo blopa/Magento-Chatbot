@@ -108,19 +108,23 @@
 			$this->save();
 		}
 
-		public function prepareProdMessages($productIDs)
+		public function prepareProdMessages($productID)
 		{
-			$products = array();
-			foreach ($productIDs as $productID)
-			{
-				$_product = Mage::getModel('catalog/product')->load($productID);
-				array_push($products,
-					$_product->getName() . "\n" .
-					$this->excerpt($_product->getShortDescription(), 60) . "\n" .
-					"Add To Cart: " . $this->add2cart_cmd . $_product->getId()
-				); // TODO
-			}
-			return $products;
+			$_product = Mage::getModel('catalog/product')->load($productID);
+			$message = $_product->getName() . "\n" .
+				$this->excerpt($_product->getShortDescription(), 60) . "\n" .
+				"Add To Cart: " . $this->add2cart_cmd . $_product->getId();
+			return $message;
+		}
+
+		public function loadImageContent($productID)
+		{
+			$absolutePath =
+				Mage::getBaseDir('media') .
+				"/catalog/product" .
+				Mage::getModel('catalog/product')->load($productID)->getSmallImage();
+
+			return curl_file_create($absolutePath, 'image/jpg');
 		}
 
 		public function excerpt($text, $size)
@@ -180,11 +184,13 @@
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($_category, true))); // TODO debug
 
-					$products = $chatdata->prepareProdMessages($_category->getProductCollection()->getAllIds());
 					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
-					foreach ($products as $message)
+					$productIDs = $_category->getProductCollection()->getAllIds();
+					foreach ($productIDs as $productID)
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
+						$message = $this->prepareProdMessages($productID);
+						$image = $this->loadImageContent($productID);
+						$telegram->sendPhoto(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
 					}
 					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
 					return;
@@ -192,10 +198,12 @@
 				else if ($chatdata->getTelegramConvState() == $this->search_state) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->start_state);
-					$products = $this->prepareProdMessages($this->getProductIdsBySearch($text));
-					foreach ($products as $message)
+					$productIDs = $this->getProductIdsBySearch($text);
+					foreach ($productIDs as $productID)
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+						$message = $this->prepareProdMessages($productID);
+						$image = $this->loadImageContent($productID);
+						$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
 					}
 					return;
 				}
