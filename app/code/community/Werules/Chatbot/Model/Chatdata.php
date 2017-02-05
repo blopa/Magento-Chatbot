@@ -22,6 +22,7 @@
 		public $track_order_state = 10;
 		public $support_state = 11;
 		public $send_email_state = 12;
+		public $clear_cart_state = 13;
 
 		// COMMANDS
 		public $add2cart_cmd = "/add2cart";
@@ -89,8 +90,6 @@
 			);
 			$this->addData($data);
 			$this->save();
-
-			return $sessionId;
 		}
 
 		public function getCommandValue($text, $cmd)
@@ -156,14 +155,9 @@
 				}
 				else if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "entreeei no add aqui!"));
-					$sessionId = $chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2cart_cmd));
-					$sessionUrl = Mage::getBaseUrl();
-					if (!isset(parse_url($sessionUrl)['SID']))
-						$sessionUrl .= "?SID=" . $sessionId; // add session id to url
+					$chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2cart_cmd));
 
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added!"));
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $sessionUrl));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added! Send /checkout to checkout."));
 				}
 
 				// commands
@@ -218,6 +212,45 @@
 					$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Pick a Category");
 					$telegram->sendMessage($content);
 				}
+				else if ($text == "/checkout")
+				{
+					$sessionId = $chatdata->getSessionId();
+					$quoteId = $chatdata->getQuoteId();
+					if ($sessionId && $quoteId)
+					{
+						$cart = Mage::getModel('checkout/cart')->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$quoteId));
+
+						$cartUrl = Mage::helper('checkout/cart')->getCartUrl();
+						if (!isset(parse_url($cartUrl)['SID']))
+							$cartUrl .= "?SID=" . $sessionId; // add session id to url
+
+						$message = "Products on cart:\n";
+						foreach ($cart->getQuote()->getItemsCollection() as $item) // TODO
+						{
+							$message .= $item->getQty() . "x " . $item->getProduct()->getName() . "\n" .
+								"Price: " . Mage::helper('core')->currency($item->getProduct()->getPrice(), true, false) . "\n\n";
+						}
+						$message .= "Total: " . Mage::helper('core')->currency($cart->getQuote()->getSubtotal(), true, false);
+
+						$chatdata->setState('telegram_conv_state', $this->checkout_state);
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $cartUrl));
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Your cart is empty"));
+				}
+				else if ($text == "/clear_cart")
+				{
+					$data = array(
+						"session_id" => "",
+						"quote_id" => ""
+					);
+					$chatdata->addData($data);
+					$chatdata->save();
+
+					$chatdata->setState('telegram_conv_state', $this->clear_cart_state);
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
+				}
 				else if ($text == "/search")
 				{
 					$chatdata->setState('telegram_conv_state', $this->search_state);
@@ -237,10 +270,6 @@
 				else if ($text == "/show_cart")
 				{
 					$chatdata->setState('telegram_conv_state', $this->show_cart_state);
-				}
-				else if ($text == "/checkout")
-				{
-					$chatdata->setState('telegram_conv_state', $this->checkout_state);
 				}
 				else if ($text == "/track_order")
 				{

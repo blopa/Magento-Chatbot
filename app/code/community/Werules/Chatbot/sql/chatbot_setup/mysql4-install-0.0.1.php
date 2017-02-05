@@ -18,6 +18,10 @@ $installer->run("
 	  `whatsapp_conv_state` int(10) NOT NULL default '0',
 	  `hash_key` varchar(150) NULL,
 	  `is_logged` smallint(1) NOT NULL default '0',
+	  `custom_one` varchar(150) NULL,
+	  `custom_two` varchar(150) NULL,
+	  `custom_three` varchar(150) NULL,
+	  `custom_four` varchar(150) NULL,
 	  key (entity_id)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	");
