@@ -4,6 +4,7 @@
 	class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
 		// APIs
+		private $api_type = "";
 		private $tg_bot = "telegram";
 		private $fb_bot = "facebook";
 		private $wapp_bot = "whatsapp";
@@ -25,18 +26,21 @@
 
 		// COMMANDS
 		private $cmd_list = "start,list_cat,search,login,list_orders,reorder,add2cart,checkout,clear_cart,track_order,support,send_email";
-		private $start_cmd = "/start";
-		private $listacateg_cmd = "/list_cat";
-		private $search_cmd = "/search";
-		private $login_cmd = "/login";
-		private $listorders_cmd = "/list_orders";
-		private $reorder_cmd = "/reorder";
-		private $add2cart_cmd = "/add2cart";
-		private $checkout_cmd = "/checkout";
-		private $clearcart_cmd = "/clear_cart";
-		private $trackorder_cmd = "/track_order";
-		private $support_cmd = "/support";
-		private $sendemail_cmd = "/send_email";
+		private $start_cmd = "";
+		private $listacateg_cmd = "";
+		private $search_cmd = "";
+		private $login_cmd = "";
+		private $listorders_cmd = "";
+		private $reorder_cmd = "";
+		private $add2cart_cmd = "";
+		private $checkout_cmd = "";
+		private $clearcart_cmd = "";
+		private $trackorder_cmd = "";
+		private $support_cmd = "";
+		private $sendemail_cmd = "";
+
+		// REGEX
+		private $unallowed_characters = "/[^A-Za-z0-9 _]/";
 
 		public function _construct()
 		{
@@ -85,37 +89,99 @@
 		{
 			$checkout = Mage::getSingleton('checkout/session');
 			$cart = Mage::getModel("checkout/cart");
-			if ($this->getSessionId() && $this->getQuoteId())
+			try
 			{
-				$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
-				$checkout->setSessionId($this->getSessionId());
-			}
-			$cart->addProduct($prodId);
-			$cart->save();
-			$checkout->setCartWasUpdated(true);
+				if ($this->getSessionId() && $this->getQuoteId())
+				{
+					$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
+					$checkout->setSessionId($this->getSessionId());
+				}
+				$cart->addProduct($prodId);
+				$cart->save();
+				$checkout->setCartWasUpdated(true);
 
-			$sessionId = $checkout->getEncryptedSessionId();
-			$data = array(
-				"session_id" => $sessionId,
-				"quote_id" => $checkout->getQuote()->getId()
-			);
-			$this->addData($data);
-			$this->save();
+				$sessionId = $checkout->getEncryptedSessionId();
+				$data = array(
+					"session_id" => $sessionId,
+					"quote_id" => $checkout->getQuote()->getId()
+				);
+				$this->addData($data);
+				$this->save();
+			}
+			catch (Exception $e)
+			{
+				return false;
+			}
+
+			return true;
 		}
 
-		private function getCommandString($cmd)
+		private function valudateCommand($cmd)
 		{
+			if ($cmd == "/")
+				return null;
+			return $cmd;
+		}
 
+		private function getCommandString($cmdId)
+		{
+			if ($this->api_type == $this->tg_bot)
+				$confpath = 'chatbot_enable/telegram_config/';
+			else if ($this->api_type == $this->fb_bot)
+				$confpath = 'chatbot_enable/facebook_config/';
+//			else if ($this->api_type == $this->wapp_bot)
+//				$confpath = 'chatbot_enable/whatsapp_config/';
+
+			$config = Mage::getStoreConfig($confpath . 'enabled_commands');
+			$enabledCmds = explode(',', $config);
+			if (in_array($cmdId, $enabledCmds))
+			{
+				$config = Mage::getStoreConfig($confpath . 'commands_code');
+				$commands = explode(',', $config);
+				$defaultCmds = explode(',', $this->cmd_list);
+				if (count($commands) < count($defaultCmds))
+				{
+					return preg_replace( // remove all non-alphanumerics
+						$this->unallowed_characters,
+						'',
+						str_replace( // replace whitespace for underscore
+							' ',
+							'_',
+							array_merge( // merge arrays
+								$commands,
+								array_slice(
+									$defaultCmds,
+									count($commands)
+								)
+							)[$cmdId - 1]
+						)
+					);
+				}
+				return preg_replace( // remove all non-alphanumerics
+					$this->unallowed_characters,
+					'',
+					str_replace( // replace whitespace for underscore
+						' ',
+						'_',
+						$commands[$cmdId - 1]
+					)
+				);
+			}
+			return "";
 		}
 
 		private function getCommandValue($text, $cmd)
 		{
-			return substr($text, strlen($cmd), strlen($text));
+			if (strlen($text) > strlen($cmd))
+				return substr($text, strlen($cmd), strlen($text));
+			return null;
 		}
 
 		private function checkCommand($text, $cmd)
 		{
-			return substr($text, 0, strlen($cmd)) == $cmd;
+			if ($cmd)
+				return substr($text, 0, strlen($cmd)) == $cmd;
+			return false;
 		}
 
 		private function setState($apiType, $state) // TODO add try
@@ -192,15 +258,51 @@
 
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
+			$chatdata->api_type = $this->tg_bot;
+
+			// init commands
+			$this->start_cmd = "/start";
+			$this->listacateg_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(1));
+			$this->search_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(2));
+			$this->login_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(3));
+			$this->listorders_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(4));
+			$this->reorder_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(5));
+			$this->add2cart_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(6));
+			$this->checkout_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(7));
+			$this->clearcart_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(8));
+			$this->trackorder_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(9));
+			$this->support_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(10));
+			$this->sendemail_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(11));
+
+			// TODO DEBUG COMMANDS
+//			$temp_var = $this->start_cmd . " - " .
+//				$this->listacateg_cmd . " - " .
+//				$this->search_cmd . " - " .
+//				$this->login_cmd . " - " .
+//				$this->listorders_cmd . " - " .
+//				$this->reorder_cmd . " - " .
+//				$this->add2cart_cmd . " - " .
+//				$this->checkout_cmd . " - " .
+//				$this->clearcart_cmd . " - " .
+//				$this->trackorder_cmd . " - " .
+//				$this->support_cmd . " - " .
+//				$this->sendemail_cmd;
+//			$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $temp_var));
+//			$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->getTelegramConvState()));
 
 			if (!is_null($text) && !is_null($chat_id))
 			{
 				// supreme commands
 				if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
 				{
-					$chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2cart_cmd));
-
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added! Send /checkout to checkout."));
+					$cmdvalue = $chatdata->getCommandValue($text, $this->add2cart_cmd);
+					if ($cmdvalue)
+					{
+						if ($chatdata->addProd2Cart($cmdvalue))
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added! Send /checkout to checkout."));
+						else
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again."));
+					}
 					return;
 				}
 
@@ -293,7 +395,7 @@
 					}
 					return;
 				}
-				else if ($text == $this->listacateg_cmd)
+				else if ($this->listacateg_cmd && $text == $this->listacateg_cmd)
 				{
 					$chatdata->setState('telegram_conv_state', $this->list_cat_state);
 					$helper = Mage::helper('catalog/category');
@@ -313,7 +415,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again.")); // TODO
 					return;
 				}
-				else if ($text == $this->checkout_cmd) // TODO
+				else if ($this->checkout_cmd && $text == $this->checkout_cmd) // TODO
 				{
 					$sessionId = $chatdata->getSessionId();
 					$quoteId = $chatdata->getQuoteId();
@@ -341,7 +443,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Your cart is empty"));
 					return;
 				}
-				else if ($text == $this->clearcart_cmd)
+				else if ($this->clearcart_cmd && $text == $this->clearcart_cmd)
 				{
 					$data = array(
 						"session_id" => "",
@@ -354,38 +456,38 @@
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
 					return;
 				}
-				else if ($text == $this->search_cmd)
+				else if ($this->search_cmd && $text == $this->search_cmd)
 				{
 					$chatdata->setState('telegram_conv_state', $this->search_state);
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, search for what?"));
 					return;
 				}
-				else if ($text == $this->login_cmd) // TODO
+				else if ($this->login_cmd && $text == $this->login_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->login_state);
 					return;
 				}
-				else if ($text == $this->listorders_cmd) // TODO
+				else if ($this->listorders_cmd && $text == $this->listorders_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->list_orders_state);
 					return;
 				}
-				else if ($text == $this->reorder_cmd) // TODO
+				else if ($this->reorder_cmd && $text == $this->reorder_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->reorder_state);
 					return;
 				}
-				else if ($text == $this->trackorder_cmd) // TODO
+				else if ($this->trackorder_cmd && $text == $this->trackorder_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->track_order_state);
 					return;
 				}
-				else if ($text == $this->support_cmd) // TODO
+				else if ($this->support_cmd && $text == $this->support_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->support_state);
 					return;
 				}
-				else if ($text == $this->sendemail_cmd) // TODO
+				else if ($this->sendemail_cmd && $text == $this->sendemail_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->send_email_state);
 					return;
@@ -394,12 +496,12 @@
 			}
 		}
 
-		private function facebookHandler()
+		private function facebookHandler($apiKey)
 		{
 
 		}
 
-		private function whatsappHandler()
+		private function whatsappHandler($apiKey)
 		{
 
 		}
