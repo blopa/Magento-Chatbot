@@ -109,6 +109,21 @@
 			$this->save();
 		}
 
+		public function prepareProdMessages($productIDs)
+		{
+			$products = array();
+			foreach ($productIDs as $productID)
+			{
+				$_product = Mage::getModel('catalog/product')->load($productID);
+				array_push($products,
+					$_product->getName() . "\n" .
+					$this->excerpt($_product->getShortDescription(), 60) . "\n" .
+					"Add To Cart: " . $this->add2cart_cmd . $_product->getId()
+				); // TODO
+			}
+			return $products;
+		}
+
 		public function excerpt($text, $size)
 		{
 			if (strlen($text) > $size)
@@ -119,6 +134,22 @@
 				$text = $text . $etc;
 			}
 			return $text;
+		}
+
+		public function getProductIdsBySearch($searchstring)
+		{
+			$ids = array();
+			// Code to Search Product by $searchstring and get Product IDs
+			$product_collection = Mage::getResourceModel('catalog/product_collection')
+				->addAttributeToSelect('*')
+				->addAttributeToFilter('name', array('like' => '%'.$searchstring.'%'))
+				->load();
+
+			foreach ($product_collection as $product) {
+				$ids[] = $product->getId();
+			}
+			//return array of product ids
+			return $ids;
 		}
 
 		public function telegramHandler($apiKey)
@@ -135,29 +166,40 @@
 
 			if (!is_null($text) && !is_null($chat_id))
 			{
+				// supreme commands
+				if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
+				{
+					$chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2cart_cmd));
+
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added! Send /checkout to checkout."));
+					return;
+				}
+
 				// states
 				if ($chatdata->getTelegramConvState() == $this->list_cat_state)
 				{
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($_category, true))); // TODO debug
-					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 
-					$productIDs = $_category->getProductCollection()->getAllIds();
-					foreach ($productIDs as $productID)
+					$products = $chatdata->prepareProdMessages($_category->getProductCollection()->getAllIds());
+					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
+					foreach ($products as $message)
 					{
-						$_product = Mage::getModel('catalog/product')->load($productID);
-						$message = $_product->getName() . "\n" .
-							$this->excerpt($_product->getShortDescription(), 60) . "\n" .
-							"Add To Cart: " . $this->add2cart_cmd . $_product->getId(); // TODO
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
 					}
 					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
+					return;
 				}
-				else if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
+				else if ($chatdata->getTelegramConvState() == $this->search_state) // TODO
 				{
-					$chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2cart_cmd));
-
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added! Send /checkout to checkout."));
+					$chatdata->setState('telegram_conv_state', $this->start_state);
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "entrei aquiii"));
+					$products = $this->prepareProdMessages($this->getProductIdsBySearch($text));
+					foreach ($products as $message)
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+					}
+					return;
 				}
 
 				// commands
@@ -196,6 +238,7 @@
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again.")); // TODO
 						}
 					}
+					return;
 				}
 				else if ($text == "/list_cat")
 				{
@@ -211,8 +254,9 @@
 					$keyb = $telegram->buildKeyBoard(array($option));
 					$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Pick a Category");
 					$telegram->sendMessage($content);
+					return;
 				}
-				else if ($text == "/checkout")
+				else if ($text == "/checkout") // TODO
 				{
 					$sessionId = $chatdata->getSessionId();
 					$quoteId = $chatdata->getQuoteId();
@@ -238,6 +282,7 @@
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Your cart is empty"));
+					return;
 				}
 				else if ($text == "/clear_cart")
 				{
@@ -250,38 +295,48 @@
 
 					$chatdata->setState('telegram_conv_state', $this->clear_cart_state);
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
+					return;
 				}
 				else if ($text == "/search")
 				{
 					$chatdata->setState('telegram_conv_state', $this->search_state);
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, search for what?"));
+					return;
 				}
 				else if ($text == "/login")
 				{
 					$chatdata->setState('telegram_conv_state', $this->login_state);
+					return;
 				}
 				else if ($text == "/list_orders")
 				{
 					$chatdata->setState('telegram_conv_state', $this->list_orders_state);
+					return;
 				}
 				else if ($text == "/reorder")
 				{
 					$chatdata->setState('telegram_conv_state', $this->reorder_state);
+					return;
 				}
 				else if ($text == "/show_cart")
 				{
 					$chatdata->setState('telegram_conv_state', $this->show_cart_state);
+					return;
 				}
 				else if ($text == "/track_order")
 				{
 					$chatdata->setState('telegram_conv_state', $this->track_order_state);
+					return;
 				}
 				else if ($text == "/support")
 				{
 					$chatdata->setState('telegram_conv_state', $this->support_state);
+					return;
 				}
 				else if ($text == "/send_email")
 				{
 					$chatdata->setState('telegram_conv_state', $this->send_email_state);
+					return;
 				}
 				else return "error 101"; // TODO
 			}
