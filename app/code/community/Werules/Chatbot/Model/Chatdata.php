@@ -77,7 +77,7 @@
 //					return $apikey;
 				return "error 101"; // TODO
 			}
-			return false;
+			return null;
 		}
 
 		private function addProd2Cart($prodId) // TODO add try / except
@@ -112,7 +112,7 @@
 			return substr($text, 0, strlen($cmd)) == $cmd;
 		}
 
-		private function setState($apiType, $state)
+		private function setState($apiType, $state) // TODO add try
 		{
 			$data = array($apiType => $state); // data to be insert on database
 			$this->addData($data);
@@ -122,20 +122,29 @@
 		private function prepareProdMessages($productID)
 		{
 			$_product = Mage::getModel('catalog/product')->load($productID);
-			$message = $_product->getName() . "\n" .
-				$this->excerpt($_product->getShortDescription(), 60) . "\n" .
-				"Add To Cart: " . $this->add2cart_cmd . $_product->getId();
-			return $message;
+			if ($_product)
+			{
+				$message = $_product->getName() . "\n" .
+					$this->excerpt($_product->getShortDescription(), 60) . "\n" .
+					"Add To Cart: " . $this->add2cart_cmd . $_product->getId();
+				return $message;
+			}
+			return null;
 		}
 
 		private function loadImageContent($productID)
 		{
-			$absolutePath =
-				Mage::getBaseDir('media') .
-				"/catalog/product" .
-				Mage::getModel('catalog/product')->load($productID)->getSmallImage();
+			$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
+			if ($imagepath && $imagepath != "no_selection")
+			{
+				$absolutePath =
+					Mage::getBaseDir('media') .
+					"/catalog/product" .
+					$imagepath;
 
-			return curl_file_create($absolutePath, 'image/jpg');
+				return curl_file_create($absolutePath, 'image/jpg');
+			}
+			return null;
 		}
 
 		private function excerpt($text, $size)
@@ -190,32 +199,53 @@
 				}
 
 				// states
-				if ($chatdata->getTelegramConvState() == $this->list_cat_state)
+				if ($chatdata->getTelegramConvState() == $this->list_cat_state) // TODO show only in stock products
 				{
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
-					//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($_category, true))); // TODO debug
 
-					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
-					$productIDs = $_category->getProductCollection()->getAllIds();
-					foreach ($productIDs as $productID)
+					if ($_category)
 					{
-						$message = $this->prepareProdMessages($productID);
-						$image = $this->loadImageContent($productID);
-						$telegram->sendPhoto(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
+						$productIDs = $_category->getProductCollection()->getAllIds();
+						if ($productIDs)
+						{
+							$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
+							foreach ($productIDs as $productID)
+							{
+								$message = $this->prepareProdMessages($productID);
+								$image = $this->loadImageContent($productID);
+								if ($image)
+									$telegram->sendPhoto(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
+								else
+									$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
+							}
+							$chatdata->setState('telegram_conv_state', $this->list_prod_state);
+						}
+						else
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Sorry, no products found in this category."));
 					}
-					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, please try again."));
 					return;
 				}
 				else if ($chatdata->getTelegramConvState() == $this->search_state) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->start_state);
 					$productIDs = $this->getProductIdsBySearch($text);
-					foreach ($productIDs as $productID)
+					if ($productIDs)
 					{
-						$message = $this->prepareProdMessages($productID);
-						$image = $this->loadImageContent($productID);
-						$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
+						foreach ($productIDs as $productID)
+						{
+							$message = $this->prepareProdMessages($productID);
+							$image = $this->loadImageContent($productID);
+							if ($image)
+								$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
+							else
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+						}
 					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Sorry, no products found."));
+
 					return;
 				}
 
@@ -262,15 +292,19 @@
 					$chatdata->setState('telegram_conv_state', $this->list_cat_state);
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories();
-					$option = array();
-					foreach ($categories as $_category) // TODO fix max size
+					if ($categories)
 					{
-						array_push($option, $_category->getName());
-					}
+						$option = array();
+						foreach ($categories as $_category) // TODO fix buttons max size
+						{
+							array_push($option, $_category->getName());
+						}
 
-					$keyb = $telegram->buildKeyBoard(array($option));
-					$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Pick a Category");
-					$telegram->sendMessage($content);
+						$keyb = $telegram->buildKeyBoard(array($option));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Pick a Category"));
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again.")); // TODO
 					return;
 				}
 				else if ($text == $this->checkout_cmd) // TODO
@@ -296,7 +330,6 @@
 
 						$chatdata->setState('telegram_conv_state', $this->checkout_state);
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
-						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $cartUrl));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Your cart is empty"));
