@@ -24,15 +24,16 @@
 		private $clear_cart_state = 13;
 
 		// COMMANDS
-		private $add2cart_cmd = "/add2cart";
+		private $cmd_list = "start,list_cat,search,login,list_orders,reorder,add2cart,checkout,clear_cart,track_order,support,send_email";
 		private $start_cmd = "/start";
 		private $listacateg_cmd = "/list_cat";
-		private $checkout_cmd = "/checkout";
-		private $clearcart_cmd = "/clear_cart";
 		private $search_cmd = "/search";
 		private $login_cmd = "/login";
 		private $listorders_cmd = "/list_orders";
 		private $reorder_cmd = "/reorder";
+		private $add2cart_cmd = "/add2cart";
+		private $checkout_cmd = "/checkout";
+		private $clearcart_cmd = "/clear_cart";
 		private $trackorder_cmd = "/track_order";
 		private $support_cmd = "/support";
 		private $sendemail_cmd = "/send_email";
@@ -100,6 +101,11 @@
 			);
 			$this->addData($data);
 			$this->save();
+		}
+
+		private function getCommandString($cmd)
+		{
+
 		}
 
 		private function getCommandValue($text, $cmd)

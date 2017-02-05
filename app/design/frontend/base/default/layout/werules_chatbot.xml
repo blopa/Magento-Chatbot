@@ -4,7 +4,7 @@
 			<action method="addLink">
 				<name>chatbot_settings</name>
 				<path>chatbot/settings/index</path>
-				<label>Customer Profile</label>
+				<label>Chatbot Settings</label>
 			</action>
 		</reference>
 	</customer_account>
