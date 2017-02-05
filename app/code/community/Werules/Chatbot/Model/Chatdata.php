@@ -24,7 +24,7 @@
 		public $send_email_state = 12;
 
 		// COMMANDS
-		public $add2card_cmd = "/add2cart";
+		public $add2cart_cmd = "/add2cart";
 
 		public function _construct()
 		{
@@ -71,16 +71,26 @@
 
 		public function addProd2Cart($prodId) // TODO add try / except
 		{
-			// TODO get user session if exists
-			$product = Mage::getModel('catalog/product')->load($prodId);
-			$cart = Mage::getModel('checkout/cart');
-			$cart->init();
-			$cart->addProduct($product, array('qty' => '1'));
+			$checkout = Mage::getSingleton('checkout/session');
+			$cart = Mage::getModel("checkout/cart");
+			if ($this->getSessionId() && $this->getQuoteId())
+			{
+				$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
+				$checkout->setSessionId($this->getSessionId());
+			}
+			$cart->addProduct($prodId);
 			$cart->save();
-			Mage::getSingleton('checkout/session')->setCartWasUpdated(true);
+			$checkout->setCartWasUpdated(true);
 
-			$session = Mage::getSingleton('core/session');
-			return $session->getEncryptedSessionId();
+			$sessionId = $checkout->getEncryptedSessionId();
+			$data = array(
+				"session_id" => $sessionId,
+				"quote_id" => $checkout->getQuote()->getId()
+			);
+			$this->addData($data);
+			$this->save();
+
+			return $sessionId;
 		}
 
 		public function getCommandValue($text, $cmd)
@@ -98,6 +108,18 @@
 			$data = array($apiType => $state); // data to be insert on database
 			$this->addData($data);
 			$this->save();
+		}
+
+		public function excerpt($text, $size)
+		{
+			if (strlen($text) > $size)
+			{
+				$text = substr($text, 0, $size);
+				$text = substr($text, 0, strrpos($text, " "));
+				$etc = " ...";
+				$text = $text . $etc;
+			}
+			return $text;
 		}
 
 		public function telegramHandler($apiKey)
@@ -125,20 +147,25 @@
 					foreach ($productIDs as $productID)
 					{
 						$_product = Mage::getModel('catalog/product')->load($productID);
-						$message = $_product->getName() . "\n/add2cart" . $_product->getId(); // TODO
+						$message = $_product->getName() . "\n" .
+							$this->excerpt($_product->getShortDescription(), 60) . "\n" .
+							"Add To Cart: " . $this->add2cart_cmd . $_product->getId(); // TODO
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
 					}
 					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
 				}
-				else if ($chatdata->getTelegramConvState() == $this->list_prod_state && $chatdata->checkCommand($text, $this->add2card_cmd)) // TODO
+				else if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
 				{
-					$sessionId = $chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2card_cmd));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "entreeei no add aqui!"));
+					$sessionId = $chatdata->addProd2Cart($chatdata->getCommandValue($text, $this->add2cart_cmd));
 					$sessionUrl = Mage::getBaseUrl();
 					if (!isset(parse_url($sessionUrl)['SID']))
 						$sessionUrl .= "?SID=" . $sessionId; // add session id to url
 
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Added!"));
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $sessionUrl));
 				}
+
 				// commands
 				if ($text == "/start")
 				{
@@ -191,10 +218,6 @@
 					$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => "Pick a Category");
 					$telegram->sendMessage($content);
 				}
-				else if ($text == "/list_prod")
-				{
-					$chatdata->setState('telegram_conv_state', $this->list_prod_state);
-				}
 				else if ($text == "/search")
 				{
 					$chatdata->setState('telegram_conv_state', $this->search_state);
@@ -210,10 +233,6 @@
 				else if ($text == "/reorder")
 				{
 					$chatdata->setState('telegram_conv_state', $this->reorder_state);
-				}
-				else if ($text == "/add2cart")
-				{
-					$chatdata->setState('telegram_conv_state', $this->add2cart_state);
 				}
 				else if ($text == "/show_cart")
 				{
