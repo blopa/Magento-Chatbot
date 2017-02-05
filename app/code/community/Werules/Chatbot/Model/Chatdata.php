@@ -4,27 +4,38 @@
 	class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
 		// APIs
-		public $tg_bot = "telegram";
-		public $fb_bot = "facebook";
-		public $wapp_bot = "whatsapp";
+		private $tg_bot = "telegram";
+		private $fb_bot = "facebook";
+		private $wapp_bot = "whatsapp";
 
 		// CONVERSATION STATES
-		public $start_state = 0;
-		public $list_cat_state = 1;
-		public $list_prod_state = 2;
-		public $search_state = 3;
-		public $login_state = 4;
-		public $list_orders_state = 5;
-		public $reorder_state = 6;
-		public $add2cart_state = 7;
-		public $checkout_state = 9;
-		public $track_order_state = 10;
-		public $support_state = 11;
-		public $send_email_state = 12;
-		public $clear_cart_state = 13;
+		private $start_state = 0;
+		private $list_cat_state = 1;
+		private $list_prod_state = 2;
+		private $search_state = 3;
+		private $login_state = 4;
+		private $list_orders_state = 5;
+		private $reorder_state = 6;
+		private $add2cart_state = 7;
+		private $checkout_state = 9;
+		private $track_order_state = 10;
+		private $support_state = 11;
+		private $send_email_state = 12;
+		private $clear_cart_state = 13;
 
 		// COMMANDS
-		public $add2cart_cmd = "/add2cart";
+		private $add2cart_cmd = "/add2cart";
+		private $start_cmd = "/start";
+		private $listacateg_cmd = "/list_cat";
+		private $checkout_cmd = "/checkout";
+		private $clearcart_cmd = "/clear_cart";
+		private $search_cmd = "/search";
+		private $login_cmd = "/login";
+		private $listorders_cmd = "/list_orders";
+		private $reorder_cmd = "/reorder";
+		private $trackorder_cmd = "/track_order";
+		private $support_cmd = "/support";
+		private $sendemail_cmd = "/send_email";
 
 		public function _construct()
 		{
@@ -49,7 +60,7 @@
 				return "error 101"; // TODO
 		}
 
-		public function getApikey($apiType) // check if bot integration is enabled
+		private function getApikey($apiType) // check if bot integration is enabled
 		{
 			if ($apiType == $this->tg_bot) // telegram api
 			{
@@ -69,7 +80,7 @@
 			return false;
 		}
 
-		public function addProd2Cart($prodId) // TODO add try / except
+		private function addProd2Cart($prodId) // TODO add try / except
 		{
 			$checkout = Mage::getSingleton('checkout/session');
 			$cart = Mage::getModel("checkout/cart");
@@ -91,24 +102,24 @@
 			$this->save();
 		}
 
-		public function getCommandValue($text, $cmd)
+		private function getCommandValue($text, $cmd)
 		{
 			return substr($text, strlen($cmd), strlen($text));
 		}
 
-		public function checkCommand($text, $cmd)
+		private function checkCommand($text, $cmd)
 		{
 			return substr($text, 0, strlen($cmd)) == $cmd;
 		}
 
-		public function setState($apiType, $state)
+		private function setState($apiType, $state)
 		{
 			$data = array($apiType => $state); // data to be insert on database
 			$this->addData($data);
 			$this->save();
 		}
 
-		public function prepareProdMessages($productID)
+		private function prepareProdMessages($productID)
 		{
 			$_product = Mage::getModel('catalog/product')->load($productID);
 			$message = $_product->getName() . "\n" .
@@ -117,7 +128,7 @@
 			return $message;
 		}
 
-		public function loadImageContent($productID)
+		private function loadImageContent($productID)
 		{
 			$absolutePath =
 				Mage::getBaseDir('media') .
@@ -127,7 +138,7 @@
 			return curl_file_create($absolutePath, 'image/jpg');
 		}
 
-		public function excerpt($text, $size)
+		private function excerpt($text, $size)
 		{
 			if (strlen($text) > $size)
 			{
@@ -139,7 +150,7 @@
 			return $text;
 		}
 
-		public function getProductIdsBySearch($searchstring)
+		private function getProductIdsBySearch($searchstring)
 		{
 			$ids = array();
 			// Code to Search Product by $searchstring and get Product IDs
@@ -155,7 +166,7 @@
 			return $ids;
 		}
 
-		public function telegramHandler($apiKey)
+		private function telegramHandler($apiKey)
 		{
 			// Instances the Telegram class
 			$telegram = new Telegram($apiKey);
@@ -209,7 +220,7 @@
 				}
 
 				// commands
-				if ($text == "/start")
+				if ($text == $this->start_cmd)
 				{
 					// started the bot for the first time
 					$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
@@ -246,7 +257,7 @@
 					}
 					return;
 				}
-				else if ($text == "/list_cat")
+				else if ($text == $this->listacateg_cmd)
 				{
 					$chatdata->setState('telegram_conv_state', $this->list_cat_state);
 					$helper = Mage::helper('catalog/category');
@@ -262,7 +273,7 @@
 					$telegram->sendMessage($content);
 					return;
 				}
-				else if ($text == "/checkout") // TODO
+				else if ($text == $this->checkout_cmd) // TODO
 				{
 					$sessionId = $chatdata->getSessionId();
 					$quoteId = $chatdata->getQuoteId();
@@ -279,17 +290,19 @@
 							$message .= $item->getQty() . "x " . $item->getProduct()->getName() . "\n" .
 								"Price: " . Mage::helper('core')->currency($item->getProduct()->getPrice(), true, false) . "\n\n";
 						}
-						$message .= "Total: " . Mage::helper('core')->currency($cart->getQuote()->getSubtotal(), true, false);
+						$message .= "Total: " .
+							Mage::helper('core')->currency($cart->getQuote()->getSubtotal(), true, false) . "\n\n" .
+							"[Checkout Here](" . $cartUrl . ")";
 
 						$chatdata->setState('telegram_conv_state', $this->checkout_state);
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $cartUrl));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
+						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $cartUrl));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Your cart is empty"));
 					return;
 				}
-				else if ($text == "/clear_cart")
+				else if ($text == $this->clearcart_cmd)
 				{
 					$data = array(
 						"session_id" => "",
@@ -302,38 +315,38 @@
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
 					return;
 				}
-				else if ($text == "/search")
+				else if ($text == $this->search_cmd)
 				{
 					$chatdata->setState('telegram_conv_state', $this->search_state);
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, search for what?"));
 					return;
 				}
-				else if ($text == "/login") // TODO
+				else if ($text == $this->login_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->login_state);
 					return;
 				}
-				else if ($text == "/list_orders") // TODO
+				else if ($text == $this->listorders_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->list_orders_state);
 					return;
 				}
-				else if ($text == "/reorder") // TODO
+				else if ($text == $this->reorder_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->reorder_state);
 					return;
 				}
-				else if ($text == "/track_order") // TODO
+				else if ($text == $this->trackorder_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->track_order_state);
 					return;
 				}
-				else if ($text == "/support") // TODO
+				else if ($text == $this->support_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->support_state);
 					return;
 				}
-				else if ($text == "/send_email") // TODO
+				else if ($text == $this->sendemail_cmd) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->send_email_state);
 					return;
@@ -342,12 +355,12 @@
 			}
 		}
 
-		public function facebookHandler()
+		private function facebookHandler()
 		{
 
 		}
 
-		public function whatsappHandler()
+		private function whatsappHandler()
 		{
 
 		}
