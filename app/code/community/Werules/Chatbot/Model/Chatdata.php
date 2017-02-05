@@ -17,7 +17,6 @@
 		public $list_orders_state = 5;
 		public $reorder_state = 6;
 		public $add2cart_state = 7;
-		public $show_cart_state = 8;
 		public $checkout_state = 9;
 		public $track_order_state = 10;
 		public $support_state = 11;
@@ -193,7 +192,6 @@
 				else if ($chatdata->getTelegramConvState() == $this->search_state) // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->start_state);
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "entrei aquiii"));
 					$products = $this->prepareProdMessages($this->getProductIdsBySearch($text));
 					foreach ($products as $message)
 					{
@@ -262,12 +260,11 @@
 					$quoteId = $chatdata->getQuoteId();
 					if ($sessionId && $quoteId)
 					{
-						$cart = Mage::getModel('checkout/cart')->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$quoteId));
-
 						$cartUrl = Mage::helper('checkout/cart')->getCartUrl();
 						if (!isset(parse_url($cartUrl)['SID']))
 							$cartUrl .= "?SID=" . $sessionId; // add session id to url
 
+						$cart = Mage::getModel('checkout/cart')->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$quoteId));
 						$message = "Products on cart:\n";
 						foreach ($cart->getQuote()->getItemsCollection() as $item) // TODO
 						{
@@ -303,37 +300,32 @@
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, search for what?"));
 					return;
 				}
-				else if ($text == "/login")
+				else if ($text == "/login") // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->login_state);
 					return;
 				}
-				else if ($text == "/list_orders")
+				else if ($text == "/list_orders") // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->list_orders_state);
 					return;
 				}
-				else if ($text == "/reorder")
+				else if ($text == "/reorder") // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->reorder_state);
 					return;
 				}
-				else if ($text == "/show_cart")
-				{
-					$chatdata->setState('telegram_conv_state', $this->show_cart_state);
-					return;
-				}
-				else if ($text == "/track_order")
+				else if ($text == "/track_order") // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->track_order_state);
 					return;
 				}
-				else if ($text == "/support")
+				else if ($text == "/support") // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->support_state);
 					return;
 				}
-				else if ($text == "/send_email")
+				else if ($text == "/send_email") // TODO
 				{
 					$chatdata->setState('telegram_conv_state', $this->send_email_state);
 					return;
