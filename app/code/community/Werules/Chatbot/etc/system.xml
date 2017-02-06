@@ -98,7 +98,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Example: command1,command2,command3,command4</comment>
+							<comment>Code of the commands, add one code per line. Please add a code for every command, even if it's not enabled.</comment>
 						</commands_code>
 					</fields>
 				</telegram_config>

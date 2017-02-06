@@ -137,7 +137,7 @@
 			if (in_array($cmdId, $enabledCmds))
 			{
 				$config = Mage::getStoreConfig($confpath . 'commands_code');
-				$commands = explode(',', $config);
+				$commands = explode("\n", $config); // command codes split by linebreak
 				$defaultCmds = explode(',', $this->cmd_list);
 				if (count($commands) < count($defaultCmds))
 				{
@@ -147,13 +147,15 @@
 						str_replace( // replace whitespace for underscore
 							' ',
 							'_',
-							array_merge( // merge arrays
-								$commands,
-								array_slice(
-									$defaultCmds,
-									count($commands)
-								)
-							)[$cmdId - 1]
+							trim(
+								array_merge( // merge arrays
+									$commands,
+									array_slice(
+										$defaultCmds,
+										count($commands)
+									)
+								)[$cmdId - 1]
+							)
 						)
 					);
 				}
@@ -163,7 +165,9 @@
 					str_replace( // replace whitespace for underscore
 						' ',
 						'_',
-						$commands[$cmdId - 1]
+						trim(
+							$commands[$cmdId - 1]
+						)
 					)
 				);
 			}
