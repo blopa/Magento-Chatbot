@@ -1187,6 +1187,29 @@ class Telegram {
 	public function ChatID() {
 		return $this->data["message"]["chat"]["id"];
 	}
+	/// Get the message_id of the current message
+	/**
+	 * \return the String message_id
+	 */
+	public function MessageID() {
+		return $this->data["message"]["message_id"];
+	}
+
+	/// Get the reply_to_message message_id of the current message
+	/**
+	 * \return the String reply_to_message message_id
+	 */
+	public function ReplyToMessageID() {
+		return $this->data["message"]["reply_to_message"]["message_id"];
+	}
+
+	/// Get the reply_to_message forward_from user_id of the current message
+	/**
+	 * \return the String reply_to_message forward_from user_id
+	 */
+	public function ReplyToMessageFromUserID() {
+		return $this->data["message"]["reply_to_message"]["forward_from"]["id"];
+	}
 
 	/// Get the callback_query of the current update
 	/**
