@@ -260,8 +260,28 @@
 			$text = $telegram->Text();
 			$chat_id = $telegram->ChatID();
 
+			$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
+			if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
+				$supportgroup = "-" . ltrim($supportgroup, "g");
+
+			// if it's a group message
+			if ($telegram->messageFromGroup())
+			{
+				if ($chat_id == $supportgroup) // if the group sending the message is the support group
+				{
+					if ($telegram->ReplyToMessageID()) // if the message is replying another message
+					{
+						$telegram->sendMessage(array('chat_id' => $telegram->ReplyToMessageFromUserID(), 'text' => "Message From Support:\n" . $text)); // TODO
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Message sent!")); // TODO
+					}
+					return;
+				}
+				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "I don't work with groups.")); // TODO
+				return;
+			}
+
 			// Instances the model class
-			$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
+			$chatdata = $this->load($chat_id, 'telegram_chat_id');
 			$chatdata->api_type = $this->tg_bot;
 
 			// init commands
@@ -360,12 +380,16 @@
 
 					return;
 				}
+				else if ($chatdata->getTelegramConvState() == $this->support_state)
+				{
+					$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay weve sent your message."));
+					return;
+				}
 
 				// commands
 				if ($text == $this->start_cmd)
 				{
-					// started the bot for the first time
-					$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
 					if ($chatdata->getTelegramChatId()) // TODO
 					{
 						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
@@ -488,6 +512,7 @@
 				}
 				else if ($this->support_cmd && $text == $this->support_cmd) // TODO
 				{
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, what's the problem?"));
 					$chatdata->setState('telegram_conv_state', $this->support_state);
 					return;
 				}
@@ -496,7 +521,8 @@
 					$chatdata->setState('telegram_conv_state', $this->send_email_state);
 					return;
 				}
-				else return "error 101"; // TODO
+				else
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Sorry, I didn't understand that.")); // TODO
 			}
 		}
 
