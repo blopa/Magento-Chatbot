@@ -690,16 +690,15 @@
 					$cmdvalue = $chatdata->getCommandValue($text, $this->reorder_cmd);
 					if ($cmdvalue)
 					{
-						$order = Mage::getModel('sales/order')->load($cmdvalue);
-						if ($order)
+						if ($chatdata->clearCart())
 						{
-							if ($chatdata->clearCart())
+							$order = Mage::getModel('sales/order')->load($cmdvalue);
+							if ($order)
 							{
-								$items = $order->getAllVisibleItems();
-								foreach($items as $item) {
-									$chatdata->addProd2Cart($item->getProductId());
+								foreach($order->getAllVisibleItems() as $item) {
+									if (!$chatdata->addProd2Cart($item->getProductId()))
+										$errorflat = true;
 								}
-								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("to checkout, send") . " " . $chatdata->checkout_cmd));
 							}
 							else
 								$errorflat = true;
@@ -714,6 +713,8 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					else if (!$chatdata->updateChatdata('telegram_conv_state', $this->reorder_state))
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					else // success!!
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("to checkout, send") . " " . $chatdata->checkout_cmd));
 					return;
 				}
 				else if ($this->trackorder_cmd && $text == $this->trackorder_cmd) // TODO
