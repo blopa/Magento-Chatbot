@@ -6,6 +6,15 @@
 		</Werules_Chatbot>
 	</modules>
 	<frontend>
+		<translate>
+			<modules>
+				<Werules_Chatbot>
+					<files>
+						<default>Werules_Chatbot.csv</default>
+					</files>
+				</Werules_Chatbot>
+			</modules>
+		</translate>
 		<layout>
 			<updates>
 				<werules_chatbot module="werules_chatbot">
