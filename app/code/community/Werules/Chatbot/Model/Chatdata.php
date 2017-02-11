@@ -47,6 +47,7 @@
 		// DEFAULT MESSAGES
 		private $errormsg = "";
 		private $cancelmsg = "";
+		private $loginfirstmsg = "";
 		private $positivemsg = array();
 
 		public function _construct()
@@ -216,11 +217,11 @@
 				if ($this->getIsLogged() == "1")
 				{
 					// if user is set as logged, then login using magento singleton
-					Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
+					//Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
 					// load quote from logged user and delete it
 					Mage::getModel('sales/quote')->loadByCustomer((int)$this->getCustomerId())->delete();
 					// clear checout session quote
-					Mage::getSingleton('checkout/session')->setQuoteId(null);
+					//Mage::getSingleton('checkout/session')->setQuoteId(null);
 					//Mage::getSingleton('checkout/cart')->truncate()->save();
 				}
 				$data = array(
@@ -396,23 +397,24 @@
 			// init messages
 			$this->errormsg = $magehelper->__("Something went wrong, please try again.");
 			$this->cancelmsg = $magehelper->__("Ok, canceled.");
+			$this->loginfirstmsg =  $magehelper->__("Please login first.");
 			array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
 			// $this->positivemsg[array_rand($this->positivemsg)]
 
 			// init commands
-			$this->start_cmd = "/start";
-			$this->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
-			$this->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
-			$this->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
-			$this->listorders_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4));
-			$this->reorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5));
-			$this->add2cart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6));
-			$this->checkout_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7));
-			$this->clearcart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8));
-			$this->trackorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9));
-			$this->support_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10));
-			$this->sendemail_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11));
-			$this->cancel_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
+			$chatdata->start_cmd = "/start";
+			$chatdata->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
+			$chatdata->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
+			$chatdata->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
+			$chatdata->listorders_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4));
+			$chatdata->reorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5));
+			$chatdata->add2cart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6));
+			$chatdata->checkout_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7));
+			$chatdata->clearcart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8));
+			$chatdata->trackorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9));
+			$chatdata->support_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10));
+			$chatdata->sendemail_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11));
+			$chatdata->cancel_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
 
 			// TODO DEBUG COMMANDS
 //			$temp_var = $this->start_cmd . " - " .
@@ -434,7 +436,7 @@
 			{
 
 				// start command
-				if ($text == $this->start_cmd)
+				if ($text == $chatdata->start_cmd)
 				{
 					if ($chatdata->getTelegramChatId()) // TODO
 					{
@@ -471,7 +473,7 @@
 				}
 
 				// cancel command
-				if ($this->cancel_cmd && $text == $this->cancel_cmd) // TODO
+				if ($chatdata->cancel_cmd && $text == $chatdata->cancel_cmd) // TODO
 				{
 					if ($chatdata->getTelegramConvState() == $this->list_cat_state)
 					{
@@ -490,13 +492,13 @@
 				}
 
 				// add2cart commands
-				if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
+				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
 				{
-					$cmdvalue = $chatdata->getCommandValue($text, $this->add2cart_cmd);
+					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd);
 					if ($cmdvalue)
 					{
 						if ($chatdata->addProd2Cart($cmdvalue))
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Added. To checkout, send") . " " . $chatdata->checkout_cmd));
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->checkout_cmd));
 						else
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					}
@@ -563,7 +565,7 @@
 				}
 
 				// commands
-				if ($this->listacateg_cmd && $text == $this->listacateg_cmd)
+				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories();
@@ -584,7 +586,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					return;
 				}
-				else if ($this->checkout_cmd && $text == $this->checkout_cmd) // TODO
+				else if ($chatdata->checkout_cmd && $text == $chatdata->checkout_cmd) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -598,7 +600,7 @@
 						$quoteId = $quote->getId();
 						$sessionId = $customersssion->getEncryptedSessionId();
 					}
-					else
+					if (!($sessionId && $quoteId))
 					{
 						// set quote and session ids from chatbot class
 						$sessionId = $chatdata->getSessionId();
@@ -631,14 +633,14 @@
 							else
 								$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
 						}
-						else if(!$this->clearCart()) // try to clear cart
+						else if(!$chatdata->clearCart()) // try to clear cart
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					}
 					if ($emptycart)
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Your cart is empty.")));
 					return;
 				}
-				else if ($this->clearcart_cmd && $text == $this->clearcart_cmd)
+				else if ($chatdata->clearcart_cmd && $text == $chatdata->clearcart_cmd)
 				{
 					if ($chatdata->clearCart())
 					{
@@ -649,7 +651,7 @@
 					}
 					return;
 				}
-				else if ($this->search_cmd && $text == $this->search_cmd)
+				else if ($chatdata->search_cmd && $text == $chatdata->search_cmd)
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->search_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -657,7 +659,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("what do you want to search for?")));
 					return;
 				}
-				else if ($this->login_cmd && $text == $this->login_cmd) // TODO
+				else if ($chatdata->login_cmd && $text == $chatdata->login_cmd) // TODO
 				{
 					$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash/" . $chatdata->getHashKey();
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->login_state))
@@ -666,7 +668,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To login to your account, access this link") . ": " . $hashlink));
 					return;
 				}
-				else if ($this->listorders_cmd && $text == $this->listorders_cmd) // TODO
+				else if ($chatdata->listorders_cmd && $text == $chatdata->listorders_cmd) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -681,49 +683,59 @@
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					}
 					else
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Please login first.")));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
 					return;
 				}
-				else if ($chatdata->checkCommand($text, $this->reorder_cmd)) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->reorder_cmd)) // TODO
 				{
-					$errorflat = false;
-					$cmdvalue = $chatdata->getCommandValue($text, $this->reorder_cmd);
-					if ($cmdvalue)
+					if ($this->getIsLogged() == "1")
 					{
-						if ($chatdata->clearCart())
+						$errorflag = false;
+						$cmdvalue = $chatdata->getCommandValue($text, $chatdata->reorder_cmd);
+						if ($cmdvalue)
 						{
-							$order = Mage::getModel('sales/order')->load($cmdvalue);
-							if ($order)
+							if ($chatdata->clearCart())
 							{
-								foreach($order->getAllVisibleItems() as $item) {
-									if (!$chatdata->addProd2Cart($item->getProductId()))
-										$errorflat = true;
+								$order = Mage::getModel('sales/order')->load($cmdvalue);
+								if ($order)
+								{
+									foreach($order->getAllVisibleItems() as $item) {
+										if (!$chatdata->addProd2Cart($item->getProductId()))
+											$errorflag = true;
+									}
 								}
+								else
+									$errorflag = true;
 							}
 							else
-								$errorflat = true;
+								$errorflag = true;
 						}
 						else
-							$errorflat = true;
+							$errorflag = true;
+
+						if ($errorflag)
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+						else if (!$chatdata->updateChatdata('telegram_conv_state', $this->reorder_state))
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+						else // success!!
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("to checkout send") . " " . $chatdata->checkout_cmd));
 					}
 					else
-						$errorflat = true;
-
-					if ($errorflat)
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
-					else if (!$chatdata->updateChatdata('telegram_conv_state', $this->reorder_state))
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
-					else // success!!
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("to checkout, send") . " " . $chatdata->checkout_cmd));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
 					return;
 				}
-				else if ($this->trackorder_cmd && $text == $this->trackorder_cmd) // TODO
+				else if ($chatdata->trackorder_cmd && $text == $chatdata->trackorder_cmd) // TODO
 				{
-					if (!$chatdata->updateChatdata('telegram_conv_state', $this->track_order_state))
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					if ($this->getIsLogged() == "1")
+					{
+						if (!$chatdata->updateChatdata('telegram_conv_state', $this->track_order_state))
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
 					return;
 				}
-				else if ($this->support_cmd && $text == $this->support_cmd) // TODO
+				else if ($chatdata->support_cmd && $text == $chatdata->support_cmd) // TODO
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->support_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -731,7 +743,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("what do you need support for?")));
 					return;
 				}
-				else if ($this->sendemail_cmd && $text == $this->sendemail_cmd) // TODO
+				else if ($chatdata->sendemail_cmd && $text == $chatdata->sendemail_cmd) // TODO
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->send_email_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -748,11 +760,11 @@
 
 		}
 
-		// WHATSAPP FUNCTIONS
-		private function whatsappHandler($apiKey)
-		{
-
-		}
+//		// WHATSAPP FUNCTIONS
+//		private function whatsappHandler($apiKey)
+//		{
+//
+//		}
 
 		// WECHAT FUNCTIONS (maybe)
 //		private function wechatHandler($apiKey)
