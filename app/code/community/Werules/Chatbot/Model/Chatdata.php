@@ -311,7 +311,7 @@
 			{
 				$message = $_product->getName() . "\n" .
 					$this->excerpt($_product->getShortDescription(), 60) . "\n" .
-					Mage::helper('core')->__("Add To Cart") . ": " . $this->add2cart_cmd . $_product->getId();
+					Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd . $_product->getId();
 				return $message;
 			}
 			return null;
@@ -325,6 +325,9 @@
 			// Take text and chat_id from the message
 			$text = $telegram->Text();
 			$chat_id = $telegram->ChatID();
+
+			// send feedback to user
+			$telegram->sendChatAction(array('chat_id' => $chat_id, 'action' => 'typing'));
 
 			// mage helper
 			$magehelper = Mage::helper('core');
@@ -340,7 +343,7 @@
 				{
 					if ($telegram->ReplyToMessageID()) // if the message is replying another message
 					{
-						$telegram->sendMessage(array('chat_id' => $telegram->ReplyToMessageFromUserID(), 'text' => $magehelper->__("Message From Support") . ":\n" . $text)); // TODO
+						$telegram->sendMessage(array('chat_id' => $telegram->ReplyToMessageFromUserID(), 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Message sent."))); // TODO
 					}
 					return;
@@ -542,7 +545,7 @@
 								$message .= $item->getQty() . "x " . $item->getProduct()->getName() . "\n" .
 									$magehelper->__("Price") . ": " . Mage::helper('core')->currency($item->getProduct()->getPrice(), true, false) . "\n\n";
 							}
-							$message .= $magehelper->__("Total: ") .
+							$message .= $magehelper->__("Total") . ": " .
 								Mage::helper('core')->currency($ordersubtotal, true, false) . "\n\n" .
 								"[" . $magehelper->__("Checkout Here") . "](" . $cartUrl . ")";
 
