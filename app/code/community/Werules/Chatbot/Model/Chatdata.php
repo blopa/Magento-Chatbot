@@ -189,9 +189,9 @@
 			return false;
 		}
 
-		private function setState($apiType, $state) // TODO add try
+		public function updateChatdata($datatype, $state) // TODO add try
 		{
-			$data = array($apiType => $state); // data to be insert on database
+			$data = array($datatype => $state); // data to be insert on database
 			$this->addData($data);
 			$this->save();
 		}
@@ -318,7 +318,44 @@
 
 			if (!is_null($text) && !is_null($chat_id))
 			{
-				// supreme commands
+
+				// start command
+				if ($text == $this->start_cmd)
+				{
+					if ($chatdata->getTelegramChatId()) // TODO
+					{
+						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
+						$content = array('chat_id' => $chat_id, 'text' => $message);
+						$telegram->sendMessage($content);
+
+//						$data = array(
+//							//'customer_id' => $customerId,
+//							'telegram_chat_id' => $chat_id
+//						); // data to be insert on database
+//						$model = Mage::getModel('chatbot/chatdata')->load($chatdata->getId())->addData($data); // insert data on database
+//						$model->setId($chatdata->getId())->save(); // save (duh)
+					}
+					else // if customer id isnt on our database, means that we need to insert his data
+					{
+						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
+						$content = array('chat_id' => $chat_id, 'text' => $message);
+						$telegram->sendMessage($content);
+						try
+						{
+							$hash = substr(md5(uniqid($chat_id, true)), 0, 150);
+							Mage::getModel('chatbot/chatdata') // using magento model to insert data into database the proper way
+							->setTelegramChatId($chat_id)
+								->setHashKey($hash) // TODO
+								->save();
+						}
+						catch (Exception $e)
+						{
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again.")); // TODO
+						}
+					}
+					return;
+				}
+					// supreme commands
 				if ($chatdata->checkCommand($text, $this->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
 				{
 					$cmdvalue = $chatdata->getCommandValue($text, $this->add2cart_cmd);
@@ -352,7 +389,7 @@
 								else
 									$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
 							}
-							$chatdata->setState('telegram_conv_state', $this->list_prod_state);
+							$chatdata->updateChatdata('telegram_conv_state', $this->list_prod_state);
 						}
 						else
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Sorry, no products found in this category."));
@@ -363,7 +400,7 @@
 				}
 				else if ($chatdata->getTelegramConvState() == $this->search_state) // TODO
 				{
-					$chatdata->setState('telegram_conv_state', $this->start_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->start_state);
 					$productIDs = $this->getProductIdsBySearch($text);
 					if ($productIDs)
 					{
@@ -390,44 +427,9 @@
 				}
 
 				// commands
-				if ($text == $this->start_cmd)
+				if ($this->listacateg_cmd && $text == $this->listacateg_cmd)
 				{
-					if ($chatdata->getTelegramChatId()) // TODO
-					{
-						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
-						$content = array('chat_id' => $chat_id, 'text' => $message);
-						$telegram->sendMessage($content);
-
-//						$data = array(
-//							//'customer_id' => $customerId,
-//							'telegram_chat_id' => $chat_id
-//						); // data to be insert on database
-//						$model = Mage::getModel('chatbot/chatdata')->load($chatdata->getId())->addData($data); // insert data on database
-//						$model->setId($chatdata->getId())->save(); // save (duh)
-					}
-					else // if customer id isnt on our database, means that we need to insert his data
-					{
-						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-						$content = array('chat_id' => $chat_id, 'text' => $message);
-						$telegram->sendMessage($content);
-						try
-						{
-							$hash = substr(md5(uniqid($chat_id, true)), 0, 150);
-							Mage::getModel('chatbot/chatdata') // using magento model to insert data into database the proper way
-								->setTelegramChatId($chat_id)
-								->setHashKey($hash) // TODO
-								->save();
-						}
-						catch (Exception $e)
-						{
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again.")); // TODO
-						}
-					}
-					return;
-				}
-				else if ($this->listacateg_cmd && $text == $this->listacateg_cmd)
-				{
-					$chatdata->setState('telegram_conv_state', $this->list_cat_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->list_cat_state);
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories();
 					if ($categories)
@@ -466,7 +468,7 @@
 							Mage::helper('core')->currency($cart->getQuote()->getSubtotal(), true, false) . "\n\n" .
 							"[Checkout Here](" . $cartUrl . ")";
 
-						$chatdata->setState('telegram_conv_state', $this->checkout_state);
+						$chatdata->updateChatdata('telegram_conv_state', $this->checkout_state);
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
 					}
 					else
@@ -482,51 +484,53 @@
 					$chatdata->addData($data);
 					$chatdata->save();
 
-					$chatdata->setState('telegram_conv_state', $this->clear_cart_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->clear_cart_state);
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
 					return;
 				}
 				else if ($this->search_cmd && $text == $this->search_cmd)
 				{
-					$chatdata->setState('telegram_conv_state', $this->search_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->search_state);
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, search for what?"));
 					return;
 				}
 				else if ($this->login_cmd && $text == $this->login_cmd) // TODO
 				{
-					$chatdata->setState('telegram_conv_state', $this->login_state);
+					$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash/" . $chatdata->getHashKey();
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Access this link: " . $hashlink));
+					$chatdata->updateChatdata('telegram_conv_state', $this->login_state);
 					return;
 				}
 				else if ($this->listorders_cmd && $text == $this->listorders_cmd) // TODO
 				{
-					$chatdata->setState('telegram_conv_state', $this->list_orders_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->list_orders_state);
 					return;
 				}
 				else if ($this->reorder_cmd && $text == $this->reorder_cmd) // TODO
 				{
-					$chatdata->setState('telegram_conv_state', $this->reorder_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->reorder_state);
 					return;
 				}
 				else if ($this->trackorder_cmd && $text == $this->trackorder_cmd) // TODO
 				{
-					$chatdata->setState('telegram_conv_state', $this->track_order_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->track_order_state);
 					return;
 				}
 				else if ($this->support_cmd && $text == $this->support_cmd) // TODO
 				{
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, what's the problem?"));
-					$chatdata->setState('telegram_conv_state', $this->support_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->support_state);
 					return;
 				}
 				else if ($this->exitsupport_cmd && $text == $this->exitsupport_cmd) // TODO
 				{
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, exited!"));
-					$chatdata->setState('telegram_conv_state', $this->start_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->start_state);
 					return;
 				}
 				else if ($this->sendemail_cmd && $text == $this->sendemail_cmd) // TODO
 				{
-					$chatdata->setState('telegram_conv_state', $this->send_email_state);
+					$chatdata->updateChatdata('telegram_conv_state', $this->send_email_state);
 					return;
 				}
 				else
