@@ -25,7 +25,7 @@
 		private $clear_cart_state = 13;
 
 		// COMMANDS
-		private $cmd_list = "start,list_cat,search,login,list_orders,reorder,add2cart,checkout,clear_cart,track_order,support,send_email";
+		private $cmd_list = "start,list_cat,search,login,list_orders,reorder,add2cart,checkout,clear_cart,track_order,support,send_email,exit_support";
 		private $start_cmd = "";
 		private $listacateg_cmd = "";
 		private $search_cmd = "";
@@ -38,6 +38,7 @@
 		private $trackorder_cmd = "";
 		private $support_cmd = "";
 		private $sendemail_cmd = "";
+		private $exitsupport_cmd = "";
 
 		// REGEX
 		private $unallowed_characters = "/[^A-Za-z0-9 _]/";
@@ -277,7 +278,7 @@
 					return;
 				}
 				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "I don't work with groups.")); // TODO
-				return;
+				return; // ignore all group messages
 			}
 
 			// Instances the model class
@@ -297,6 +298,7 @@
 			$this->trackorder_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(9));
 			$this->support_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(10));
 			$this->sendemail_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(11));
+			$this->exitsupport_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(12));
 
 			// TODO DEBUG COMMANDS
 //			$temp_var = $this->start_cmd . " - " .
@@ -380,7 +382,7 @@
 
 					return;
 				}
-				else if ($chatdata->getTelegramConvState() == $this->support_state)
+				else if ($chatdata->getTelegramConvState() == $this->support_state && $text != $this->exitsupport_cmd)
 				{
 					$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay weve sent your message."));
@@ -514,6 +516,12 @@
 				{
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, what's the problem?"));
 					$chatdata->setState('telegram_conv_state', $this->support_state);
+					return;
+				}
+				else if ($this->exitsupport_cmd && $text == $this->exitsupport_cmd) // TODO
+				{
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay, exited!"));
+					$chatdata->setState('telegram_conv_state', $this->start_state);
 					return;
 				}
 				else if ($this->sendemail_cmd && $text == $this->sendemail_cmd) // TODO
