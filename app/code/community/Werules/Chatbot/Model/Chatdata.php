@@ -97,7 +97,8 @@
 				if ($this->getIsLogged() == "1")
 				{
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
-					$checkout->setCustomer($customer);
+					//$checkout->setCustomer($customer);
+					$checkout->getQuote()->setCustomer($customer);
 				}
 				else if ($this->getSessionId() && $this->getQuoteId())
 				{
@@ -192,10 +193,8 @@
 		{
 			if ($this->getIsLogged() == "1")
 			{
-				$checkout = Mage::getSingleton('checkout/session');
-				$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
-				$checkout->setCustomer($customer);
-				$checkout->clear();
+				$quote = Mage::getModel('sales/quote')->loadByCustomer((int)$this->getCustomerId());
+				$quote->delete();
 			}
 			$data = array(
 				"session_id" => "",
@@ -513,6 +512,7 @@
 				{
 					$sessionId = $chatdata->getSessionId();
 					$quoteId = $chatdata->getQuoteId();
+					$emptycart = true;
 					if ($sessionId && $quoteId)
 					{
 						$cartUrl = Mage::helper('checkout/cart')->getCartUrl();
@@ -520,20 +520,27 @@
 							$cartUrl .= "?SID=" . $sessionId; // add session id to url
 
 						$cart = Mage::getModel('checkout/cart')->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$quoteId));
-						$message = "Products on cart:\n";
-						foreach ($cart->getQuote()->getItemsCollection() as $item) // TODO
+						$ordersubtotal = $cart->getQuote()->getSubtotal();
+						if ($ordersubtotal > 0)
 						{
-							$message .= $item->getQty() . "x " . $item->getProduct()->getName() . "\n" .
-								"Price: " . Mage::helper('core')->currency($item->getProduct()->getPrice(), true, false) . "\n\n";
-						}
-						$message .= "Total: " .
-							Mage::helper('core')->currency($cart->getQuote()->getSubtotal(), true, false) . "\n\n" .
-							"[Checkout Here](" . $cartUrl . ")";
+							$emptycart = false;
+							$message = "Products on cart:\n";
+							foreach ($cart->getQuote()->getItemsCollection() as $item) // TODO
+							{
+								$message .= $item->getQty() . "x " . $item->getProduct()->getName() . "\n" .
+									"Price: " . Mage::helper('core')->currency($item->getProduct()->getPrice(), true, false) . "\n\n";
+							}
+							$message .= "Total: " .
+								Mage::helper('core')->currency($ordersubtotal, true, false) . "\n\n" .
+								"[Checkout Here](" . $cartUrl . ")";
 
-						$chatdata->updateChatdata('telegram_conv_state', $this->checkout_state);
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
+							$chatdata->updateChatdata('telegram_conv_state', $this->checkout_state);
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
+						}
+						else
+							$this->clearCart();
 					}
-					else
+					if ($emptycart)
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Your cart is empty"));
 					return;
 				}
