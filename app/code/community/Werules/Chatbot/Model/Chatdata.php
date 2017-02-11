@@ -207,11 +207,11 @@
 			return $text;
 		}
 
-		private function listOrdersByCustomerId($customerid)
+		private function listOrdersFromCustomer()
 		{
 			$orders = Mage::getResourceModel('sales/order_collection')
 				->addFieldToSelect('*')
-				->addFieldToFilter('customer_id', $customerid)
+				->addFieldToFilter('customer_id', $this->getCustomerId())
 				->setOrder('created_at', 'desc');
 			return $orders;
 		}
@@ -522,8 +522,7 @@
 					if ($chatdata->getIsLogged() == "1")
 					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay listing"));
-						$customerid = $chatdata->getCustomerId();
-						$orders = $this->listOrdersByCustomerId($customerid);
+						$orders = $chatdata->listOrdersFromCustomer();
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($orders, true)));
 						foreach($orders as $order)
 						{
