@@ -21,6 +21,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 
 	private function requestHandler()
 	{
+		$debug = "<br>";
 		$success = false;
 		$hash = Mage::app()->getRequest()->getParam('hash');
 		if ($hash)
@@ -30,33 +31,39 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 			if ($chatdata->getCustomerId()) // check if customer already is on chatdata model
 			{
-				foreach ($chatdata as $chatdata_customer)
+				$debug .= " 1 - ";
+				while ($chatdata->getCustomerId())
 				{
-					if ($chatdata_customer->getTelegramChatId()) {
-						$data["telegram_chat_id"] = $chatdata_customer->getTelegramChatId();
-						$data["telegram_conv_state"] = $chatdata_customer->getTelegramConvState();
+					$debug .= " 2 - ";
+					if ($chatdata->getTelegramChatId()) {
+						$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
+						$data["telegram_conv_state"] = $chatdata->getTelegramConvState();
 					}
-					if ($chatdata_customer->getFacebookChatId()) {
-						$data["facebook_chat_id"] = $chatdata_customer->getFacebookChatId();
-						$data["facebook_conv_state"] = $chatdata_customer->getFacebookConvState();
+					if ($chatdata->getFacebookChatId()) {
+						$data["facebook_chat_id"] = $chatdata->getFacebookChatId();
+						$data["facebook_conv_state"] = $chatdata->getFacebookConvState();
 					}
-					if ($chatdata_customer->getTelegramChatId()) {
-						$data["whatsapp_chat_id"] = $chatdata_customer->getWhatsappChatId();
-						$data["whatsapp_conv_state"] = $chatdata_customer->getWhatsappConvState();
+					if ($chatdata->getTelegramChatId()) {
+						$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
+						$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
 					}
-					$chatdata_customer->delete();
+					$chatdata->delete();
+					$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 				}
 				if ($data)
 				{
+					$debug .= " 3 - ";
 					$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
 					if ($chatdata->getHashKey())
 					{
+						$debug .= " 4 - ";
 						$data["customer_id"] = $customerid;
 						$chatdata->addData($data);
 						$chatdata->save();
 					}
 					else
 					{
+						$debug .= " 5 - ";
 						$data["hash_key"] = $hash;
 						$data["customer_id"] = $customerid;
 						$chatdata->addData($data);
@@ -67,8 +74,10 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			}
 			else
 			{
+				$debug .= " 6 - ";
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
 				if ($chatdata->getHashKey()) {
+					$debug .= " 7 - ";
 					$chatdata->updateChatdata("customer_id", $customerid);
 					$success = true;
 				}
@@ -78,5 +87,6 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			Mage::getSingleton('customer/session')->addSuccess('All good :D');
 		else
 			Mage::getSingleton('customer/session')->addError('All bad :(');
+		Mage::getSingleton('customer/session')->addError('da um check ->' . $debug);
 	}
 }
