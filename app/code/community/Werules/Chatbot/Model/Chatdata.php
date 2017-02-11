@@ -97,13 +97,17 @@
 					$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
 					$checkout->setSessionId($this->getSessionId());
 				}
+				else if ($this->getIsLogged() == "1")
+				{
+					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
+					$checkout->setCustomer($customer);
+				}
 				$cart->addProduct($prodId);
 				$cart->save();
 				$checkout->setCartWasUpdated(true);
 
-				$sessionId = $checkout->getEncryptedSessionId();
 				$data = array(
-					"session_id" => $sessionId,
+					"session_id" => $checkout->getEncryptedSessionId(),
 					"quote_id" => $checkout->getQuote()->getId()
 				);
 				$this->addData($data);
