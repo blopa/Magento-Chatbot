@@ -29,66 +29,77 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 	private function loginFromChatbot($hash)
 	{
 		$success = false;
+		$error = false;
 		$data = array();
+		$magehelper = Mage::helper('core');
 		$customerid = Mage::getSingleton('customer/session')->getCustomer()->getId();
 		$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 		if ($chatdata->getCustomerId()) // check if customer already is on chatdata model
 		{
-			while ($chatdata->getCustomerId()) // gather all data from all chatdata models
+			try
 			{
-				if ($chatdata->getTelegramChatId()) {
-					$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
-					$data["telegram_conv_state"] = $chatdata->getTelegramConvState();
+				while ($chatdata->getCustomerId()) // gather all data from all chatdata models
+				{
+					if ($chatdata->getTelegramChatId() && $chatdata->getFacebookChatId() && $chatdata->getWhatsappChatId())
+						break;
+					if ($chatdata->getTelegramChatId()) {
+						$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
+						$data["telegram_conv_state"] = $chatdata->getTelegramConvState();
+					}
+					if ($chatdata->getFacebookChatId()) {
+						$data["facebook_chat_id"] = $chatdata->getFacebookChatId();
+						$data["facebook_conv_state"] = $chatdata->getFacebookConvState();
+					}
+					if ($chatdata->getWhatsappChatId()) {
+						$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
+						$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
+					}
+					$chatdata->delete();
+					$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 				}
-				if ($chatdata->getFacebookChatId()) {
-					$data["facebook_chat_id"] = $chatdata->getFacebookChatId();
-					$data["facebook_conv_state"] = $chatdata->getFacebookConvState();
+				if ($data) // if any found, prepare to merge
+				{
+					$data["is_logged"] = "1";
+					$data["customer_id"] = $customerid;
+
+					$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
+					if (!$chatdata->getHashKey())
+						$data["hash_key"] = $hash;
+
+					$chatdata->addData($data);
+					$chatdata->save();
+					$success = true;
 				}
-				if ($chatdata->getTelegramChatId()) {
-					$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
-					$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
-				}
-				$chatdata->delete();
-				$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 			}
-			if ($data) // if any found, prepare to merge
+			catch (Exception $e)
 			{
-				$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
-				if ($chatdata->getHashKey())
-				{
-					$data["is_logged"] = "1";
-					$data["customer_id"] = $customerid;
-					$chatdata->addData($data);
-					$chatdata->save();
-				}
-				else
-				{
-					$data["is_logged"] = "1";
-					$data["hash_key"] = $hash;
-					$data["customer_id"] = $customerid;
-					$chatdata->addData($data);
-					$chatdata->save();
-				}
-				$success = true;
+				$error = true;
 			}
 		}
 		else // if is the first time for this customer, just save it
 		{
-			$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
-			if ($chatdata->getHashKey()) {
-				$data = array(
-					"customer_id" => $customerid,
-					"is_logged" => "1"
-				);
-				$chatdata->addData($data);
-				$chatdata->save();
-				$success = true;
+			try
+			{
+				$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
+				if ($chatdata->getHashKey()) {
+					$data = array(
+						"customer_id" => $customerid,
+						"is_logged" => "1"
+					);
+					$chatdata->addData($data);
+					$chatdata->save();
+					$success = true;
+				}
+			}
+			catch (Exception $e)
+			{
+				$error = true;
 			}
 		}
 		// messages
 		if ($success)
-			Mage::getSingleton('customer/session')->addSuccess('All good :D');
-		else
-			Mage::getSingleton('customer/session')->addError('All bad :(');
+			Mage::getSingleton('customer/session')->addSuccess($magehelper->__("Your account is now attached with our chatbot."));
+		if ($error)
+			Mage::getSingleton('customer/session')->addError($magehelper->__("Something went wrong, please try again."));
 	}
 }

@@ -21,7 +21,7 @@ class Werules_Chatbot_Model_Options
 			array('value'=>9, 'label'=>'Track Order Status'),
 			array('value'=>10, 'label'=>'Talk to Support'),
 			array('value'=>11, 'label'=>'Send Email'),
-			array('value'=>12, 'label'=>'Exit Support')
+			array('value'=>12, 'label'=>'Cancel')
 		);
 	}
 }
