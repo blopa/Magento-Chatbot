@@ -49,6 +49,7 @@
 			$this->_init('chatbot/chatdata'); // this is location of the resource file.
 		}
 
+		// GENERAL FUNCTIONS
 		public function requestHandler($apiType) // handle request
 		{
 			$apiKey = $this->getApikey($apiType);
@@ -86,7 +87,7 @@
 			return null;
 		}
 
-		private function addProd2Cart($prodId) // TODO add try / except
+		private function addProd2Cart($prodId) // TODO add expiration date for sessions
 		{
 			$checkout = Mage::getSingleton('checkout/session');
 			$cart = Mage::getModel("checkout/cart");
@@ -119,13 +120,6 @@
 			}
 
 			return true;
-		}
-
-		private function valudateCommand($cmd)
-		{
-			if ($cmd == "/")
-				return null;
-			return $cmd;
 		}
 
 		private function getCommandString($cmdId)
@@ -200,34 +194,6 @@
 			$this->save();
 		}
 
-		private function prepareProdMessages($productID)
-		{
-			$_product = Mage::getModel('catalog/product')->load($productID);
-			if ($_product)
-			{
-				$message = $_product->getName() . "\n" .
-					$this->excerpt($_product->getShortDescription(), 60) . "\n" .
-					"Add To Cart: " . $this->add2cart_cmd . $_product->getId();
-				return $message;
-			}
-			return null;
-		}
-
-		private function loadImageContent($productID)
-		{
-			$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
-			if ($imagepath && $imagepath != "no_selection")
-			{
-				$absolutePath =
-					Mage::getBaseDir('media') .
-					"/catalog/product" .
-					$imagepath;
-
-				return curl_file_create($absolutePath, 'image/jpg');
-			}
-			return null;
-		}
-
 		private function excerpt($text, $size)
 		{
 			if (strlen($text) > $size)
@@ -254,6 +220,42 @@
 			}
 			//return array of product ids
 			return $ids;
+		}
+
+		private function validateTelegramCmd($cmd)
+		{
+			if ($cmd == "/")
+				return null;
+			return $cmd;
+		}
+
+		private function loadImageContent($productID)
+		{
+			$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
+			if ($imagepath && $imagepath != "no_selection")
+			{
+				$absolutePath =
+					Mage::getBaseDir('media') .
+					"/catalog/product" .
+					$imagepath;
+
+				return curl_file_create($absolutePath, 'image/jpg');
+			}
+			return null;
+		}
+
+		// TELEGRAM FUNCTIONS
+		private function prepareTelegramProdMessages($productID)
+		{
+			$_product = Mage::getModel('catalog/product')->load($productID);
+			if ($_product)
+			{
+				$message = $_product->getName() . "\n" .
+					$this->excerpt($_product->getShortDescription(), 60) . "\n" .
+					"Add To Cart: " . $this->add2cart_cmd . $_product->getId();
+				return $message;
+			}
+			return null;
 		}
 
 		private function telegramHandler($apiKey)
@@ -291,18 +293,18 @@
 
 			// init commands
 			$this->start_cmd = "/start";
-			$this->listacateg_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(1));
-			$this->search_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(2));
-			$this->login_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(3));
-			$this->listorders_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(4));
-			$this->reorder_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(5));
-			$this->add2cart_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(6));
-			$this->checkout_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(7));
-			$this->clearcart_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(8));
-			$this->trackorder_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(9));
-			$this->support_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(10));
-			$this->sendemail_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(11));
-			$this->exitsupport_cmd = $this->valudateCommand("/" . $chatdata->getCommandString(12));
+			$this->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
+			$this->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
+			$this->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
+			$this->listorders_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4));
+			$this->reorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5));
+			$this->add2cart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6));
+			$this->checkout_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7));
+			$this->clearcart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8));
+			$this->trackorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9));
+			$this->support_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10));
+			$this->sendemail_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11));
+			$this->exitsupport_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
 
 			// TODO DEBUG COMMANDS
 //			$temp_var = $this->start_cmd . " - " .
@@ -386,7 +388,7 @@
 							$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 							foreach ($productIDs as $productID)
 							{
-								$message = $this->prepareProdMessages($productID);
+								$message = $this->prepareTelegramProdMessages($productID);
 								$image = $this->loadImageContent($productID);
 								if ($image)
 									$telegram->sendPhoto(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
@@ -410,7 +412,7 @@
 					{
 						foreach ($productIDs as $productID)
 						{
-							$message = $this->prepareProdMessages($productID);
+							$message = $this->prepareTelegramProdMessages($productID);
 							$image = $this->loadImageContent($productID);
 							if ($image)
 								$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
@@ -542,13 +544,21 @@
 			}
 		}
 
+		// FACEBOOK FUNCTIONS
 		private function facebookHandler($apiKey)
 		{
 
 		}
 
+		// WHATSAPP FUNCTIONS
 		private function whatsappHandler($apiKey)
 		{
 
 		}
+
+		// WECHAT FUNCTIONS (maybe)
+//		private function wechatHandler($apiKey)
+//		{
+//
+//		}
 	}
