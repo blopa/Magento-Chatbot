@@ -34,7 +34,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 		if ($chatdata->getCustomerId()) // check if customer already is on chatdata model
 		{
-			while ($chatdata->getCustomerId())
+			while ($chatdata->getCustomerId()) // gather all data from all chatdata models
 			{
 				if ($chatdata->getTelegramChatId()) {
 					$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
@@ -51,7 +51,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 				$chatdata->delete();
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 			}
-			if ($data)
+			if ($data) // if any found, prepare to merge
 			{
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
 				if ($chatdata->getHashKey())
@@ -72,7 +72,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 				$success = true;
 			}
 		}
-		else
+		else // if is the first time for this customer, just save it
 		{
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
 			if ($chatdata->getHashKey()) {

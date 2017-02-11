@@ -8,6 +8,7 @@
 		private $tg_bot = "telegram";
 		private $fb_bot = "facebook";
 		private $wapp_bot = "whatsapp";
+		private $wechat_bot = "wechat";
 
 		// CONVERSATION STATES
 		private $start_state = 0;
@@ -204,6 +205,15 @@
 				$text = $text . $etc;
 			}
 			return $text;
+		}
+
+		private function listOrdersByCustomerId($customerid)
+		{
+			$orders = Mage::getResourceModel('sales/order_collection')
+				->addFieldToSelect('*')
+				->addFieldToFilter('customer_id', $customerid)
+				->setOrder('created_at', 'desc');
+			return $orders;
 		}
 
 		private function getProductIdsBySearch($searchstring)
@@ -509,7 +519,22 @@
 				}
 				else if ($this->listorders_cmd && $text == $this->listorders_cmd) // TODO
 				{
-					$chatdata->updateChatdata('telegram_conv_state', $this->list_orders_state);
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "cheguei ate aqui 1"));
+					if ($chatdata->getIsLogged() == "1")
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "cheguei ate aqui 2"));
+						$customerid = $chatdata->getCustomerId();
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $customerid));
+						$orders = $this->listOrdersByCustomerId($customerid);
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($orders, true)));
+						foreach($orders as $order)
+						{
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($order->getData(), true)));
+						}
+						$chatdata->updateChatdata('telegram_conv_state', $this->list_orders_state);
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Please log in first!"));
 					return;
 				}
 				else if ($this->reorder_cmd && $text == $this->reorder_cmd) // TODO
