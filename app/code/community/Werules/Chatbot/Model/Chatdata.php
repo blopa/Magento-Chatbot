@@ -98,13 +98,17 @@
 			$cart = Mage::getModel("checkout/cart");
 			try
 			{
-				if ($this->getIsLogged() == "1")
+				$hasquote = $this->getSessionId() && $this->getQuoteId();
+				if ($this->getIsLogged() == "1" && !$hasquote)
 				{
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
-					//$checkout->setCustomer($customer);
-					$checkout->getQuote()->setCustomer($customer);
+					$quote = Mage::getModel('sales/quote')->loadByCustomer($customer);
+					$cart->setQuote($quote);
+					$checkout->setCustomer($customer);
+					//$quote = $checkout->getQuote();
+					//$quote->setCustomer($customer);
 				}
-				else if ($this->getSessionId() && $this->getQuoteId())
+				else if ($hasquote)
 				{
 					$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
 					$checkout->setSessionId($this->getSessionId());
