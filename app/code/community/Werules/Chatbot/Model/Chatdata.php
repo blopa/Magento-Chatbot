@@ -207,13 +207,18 @@
 			return $text;
 		}
 
-		private function listOrdersFromCustomer()
+		private function getOrdersIdsFromCustomer()
 		{
+			$ids = array();
 			$orders = Mage::getResourceModel('sales/order_collection')
 				->addFieldToSelect('*')
 				->addFieldToFilter('customer_id', $this->getCustomerId())
 				->setOrder('created_at', 'desc');
-			return $orders;
+			foreach ($orders as $_order)
+			{
+				array_push($ids, $_order->getId());
+			}
+			return $ids;
 		}
 
 		private function getProductIdsBySearch($searchstring)
@@ -255,6 +260,17 @@
 		}
 
 		// TELEGRAM FUNCTIONS
+		private function prepareTelegramOrderMessages($orderID)
+		{
+			$order = Mage::getModel('sales/order')->load($orderID);
+			if ($order)
+			{
+				$message = $order->getGrandTotal();
+				return $message;
+			}
+			return null;
+		}
+
 		private function prepareTelegramProdMessages($productID)
 		{
 			$_product = Mage::getModel('catalog/product')->load($productID);
@@ -522,11 +538,11 @@
 					if ($chatdata->getIsLogged() == "1")
 					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay listing"));
-						$orders = $chatdata->listOrdersFromCustomer();
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($orders, true)));
-						foreach($orders as $order)
+						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
+						foreach($ordersIDs as $orderID)
 						{
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($order->getData(), true)));
+							$message = $this->prepareTelegramOrderMessages($orderID);
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 						}
 						$chatdata->updateChatdata('telegram_conv_state', $this->list_orders_state);
 					}
