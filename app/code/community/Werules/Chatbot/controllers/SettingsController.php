@@ -21,72 +21,74 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 
 	private function requestHandler()
 	{
-		$debug = "<br>";
-		$success = false;
 		$hash = Mage::app()->getRequest()->getParam('hash');
 		if ($hash)
+			$this->loginFromChatbot($hash);
+	}
+
+	private function loginFromChatbot($hash)
+	{
+		$success = false;
+		$data = array();
+		$customerid = Mage::getSingleton('customer/session')->getCustomer()->getId();
+		$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
+		if ($chatdata->getCustomerId()) // check if customer already is on chatdata model
 		{
-			$data = array();
-			$customerid = Mage::getSingleton('customer/session')->getCustomer()->getId();
-			$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
-			if ($chatdata->getCustomerId()) // check if customer already is on chatdata model
+			while ($chatdata->getCustomerId())
 			{
-				$debug .= " 1 - ";
-				while ($chatdata->getCustomerId())
-				{
-					$debug .= " 2 - ";
-					if ($chatdata->getTelegramChatId()) {
-						$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
-						$data["telegram_conv_state"] = $chatdata->getTelegramConvState();
-					}
-					if ($chatdata->getFacebookChatId()) {
-						$data["facebook_chat_id"] = $chatdata->getFacebookChatId();
-						$data["facebook_conv_state"] = $chatdata->getFacebookConvState();
-					}
-					if ($chatdata->getTelegramChatId()) {
-						$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
-						$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
-					}
-					$chatdata->delete();
-					$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
+				if ($chatdata->getTelegramChatId()) {
+					$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
+					$data["telegram_conv_state"] = $chatdata->getTelegramConvState();
 				}
-				if ($data)
-				{
-					$debug .= " 3 - ";
-					$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
-					if ($chatdata->getHashKey())
-					{
-						$debug .= " 4 - ";
-						$data["customer_id"] = $customerid;
-						$chatdata->addData($data);
-						$chatdata->save();
-					}
-					else
-					{
-						$debug .= " 5 - ";
-						$data["hash_key"] = $hash;
-						$data["customer_id"] = $customerid;
-						$chatdata->addData($data);
-						$chatdata->save();
-					}
-					$success = true;
+				if ($chatdata->getFacebookChatId()) {
+					$data["facebook_chat_id"] = $chatdata->getFacebookChatId();
+					$data["facebook_conv_state"] = $chatdata->getFacebookConvState();
 				}
+				if ($chatdata->getTelegramChatId()) {
+					$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
+					$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
+				}
+				$chatdata->delete();
+				$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
 			}
-			else
+			if ($data)
 			{
-				$debug .= " 6 - ";
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
-				if ($chatdata->getHashKey()) {
-					$debug .= " 7 - ";
-					$chatdata->updateChatdata("customer_id", $customerid);
-					$success = true;
+				if ($chatdata->getHashKey())
+				{
+					$data["is_logged"] = "1";
+					$data["customer_id"] = $customerid;
+					$chatdata->addData($data);
+					$chatdata->save();
 				}
+				else
+				{
+					$data["is_logged"] = "1";
+					$data["hash_key"] = $hash;
+					$data["customer_id"] = $customerid;
+					$chatdata->addData($data);
+					$chatdata->save();
+				}
+				$success = true;
 			}
 		}
+		else
+		{
+			$chatdata = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
+			if ($chatdata->getHashKey()) {
+				$data = array(
+					"customer_id" => $customerid,
+					"is_logged" => "1"
+				);
+				$chatdata->addData($data);
+				$chatdata->save();
+				$success = true;
+			}
+		}
+		// messages
 		if ($success)
 			Mage::getSingleton('customer/session')->addSuccess('All good :D');
 		else
 			Mage::getSingleton('customer/session')->addError('All bad :(');
-		Mage::getSingleton('customer/session')->addError('da um check ->' . $debug);
 	}
 }
