@@ -94,15 +94,15 @@
 			$cart = Mage::getModel("checkout/cart");
 			try
 			{
-				if ($this->getSessionId() && $this->getQuoteId())
-				{
-					$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
-					$checkout->setSessionId($this->getSessionId());
-				}
-				else if ($this->getIsLogged() == "1")
+				if ($this->getIsLogged() == "1")
 				{
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
 					$checkout->setCustomer($customer);
+				}
+				else if ($this->getSessionId() && $this->getQuoteId())
+				{
+					$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
+					$checkout->setSessionId($this->getSessionId());
 				}
 				$cart->addProduct($prodId);
 				$cart->save();
@@ -188,6 +188,25 @@
 			return false;
 		}
 
+		private function clearCart() // TODO add try
+		{
+			if ($this->getIsLogged() == "1")
+			{
+				$checkout = Mage::getSingleton('checkout/session');
+				$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
+				$checkout->setCustomer($customer);
+				$checkout->clear();
+			}
+			$data = array(
+				"session_id" => "",
+				"quote_id" => ""
+			);
+			$this->addData($data);
+			$this->save();
+
+			return true;
+		}
+
 		public function updateChatdata($datatype, $state) // TODO add try
 		{
 			$data = array($datatype => $state); // data to be insert on database
@@ -260,18 +279,29 @@
 		}
 
 		// TELEGRAM FUNCTIONS
-		private function prepareTelegramOrderMessages($orderID)
+		private function prepareTelegramOrderMessages($orderID) // TODO add link to product name
 		{
 			$order = Mage::getModel('sales/order')->load($orderID);
 			if ($order)
 			{
-				$message = $order->getGrandTotal();
+				$message = "Order # " . $order->getIncrementId() . "\n\n";
+				$items = $order->getAllVisibleItems();
+				foreach($items as $item)
+				{
+					$message .= (int)$item->getQtyOrdered() . "x " .
+						$item->getName() . "\n" .
+						"Price: " . Mage::helper('core')->currency($item->getPrice(), true, false) . "\n\n";
+				}
+				$message .= "Total: " . Mage::helper('core')->currency($order->getGrandTotal(), true, false) . "\n" .
+					"Zipcode: " . $order->getShippingAddress()->getPostcode();
+				if ($this->reorder_cmd)
+					$message .= "\n\nReorder: " . $this->reorder_cmd . $orderID;
 				return $message;
 			}
 			return null;
 		}
 
-		private function prepareTelegramProdMessages($productID)
+		private function prepareTelegramProdMessages($productID) // TODO add link to product name
 		{
 			$_product = Mage::getModel('catalog/product')->load($productID);
 			if ($_product)
@@ -509,15 +539,11 @@
 				}
 				else if ($this->clearcart_cmd && $text == $this->clearcart_cmd)
 				{
-					$data = array(
-						"session_id" => "",
-						"quote_id" => ""
-					);
-					$chatdata->addData($data);
-					$chatdata->save();
-
-					$chatdata->updateChatdata('telegram_conv_state', $this->clear_cart_state);
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
+					if ($chatdata->clearCart())
+					{
+						$chatdata->updateChatdata('telegram_conv_state', $this->clear_cart_state);
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Cart cleared!"));
+					}
 					return;
 				}
 				else if ($this->search_cmd && $text == $this->search_cmd)
@@ -541,7 +567,7 @@
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						foreach($ordersIDs as $orderID)
 						{
-							$message = $this->prepareTelegramOrderMessages($orderID);
+							$message = $chatdata->prepareTelegramOrderMessages($orderID);
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 						}
 						$chatdata->updateChatdata('telegram_conv_state', $this->list_orders_state);
@@ -550,8 +576,28 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Please log in first!"));
 					return;
 				}
-				else if ($this->reorder_cmd && $text == $this->reorder_cmd) // TODO
+				else if ($chatdata->checkCommand($text, $this->reorder_cmd)) // TODO
 				{
+					$cmdvalue = $chatdata->getCommandValue($text, $this->reorder_cmd);
+					if ($cmdvalue)
+					{
+						$order = Mage::getModel('sales/order')->load($cmdvalue);
+						if ($order)
+						{
+							if ($chatdata->clearCart())
+							{
+								$items = $order->getAllVisibleItems();
+								foreach($items as $item) {
+									$chatdata->addProd2Cart($item->getProductId());
+								}
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Awesome! Send /checkout to checkout."));
+							}
+							else
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again."));
+						}
+						else
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Something went wrong, try again."));
+					}
 					$chatdata->updateChatdata('telegram_conv_state', $this->reorder_state);
 					return;
 				}
