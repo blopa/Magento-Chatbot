@@ -519,12 +519,10 @@
 				}
 				else if ($this->listorders_cmd && $text == $this->listorders_cmd) // TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "cheguei ate aqui 1"));
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "cheguei ate aqui 2"));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Okay listing"));
 						$customerid = $chatdata->getCustomerId();
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $customerid));
 						$orders = $this->listOrdersByCustomerId($customerid);
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => var_export($orders, true)));
 						foreach($orders as $order)
