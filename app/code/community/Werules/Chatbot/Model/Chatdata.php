@@ -356,7 +356,7 @@
 			// init messages
 			$this->errormsg = $magehelper->__("Something went wrong, please try again.");
 			array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
-			// array_rand($this->positivemsg)
+			// $this->positivemsg[array_rand($this->positivemsg)]
 
 			// init commands
 			$this->start_cmd = "/start";
@@ -495,7 +495,7 @@
 				else if ($chatdata->getTelegramConvState() == $this->support_state && $text != $this->exitsupport_cmd)
 				{
 					$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => array_rand($this->positivemsg) . ", " . $magehelper->__("we have sent your message to support.")));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("we have sent your message to support.")));
 					return;
 				}
 
@@ -568,7 +568,7 @@
 				else if ($this->search_cmd && $text == $this->search_cmd)
 				{
 					$chatdata->updateChatdata('telegram_conv_state', $this->search_state);
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => array_rand($this->positivemsg) . ", " . $magehelper->__("what do you want to search for?")));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("what do you want to search for?")));
 					return;
 				}
 				else if ($this->login_cmd && $text == $this->login_cmd) // TODO
@@ -582,7 +582,7 @@
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => array_rand($this->positivemsg) . ", " . $magehelper->__("let me fetch that for you.")));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("let me fetch that for you.")));
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						foreach($ordersIDs as $orderID)
 						{
@@ -609,7 +609,7 @@
 								foreach($items as $item) {
 									$chatdata->addProd2Cart($item->getProductId());
 								}
-								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => array_rand($this->positivemsg) . ", " . $magehelper->__("to checkout, send") . " " . $chatdata->checkout_cmd));
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("to checkout, send") . " " . $chatdata->checkout_cmd));
 							}
 							else
 								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__($this->errormsg)));
@@ -627,13 +627,13 @@
 				}
 				else if ($this->support_cmd && $text == $this->support_cmd) // TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => array_rand($this->positivemsg) . ", " . $magehelper->__("what do you need support for?")));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("what do you need support for?")));
 					$chatdata->updateChatdata('telegram_conv_state', $this->support_state);
 					return;
 				}
 				else if ($this->exitsupport_cmd && $text == $this->exitsupport_cmd) // TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => array_rand($this->positivemsg) . ", " . $magehelper->__("exiting support mode.")));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("exiting support mode.")));
 					$chatdata->updateChatdata('telegram_conv_state', $this->start_state);
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
 					return;
