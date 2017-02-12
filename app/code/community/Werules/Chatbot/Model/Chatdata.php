@@ -130,7 +130,7 @@
 				if ($this->getCustomerId())
 				{
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
-					if ($customer)
+					if ($customer->getId())
 					{
 						$customer_email = $customer->getEmail();
 						$customer_name = $customer->getName();
@@ -183,19 +183,22 @@
 				$hasquote = $this->getSessionId() && $this->getQuoteId(); // has class quote and session ids
 				if ($this->getIsLogged() == "1")
 				{
-					// if user is set as logged, then login using magento singleton
-					Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
-					if (!$hasquote)
-					{ // if class still dosen't have quote and session ids, init here
-						// set current quote as customer quote
-						$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
-						$quote = Mage::getModel('sales/quote')->loadByCustomer($customer);
-						$cart->setQuote($quote);
-						// attach checkout session to logged customer
-						$checkout->setCustomer($customer);
-						//$checkout->setSessionId($customersssion->getEncryptedSessionId());
-						//$quote = $checkout->getQuote();
-						//$quote->setCustomer($customer);
+					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
+					if ($customer->getId())
+					{
+						// if user is set as logged, then login using magento singleton
+						Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
+						if (!$hasquote)
+						{ // if class still dosen't have quote and session ids, init here
+							// set current quote as customer quote
+							$quote = Mage::getModel('sales/quote')->loadByCustomer($customer);
+							$cart->setQuote($quote);
+							// attach checkout session to logged customer
+							$checkout->setCustomer($customer);
+							//$checkout->setSessionId($customersssion->getEncryptedSessionId());
+							//$quote = $checkout->getQuote();
+							//$quote->setCustomer($customer);
+						}
 					}
 				}
 				if ($hasquote)
@@ -296,13 +299,16 @@
 			{
 				if ($this->getIsLogged() == "1")
 				{
-					// if user is set as logged, then login using magento singleton
-					//Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
-					// load quote from logged user and delete it
-					Mage::getModel('sales/quote')->loadByCustomer((int)$this->getCustomerId())->delete();
-					// clear checout session quote
-					//Mage::getSingleton('checkout/session')->setQuoteId(null);
-					//Mage::getSingleton('checkout/cart')->truncate()->save();
+					if (Mage::getModel('customer/customer')->load((int)$this->getCustomerId())->getId())
+					{
+						// if user is set as logged, then login using magento singleton
+						//Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
+						// load quote from logged user and delete it
+						Mage::getModel('sales/quote')->loadByCustomer((int)$this->getCustomerId())->delete();
+						// clear checout session quote
+						//Mage::getSingleton('checkout/session')->setQuoteId(null);
+						//Mage::getSingleton('checkout/cart')->truncate()->save();
+					}
 				}
 				$data = array(
 					"session_id" => "",
@@ -352,7 +358,7 @@
 			$ids = array();
 			$orders = Mage::getResourceModel('sales/order_collection')
 				->addFieldToSelect('*')
-				->addFieldToFilter('customer_id', $this->getCustomerId())
+				->addFieldToFilter('customer_id', $this->getCustomerId()) // not a problem if customer dosen't exist
 				->setOrder('created_at', 'desc');
 			foreach ($orders as $_order)
 			{
@@ -379,13 +385,6 @@
 			return $ids;
 		}
 
-		private function validateTelegramCmd($cmd)
-		{
-			if ($cmd == "/")
-				return null;
-			return $cmd;
-		}
-
 		private function loadImageContent($productID)
 		{
 			$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
@@ -402,10 +401,17 @@
 		}
 
 		// TELEGRAM FUNCTIONS
+		private function validateTelegramCmd($cmd)
+		{
+			if ($cmd == "/")
+				return null;
+			return $cmd;
+		}
+
 		private function prepareTelegramOrderMessages($orderID) // TODO add link to product name
 		{
 			$order = Mage::getModel('sales/order')->load($orderID);
-			if ($order)
+			if ($order->getId())
 			{
 				$message = Mage::helper('core')->__("Order") . " # " . $order->getIncrementId() . "\n\n";
 				$items = $order->getAllVisibleItems();
@@ -427,7 +433,7 @@
 		private function prepareTelegramProdMessages($productID) // TODO add link to product name
 		{
 			$product = Mage::getModel('catalog/product')->load($productID);
-			if ($product)
+			if ($product->getId())
 			{
 				if ($product->getStockItem()->getIsInStock() > 0)
 				{
@@ -482,7 +488,7 @@
 			if (!$chatdata->getTelegramChatId() && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-				if ($message)
+				if ($message) // TODO
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 				try
 				{
@@ -559,7 +565,7 @@
 								$chat_hash->save();
 							}catch (Exception $e){}
 							$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-							if ($message)
+							if ($message) // TODO
 								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 						}
 					}
@@ -578,7 +584,7 @@
 					else // if customer id isnt on our database, means that we need to insert his data
 					{
 						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-						if ($message)
+						if ($message) // TODO
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 						try
 						{
@@ -600,7 +606,7 @@
 				if ($chatdata->help_cmd && $text == $chatdata->help_cmd)
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
-					if ($message)
+					if ($message) // TODO
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 					return;
 				}
@@ -664,7 +670,7 @@
 				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
 				{
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd);
-					if ($cmdvalue)
+					if ($cmdvalue) // TODO
 					{
 						if ($chatdata->addProd2Cart($cmdvalue))
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->checkout_cmd));
@@ -680,7 +686,7 @@
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 
-					if ($_category)
+					if ($_category) // this works, no need to get the id
 					{
 						$noprodflag = false;
 						$productIDs = $_category->getProductCollection()->getAllIds();
@@ -690,7 +696,7 @@
 							foreach ($productIDs as $productID)
 							{
 								$message = $this->prepareTelegramProdMessages($productID);
-								if ($message)
+								if ($message) // TODO
 								{
 									$i++;
 									$image = $this->loadImageContent($productID);
@@ -727,7 +733,7 @@
 						foreach ($productIDs as $productID)
 						{
 							$message = $this->prepareTelegramProdMessages($productID);
-							if ($message)
+							if ($message) // TODO
 							{
 								$i++;
 								$image = $this->loadImageContent($productID);
@@ -773,9 +779,9 @@
 					if ($chatdata->getIsLogged() == "1")
 					{
 						$order = Mage::getModel('sales/order')->loadByIncrementId($text);
-						if ($order)
+						if ($order->getId())
 						{
-							if ($order->getCustomerId() == $chatdata->getCustomerId())
+							if ($order->getCustomerId() == $chatdata->getCustomerId()) // not a problem if customer dosen't exist
 							{
 								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Your order status is") . " " . $order->getStatus()));
 							}
@@ -798,7 +804,7 @@
 				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
 				{
 					$helper = Mage::helper('catalog/category');
-					$categories = $helper->getStoreCategories();
+					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->list_cat_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					else if ($categories)
@@ -821,15 +827,18 @@
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
-						// if user is set as logged, then login using magento singleton
-						$customersssion = Mage::getSingleton('customer/session');
-						$customersssion->loginById((int)$chatdata->getCustomerId());
-						// then set current quote as customer quote
-						$customer = Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId());
-						$quote = Mage::getModel('sales/quote')->loadByCustomer($customer);
-						// set quote and session ids from logged user
-						$quoteId = $quote->getId();
-						$sessionId = $customersssion->getEncryptedSessionId();
+						if (Mage::getModel('customer/customer')->load((int)$this->getCustomerId())->getId())
+						{
+							// if user is set as logged, then login using magento singleton
+							$customersssion = Mage::getSingleton('customer/session');
+							$customersssion->loginById((int)$chatdata->getCustomerId());
+							// then set current quote as customer quote
+							$customer = Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId());
+							$quote = Mage::getModel('sales/quote')->loadByCustomer($customer);
+							// set quote and session ids from logged user
+							$quoteId = $quote->getId();
+							$sessionId = $customersssion->getEncryptedSessionId();
+						}
 					}
 					if (!($sessionId && $quoteId))
 					{
@@ -864,7 +873,7 @@
 							else
 								$telegram->sendMessage(array('chat_id' => $chat_id, 'parse_mode' => 'Markdown', 'text' => $message));
 						}
-						else if(!$chatdata->clearCart()) // try to clear cart
+						else if (!$chatdata->clearCart()) // try to clear cart
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					}
 					if ($emptycart)
@@ -914,7 +923,7 @@
 							foreach($ordersIDs as $orderID)
 							{
 								$message = $chatdata->prepareTelegramOrderMessages($orderID);
-								if ($message)
+								if ($message) // TODO
 								{
 									$i++;
 									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
@@ -946,7 +955,7 @@
 							if ($chatdata->clearCart())
 							{
 								$order = Mage::getModel('sales/order')->load($cmdvalue);
-								if ($order)
+								if ($order->getId())
 								{
 									foreach($order->getAllVisibleItems() as $item) {
 										if (!$chatdata->addProd2Cart($item->getProductId()))
