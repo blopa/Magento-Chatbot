@@ -767,6 +767,32 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					return;
 				}
+				else if ($chatdata->getTelegramConvState() == $this->track_order_state)
+				{
+					$errorflag = false;
+					if ($chatdata->getIsLogged() == "1")
+					{
+						$order = Mage::getModel('sales/order')->loadByIncrementId($text);
+						if ($order)
+						{
+							if ($order->getCustomerId() == $chatdata->getCustomerId())
+							{
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Your order status is") . " " . $order->getStatus()));
+							}
+							else
+								$errorflag = true;
+						}
+						else
+							$errorflag = true;
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
+					if (!$chatdata->updateChatdata('telegram_conv_state', $this->start_state))
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					else if ($errorflag)
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Sorry, we couldn't find any order with this information.")));
+					return;
+				}
 
 				// commands
 				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
@@ -949,10 +975,18 @@
 				}
 				else if ($chatdata->trackorder_cmd && $text == $chatdata->trackorder_cmd) // TODO
 				{
-					if ($this->getIsLogged() == "1")
+					if ($chatdata->getIsLogged() == "1")
 					{
-						if (!$chatdata->updateChatdata('telegram_conv_state', $this->track_order_state))
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
+						if ($ordersIDs)
+						{
+							if (!$chatdata->updateChatdata('telegram_conv_state', $this->track_order_state))
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+							else
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("send the order number.")));
+						}
+						else
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Your account dosen't have any orders.")));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
