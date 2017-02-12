@@ -53,6 +53,12 @@
 		private $loginfirstmsg = "";
 		private $positivemsg = array();
 
+		// URLS
+		private $tg_url = "https://t.me/";
+		private $fb_url = "https://m.me/";
+//		private $wapp_url = "";
+//		private $wechat_url = "";
+
 		public function _construct()
 		{
 			//parent::_construct();
@@ -126,7 +132,7 @@
 
 			if ($this->api_type == $this->tg_bot)
 			{
-				$url = "http://t.me/" . $this->getTelegramChatId();
+				$url = $this->tg_url . $this->getTelegramChatId();
 				if ($this->getCustomerId())
 				{
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
@@ -484,6 +490,18 @@
 			// Instances the model class
 			$chatdata = $this->load($chat_id, 'telegram_chat_id');
 			$chatdata->api_type = $this->tg_bot;
+
+			if ($chatdata->getIsLogged() == "1") // check if customer is logged
+			{
+				if (Mage::getModel('customer/customer')->load((int)$this->getCustomerId())->getId()) // if is a valid customer id
+				{
+					if ($chatdata->getEnableTelegram() != "1")
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To talk with me, please enable Telegram on your account chatbot settings.")));
+						return;
+					}
+				}
+			}
 
 			if (!$chatdata->getTelegramChatId() && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
 			{
