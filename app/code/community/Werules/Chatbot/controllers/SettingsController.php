@@ -19,6 +19,40 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$this->renderLayout();
 	}
 
+	public function saveAction()
+	{
+		$magehelper = Mage::helper('core');
+		$postData = $this->getRequest()->getPost(); // get all post data
+		if ($postData)
+		{
+			$clientid = Mage::getSingleton('customer/session')->getCustomer()->getId(); // get customer id
+			$chatdata = Mage::getModel('chatbot/chatdata')->load($clientid, 'customer_id'); // load profile info from customer id
+			try
+			{
+				$data = array(
+					"enable_telegram" => ((isset($postData['enable_telegram'])) ? 1 : 0),
+					"enable_facebook" => ((isset($postData['enable_facebook'])) ? 1 : 0)
+					//"enable_whatsapp" => ((isset($postData['enable_whatsapp'])) ? 1 : 0),
+					//"enable_wechat" => ((isset($postData['enable_wechat'])) ? 1 : 0)
+				);
+				if (!$chatdata->getCustomerId()) // attach class to customer id
+				{
+					$data["hash_key"] = substr(md5(uniqid(str_shuffle("e09rgu89y54h"), true)), 0, 150); // TODO
+					$data["customer_id"] = $clientid;
+				}
+				$chatdata->addData($data);
+				$chatdata->save();
+
+				Mage::getSingleton('customer/session')->addSuccess($magehelper->__("Chatbot settings saved successfully.")); // throw success message to the html page
+			}
+			catch (Exception $e)
+			{
+				Mage::getSingleton('customer/session')->addError($magehelper->__("Something went wrong, please try again.")); // throw error message to the html page
+			}
+		}
+		$this->_redirect('chatbot/settings/index'); // redirect customer to settings page
+	}
+
 	private function requestHandler()
 	{
 		$hash = Mage::app()->getRequest()->getParam('hash');

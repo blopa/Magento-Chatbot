@@ -1,5 +1,76 @@
-<div id="messages_product_view"><?php echo $this->getMessagesBlock()->getGroupedHtml() ?></div>
-
 <?php
+	$clientid = Mage::getSingleton('customer/session')->getCustomer()->getId(); // get customer id
+	$chatdata = Mage::getModel('chatbot/chatdata')->load($clientid, 'customer_id'); // load profile info from customer id
 
+	$tg_apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+	$getme = "https://api.telegram.org/bot" . $tg_apikey . "/getMe";
+	$response = json_decode(file_get_contents($getme), true);
+	if ($response["ok"])
+		$tg_username = $response["result"]["username"];
+	//var_dump($response);
+	//$fb_apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
 ?>
+<div class="dashboard">
+	<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+	<div class="page-title">
+		<h1><?php echo $this->__('Chatbot Settings') ?></h1>
+	</div>
+	<form action="<?php echo $this->getUrl('chatbot/settings/save') ?>" method="post" id="form-validate" autocomplete="off">
+		<input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey(); ?>" />
+		<div class="fieldset">
+			<ul class="form-list">
+				<li>
+					<div class="input-box">
+						<input <?php if ($chatdata->getEnableTelegram() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Telegram?') ?>" class="checkbox" name="enable_telegram" id="enable_telegram" />
+						<label for="enable_telegram" class="required"><em>*</em><?php echo $this->__('Enable Telegram?') ?></label>
+					</div>
+					<p>
+						<?php
+						echo "Start a bot conversation on Telegram: ";
+						$url = "https://telegram.me/" . $tg_username . "?start=" . $chatdata->getHashKey();
+						?>
+						<a href="<?php echo $url; ?>">Here</a>
+					</p>
+				</li>
+				<li>
+					<div class="input-box">
+						<input <?php if ($chatdata->getEnableFacebook() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Facebook?') ?>" class="checkbox" name="enable_facebook" id="enable_facebook" />
+						<label for="enable_facebook" class="required"><em>*</em><?php echo $this->__('Enable Facebook?') ?></label>
+					</div>
+				</li>
+				<?php
+				/*
+				<li>
+					<div class="input-box">
+						<input <?php if ($chatdata->getEnableWhatsapp() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Whatsapp?') ?>" class="checkbox" name="enable_whatsapp" id="enable_whatsapp" />
+					</div>
+					<label for="enable_whatsapp" class="required"><em>*</em><?php echo $this->__('Enable Whatsapp?') ?></label>
+				</li>
+				<li>
+					<div class="input-box">
+						<input <?php if ($chatdata->getEnableWechat() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Wechat?') ?>" class="checkbox" name="enable_wechat" id="enable_wechat" />
+					</div>
+					<label for="enable_wechat" class="required"><em>*</em><?php echo $this->__('Enable Wechat?') ?></label>
+				</li>
+				*/
+				?>
+			</ul>
+		</div>
+		<!-- buttons -->
+		<p class="required"><?php echo $this->__('* Required Fields') ?></p>
+		<div class="buttons-set">
+			<p class="back-link">
+				<a href="<?php echo $this->getBackUrl() ?>">
+					<small>&laquo; </small><?php echo $this->__('Back') ?>
+				</a>
+			</p>
+			<button type="submit" title="<?php echo $this->__('Save') ?>" class="button">
+				<span>
+					<span>
+						<?php echo $this->__('Save') ?>
+					</span>
+				</span>
+			</button>
+		</div>
+	</form>
+</div>

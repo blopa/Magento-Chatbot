@@ -87,7 +87,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Group that the support messages will be forwarded.</comment>
+							<comment>ID of Group that the support messages will be forwarded. e.g. g123456789</comment>
 						</telegram_support_group>
 						<enabled_commands>
 							<label>Enabled Commands</label>
