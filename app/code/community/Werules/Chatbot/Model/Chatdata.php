@@ -59,15 +59,22 @@
 		}
 
 		// GENERAL FUNCTIONS
-		public function requestHandler($apiType) // handle request
+		public function requestHandler($action, $webhook) // handle request
 		{
-			$apiKey = $this->getApikey($apiType);
-			if ($apiType == $this->tg_bot && $apiKey) // telegram api
+			$apiKey = $this->getApikey($action);
+			if ($webhook && $apiKey && $action == $this->tg_bot) // set telegram webhook
+			{
+				$telegram = new Telegram($apiKey);
+				$telegram->setWebhook(Mage::getUrl('chatbot/chatdata/', array('_forced_secure' => true)) . $this->tg_bot);
+				return;
+			}
+			// handle conversation
+			if ($action == $this->tg_bot && $apiKey) // telegram api
 			{
 				// all logic goes here
 				$this->telegramHandler($apiKey);
 			}
-			else if ($apiType == $this->fb_bot && $apiKey) // facebook api
+			else if ($action == $this->fb_bot && $apiKey) // facebook api
 			{
 				// all logic goes here
 				$this->facebookHandler($apiKey);
