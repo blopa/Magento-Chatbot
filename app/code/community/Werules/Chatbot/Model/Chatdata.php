@@ -503,7 +503,7 @@
 				}
 			}
 
-			if (!$chatdata->getTelegramChatId() && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
+			if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 				if ($message) // TODO
@@ -671,6 +671,10 @@
 						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
 					}
 					else if ($chatdata->getTelegramConvState() == $this->search_state)
+					{
+						$content = array('chat_id' => $chat_id, 'text' => $this->canceledmsg);
+					}
+					else if ($chatdata->getTelegramConvState() == $this->send_email_state)
 					{
 						$content = array('chat_id' => $chat_id, 'text' => $this->canceledmsg);
 					}
