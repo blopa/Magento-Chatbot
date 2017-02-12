@@ -49,6 +49,7 @@
 		// DEFAULT MESSAGES
 		private $errormsg = "";
 		private $cancelmsg = "";
+		private $canceledmsg = "";
 		private $loginfirstmsg = "";
 		private $positivemsg = array();
 
@@ -115,16 +116,47 @@
 		{
 			$storename = Mage::app()->getStore()->getName();
 			$storeemail = Mage::getStoreConfig('trans_email/ident_general/email');// TODO
+			$magehelper = Mage::helper('core');
 
-			$email_body = $text;
-			$mail = Mage::getModel('core/email');
-			$mail->setToName($storename);
-			$mail->setToEmail($storeemail);
-			$mail->setBody($email_body);
+			$url = $magehelper->__("Not informed");
+			$customer_email = $magehelper->__("Not informed");
+			$customer_name = $magehelper->__("Not informed");
+
+			$mail = new Zend_Mail('UTF-8');
+
+			if ($this->api_type == $this->tg_bot)
+			{
+				$url = "http://t.me/" . $this->getTelegramChatId();
+				if ($this->getCustomerId())
+				{
+					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
+					if ($customer)
+					{
+						$customer_email = $customer->getEmail();
+						$customer_name = $customer->getName();
+						$mail->setReplyTo($customer_email);
+					}
+				}
+			}
+			else if ($this->api_type == $this->fb_bot)
+			{
+				// code here etc
+			}
+
+			$email_body =
+				$magehelper->__("Message from chatbot customer") . "<br><br>" .
+				$magehelper->__("Customer name") . ": " .
+				$customer_name . "<br>" .
+				$magehelper->__("Message") . ":<br>" .
+				$text . "<br><br>" .
+				$magehelper->__("Contacts") . ":<br>" .
+				$magehelper->__("Chatbot") . ": " . $url . "<br>" .
+				$magehelper->__("Email") . ": " . $customer_email . "<br>";
+
+			$mail->setBodyHtml($email_body);
+			$mail->setFrom($storeemail, $storename);
+			$mail->addTo($storeemail, $storename);
 			$mail->setSubject(Mage::helper('core')->__("Contact from chatbot"));
-			$mail->setFromEmail($storeemail);
-			$mail->setFromName($storename);
-			$mail->setType('text');// You can use 'html' or 'text'
 
 			try
 			{
@@ -466,13 +498,6 @@
 				}
 			}
 
-			// init messages
-			$this->errormsg = $magehelper->__("Something went wrong, please try again.");
-			$this->cancelmsg = $magehelper->__("Ok, canceled.");
-			$this->loginfirstmsg =  $magehelper->__("Please login first.");
-			array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
-			// $this->positivemsg[array_rand($this->positivemsg)]
-
 			// init commands
 			$chatdata->start_cmd = "/start";
 			$chatdata->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
@@ -489,6 +514,16 @@
 			$chatdata->cancel_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
 			$chatdata->help_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(13));
 			$chatdata->about_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(14));
+
+			if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "/cancel"; // it must always have a cancel command
+
+			// init messages
+			$this->errormsg = $magehelper->__("Something went wrong, please try again.");
+			$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd;
+			$this->canceledmsg = $magehelper->__("Ok, canceled.");
+			$this->loginfirstmsg =  $magehelper->__("Please login first.");
+			array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
+			// $this->positivemsg[array_rand($this->positivemsg)]
 
 			// TODO DEBUG COMMANDS
 //			$temp_var = $this->start_cmd . " - " .
@@ -604,16 +639,24 @@
 					if ($chatdata->getTelegramConvState() == $this->list_cat_state)
 					{
 						$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $this->cancelmsg));
+						$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $this->canceledmsg);
 					}
 					else if ($chatdata->getTelegramConvState() == $this->support_state)
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("exiting support mode.")));
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
+						$content = array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("exiting support mode."));
+						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
 					}
+					else if ($chatdata->getTelegramConvState() == $this->search_state)
+					{
+						$content = array('chat_id' => $chat_id, 'text' => $this->canceledmsg);
+					}
+					else
+						$content = array('chat_id' => $chat_id, 'text' => $this->errormsg);
 
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->start_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					else
+						$telegram->sendMessage($content);
 					return;
 				}
 
@@ -713,10 +756,10 @@
 				}
 				else if ($chatdata->getTelegramConvState() == $this->send_email_state)
 				{
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Trying to send the email..."));
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Trying to send the email...")));
 					if ($chatdata->sendEmail($text))
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Done."));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Sorry, I wasn't able to send an email this time. Please try again later."));
@@ -742,6 +785,7 @@
 
 						$keyb = $telegram->buildKeyBoard(array($option));
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $magehelper->__("Select a category")));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $this->cancelmsg));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -817,7 +861,10 @@
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->search_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					else
+					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("what do you want to search for?")));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->cancelmsg));
+					}
 					return;
 				}
 				else if ($chatdata->login_cmd && $text == $chatdata->login_cmd) // TODO
@@ -916,7 +963,10 @@
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->support_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					else
+					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("what do you need support for?")));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->cancelmsg));
+					}
 					return;
 				}
 				else if ($chatdata->sendemail_cmd && $text == $chatdata->sendemail_cmd) // TODO
@@ -924,7 +974,10 @@
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->send_email_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					else
+					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("write the email content.")));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $this->cancelmsg));
+					}
 					return;
 				}
 				else
