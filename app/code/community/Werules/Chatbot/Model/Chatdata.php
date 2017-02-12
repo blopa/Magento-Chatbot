@@ -64,9 +64,17 @@
 			$apiKey = $this->getApikey($action);
 			if ($webhook && $apiKey && $action == $this->tg_bot) // set telegram webhook
 			{
-				$telegram = new Telegram($apiKey);
-				$telegram->setWebhook(Mage::getUrl('chatbot/chatdata/', array('_forced_secure' => true)) . $this->tg_bot);
-				return;
+				try
+				{
+					$telegram = new Telegram($apiKey);
+					$telegram->setWebhook(Mage::getUrl('chatbot/chatdata/', array('_forced_secure' => true)) . $this->tg_bot);
+				}
+				catch (Exception $e)
+				{
+					return Mage::helper('core')->__("Something went wrong, please try again.");
+				}
+
+				return Mage::helper('core')->__("Webhook for Telegram configured.");
 			}
 			// handle conversation
 			if ($action == $this->tg_bot && $apiKey) // telegram api
