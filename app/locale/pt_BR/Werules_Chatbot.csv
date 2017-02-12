@@ -49,3 +49,8 @@
 "About.","Sobre."
 "Webhook for Telegram configured..","Webhook para o Telegram configurado com sucesso."
 "Command list","Lista de comandos"
+"This account has no orders.","Nenhum pedido nessa conta."
+"write the email content.","escreva o conteudo do e-mail."
+"Trying to send the email...","Tentando enviar o e-mail..."
+"Contact from chatbot","Contado do chatbot"
+"Sorry, I wasn't able to send an email this time. Please try again later.","Desculpe, não consegui enviar o seu e-mail nesse momento. Tente novamente mais tarde."

@@ -111,6 +111,32 @@
 			return null;
 		}
 
+		private function sendEmail($text)
+		{
+			$storename = Mage::app()->getStore()->getName();
+			$storeemail = Mage::getStoreConfig('trans_email/ident_general/email');// TODO
+
+			$email_body = $text;
+			$mail = Mage::getModel('core/email');
+			$mail->setToName($storename);
+			$mail->setToEmail($storeemail);
+			$mail->setBody($email_body);
+			$mail->setSubject(Mage::helper('core')->__("Contact from chatbot"));
+			$mail->setFromEmail($storeemail);
+			$mail->setFromName($storename);
+			$mail->setType('text');// You can use 'html' or 'text'
+
+			try
+			{
+				$mail->send();
+				return true;
+			}
+			catch (Exception $e)
+			{
+				return false;
+			}
+		}
+
 		private function addProd2Cart($prodId) // TODO add expiration date for sessions
 		{
 			$stock = Mage::getModel('cataloginventory/stock_item')
@@ -300,7 +326,9 @@
 			{
 				array_push($ids, $_order->getId());
 			}
-			return $ids;
+			if ($ids)
+				return $ids;
+			return false;
 		}
 
 		private function getProductIdsBySearch($searchstring)
@@ -683,6 +711,19 @@
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("we have sent your message to support.")));
 					return;
 				}
+				else if ($chatdata->getTelegramConvState() == $this->send_email_state)
+				{
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Trying to send the email..."));
+					if ($chatdata->sendEmail($text))
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Done."));
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "Sorry, I wasn't able to send an email this time. Please try again later."));
+					if (!$chatdata->updateChatdata('telegram_conv_state', $this->start_state))
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					return;
+				}
 
 				// commands
 				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
@@ -795,14 +836,22 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("let me fetch that for you.")));
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						$i = 0;
-						foreach($ordersIDs as $orderID)
+						if ($ordersIDs)
 						{
-							$message = $chatdata->prepareTelegramOrderMessages($orderID);
-							if ($message)
+							foreach($ordersIDs as $orderID)
 							{
-								$i++;
-								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+								$message = $chatdata->prepareTelegramOrderMessages($orderID);
+								if ($message)
+								{
+									$i++;
+									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+								}
 							}
+						}
+						else
+						{
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("This account has no orders.")));
+							return;
 						}
 						if ($i == 0)
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -874,6 +923,8 @@
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->send_email_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("write the email content.")));
 					return;
 				}
 				else
