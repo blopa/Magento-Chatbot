@@ -13,7 +13,7 @@ class Telegram {
 	/// Class constructor
 	/**
 	 * Create a Telegram instance from the bot token
-	 * \param bot_id the bot token
+	 * \param $bot_id the bot token
 	 * \return an instance of the class
 	 */
 	public function __construct($bot_id) {
@@ -24,7 +24,7 @@ class Telegram {
 	/// Do requests to Telegram Bot API
 	/**
 	 * Contacts the various API's endpoints
-	 * \param api the API endpoint
+	 * \param $api the API endpoint
 	 * \param $content the request parameters as array
 	 * \param $post boolean tells if $content needs to be sends
 	 * \return the JSON Telegram's reply
@@ -48,6 +48,10 @@ class Telegram {
 		return $this->endpoint("getMe", array(), false);
 	}
 
+	/// A method for responding http to Telegram.
+	/**
+	 * \return the HTTP 200 to Telegram
+	 */
 	public function respondSuccess() {
 		http_response_code(200);
 		return json_encode(array("status" => "success"));
@@ -558,7 +562,7 @@ class Telegram {
 	public function sendVenue(array $content) {
 		return $this->endpoint("sendVenue", $content);
 	}
-    
+
 	//Send contact
 	/**Use this method to send phone contacts. On success, the sent <a href="https://core.telegram.org/bots/api#message">Message</a> is returned.</p> <br/>Values inside $content:<br/>
 	 * <table>
@@ -729,7 +733,7 @@ class Telegram {
 	public function kickChatMember(array $content) {
 		return $this->endpoint("kickChatMember", $content);
 	}
-    
+
 	/**
 	 * Use this method for your bot to leave a group, supergroup or channel. Returns <em>True</em> on success.</p> <br/>Values inside $content:<br/>
 	 * <table>
@@ -752,7 +756,7 @@ class Telegram {
 	public function leaveChat(array $content) {
 		return $this->endpoint("leaveChat", $content);
 	}
-    
+
 	/**
 	 * Use this method to unban a previously kicked user in a supergroup. The user will <strong>not</strong> return to the group automatically, but will be able to join via link, etc. The bot must be an administrator in the group for this to work. Returns <em>True</em> on success.<br/>Values inside $content:<br/>
 	 * <table>
@@ -781,7 +785,7 @@ class Telegram {
 	public function unbanChatMember(array $content) {
 		return $this->endpoint("unbanChatMember", $content);
 	}
-    
+
 	/**
 	 * Use this method to get up to date information about the chat (current name of the user for one-on-one conversations, current username of a user, group or channel, etc.). Returns a <a href="https://core.telegram.org/bots/api#chat">Chat</a> object on success.<br/>Values inside $content:<br/>
 	 * <table>
@@ -804,7 +808,7 @@ class Telegram {
 	public function getChat(array $content) {
 		return $this->endpoint("getChat", $content);
 	}
-    
+
 	/**
 	 * Use this method to get a list of administrators in a chat. On success, returns an Array of <a href="https://core.telegram.org/bots/api#chatmember">ChatMember</a> objects that contains information about all chat administrators except other bots. If the chat is a group or a supergroup and no administrators were appointed, only the creator will be returned.<br/>Values inside $content:<br/>
 	 * <table>
@@ -827,7 +831,7 @@ class Telegram {
 	public function getChatAdministrators(array $content) {
 		return $this->endpoint("getChatAdministrators", $content);
 	}
-    
+
 	/**
 	 * Use this method to get the number of members in a chat. Returns <em>Int</em> on success.<br/>Values inside $content:<br/>
 	 * <table>
@@ -850,7 +854,7 @@ class Telegram {
 	public function getChatMembersCount(array $content) {
 		return $this->endpoint("getChatMembersCount", $content);
 	}
-    
+
 	/**
 	 * Use this method to get information about a member of a chat. Returns a <a href="https://core.telegram.org/bots/api#chatmember">ChatMember</a> object on success.<br/>Values inside $content:<br/>
 	 * <table>
@@ -879,7 +883,7 @@ class Telegram {
 	public function getChatMember(array $content) {
 		return $this->endpoint("getChatMember", $content);
 	}
-    
+
 	/**
 	 * Use this method to send answers to an inline query. On success, <em>True</em> is returned.<br>No more than <strong>50</strong> results per query are allowed.<br/>Values inside $content:<br/>
 	 * <table>
@@ -939,6 +943,65 @@ class Telegram {
 		return $this->endpoint("answerInlineQuery", $content);
 	}
 
+	/// Set Game Score
+	/**
+	 * Use this method to set the score of the specified user in a game. On success, if the message was sent by the bot, returns the edited Message, otherwise returns <em>True</em>. Returns an error, if the new score is not greater than the user&#39;s current score in the chat and <em>force</em> is <em>False</em>.<br/>
+	 * <table>
+	 * <tr>
+	 * <td><strong>Parameters</strong></td>
+	 * <td><strong>Type</strong></td>
+	 * <td><strong>Required</strong></td>
+	 * <td><strong>Description</strong></td>
+	 * </tr>
+	 * <tr>
+	 * <td>user_id</td>
+	 * <td>Integer</td>
+	 * <td>Yes</td>
+	 * <td>User identifier</td>
+	 * </tr>
+	 * <tr>
+	 * <td>score</td>
+	 * <td>Integer</td>
+	 * <td>Yes</td>
+	 * <td>New score, must be non-negative</td>
+	 * </tr>
+	 * <tr>
+	 * <td>force</td>
+	 * <td>Boolean</td>
+	 * <td>Optional</td>
+	 * <td>Pass True, if the high score is allowed to decrease. This can be useful when fixing mistakes or banning cheaters</td>
+	 * </tr>
+	 * <tr>
+	 * <td>disable_edit_message</td>
+	 * <td>Boolean</td>
+	 * <td>Optional</td>
+	 * <td>Pass True, if the game message should not be automatically edited to include the current scoreboard</td>
+	 * </tr>
+	 * <tr>
+	 * <td>chat_id</td>
+	 * <td>Integer</td>
+	 * <td>Optional</td>
+	 * <td>Required if <em>inline_message_id</em> is not specified. Unique identifier for the target chat</td>
+	 * </tr>
+	 * <tr>
+	 * <td>message_id</td>
+	 * <td>Integer</td>
+	 * <td>Optional</td>
+	 * <td>Required if <em>inline_message_id</em> is not specified. Identifier of the sent message</td>
+	 * </tr>
+	 * <tr>
+	 * <td>inline_message_id</td>
+	 * <td>String</td>
+	 * <td>Optional</td>
+	 * <td>Required if <em>chat_id</em> and <em>message_id</em> are not specified. Identifier of the inline message</td>
+	 * </tr>
+	 * </table>
+	 * \param $content the request parameters as array
+	 * \return the JSON Telegram's reply
+	 */
+	public function setGameScore(array $content) {
+		return $this->endpoint("setGameScore", $content);
+	}
 
 	/// Answer a callback Query
 	/**
@@ -975,7 +1038,7 @@ class Telegram {
 	public function answerCallbackQuery(array $content) {
 		return $this->endpoint("answerCallbackQuery", $content);
 	}
-    
+
 	/**
 	 * Use this method to edit text messages sent by the bot or via the bot (for <a href="https://core.telegram.org/bots/api#inline-mode">inline bots</a>). On success, if edited message is sent by the bot, the edited <a href="https://core.telegram.org/bots/api#message">Message</a> is returned, otherwise <em>True</em> is returned.<br/>Values inside $content:<br/>
 	 * <table>
@@ -1034,7 +1097,7 @@ class Telegram {
 	public function editMessageText(array $content) {
 		return $this->endpoint("editMessageText", $content);
 	}
-    
+
 	/**
 	 * Use this method to edit captions of messages sent by the bot or via the bot (for <a href="https://core.telegram.org/bots/api#inline-mode">inline bots</a>). On success, if edited message is sent by the bot, the edited <a href="https://core.telegram.org/bots/api#message">Message</a> is returned, otherwise <em>True</em> is returned.<br/>Values inside $content:<br/>
 	 * <table>
@@ -1081,7 +1144,7 @@ class Telegram {
 	public function editMessageCaption(array $content) {
 		return $this->endpoint("editMessageCaption", $content);
 	}
-    
+
 	/**
 	 * Use this method to edit only the reply markup of messages sent by the bot or via the bot (for <a href="https://core.telegram.org/bots/api#inline-mode">inline bots</a>).  On success, if edited message is sent by the bot, the edited <a href="https://core.telegram.org/bots/api#message">Message</a> is returned, otherwise <em>True</em> is returned.<br/>Values inside $content:<br/>
 	 * <table>
@@ -1122,7 +1185,7 @@ class Telegram {
 	public function editMessageReplyMarkup(array $content) {
 		return $this->endpoint("editMessageReplyMarkup", $content);
 	}
-    
+
 	/// Use this method to download a file
 	/**
 	 *  Use this method to to download a file from the Telegram servers.
@@ -1216,6 +1279,13 @@ class Telegram {
 		return $this->data["message"]["reply_to_message"]["forward_from"]["id"];
 	}
 
+	/// Get the inline_query of the current update
+	/**
+	 * \return the Array inline_query
+	 */
+	public function Inline_Query() {
+		return $this->data["inline_query"];
+	}
 	/// Get the callback_query of the current update
 	/**
 	 * \return the String callback_query
@@ -1306,6 +1376,11 @@ class Telegram {
 		return true;
 	}
 
+	/// Get the title of the group chat
+	/**
+	 *
+	 *  \return a String of the title chat
+	 */
 	public function messageFromGroupTitle() {
 		if ($this->data["message"]["chat"]["type"] != "private") {
 			return $this->data["message"]["chat"]["title"];
@@ -1351,9 +1426,11 @@ class Telegram {
 	 * \param $url String Optional. HTTP url to be opened when button is pressed
 	 * \param $callback_data String Optional. Data to be sent in a callback query to the bot when button is pressed
 	 * \param $switch_inline_query String Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot‘s username and the specified inline query in the input field. Can be empty, in which case just the bot’s username will be inserted.
+	 * \param $switch_inline_query_current_chat String Optional. Optional. If set, pressing the button will insert the bot‘s username and the specified inline query in the current chat's input field. Can be empty, in which case only the bot’s username will be inserted.
+	 * \param $callback_game  String Optional. Description of the game that will be launched when the user presses the button.
 	 * \return the requested button as Array
 	 */
-	public function buildInlineKeyboardButton($text, $url = "", $callback_data = "", $switch_inline_query = "") {
+	public function buildInlineKeyboardButton($text, $url = "", $callback_data = "", $switch_inline_query = "", $switch_inline_query_current_chat = "", $callback_game = "") {
 		$replyMarkup = array(
 			'text' => $text
 		);
@@ -1363,6 +1440,10 @@ class Telegram {
 			$replyMarkup['callback_data'] = $callback_data;
 		} else if ($switch_inline_query != "") {
 			$replyMarkup['switch_inline_query'] = $switch_inline_query;
+		} else if ($switch_inline_query_current_chat != "") {
+			$replyMarkup['switch_inline_query_current_chat'] = $switch_inline_query_current_chat;
+		} else if ($callback_game != "") {
+			$replyMarkup['callback_game'] = $callback_game;
 		}
 		return $replyMarkup;
 	}
@@ -1406,9 +1487,9 @@ class Telegram {
 
 	/// Display a reply interface to the user
 	/* Upon receiving a message with this object, Telegram clients will display a reply interface to the user (act as if the user has selected the bot‘s message and tapped ’Reply'). This can be extremely useful if you want to create user-friendly step-by-step interfaces without having to sacrifice privacy mode.
-     * \param $selective Boolean Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
-     * \return the requested force reply as Array
-     */
+	 * \param $selective Boolean Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
+	 * \return the requested force reply as Array
+	 */
 	public function buildForceReply($selective = true) {
 		$replyMarkup = array(
 			'force_reply' => true,
