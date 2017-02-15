@@ -460,97 +460,113 @@
 			// Take text and chat_id from the message
 			$text = $telegram->Text();
 			$chat_id = $telegram->ChatID();
+			$message_id = $telegram->MessageID();
 
-			// send feedback to user
-			$telegram->sendChatAction(array('chat_id' => $chat_id, 'action' => 'typing'));
-
-			// mage helper
-			$magehelper = Mage::helper('core');
-
-			$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
-			if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
-				$supportgroup = "-" . ltrim($supportgroup, "g");
-
-			// if it's a group message
-			if ($telegram->messageFromGroup())
+			if (!is_null($text) && !is_null($chat_id))
 			{
-				if ($chat_id == $supportgroup) // if the group sending the message is the support group
-				{
-					if ($telegram->ReplyToMessageID()) // if the message is replying another message
-					{
-						$telegram->sendMessage(array('chat_id' => $telegram->ReplyToMessageFromUserID(), 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Message sent."))); // TODO
-					}
+				// Instances the model class
+				$chatdata = $this->load($chat_id, 'telegram_chat_id');
+				$chatdata->api_type = $this->tg_bot;
+
+				if ($message_id == $chatdata->getTelegramMessageId()) // prevents to reply the same request twice
 					return;
-				}
-				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("I don't work with groups."))); // TODO
-				return; // ignore all group messages
-			}
+				else
+					$this->updateChatdata('telegram_message_id', $message_id); // if this fails, it may send the same message twice
 
-			// Instances the model class
-			$chatdata = $this->load($chat_id, 'telegram_chat_id');
-			$chatdata->api_type = $this->tg_bot;
+				// send feedback to user
+				$telegram->sendChatAction(array('chat_id' => $chat_id, 'action' => 'typing'));
 
-			if ($chatdata->getIsLogged() == "1") // check if customer is logged
-			{
-				if (Mage::getModel('customer/customer')->load((int)$this->getCustomerId())->getId()) // if is a valid customer id
+				// mage helper
+				$magehelper = Mage::helper('core');
+
+				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
+				if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
+					$supportgroup = "-" . ltrim($supportgroup, "g");
+
+				// if it's a group message
+				if ($telegram->messageFromGroup())
 				{
-					if ($chatdata->getEnableTelegram() != "1")
+					if ($chat_id == $supportgroup) // if the group sending the message is the support group
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To talk with me, please enable Telegram on your account chatbot settings.")));
+						if ($telegram->ReplyToMessageID()) // if the message is replying another message
+						{
+							$reply_from_user = $telegram->ReplyToMessageFromUserID();
+							if (!is_null($reply_from_user))
+							{
+								$telegram->sendMessage(array('chat_id' => $reply_from_user, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
+								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Message sent."))); // TODO
+							}
+							else if ($text == "/sendmessagetoall") // TODO
+							{
+								// TODO
+							}
+						}
 						return;
 					}
+					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("I don't work with groups."))); // TODO
+					return; // ignore all group messages
 				}
-			}
 
-			if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
-			{
-				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-				if ($message) // TODO
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-				try
+				if ($chatdata->getIsLogged() == "1") // check if customer is logged
 				{
-					$hash = substr(md5(uniqid($chat_id, true)), 0, 150); // TODO
-					Mage::getModel('chatbot/chatdata') // using magento model to insert data into database the proper way
-					->setTelegramChatId($chat_id)
-						->setHashKey($hash) // TODO
-						->save();
+					if (Mage::getModel('customer/customer')->load((int)$this->getCustomerId())->getId()) // if is a valid customer id
+					{
+						if ($chatdata->getEnableTelegram() != "1")
+						{
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To talk with me, please enable Telegram on your account chatbot settings.")));
+							return;
+						}
+					}
 				}
-				catch (Exception $e)
+
+				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
 				{
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg)); // TODO
+					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
+					if ($message) // TODO
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+					try
+					{
+						$hash = substr(md5(uniqid($chat_id, true)), 0, 150); // TODO
+						Mage::getModel('chatbot/chatdata') // using magento model to insert data into database the proper way
+						->setTelegramChatId($chat_id)
+							->setHashKey($hash) // TODO
+							->save();
+					}
+					catch (Exception $e)
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg)); // TODO
+					}
 				}
-			}
 
-			// init commands
-			$chatdata->start_cmd = "/start";
-			$chatdata->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
-			$chatdata->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
-			$chatdata->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
-			$chatdata->listorders_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4));
-			$chatdata->reorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5));
-			$chatdata->add2cart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6));
-			$chatdata->checkout_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7));
-			$chatdata->clearcart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8));
-			$chatdata->trackorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9));
-			$chatdata->support_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10));
-			$chatdata->sendemail_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11));
-			$chatdata->cancel_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
-			$chatdata->help_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(13));
-			$chatdata->about_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(14));
+				// init commands
+				$chatdata->start_cmd = "/start";
+				$chatdata->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
+				$chatdata->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
+				$chatdata->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
+				$chatdata->listorders_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4));
+				$chatdata->reorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5));
+				$chatdata->add2cart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6));
+				$chatdata->checkout_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7));
+				$chatdata->clearcart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8));
+				$chatdata->trackorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9));
+				$chatdata->support_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10));
+				$chatdata->sendemail_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11));
+				$chatdata->cancel_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
+				$chatdata->help_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(13));
+				$chatdata->about_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(14));
 
-			if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "/cancel"; // it must always have a cancel command
+				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "/cancel"; // it must always have a cancel command
 
-			// init messages
-			$this->errormsg = $magehelper->__("Something went wrong, please try again.");
-			$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd;
-			$this->canceledmsg = $magehelper->__("Ok, canceled.");
-			$this->loginfirstmsg =  $magehelper->__("Please login first.");
-			array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
-			// $this->positivemsg[array_rand($this->positivemsg)]
+				// init messages
+				$this->errormsg = $magehelper->__("Something went wrong, please try again.");
+				$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd;
+				$this->canceledmsg = $magehelper->__("Ok, canceled.");
+				$this->loginfirstmsg =  $magehelper->__("Please login first.");
+				array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
+				// $this->positivemsg[array_rand($this->positivemsg)]
 
-			// TODO DEBUG COMMANDS
-//			$temp_var = $this->start_cmd . " - " .
+				// TODO DEBUG COMMANDS
+//				$temp_var = $this->start_cmd . " - " .
 //				$this->listacateg_cmd . " - " .
 //				$this->search_cmd . " - " .
 //				$this->login_cmd . " - " .
@@ -562,11 +578,9 @@
 //				$this->trackorder_cmd . " - " .
 //				$this->support_cmd . " - " .
 //				$this->sendemail_cmd;
-//			$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $temp_var));
-//			$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->getTelegramConvState()));
+//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $temp_var));
+//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->getTelegramConvState()));
 
-			if (!is_null($text) && !is_null($chat_id))
-			{
 				// start command
 				if ($chatdata->checkCommand($text, $chatdata->start_cmd))
 				//if ($text == $chatdata->start_cmd)
