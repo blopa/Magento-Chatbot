@@ -48,6 +48,11 @@ class Telegram {
 		return $this->endpoint("getMe", array(), false);
 	}
 
+	public function respondSuccess() {
+		http_response_code(200);
+		return json_encode(array("status" => "success"));
+	}
+
 	/// Send a message
 	/**
 	 * Contacts the various API's endpoints<br/>Values inside $content:<br/>

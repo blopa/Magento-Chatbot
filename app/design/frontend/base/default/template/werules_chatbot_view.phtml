@@ -3,6 +3,7 @@
 	$webhook = Mage::app()->getRequest()->getParam('webhook');
 	$custom_key = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 
-	if ($webhook != $custom_key) $webhook = null;
+	if ($webhook != $custom_key)
+		$webhook = null;
 	echo Mage::getModel('chatbot/chatdata')->requestHandler($action, $webhook);
 ?>
