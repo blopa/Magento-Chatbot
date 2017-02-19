@@ -1108,10 +1108,10 @@
 				$chatdata = $this->load($chat_id, 'facebook_chat_id');
 				$chatdata->api_type = $this->fb_bot;
 
-				if ($message_id == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
-					return $facebook->respondSuccess();
-				else if ($chatdata->getFacebookChatId())
-					$chatdata->updateChatdata('facebook_message_id', $message_id); // if this fails, it may send the same message twice
+//				if ($message_id == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
+//					return $facebook->respondSuccess();
+//				else if ($chatdata->getFacebookChatId())
+//					$chatdata->updateChatdata('facebook_message_id', $message_id); // if this fails, it may send the same message twice
 
 				// send feedback to user
 				$facebook->sendChatAction($chat_id, "typing_on");
