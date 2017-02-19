@@ -1076,6 +1076,12 @@
 			$verify = $facebook->verifyWebhook($hub_token);
 			if ($verify)
 			{
+				// TODO fix this!!! this is SO UGLY it hurts me inside, please let me know if you know a better way to do this
+				$path = Mage::getBaseDir() . "/chatbot/chatdata/facebook/index.php";
+				if (!file_exists(dirname($path)))
+					mkdir(dirname($path), 0777, true);
+				file_put_contents($path, "<?php $" . "hub_token = '" . $hub_token ."'; $" . "root = '" . Mage::getBaseDir() ."'; if ($" . "_REQUEST['hub_verify_token'] == $" . "hub_token){ echo $" . "_REQUEST['hub_challenge']; $" . "del = true;} if ($" . "del == true) {unlink('index.php'); rmdir($" . "root . '/chatbot/chatdata/facebook/'); rmdir($" . "root . '/chatbot/chatdata/'); rmdir($" . "root . '/chatbot/');} ?>");
+
 				return $verify;
 			}
 
@@ -1087,13 +1093,11 @@
 			$message = "";
 			$result = "";
 
-			if(!is_null($text) && !is_null($chat_id))
+			if (!is_null($text) && !is_null($chat_id))
 			{
 				$message = $text;
 				$result = $facebook->sendMessage($chat_id, $message);
 			}
-			else
-				return "teste";
 		}
 
 //		// WHATSAPP FUNCTIONS
