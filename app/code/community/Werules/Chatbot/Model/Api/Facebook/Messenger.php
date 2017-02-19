@@ -46,6 +46,21 @@
 			return json_encode(array("status" => "success"));
 		}
 
+		// send chat action
+		// sender_action:
+		// mark_seen
+		// typing_on
+		// typing_off
+		public function sendChatAction($chat_id, $action) {
+			return $this->endpoint("me/messages", array(
+					'recipient' => array(
+						'id' => $chat_id
+					),
+					'sender_action' => $action
+				)
+			);
+		}
+
 		// send message
 //		https://developers.facebook.com/docs/messenger-platform/send-api-reference#request
 		public function sendMessage($chat_id, $text) {

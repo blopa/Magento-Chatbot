@@ -236,10 +236,17 @@
 
 		private function getCommandString($cmdId)
 		{
+			$rep = "";
 			if ($this->api_type == $this->tg_bot)
+			{
+				$rep = "_";
 				$confpath = 'chatbot_enable/telegram_config/';
+			}
 			else if ($this->api_type == $this->fb_bot)
+			{
+				$rep = " ";
 				$confpath = 'chatbot_enable/facebook_config/';
+			}
 //			else if ($this->api_type == $this->wapp_bot)
 //				$confpath = 'chatbot_enable/whatsapp_config/';
 
@@ -257,7 +264,7 @@
 						'',
 						str_replace( // replace whitespace for underscore
 							' ',
-							'_',
+							$rep,
 							trim(
 								array_merge( // merge arrays
 									$commands,
@@ -275,14 +282,14 @@
 					'',
 					str_replace( // replace whitespace for underscore
 						' ',
-						'_',
+						$rep,
 						trim(
 							$commands[$cmdId - 1]
 						)
 					)
 				);
 			}
-			return "";
+			return null;
 		}
 
 		private function getCommandValue($text, $cmd)
@@ -519,6 +526,9 @@
 					}
 				}
 
+				// init start command
+				$chatdata->start_cmd = "/start";
+
 				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
@@ -539,8 +549,7 @@
 					return $telegram->respondSuccess();
 				}
 
-				// init commands
-				$chatdata->start_cmd = "/start";
+				// init other commands
 				$chatdata->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
 				$chatdata->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
 				$chatdata->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
@@ -1095,9 +1104,118 @@
 
 			if (!is_null($text) && !is_null($chat_id))
 			{
-				$message = $text;
-				$result = $facebook->sendMessage($chat_id, $message);
+				// Instances the model class
+				$chatdata = $this->load($chat_id, 'facebook_message_id');
+				$chatdata->api_type = $this->tg_bot;
+
+				if ($message_id == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
+					return $facebook->respondSuccess();
+				else
+					$chatdata->updateChatdata('facebook_message_id', $message_id); // if this fails, it may send the same message twice
+
+				// send feedback to user
+				$facebook->sendChatAction($chat_id, "typing_on");
+
+				// mage helper
+				$magehelper = Mage::helper('core');
+
+				if ($chatdata->getIsLogged() == "1") // check if customer is logged
+				{
+					if (Mage::getModel('customer/customer')->load((int)$this->getCustomerId())->getId()) // if is a valid customer id
+					{
+						if ($chatdata->getEnableFacebook() != "1")
+						{
+							$facebook->sendMessage($chat_id, $magehelper->__("To talk with me, please enable Facebook Messenger on your account chatbot settings."));
+							return $facebook->respondSuccess();
+						}
+					}
+				}
+
+				// user isnt registred HERE
+
+				if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
+				{
+					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
+					if ($message) // TODO
+						$facebook->sendMessage($chat_id, $message);
+					try
+					{
+						$hash = substr(md5(uniqid($chat_id, true)), 0, 150); // TODO
+						$chatdata // using magento model to insert data into database the proper way
+						->setFacebookChatId($chat_id)
+							->setHashKey($hash) // TODO
+							->save();
+					}
+					catch (Exception $e)
+					{
+						$facebook->sendMessage($chat_id, $this->errormsg); // TODO
+					}
+					return $facebook->respondSuccess();
+				}
+
+				// init commands
+				//$chatdata->start_cmd = "Start";
+				$chatdata->listacateg_cmd = $chatdata->getCommandString(1);
+				$chatdata->search_cmd = $chatdata->getCommandString(2);
+				$chatdata->login_cmd = $chatdata->getCommandString(3);
+				$chatdata->listorders_cmd = $chatdata->getCommandString(4);
+				$chatdata->reorder_cmd = $chatdata->getCommandString(5);
+				$chatdata->add2cart_cmd = $chatdata->getCommandString(6);
+				$chatdata->checkout_cmd = $chatdata->getCommandString(7);
+				$chatdata->clearcart_cmd = $chatdata->getCommandString(8);
+				$chatdata->trackorder_cmd = $chatdata->getCommandString(9);
+				$chatdata->support_cmd = $chatdata->getCommandString(10);
+				$chatdata->sendemail_cmd = $chatdata->getCommandString(11);
+				$chatdata->cancel_cmd = $chatdata->getCommandString(12);
+				$chatdata->help_cmd = $chatdata->getCommandString(13);
+				$chatdata->about_cmd = $chatdata->getCommandString(14);
+
+				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "Cancel"; // it must always have a cancel command
+
+				// help command
+				if ($chatdata->help_cmd && $text == $chatdata->help_cmd)
+				{
+					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
+					if ($message) // TODO
+						$facebook->sendMessage($chat_id, $message);
+					return $facebook->respondSuccess();
+				}
+
+				// about command
+				if ($chatdata->about_cmd && $text == $chatdata->about_cmd)
+				{
+					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
+					$cmdlisting = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
+					if ($cmdlisting == 1)
+					{
+						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
+						if ($chatdata->listacateg_cmd) $message .= $chatdata->listacateg_cmd . " - " . $magehelper->__("List store categories.") . "\n";
+						if ($chatdata->search_cmd) $message .= $chatdata->search_cmd . " - " . $magehelper->__("Search for products.") . "\n";
+						if ($chatdata->login_cmd) $message .= $chatdata->login_cmd . " - " . $magehelper->__("Login into your account.") . "\n";
+						if ($chatdata->listorders_cmd) $message .= $chatdata->listorders_cmd . " - " . $magehelper->__("List your personal orders.") . "\n";
+						//$message .= $chatdata->reorder_cmd . " - " . $magehelper->__("Reorder a order.") . "\n";
+						//$message .= $chatdata->add2cart_cmd . " - " . $magehelper->__("Add product to cart.") . "\n";
+						if ($chatdata->checkout_cmd) $message .= $chatdata->checkout_cmd . " - " . $magehelper->__("Checkout your order.") . "\n";
+						if ($chatdata->clearcart_cmd) $message .= $chatdata->clearcart_cmd . " - " . $magehelper->__("Clear your cart.") . "\n";
+						if ($chatdata->trackorder_cmd) $message .= $chatdata->trackorder_cmd . " - " . $magehelper->__("Track your order status.") . "\n";
+						if ($chatdata->support_cmd) $message .= $chatdata->support_cmd . " - " . $magehelper->__("Send message to support.") . "\n";
+						if ($chatdata->sendemail_cmd) $message .= $chatdata->sendemail_cmd . " - " . $magehelper->__("Send email.") . "\n";
+						//$message .= $chatdata->cancel_cmd . " - " . $magehelper->__("Cancel.");
+						if ($chatdata->help_cmd) $message .= $chatdata->help_cmd . " - " . $magehelper->__("Get help.") . "\n";
+						//$message .= $chatdata->about_cmd . " - " . $magehelper->__("About.");
+					}
+
+					$facebook->sendMessage($chat_id, $message);
+					return $facebook->respondSuccess();
+				}
+
+				if (true)
+				{
+					$message = $text;
+					$result = $facebook->sendMessage($chat_id, $message);
+				}
 			}
+			//else return "all good!!";
 		}
 
 //		// WHATSAPP FUNCTIONS
