@@ -1,5 +1,6 @@
 <?php
 	include("Api/Telegram/Telegram.php");
+	include("Api/Facebook/Messenger.php");
 
 	class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
@@ -69,6 +70,7 @@
 		public function requestHandler($action, $webhook) // handle request
 		{
 			$apiKey = $this->getApikey($action);
+			// handle webhook configuration
 			if ($webhook && $apiKey && $action == $this->tg_bot) // set telegram webhook
 			{
 				try
@@ -82,17 +84,16 @@
 				}
 
 				return Mage::helper('core')->__("Webhook for Telegram configured.");
-			}
-			// handle conversation
-			if ($action == $this->tg_bot && $apiKey) // telegram api
+			} // start to handle conversation
+			else if ($action == $this->tg_bot && $apiKey) // telegram api
 			{
 				// all logic goes here
-				$this->telegramHandler($apiKey);
+				return $this->telegramHandler($apiKey);
 			}
 			else if ($action == $this->fb_bot && $apiKey) // facebook api
 			{
 				// all logic goes here
-				$this->facebookHandler($apiKey);
+				return $this->facebookHandler($apiKey);
 			}
 			else
 				return "error 101"; // TODO
@@ -109,11 +110,10 @@
 			}
 			else if ($apiType == $this->fb_bot)
 			{
-//				$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
-//				$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-//				if ($enabled == 1 && $apikey) // is enabled and has API
-//					return $apikey;
-				return "error 101"; // TODO
+				$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
+				$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+				if ($enabled == 1 && $apikey) // is enabled and has API
+					return $apikey;
 			}
 			return null;
 		}
@@ -1069,7 +1069,31 @@
 		// FACEBOOK FUNCTIONS
 		private function facebookHandler($apiKey)
 		{
+			// Instances the Facebook class
+			$facebook = new Messenger($apiKey);
 
+			$hub_token = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
+			$verify = $facebook->verifyWebhook($hub_token);
+			if ($verify)
+			{
+				return $verify;
+			}
+
+			// Take text and chat_id from the message
+			$text = $facebook->Text();
+			$chat_id = $facebook->ChatID();
+			$message_id = $facebook->EntryID();
+
+			$message = "";
+			$result = "";
+
+			if(!is_null($text) && !is_null($chat_id))
+			{
+				$message = $text;
+				$result = $facebook->sendMessage($chat_id, $message);
+			}
+			else
+				return "teste";
 		}
 
 //		// WHATSAPP FUNCTIONS
