@@ -1,6 +1,7 @@
 <?php
 	include("Api/Telegram/Telegram.php");
 	include("Api/Facebook/Messenger.php");
+	include("Api/witAI/witAI.php");
 
 	class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
@@ -27,7 +28,24 @@
 		private $clear_cart_state = 13;
 
 		// COMMANDS
-		private $cmd_list = "start,list_cat,search,login,list_orders,reorder,add2cart,checkout,clear_cart,track_order,support,send_email,cancel,help,about";
+		private $cmd_list =
+		"
+			start,
+			list_cat,
+			search,
+			login,
+			list_orders,
+			reorder,
+			add2cart,
+			checkout,
+			clear_cart,
+			track_order,
+			support,
+			send_email,
+			cancel,
+			help,
+			about"
+		;
 		private $start_cmd = "";
 		private $listacateg_cmd = "";
 		private $search_cmd = "";
@@ -474,6 +492,7 @@
 				// Instances the model class
 				$chatdata = $this->load($chat_id, 'telegram_chat_id');
 				$chatdata->api_type = $this->tg_bot;
+				$conv_state = $chatdata->getTelegramConvState();
 
 				if ($message_id == $chatdata->getTelegramMessageId()) // prevents to reply the same request twice
 					return $telegram->respondSuccess();
@@ -589,7 +608,7 @@
 //				$this->support_cmd . " - " .
 //				$this->sendemail_cmd;
 //				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $temp_var));
-//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->getTelegramConvState()));
+//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $conv_state));
 
 				// start command
 				if ($chatdata->checkCommand($text, $chatdata->start_cmd))
@@ -684,21 +703,21 @@
 				// cancel command
 				if ($chatdata->cancel_cmd && $text == $chatdata->cancel_cmd) // TODO
 				{
-					if ($chatdata->getTelegramConvState() == $this->list_cat_state)
+					if ($conv_state == $this->list_cat_state)
 					{
 						$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 						$content = array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $this->canceledmsg);
 					}
-					else if ($chatdata->getTelegramConvState() == $this->support_state)
+					else if ($conv_state == $this->support_state)
 					{
 						$content = array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("exiting support mode."));
 						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
 					}
-					else if ($chatdata->getTelegramConvState() == $this->search_state)
+					else if ($conv_state == $this->search_state)
 					{
 						$content = array('chat_id' => $chat_id, 'text' => $this->canceledmsg);
 					}
-					else if ($chatdata->getTelegramConvState() == $this->send_email_state)
+					else if ($conv_state == $this->send_email_state)
 					{
 						$content = array('chat_id' => $chat_id, 'text' => $this->canceledmsg);
 					}
@@ -713,7 +732,7 @@
 				}
 
 				// add2cart commands
-				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd)) // && $chatdata->getTelegramConvState() == $this->list_prod_state TODO
+				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd)) // && $conv_state == $this->list_prod_state TODO
 				{
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd);
 					if ($cmdvalue) // TODO
@@ -727,7 +746,7 @@
 				}
 
 				// states
-				if ($chatdata->getTelegramConvState() == $this->list_cat_state) // TODO show only in stock products
+				if ($conv_state == $this->list_cat_state) // TODO show only in stock products
 				{
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
@@ -767,7 +786,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $this->errormsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->getTelegramConvState() == $this->search_state) // TODO
+				else if ($conv_state == $this->search_state) // TODO
 				{
 					$noprodflag = false;
 					$productIDs = $this->getProductIdsBySearch($text);
@@ -800,13 +819,13 @@
 
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->getTelegramConvState() == $this->support_state)
+				else if ($conv_state == $this->support_state)
 				{
 					$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("we have sent your message to support.")));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->getTelegramConvState() == $this->send_email_state)
+				else if ($conv_state == $this->send_email_state)
 				{
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Trying to send the email...")));
 					if ($chatdata->sendEmail($text))
@@ -819,7 +838,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->getTelegramConvState() == $this->track_order_state)
+				else if ($conv_state == $this->track_order_state)
 				{
 					$errorflag = false;
 					if ($chatdata->getIsLogged() == "1")
@@ -1081,6 +1100,10 @@
 			// Instances the Facebook class
 			$facebook = new Messenger($apiKey);
 
+			// Instances the witAI class
+//			$witapi = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+//			$witai = new witAI($witapi);
+
 			$hub_token = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 			$verify = $facebook->verifyWebhook($hub_token);
 			if ($verify)
@@ -1097,21 +1120,24 @@
 			// Take text and chat_id from the message
 			$text = $facebook->Text();
 			$chat_id = $facebook->ChatID();
-			$message_id = $facebook->EntryID();
+			$message_id = $facebook->MessageID();
+			$is_echo = $facebook->getEcho();
 
 			$message = "";
 			$result = "";
 
-			if (!is_null($text) && !is_null($chat_id))
+			if (!empty($text) && !empty($chat_id) && $is_echo != "true")
 			{
+				$text = strtolower($text);
 				// Instances the model class
 				$chatdata = $this->load($chat_id, 'facebook_chat_id');
 				$chatdata->api_type = $this->fb_bot;
+				$conv_state = $chatdata->getFacebookConvState();
 
-//				if ($message_id == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
-//					return $facebook->respondSuccess();
-//				else if ($chatdata->getFacebookChatId())
-//					$chatdata->updateChatdata('facebook_message_id', $message_id); // if this fails, it may send the same message twice
+				if ($message_id == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
+					return $facebook->respondSuccess();
+				else if ($chatdata->getFacebookChatId())
+					$chatdata->updateChatdata('facebook_message_id', $message_id); // if this fails, it may send the same message twice
 
 				// send feedback to user
 				$facebook->sendChatAction($chat_id, "typing_on");
@@ -1126,13 +1152,13 @@
 						if ($chatdata->getEnableFacebook() != "1")
 						{
 							$facebook->sendMessage($chat_id, $magehelper->__("To talk with me, please enable Facebook Messenger on your account chatbot settings."));
+							$facebook->sendChatAction($chat_id, "typing_off");
 							return $facebook->respondSuccess();
 						}
 					}
 				}
 
 				// user isnt registred HERE
-
 				if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
@@ -1145,44 +1171,115 @@
 						->setFacebookChatId($chat_id)
 							->setHashKey($hash) // TODO
 							->save();
+						//$chatdata->updateChatdata('facebook_chat_id', $chat_id);
+						//$chatdata->updateChatdata('hash_key', $hash);
 					}
 					catch (Exception $e)
 					{
 						$facebook->sendMessage($chat_id, $this->errormsg); // TODO
 					}
+					$facebook->sendChatAction($chat_id, "typing_off");
 					return $facebook->respondSuccess();
 				}
 
 				// init commands
 				//$chatdata->start_cmd = "Start";
-				$chatdata->listacateg_cmd = $chatdata->getCommandString(1);
-				$chatdata->search_cmd = $chatdata->getCommandString(2);
-				$chatdata->login_cmd = $chatdata->getCommandString(3);
-				$chatdata->listorders_cmd = $chatdata->getCommandString(4);
-				$chatdata->reorder_cmd = $chatdata->getCommandString(5);
-				$chatdata->add2cart_cmd = $chatdata->getCommandString(6);
-				$chatdata->checkout_cmd = $chatdata->getCommandString(7);
-				$chatdata->clearcart_cmd = $chatdata->getCommandString(8);
-				$chatdata->trackorder_cmd = $chatdata->getCommandString(9);
-				$chatdata->support_cmd = $chatdata->getCommandString(10);
-				$chatdata->sendemail_cmd = $chatdata->getCommandString(11);
-				$chatdata->cancel_cmd = $chatdata->getCommandString(12);
-				$chatdata->help_cmd = $chatdata->getCommandString(13);
-				$chatdata->about_cmd = $chatdata->getCommandString(14);
-
+				$chatdata->listacateg_cmd = strtolower($chatdata->getCommandString(1));
+				$chatdata->search_cmd = strtolower($chatdata->getCommandString(2));
+				$chatdata->login_cmd = strtolower($chatdata->getCommandString(3));
+				$chatdata->listorders_cmd = strtolower($chatdata->getCommandString(4));
+				$chatdata->reorder_cmd = strtolower($chatdata->getCommandString(5));
+				$chatdata->add2cart_cmd = strtolower($chatdata->getCommandString(6));
+				$chatdata->checkout_cmd = strtolower($chatdata->getCommandString(7));
+				$chatdata->clearcart_cmd = strtolower($chatdata->getCommandString(8));
+				$chatdata->trackorder_cmd = strtolower($chatdata->getCommandString(9));
+				$chatdata->support_cmd = strtolower($chatdata->getCommandString(10));
+				$chatdata->sendemail_cmd = strtolower($chatdata->getCommandString(11));
+				$chatdata->cancel_cmd = strtolower($chatdata->getCommandString(12));
+				$chatdata->help_cmd = strtolower($chatdata->getCommandString(13));
+				$chatdata->about_cmd = strtolower($chatdata->getCommandString(14));
 				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "Cancel"; // it must always have a cancel command
 
+				// init messages
+				$this->errormsg = $magehelper->__("Something went wrong, please try again.");
+				$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd;
+				$this->canceledmsg = $magehelper->__("Ok, canceled.");
+				$this->loginfirstmsg =  $magehelper->__("Please login first.");
+				array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
+				// $this->positivemsg[array_rand($this->positivemsg)]
+
+				if ($conv_state == $this->start_state)
+				{
+					$cmdarray = array(
+						$chatdata->start_cmd,
+						$chatdata->listacateg_cmd,
+						$chatdata->search_cmd,
+						$chatdata->login_cmd,
+						$chatdata->listorders_cmd,
+						$chatdata->reorder_cmd,
+						$chatdata->add2cart_cmd,
+						$chatdata->checkout_cmd,
+						$chatdata->clearcart_cmd,
+						$chatdata->trackorder_cmd,
+						$chatdata->support_cmd,
+						$chatdata->sendemail_cmd,
+						$chatdata->cancel_cmd,
+						$chatdata->help_cmd,
+						$chatdata->about_cmd
+					);
+
+					foreach ($cmdarray as $cmd)
+					{
+						if (strpos($text, $cmd) !== false)
+						{
+							$text = $cmd;
+							break;
+						}
+					}
+				}
+
+				// cancel command
+				if ($text == $chatdata->cancel_cmd) // && $chatdata->cancel_cmd TODO
+				{
+					if ($conv_state == $this->list_cat_state)
+					{
+						$message = $this->canceledmsg;
+					}
+					else if ($conv_state == $this->support_state)
+					{
+						$message = $this->positivemsg[array_rand($this->positivemsg)] . ", " . $magehelper->__("exiting support mode.");
+					}
+					else if ($conv_state == $this->search_state)
+					{
+						$message = $this->canceledmsg;
+					}
+					else if ($conv_state == $this->send_email_state)
+					{
+						$message = $this->canceledmsg;
+					}
+					else
+						$message = $this->errormsg;
+
+					if (!$chatdata->updateChatdata('facebook_conv_state', $this->start_state))
+						$facebook->sendMessage($chat_id, $this->errormsg);
+					else
+						$facebook->sendMessage($chat_id, $message);
+					$facebook->sendChatAction($chat_id, "typing_off");
+					return $facebook->respondSuccess();
+				}
+
 				// help command
-				if ($chatdata->help_cmd && strtolower($text) == strtolower($chatdata->help_cmd))
+				if ($chatdata->help_cmd && $text == $chatdata->help_cmd)
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
 					if ($message) // TODO
 						$facebook->sendMessage($chat_id, $message);
+					$facebook->sendChatAction($chat_id, "typing_off");
 					return $facebook->respondSuccess();
 				}
 
 				// about command
-				if ($chatdata->about_cmd && strtolower($text) == strtolower($chatdata->about_cmd))
+				if ($chatdata->about_cmd && $text == $chatdata->about_cmd)
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
 					$cmdlisting = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
@@ -1192,55 +1289,55 @@
 						$replies = array(); // quick replies limit is 10 options
 						if ($chatdata->listacateg_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listacateg_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->listacateg_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listacateg_cmd, 'payload' => str_replace(' ', '_', $chatdata->listacateg_cmd)));
 							$message .= $chatdata->listacateg_cmd . " - " . $magehelper->__("List store categories.") . "\n";
 						}
 						if ($chatdata->search_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->search_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->search_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->search_cmd, 'payload' => str_replace(' ', '_', $chatdata->search_cmd)));
 							$message .= $chatdata->search_cmd . " - " . $magehelper->__("Search for products.") . "\n";
 						}
 						if ($chatdata->login_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->login_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->login_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->login_cmd, 'payload' => str_replace(' ', '_', $chatdata->login_cmd)));
 							$message .= $chatdata->login_cmd . " - " . $magehelper->__("Login into your account.") . "\n";
 						}
 						if ($chatdata->listorders_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listorders_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->listorders_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listorders_cmd, 'payload' => str_replace(' ', '_', $chatdata->listorders_cmd)));
 							$message .= $chatdata->listorders_cmd . " - " . $magehelper->__("List your personal orders.") . "\n";
 						}
 						//$message .= $chatdata->reorder_cmd . " - " . $magehelper->__("Reorder a order.") . "\n";
 						//$message .= $chatdata->add2cart_cmd . " - " . $magehelper->__("Add product to cart.") . "\n";
 						if ($chatdata->checkout_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->checkout_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->checkout_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->checkout_cmd, 'payload' => str_replace(' ', '_', $chatdata->checkout_cmd)));
 							$message .= $chatdata->checkout_cmd . " - " . $magehelper->__("Checkout your order.") . "\n";
 						}
 						if ($chatdata->clearcart_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->clearcart_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->clearcart_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->clearcart_cmd, 'payload' => str_replace(' ', '_', $chatdata->clearcart_cmd)));
 							$message .= $chatdata->clearcart_cmd . " - " . $magehelper->__("Clear your cart.") . "\n";
 						}
 						if ($chatdata->trackorder_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->trackorder_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->trackorder_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->trackorder_cmd, 'payload' => str_replace(' ', '_', $chatdata->trackorder_cmd)));
 							$message .= $chatdata->trackorder_cmd . " - " . $magehelper->__("Track your order status.") . "\n";
 						}
 						if ($chatdata->support_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->support_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->support_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->support_cmd, 'payload' => str_replace(' ', '_', $chatdata->support_cmd)));
 							$message .= $chatdata->support_cmd . " - " . $magehelper->__("Send message to support.") . "\n";
 						}
 						if ($chatdata->sendemail_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->sendemail_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->sendemail_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->sendemail_cmd, 'payload' => str_replace(' ', '_', $chatdata->sendemail_cmd)));
 							$message .= $chatdata->sendemail_cmd . " - " . $magehelper->__("Send email.") . "\n";
 						}
 						//$message .= $chatdata->cancel_cmd . " - " . $magehelper->__("Cancel.");
 						if ($chatdata->help_cmd)
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->help_cmd, 'payload' => str_replace(' ', '_', strtolower($chatdata->help_cmd))));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->help_cmd, 'payload' => str_replace(' ', '_', $chatdata->help_cmd)));
 							$message .= $chatdata->help_cmd . " - " . $magehelper->__("Get help.") . "\n";
 						}
 						//$message .= $chatdata->about_cmd . " - " . $magehelper->__("About.");
@@ -1250,6 +1347,7 @@
 					else
 						$facebook->sendMessage($chat_id, $message);
 
+					$facebook->sendChatAction($chat_id, "typing_off");
 					return $facebook->respondSuccess();
 				}
 
@@ -1257,6 +1355,7 @@
 				{
 					$message = $text;
 					$result = $facebook->sendMessage($chat_id, $message);
+					return $facebook->respondSuccess();
 				}
 			}
 			//else return "all good!!";

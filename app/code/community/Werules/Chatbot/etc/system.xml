@@ -19,7 +19,7 @@
 				<general_config translate="label">
 					<label>General Configuration</label>
 					<frontend_type>text</frontend_type>
-					<sort_order>1</sort_order>
+					<sort_order>0</sort_order>
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
@@ -45,6 +45,35 @@
 						</master_support_group>
 					</fields>
 				</general_config>
+				<witai_config translate="label">
+					<label>wit.ai Configurations</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>1</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<enable_witai>
+							<label>Enable WitAI Integration</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Soon</comment>
+						</enable_witai>
+						<witai_api_key>
+							<label>witAI API Key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Soon</comment>
+						</witai_api_key>
+					</fields>
+				</witai_config>
 				<telegram_config translate="label">
 					<label>Telegram Configuration</label>
 					<frontend_type>text</frontend_type>

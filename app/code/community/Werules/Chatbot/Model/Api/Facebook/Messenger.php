@@ -191,9 +191,19 @@
 			return $this->data['entry'][0]['messaging'][0]['sender']['id'];
 		}
 
+		/// Get raw data
+		public function RawData() {
+			return $this->data;
+		}
+
 		/// Get the message_id of the current message
-		public function EntryID() {
-			return $this->data["entry"][0]["id"];
+		public function MessageID() {
+			return $this->data["entry"][0]["messaging"][0]["message"]["mid"];
+		}
+
+		/// Get the message_id of the current message
+		public function getEcho() {
+			return $this->data["entry"][0]["messaging"][0]["message"]["is_echo"];
 		}
 
 		private function sendAPIRequest($url, array $content, $post = true, $response = true) {
