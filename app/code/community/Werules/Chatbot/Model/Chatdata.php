@@ -1104,18 +1104,11 @@
 //			$witapi = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 //			$witai = new witAI($witapi);
 
+			// hub challenge
 			$hub_token = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 			$verify = $facebook->verifyWebhook($hub_token);
 			if ($verify)
-			{
-				// TODO fix this!!! this is SO UGLY it hurts me inside, please let me know if you know a better way to do this
-				$path = Mage::getBaseDir() . "/chatbot/chatdata/facebook/index.php";
-				if (!file_exists(dirname($path)))
-					mkdir(dirname($path), 0777, true);
-				file_put_contents($path, "<?php $" . "hub_token = '" . $hub_token ."'; $" . "root = '" . Mage::getBaseDir() ."'; if ($" . "_REQUEST['hub_verify_token'] == $" . "hub_token){ echo $" . "_REQUEST['hub_challenge']; $" . "del = true;} if ($" . "del == true) {unlink('index.php'); rmdir($" . "root . '/chatbot/chatdata/facebook/'); rmdir($" . "root . '/chatbot/chatdata/'); rmdir($" . "root . '/chatbot/');} ?>");
-
 				return $verify;
-			}
 
 			// Take text and chat_id from the message
 			$text = $facebook->Text();
@@ -1358,7 +1351,7 @@
 					return $facebook->respondSuccess();
 				}
 			}
-			//else return "all good!!";
+			else return "all good!!";
 		}
 
 //		// WHATSAPP FUNCTIONS
