@@ -770,6 +770,11 @@
 									else
 										$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
 								}
+								if ($i >= 15)
+								{
+									// TODO add option to list more products
+									break;
+								}
 							}
 							if ($i == 0)
 								$noprodflag = true;
@@ -806,6 +811,11 @@
 									$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
 								else
 									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+							}
+							if ($i >= 15)
+							{
+								// TODO add option to list more products
+								break;
 							}
 						}
 						if ($i == 0)
@@ -993,6 +1003,11 @@
 									$i++;
 									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 								}
+								if ($i >= 15)
+								{
+									// TODO add option to list more orders
+									break;
+								}
 							}
 						}
 						else
@@ -1116,8 +1131,8 @@
 			$message_id = $facebook->MessageID();
 			$is_echo = $facebook->getEcho();
 
-			$message = "";
-			$result = "";
+			// configs
+			$enable_predict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 
 			if (!empty($text) && !empty($chat_id) && $is_echo != "true")
 			{
@@ -1201,32 +1216,35 @@
 				array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
 				// $this->positivemsg[array_rand($this->positivemsg)]
 
-				if ($conv_state == $this->start_state)
+				if ($enable_predict == "1") // is enable
 				{
-					$cmdarray = array(
-						$chatdata->start_cmd,
-						$chatdata->listacateg_cmd,
-						$chatdata->search_cmd,
-						$chatdata->login_cmd,
-						$chatdata->listorders_cmd,
-						$chatdata->reorder_cmd,
-						$chatdata->add2cart_cmd,
-						$chatdata->checkout_cmd,
-						$chatdata->clearcart_cmd,
-						$chatdata->trackorder_cmd,
-						$chatdata->support_cmd,
-						$chatdata->sendemail_cmd,
-						$chatdata->cancel_cmd,
-						$chatdata->help_cmd,
-						$chatdata->about_cmd
-					);
-
-					foreach ($cmdarray as $cmd)
+					if ($conv_state == $this->start_state)
 					{
-						if (strpos($text, $cmd) !== false)
+						$cmdarray = array(
+							$chatdata->start_cmd,
+							$chatdata->listacateg_cmd,
+							$chatdata->search_cmd,
+							$chatdata->login_cmd,
+							$chatdata->listorders_cmd,
+							$chatdata->reorder_cmd,
+							$chatdata->add2cart_cmd,
+							$chatdata->checkout_cmd,
+							$chatdata->clearcart_cmd,
+							$chatdata->trackorder_cmd,
+							$chatdata->support_cmd,
+							$chatdata->sendemail_cmd,
+							$chatdata->cancel_cmd,
+							$chatdata->help_cmd,
+							$chatdata->about_cmd
+						);
+
+						foreach ($cmdarray as $cmd)
 						{
-							$text = $cmd;
-							break;
+							if (strpos($text, $cmd) !== false)
+							{
+								$text = $cmd;
+								break;
+							}
 						}
 					}
 				}
@@ -1344,6 +1362,108 @@
 					return $facebook->respondSuccess();
 				}
 
+				// states
+				if ($conv_state == $this->list_cat_state) // TODO show only in stock products
+				{
+					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
+
+					if ($_category) // this works, no need to get the id
+					{
+						$noprodflag = false;
+						$productIDs = $_category->getProductCollection()->getAllIds();
+						if ($productIDs)
+						{
+							$i = 0;
+							$elements = array();
+							foreach ($productIDs as $productID)
+							{
+								$i++;
+								$product = Mage::getModel('catalog/product')->load($productID);
+								$product_url = $product->getProductUrl();
+								$product_image = $product->getImageUrl();
+								if (empty($product_image))
+									$product_image = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . "/placeholder/" . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeho‌​lder");
+
+								$button = array(
+									array(
+										'type' => 'web_url',
+										'url' => $product_url, // TODO
+										'title' => $magehelper->__("Add to cart")
+									),
+									array(
+										'type' => 'web_url',
+										'url' => $product_url,
+										'title' => $magehelper->__("Visit product's page")
+									)
+								);
+								$element = array(
+									'title' => $product->getName(),
+									'item_url' => $product_url,
+									'image_url' => $product_image,
+									'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+									'buttons' => $button
+								);
+								array_push($elements, $element);
+
+								if ($i >= 9) // facebook api generic template limit
+								{
+									// TODO add option to list more products
+									break;
+								}
+							}
+							if ($i == 0)
+								$noprodflag = true;
+							if (!$chatdata->updateChatdata('facebook_conv_state', $this->list_prod_state))
+								$facebook->sendMessage($chat_id, $this->errormsg);
+						}
+						else
+							$noprodflag = true;
+
+						if ($noprodflag)
+							$facebook->sendMessage($chat_id, $magehelper->__("Sorry, no products found in this category."));
+						else
+							$facebook->sendGenericTemplate($chat_id, $elements);
+					}
+					else
+						$facebook->sendMessage($chat_id, $this->errormsg);
+					return $facebook->respondSuccess();
+				}
+
+				//general commands
+				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
+				{
+					$helper = Mage::helper('catalog/category');
+					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
+					if (!$chatdata->updateChatdata('facebook_conv_state', $this->list_cat_state))
+						$facebook->sendMessage($chat_id, $this->errormsg);
+					else if ($categories)
+					{
+						$replies = array();
+						foreach ($categories as $_category) // TODO fix buttons max size
+						{
+							//array_push($option, $_category->getName());
+							$cat_name = $_category->getName();
+							if (!empty($cat_name))
+							{
+								$reply = array(
+									'content_type' => 'text',
+									'title' => $cat_name,
+									'payload' => 'CAT_PAYLOAD' // TODO
+								);
+								array_push($replies, $reply);
+							}
+						}
+						if (!empty($replies))
+						{
+							$message = $magehelper->__("Select a category") . ". " . $this->cancelmsg;
+							$facebook->sendQuickReply($chat_id, $message, $replies);
+						}
+					}
+					else
+						$facebook->sendMessage($chat_id, $this->errormsg);
+					return $facebook->respondSuccess();
+				}
+
 				if (true)
 				{
 					$message = $text;
@@ -1351,7 +1471,8 @@
 					return $facebook->respondSuccess();
 				}
 			}
-			else return "all good!!";
+			else
+				return $facebook->respondSuccess();
 		}
 
 //		// WHATSAPP FUNCTIONS
