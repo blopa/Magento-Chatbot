@@ -92,21 +92,21 @@
 
 				// init commands
 				//$chatdata->start_cmd['command'] = "Start";
-				$chatdata->listacateg_cmd = array_map('strtolower', $chatdata->getCommandString(1));
-				$chatdata->search_cmd = array_map('strtolower', $chatdata->getCommandString(2));
-				$chatdata->login_cmd = array_map('strtolower', $chatdata->getCommandString(3));
-				$chatdata->listorders_cmd = array_map('strtolower', $chatdata->getCommandString(4));
-				$chatdata->reorder_cmd = array_map('strtolower', $chatdata->getCommandString(5));
-				$chatdata->add2cart_cmd = array_map('strtolower', $chatdata->getCommandString(6));
-				$chatdata->checkout_cmd = array_map('strtolower', $chatdata->getCommandString(7));
-				$chatdata->clearcart_cmd = array_map('strtolower', $chatdata->getCommandString(8));
-				$chatdata->trackorder_cmd = array_map('strtolower', $chatdata->getCommandString(9));
-				$chatdata->support_cmd = array_map('strtolower', $chatdata->getCommandString(10));
-				$chatdata->sendemail_cmd = array_map('strtolower', $chatdata->getCommandString(11));
-				$chatdata->cancel_cmd = array_map('strtolower', $chatdata->getCommandString(12));
-				$chatdata->help_cmd = array_map('strtolower', $chatdata->getCommandString(13));
-				$chatdata->about_cmd = array_map('strtolower', $chatdata->getCommandString(14));
-				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd['command'] = "Cancel"; // it must always have a cancel command
+				$chatdata->listacateg_cmd = $chatdata->getCommandString(1);
+				$chatdata->search_cmd = $chatdata->getCommandString(2);
+				$chatdata->login_cmd = $chatdata->getCommandString(3);
+				$chatdata->listorders_cmd = $chatdata->getCommandString(4);
+				$chatdata->reorder_cmd = $chatdata->getCommandString(5);
+				$chatdata->add2cart_cmd = $chatdata->getCommandString(6);
+				$chatdata->checkout_cmd = $chatdata->getCommandString(7);
+				$chatdata->clearcart_cmd = $chatdata->getCommandString(8);
+				$chatdata->trackorder_cmd = $chatdata->getCommandString(9);
+				$chatdata->support_cmd = $chatdata->getCommandString(10);
+				$chatdata->sendemail_cmd = $chatdata->getCommandString(11);
+				$chatdata->cancel_cmd = $chatdata->getCommandString(12);
+				$chatdata->help_cmd = $chatdata->getCommandString(13);
+				$chatdata->about_cmd = $chatdata->getCommandString(14);
+				if (!$chatdata->cancel_cmd['command']) $chatdata->cancel_cmd['command'] = "Cancel"; // it must always have a cancel command
 
 				// init messages
 				$chatdata->errormsg = $magehelper->__("Something went wrong, please try again.");
@@ -150,7 +150,7 @@
 				}
 
 				// cancel command
-				if ($text == $chatdata->cancel_cmd['command']) // && $chatdata->cancel_cmd['command'] TODO
+				if ($chatdata->checkCommand($text, $chatdata->cancel_cmd))
 				{
 					if ($conv_state == $chatdata->list_cat_state)
 					{
@@ -180,7 +180,7 @@
 				}
 
 				// help command
-				if ($chatdata->help_cmd['command'] && $text == $chatdata->help_cmd['command'])
+				if ($chatdata->checkCommand($text, $chatdata->help_cmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
 					if ($message) // TODO
@@ -190,7 +190,7 @@
 				}
 
 				// about command
-				if ($chatdata->about_cmd['command'] && $text == $chatdata->about_cmd['command'])
+				if ($chatdata->checkCommand($text, $chatdata->about_cmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
 					$cmdlisting = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
@@ -198,6 +198,7 @@
 					{
 						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
 						$replies = array(); // quick replies limit is 10 options
+						// just getting the command string, not checking the command
 						if ($chatdata->listacateg_cmd['command'])
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listacateg_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->listacateg_cmd['command'])));
@@ -330,7 +331,7 @@
 				}
 
 				//general commands
-				if ($chatdata->listacateg_cmd['command'] && $text == $chatdata->listacateg_cmd['command'])
+				if ($chatdata->checkCommand($text, $chatdata->listacateg_cmd))
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories

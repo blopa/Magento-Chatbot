@@ -81,7 +81,7 @@
 				// init start command
 				$chatdata->start_cmd['command'] = "/start";
 
-				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd['command'])) // if user isn't registred, and not using the start command
+				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommandWithValue($text, $chatdata->start_cmd['command'])) // if user isn't registred, and not using the start command
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 					if ($message) // TODO
@@ -144,11 +144,11 @@
 				//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $conv_state));
 
 				// start command
-				if ($chatdata->checkCommand($text, $chatdata->start_cmd['command']))
-					//if ($text == $chatdata->start_cmd['command'])
+				if ($chatdata->checkCommandWithValue($text, $chatdata->start_cmd['command'])) // ignore alias
+				//if ($text == $chatdata->start_cmd['command'])
 				{
 					$startdata = explode(" ", $text);
-					if (count($startdata) > 1) // has hash parameter
+					if (is_array($startdata) && count($startdata) > 1) // has hash parameter
 					{
 						$chat_hash =  $chatdata->load(trim($startdata[1]), 'hash_key');
 						if ($chat_hash->getHashKey())
@@ -197,7 +197,7 @@
 				}
 
 				// help command
-				if ($chatdata->help_cmd['command'] && $text == $chatdata->help_cmd['command'])
+				if ($chatdata->checkCommand($text, $chatdata->help_cmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
 					if ($message) // TODO
@@ -206,7 +206,7 @@
 				}
 
 				// about command
-				if ($chatdata->about_cmd['command'] && $text == $chatdata->about_cmd['command'])
+				if ($chatdata->checkCommand($text, $chatdata->about_cmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
 					$cmdlisting = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_command_list');
@@ -234,7 +234,7 @@
 				}
 
 				// cancel command
-				if ($chatdata->cancel_cmd['command'] && $text == $chatdata->cancel_cmd['command']) // TODO
+				if ($chatdata->checkCommand($text, $chatdata->cancel_cmd)) // TODO
 				{
 					if ($conv_state == $chatdata->list_cat_state)
 					{
@@ -265,7 +265,7 @@
 				}
 
 				// add2cart commands
-				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd['command'])) // && $conv_state == $chatdata->list_prod_state TODO
+				if ($chatdata->checkCommandWithValue($text, $chatdata->add2cart_cmd['command'])) // ignore alias
 				{
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd['command']);
 					if ($cmdvalue) // TODO
@@ -409,7 +409,7 @@
 				}
 
 				// commands
-				if ($chatdata->listacateg_cmd['command'] && $text == $chatdata->listacateg_cmd['command'])
+				if ($chatdata->checkCommand($text, $chatdata->listacateg_cmd))
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
@@ -431,7 +431,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkout_cmd['command'] && $text == $chatdata->checkout_cmd['command']) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->checkout_cmd)) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -488,7 +488,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Your cart is empty.")));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->clearcart_cmd['command'] && $text == $chatdata->clearcart_cmd['command'])
+				else if ($chatdata->checkCommand($text, $chatdata->clearcart_cmd))
 				{
 					if ($chatdata->clearCart())
 					{
@@ -499,7 +499,7 @@
 					}
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->search_cmd['command'] && $text == $chatdata->search_cmd['command'])
+				else if ($chatdata->checkCommand($text, $chatdata->search_cmd))
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->search_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
@@ -510,7 +510,7 @@
 					}
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->login_cmd['command'] && $text == $chatdata->login_cmd['command']) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->login_cmd)) // TODO
 				{
 					$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash/" . $chatdata->getHashKey();
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->login_state))
@@ -519,7 +519,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To login to your account, access this link") . ": " . $hashlink));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->listorders_cmd['command'] && $text == $chatdata->listorders_cmd['command']) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->listorders_cmd)) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -557,7 +557,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->loginfirstmsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkCommand($text, $chatdata->reorder['command'])) // TODO
+				else if ($chatdata->checkCommandWithValue($text, $chatdata->reorder_cmd['command'])) // ignore alias TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -589,13 +589,13 @@
 						else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->reorder_state))
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 						else // success!!
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("to checkout send") . " " . $chatdata->checkout_cmd));
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("to checkout send") . " " . $chatdata->checkout_cmd['command']));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->loginfirstmsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->trackorder_cmd['command'] && $text == $chatdata->trackorder_cmd['command']) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->trackorder_cmd)) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -614,7 +614,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->loginfirstmsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->support_cmd['command'] && $text == $chatdata->support_cmd['command']) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->support_cmd)) // TODO
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->support_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
@@ -625,7 +625,7 @@
 					}
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->sendemail_cmd['command'] && $text == $chatdata->sendemail_cmd['command']) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->sendemail_cmd)) // TODO
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->send_email_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));

@@ -271,46 +271,52 @@
 
 			$config = Mage::getStoreConfig($confpath . 'enabled_commands');
 			$enabledCmds = explode(',', $config);
-			if (in_array($cmdId, $enabledCmds))
+			if (is_array($enabledCmds))
 			{
-				$config = Mage::getStoreConfig($confpath . 'commands_list');
-				$defaultCmds = explode(',', $this->cmd_list);
-				$cmd_code = "";
-				$alias = array();
-				if ($config)
+				if (in_array($cmdId, $enabledCmds))
 				{
-					$commands = unserialize($config);
-					if (is_array($commands))
+					$defaultCmds = explode(',', $this->cmd_list);
+					if (is_array($defaultCmds))
 					{
-						foreach($commands as $cmd)
+						$cmd_code = "";
+						$alias = array();
+						$config = Mage::getStoreConfig($confpath . 'commands_list');
+						if ($config)
 						{
-							if ($cmd['command_id'] == $cmdId)
+							$commands = unserialize($config);
+							if (is_array($commands))
 							{
-								$cmd_code = $cmd['command_code'];
-								$alias = explode(',', $cmd['command_alias_list']);
-								break;
+								foreach($commands as $cmd)
+								{
+									if ($cmd['command_id'] == $cmdId)
+									{
+										$cmd_code = $cmd['command_code'];
+										$alias = array_map('strtolower', explode(',', $cmd['command_alias_list']));
+										break;
+									}
+								}
+								if (empty($cmd_code)) // if no command found, return the default
+									$cmd_code = $defaultCmds[$cmdId - 1];
 							}
+							else // if no command found, return the default
+								$cmd_code = $defaultCmds[$cmdId - 1];
 						}
-						if (empty($cmd_code)) // if no command found, return the default
+						else // if no command found, return the default
 							$cmd_code = $defaultCmds[$cmdId - 1];
+
+						$cmd_code = preg_replace( // remove all non-alphanumerics
+							$this->unallowed_characters,
+							'',
+							str_replace( // replace whitespace for underscore
+								' ',
+								$rep,
+								trim($cmd_code)
+							)
+						);
+
+						return array('command' => strtolower($cmd_code), 'alias' => $alias);
 					}
-					else // if no command found, return the default
-						$cmd_code = $defaultCmds[$cmdId - 1];
 				}
-				else // if no command found, return the default
-					$cmd_code = $defaultCmds[$cmdId - 1];
-
-				$cmd_code = preg_replace( // remove all non-alphanumerics
-					$this->unallowed_characters,
-					'',
-					str_replace( // replace whitespace for underscore
-						' ',
-						$rep,
-						trim($cmd_code)
-					)
-				);
-
-				return array('command' => $cmd_code, 'alias' => $alias);
 			}
 			return array('command' => null, 'alias' => null);
 		}
@@ -323,6 +329,31 @@
 		}
 
 		protected function checkCommand($text, $cmd)
+		{
+			if ($cmd['command'])
+			{
+				$t = strtolower($text);
+				if ($t == $cmd['command'])
+					return true;
+				else if ($cmd['alias'])
+				{
+					//$alias = explode(",", $cmd['alias']);
+					$alias = $cmd['alias'];
+					if (is_array($alias))
+					{
+						foreach ($alias as $al)
+						{
+							if (strpos($t, $al) !== false)
+								return true;
+						}
+					}
+				}
+			}
+
+			return false;
+		}
+
+		protected function checkCommandWithValue($text, $cmd)
 		{
 			if ($cmd)
 				return substr($text, 0, strlen($cmd)) == $cmd;
