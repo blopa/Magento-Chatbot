@@ -266,7 +266,7 @@
 						<commands_list>
 							<label>Commands List</label>
 							<frontend_model>werules_chatbot/commands</frontend_model>
-							<backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+							<backend_model>chatbot/adminhtml_serialized_array</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>9</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
