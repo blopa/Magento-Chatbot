@@ -158,15 +158,16 @@
 							<show_in_store>1</show_in_store>
 							<comment>Enabled Commands</comment>
 						</enabled_commands>
-						<commands_code>
-							<label>Commands Code</label>
-							<frontend_type>textarea</frontend_type>
+						<commands_list>
+							<label>Commands List</label>
+							<frontend_model>werules_chatbot/commands</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>8</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Code of the commands, add one code per line. Please add a code for every command, even if it's not enabled.</comment>
-						</commands_code>
+							<show_in_store>0</show_in_store>
+							<comment>Code of the commands and it's alias.</comment>
+						</commands_list>
 					</fields>
 				</telegram_config>
 				<facebook_config translate="label">
@@ -266,22 +267,13 @@
 						<commands_list>
 							<label>Commands List</label>
 							<frontend_model>werules_chatbot/commands</frontend_model>
-							<backend_model>chatbot/adminhtml_serialized_array</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>9</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 							<comment>Code of the commands and it's alias.</comment>
 						</commands_list>
-						<commands_code>
-							<label>Commands Code</label>
-							<frontend_type>textarea</frontend_type>
-							<sort_order>9</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Code of the commands, add one code per line. Please add a code for every command, even if it's not enabled.</comment>
-						</commands_code>
 					</fields>
 				</facebook_config>
 			</groups>

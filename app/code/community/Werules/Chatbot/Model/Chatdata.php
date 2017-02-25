@@ -46,21 +46,21 @@
 			help,
 			about"
 		;
-		private $start_cmd = "";
-		private $listacateg_cmd = "";
-		private $search_cmd = "";
-		private $login_cmd = "";
-		private $listorders_cmd = "";
-		private $reorder_cmd = "";
-		private $add2cart_cmd = "";
-		private $checkout_cmd = "";
-		private $clearcart_cmd = "";
-		private $trackorder_cmd = "";
-		private $support_cmd = "";
-		private $sendemail_cmd = "";
-		private $cancel_cmd = "";
-		private $help_cmd = "";
-		private $about_cmd = "";
+		private $start_cmd = array();
+		private $listacateg_cmd = array();
+		private $search_cmd = array();
+		private $login_cmd = array();
+		private $listorders_cmd = array();
+		private $reorder_cmd = array();
+		private $add2cart_cmd = array();
+		private $checkout_cmd = array();
+		private $clearcart_cmd = array();
+		private $trackorder_cmd = array();
+		private $support_cmd = array();
+		private $sendemail_cmd = array();
+		private $cancel_cmd = array();
+		private $help_cmd = array();
+		private $about_cmd = array();
 
 		// REGEX
 		private $unallowed_characters = "/[^A-Za-z0-9 _]/";
@@ -272,42 +272,46 @@
 			$enabledCmds = explode(',', $config);
 			if (in_array($cmdId, $enabledCmds))
 			{
-				$config = Mage::getStoreConfig($confpath . 'commands_code');
-				$commands = explode("\n", $config); // command codes split by linebreak
+				$config = Mage::getStoreConfig($confpath . 'commands_list');
 				$defaultCmds = explode(',', $this->cmd_list);
-				if (count($commands) < count($defaultCmds))
+				$cmd_code = "";
+				$alias = array();
+				if ($config)
 				{
-					return preg_replace( // remove all non-alphanumerics
-						$this->unallowed_characters,
-						'',
-						str_replace( // replace whitespace for underscore
-							' ',
-							$rep,
-							trim(
-								array_merge( // merge arrays
-									$commands,
-									array_slice(
-										$defaultCmds,
-										count($commands)
-									)
-								)[$cmdId - 1]
-							)
-						)
-					);
+					$commands = unserialize($config);
+					if (is_array($commands))
+					{
+						foreach($commands as $cmd)
+						{
+							if ($cmd['command_id'] == $cmdId)
+							{
+								$cmd_code = $cmd['command_code'];
+								$alias = explode(',', $cmd['command_alias_list']);
+								break;
+							}
+						}
+						if (empty($cmd_code)) // if no command found, return the default
+							$cmd_code = $defaultCmds[$cmdId - 1];
+					}
+					else // if no command found, return the default
+						$cmd_code = $defaultCmds[$cmdId - 1];
 				}
-				return preg_replace( // remove all non-alphanumerics
+				else // if no command found, return the default
+					$cmd_code = $defaultCmds[$cmdId - 1];
+
+				$cmd_code = preg_replace( // remove all non-alphanumerics
 					$this->unallowed_characters,
 					'',
 					str_replace( // replace whitespace for underscore
 						' ',
 						$rep,
-						trim(
-							$commands[$cmdId - 1]
-						)
+						trim($cmd_code)
 					)
 				);
+
+				return array('command' => $cmd_code, 'alias' => $alias);
 			}
-			return null;
+			return array('command' => null, 'alias' => null);
 		}
 
 		private function getCommandValue($text, $cmd)
@@ -454,8 +458,8 @@
 				}
 				$message .= Mage::helper('core')->__("Total") . ": " . Mage::helper('core')->currency($order->getGrandTotal(), true, false) . "\n" .
 					Mage::helper('core')->__("Zipcode") . ": " . $order->getShippingAddress()->getPostcode();
-				if ($this->reorder_cmd)
-					$message .= "\n\n" . Mage::helper('core')->__("Reorder") . ": " . $this->reorder_cmd . $orderID;
+				if ($this->reorder_cmd['command'])
+					$message .= "\n\n" . Mage::helper('core')->__("Reorder") . ": " . $this->reorder_cmd['command'] . $orderID;
 				return $message;
 			}
 			return null;
@@ -470,7 +474,7 @@
 				{
 					$message = $product->getName() . "\n" .
 						$this->excerpt($product->getShortDescription(), 60) . "\n" .
-						Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd . $product->getId();
+						Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd['command'] . $product->getId();
 					return $message;
 				}
 			}
@@ -546,9 +550,9 @@
 				}
 
 				// init start command
-				$chatdata->start_cmd = "/start";
+				$chatdata->start_cmd['command'] = "/start";
 
-				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd)) // if user isn't registred, and not using the start command
+				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommand($text, $chatdata->start_cmd['command'])) // if user isn't registred, and not using the start command
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 					if ($message) // TODO
@@ -568,51 +572,51 @@
 					return $telegram->respondSuccess();
 				}
 
-				// init other commands
-				$chatdata->listacateg_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1));
-				$chatdata->search_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2));
-				$chatdata->login_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3));
-				$chatdata->listorders_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4));
-				$chatdata->reorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5));
-				$chatdata->add2cart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6));
-				$chatdata->checkout_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7));
-				$chatdata->clearcart_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8));
-				$chatdata->trackorder_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9));
-				$chatdata->support_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10));
-				$chatdata->sendemail_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11));
-				$chatdata->cancel_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12));
-				$chatdata->help_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(13));
-				$chatdata->about_cmd = $this->validateTelegramCmd("/" . $chatdata->getCommandString(14));
+				// init other commands (for now, no alias for telegram)
+				$chatdata->listacateg_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(1)['command']);
+				$chatdata->search_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(2)['command']);
+				$chatdata->login_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(3)['command']);
+				$chatdata->listorders_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(4)['command']);
+				$chatdata->reorder_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(5)['command']);
+				$chatdata->add2cart_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(6)['command']);
+				$chatdata->checkout_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(7)['command']);
+				$chatdata->clearcart_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(8)['command']);
+				$chatdata->trackorder_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(9)['command']);
+				$chatdata->support_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(10)['command']);
+				$chatdata->sendemail_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(11)['command']);
+				$chatdata->cancel_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(12)['command']);
+				$chatdata->help_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(13)['command']);
+				$chatdata->about_cmd['command'] = $this->validateTelegramCmd("/" . $chatdata->getCommandString(14)['command']);
 
-				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "/cancel"; // it must always have a cancel command
+				if (!$chatdata->cancel_cmd['command']) $chatdata->cancel_cmd['command'] = "/cancel"; // it must always have a cancel command
 
 				// init messages
 				$this->errormsg = $magehelper->__("Something went wrong, please try again.");
-				$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd;
+				$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd['command'];
 				$this->canceledmsg = $magehelper->__("Ok, canceled.");
 				$this->loginfirstmsg =  $magehelper->__("Please login first.");
 				array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
 				// $this->positivemsg[array_rand($this->positivemsg)]
 
 				// TODO DEBUG COMMANDS
-//				$temp_var = $this->start_cmd . " - " .
-//				$this->listacateg_cmd . " - " .
-//				$this->search_cmd . " - " .
-//				$this->login_cmd . " - " .
-//				$this->listorders_cmd . " - " .
-//				$this->reorder_cmd . " - " .
-//				$this->add2cart_cmd . " - " .
-//				$this->checkout_cmd . " - " .
-//				$this->clearcart_cmd . " - " .
-//				$this->trackorder_cmd . " - " .
-//				$this->support_cmd . " - " .
-//				$this->sendemail_cmd;
+//				$temp_var = $this->start_cmd['command'] . " - " .
+//				$this->listacateg_cmd['command'] . " - " .
+//				$this->search_cmd['command'] . " - " .
+//				$this->login_cmd['command'] . " - " .
+//				$this->listorders_cmd['command'] . " - " .
+//				$this->reorder_cmd['command'] . " - " .
+//				$this->add2cart_cmd['command'] . " - " .
+//				$this->checkout_cmd['command'] . " - " .
+//				$this->clearcart_cmd['command'] . " - " .
+//				$this->trackorder_cmd['command'] . " - " .
+//				$this->support_cmd['command'] . " - " .
+//				$this->sendemail_cmd['command'];
 //				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $temp_var));
 //				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $conv_state));
 
 				// start command
-				if ($chatdata->checkCommand($text, $chatdata->start_cmd))
-				//if ($text == $chatdata->start_cmd)
+				if ($chatdata->checkCommand($text, $chatdata->start_cmd['command']))
+				//if ($text == $chatdata->start_cmd['command'])
 				{
 					$startdata = explode(" ", $text);
 					if (count($startdata) > 1) // has hash parameter
@@ -664,7 +668,7 @@
 				}
 
 				// help command
-				if ($chatdata->help_cmd && $text == $chatdata->help_cmd)
+				if ($chatdata->help_cmd['command'] && $text == $chatdata->help_cmd['command'])
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
 					if ($message) // TODO
@@ -673,27 +677,27 @@
 				}
 
 				// about command
-				if ($chatdata->about_cmd && $text == $chatdata->about_cmd)
+				if ($chatdata->about_cmd['command'] && $text == $chatdata->about_cmd['command'])
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
 					$cmdlisting = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_command_list');
 					if ($cmdlisting == 1)
 					{
 						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
-						if ($chatdata->listacateg_cmd) $message .= $chatdata->listacateg_cmd . " - " . $magehelper->__("List store categories.") . "\n";
-						if ($chatdata->search_cmd) $message .= $chatdata->search_cmd . " - " . $magehelper->__("Search for products.") . "\n";
-						if ($chatdata->login_cmd) $message .= $chatdata->login_cmd . " - " . $magehelper->__("Login into your account.") . "\n";
-						if ($chatdata->listorders_cmd) $message .= $chatdata->listorders_cmd . " - " . $magehelper->__("List your personal orders.") . "\n";
-						//$message .= $chatdata->reorder_cmd . " - " . $magehelper->__("Reorder a order.") . "\n";
-						//$message .= $chatdata->add2cart_cmd . " - " . $magehelper->__("Add product to cart.") . "\n";
-						if ($chatdata->checkout_cmd) $message .= $chatdata->checkout_cmd . " - " . $magehelper->__("Checkout your order.") . "\n";
-						if ($chatdata->clearcart_cmd) $message .= $chatdata->clearcart_cmd . " - " . $magehelper->__("Clear your cart.") . "\n";
-						if ($chatdata->trackorder_cmd) $message .= $chatdata->trackorder_cmd . " - " . $magehelper->__("Track your order status.") . "\n";
-						if ($chatdata->support_cmd) $message .= $chatdata->support_cmd . " - " . $magehelper->__("Send message to support.") . "\n";
-						if ($chatdata->sendemail_cmd) $message .= $chatdata->sendemail_cmd . " - " . $magehelper->__("Send email.") . "\n";
-						//$message .= $chatdata->cancel_cmd . " - " . $magehelper->__("Cancel.");
-						if ($chatdata->help_cmd) $message .= $chatdata->help_cmd . " - " . $magehelper->__("Get help.") . "\n";
-						//$message .= $chatdata->about_cmd . " - " . $magehelper->__("About.");
+						if ($chatdata->listacateg_cmd['command']) $message .= $chatdata->listacateg_cmd['command'] . " - " . $magehelper->__("List store categories.") . "\n";
+						if ($chatdata->search_cmd['command']) $message .= $chatdata->search_cmd['command'] . " - " . $magehelper->__("Search for products.") . "\n";
+						if ($chatdata->login_cmd['command']) $message .= $chatdata->login_cmd['command'] . " - " . $magehelper->__("Login into your account.") . "\n";
+						if ($chatdata->listorders_cmd['command']) $message .= $chatdata->listorders_cmd['command'] . " - " . $magehelper->__("List your personal orders.") . "\n";
+						//$message .= $chatdata->reorder_cmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
+						//$message .= $chatdata->add2cart_cmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
+						if ($chatdata->checkout_cmd['command']) $message .= $chatdata->checkout_cmd['command'] . " - " . $magehelper->__("Checkout your order.") . "\n";
+						if ($chatdata->clearcart_cmd['command']) $message .= $chatdata->clearcart_cmd['command'] . " - " . $magehelper->__("Clear your cart.") . "\n";
+						if ($chatdata->trackorder_cmd['command']) $message .= $chatdata->trackorder_cmd['command'] . " - " . $magehelper->__("Track your order status.") . "\n";
+						if ($chatdata->support_cmd['command']) $message .= $chatdata->support_cmd['command'] . " - " . $magehelper->__("Send message to support.") . "\n";
+						if ($chatdata->sendemail_cmd['command']) $message .= $chatdata->sendemail_cmd['command'] . " - " . $magehelper->__("Send email.") . "\n";
+						//$message .= $chatdata->cancel_cmd['command'] . " - " . $magehelper->__("Cancel.");
+						if ($chatdata->help_cmd['command']) $message .= $chatdata->help_cmd['command'] . " - " . $magehelper->__("Get help.") . "\n";
+						//$message .= $chatdata->about_cmd['command'] . " - " . $magehelper->__("About.");
 					}
 
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
@@ -701,7 +705,7 @@
 				}
 
 				// cancel command
-				if ($chatdata->cancel_cmd && $text == $chatdata->cancel_cmd) // TODO
+				if ($chatdata->cancel_cmd['command'] && $text == $chatdata->cancel_cmd['command']) // TODO
 				{
 					if ($conv_state == $this->list_cat_state)
 					{
@@ -732,13 +736,13 @@
 				}
 
 				// add2cart commands
-				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd)) // && $conv_state == $this->list_prod_state TODO
+				if ($chatdata->checkCommand($text, $chatdata->add2cart_cmd['command'])) // && $conv_state == $this->list_prod_state TODO
 				{
-					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd);
+					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd['command']);
 					if ($cmdvalue) // TODO
 					{
 						if ($chatdata->addProd2Cart($cmdvalue))
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->checkout_cmd));
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->checkout_cmd['command']));
 						else
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					}
@@ -876,7 +880,7 @@
 				}
 
 				// commands
-				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
+				if ($chatdata->listacateg_cmd['command'] && $text == $chatdata->listacateg_cmd['command'])
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
@@ -898,7 +902,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkout_cmd && $text == $chatdata->checkout_cmd) // TODO
+				else if ($chatdata->checkout_cmd['command'] && $text == $chatdata->checkout_cmd['command']) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -955,7 +959,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Your cart is empty.")));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->clearcart_cmd && $text == $chatdata->clearcart_cmd)
+				else if ($chatdata->clearcart_cmd['command'] && $text == $chatdata->clearcart_cmd['command'])
 				{
 					if ($chatdata->clearCart())
 					{
@@ -966,7 +970,7 @@
 					}
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->search_cmd && $text == $chatdata->search_cmd)
+				else if ($chatdata->search_cmd['command'] && $text == $chatdata->search_cmd['command'])
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->search_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -977,7 +981,7 @@
 					}
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->login_cmd && $text == $chatdata->login_cmd) // TODO
+				else if ($chatdata->login_cmd['command'] && $text == $chatdata->login_cmd['command']) // TODO
 				{
 					$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash/" . $chatdata->getHashKey();
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->login_state))
@@ -986,7 +990,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To login to your account, access this link") . ": " . $hashlink));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->listorders_cmd && $text == $chatdata->listorders_cmd) // TODO
+				else if ($chatdata->listorders_cmd['command'] && $text == $chatdata->listorders_cmd['command']) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -1024,12 +1028,12 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkCommand($text, $chatdata->reorder_cmd)) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->reorder['command'])) // TODO
 				{
 					if ($this->getIsLogged() == "1")
 					{
 						$errorflag = false;
-						$cmdvalue = $chatdata->getCommandValue($text, $chatdata->reorder_cmd);
+						$cmdvalue = $chatdata->getCommandValue($text, $chatdata->reorder_cmd['command']);
 						if ($cmdvalue)
 						{
 							if ($chatdata->clearCart())
@@ -1062,7 +1066,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->trackorder_cmd && $text == $chatdata->trackorder_cmd) // TODO
+				else if ($chatdata->trackorder_cmd['command'] && $text == $chatdata->trackorder_cmd['command']) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -1081,7 +1085,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->loginfirstmsg));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->support_cmd && $text == $chatdata->support_cmd) // TODO
+				else if ($chatdata->support_cmd['command'] && $text == $chatdata->support_cmd['command']) // TODO
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->support_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -1092,7 +1096,7 @@
 					}
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->sendemail_cmd && $text == $chatdata->sendemail_cmd) // TODO
+				else if ($chatdata->sendemail_cmd['command'] && $text == $chatdata->sendemail_cmd['command']) // TODO
 				{
 					if (!$chatdata->updateChatdata('telegram_conv_state', $this->send_email_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $this->errormsg));
@@ -1191,26 +1195,26 @@
 				}
 
 				// init commands
-				//$chatdata->start_cmd = "Start";
-				$chatdata->listacateg_cmd = strtolower($chatdata->getCommandString(1));
-				$chatdata->search_cmd = strtolower($chatdata->getCommandString(2));
-				$chatdata->login_cmd = strtolower($chatdata->getCommandString(3));
-				$chatdata->listorders_cmd = strtolower($chatdata->getCommandString(4));
-				$chatdata->reorder_cmd = strtolower($chatdata->getCommandString(5));
-				$chatdata->add2cart_cmd = strtolower($chatdata->getCommandString(6));
-				$chatdata->checkout_cmd = strtolower($chatdata->getCommandString(7));
-				$chatdata->clearcart_cmd = strtolower($chatdata->getCommandString(8));
-				$chatdata->trackorder_cmd = strtolower($chatdata->getCommandString(9));
-				$chatdata->support_cmd = strtolower($chatdata->getCommandString(10));
-				$chatdata->sendemail_cmd = strtolower($chatdata->getCommandString(11));
-				$chatdata->cancel_cmd = strtolower($chatdata->getCommandString(12));
-				$chatdata->help_cmd = strtolower($chatdata->getCommandString(13));
-				$chatdata->about_cmd = strtolower($chatdata->getCommandString(14));
-				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd = "Cancel"; // it must always have a cancel command
+				//$chatdata->start_cmd['command'] = "Start";
+				$chatdata->listacateg_cmd = array_map('strtolower', $chatdata->getCommandString(1));
+				$chatdata->search_cmd = array_map('strtolower', $chatdata->getCommandString(2));
+				$chatdata->login_cmd = array_map('strtolower', $chatdata->getCommandString(3));
+				$chatdata->listorders_cmd = array_map('strtolower', $chatdata->getCommandString(4));
+				$chatdata->reorder_cmd = array_map('strtolower', $chatdata->getCommandString(5));
+				$chatdata->add2cart_cmd = array_map('strtolower', $chatdata->getCommandString(6));
+				$chatdata->checkout_cmd = array_map('strtolower', $chatdata->getCommandString(7));
+				$chatdata->clearcart_cmd = array_map('strtolower', $chatdata->getCommandString(8));
+				$chatdata->trackorder_cmd = array_map('strtolower', $chatdata->getCommandString(9));
+				$chatdata->support_cmd = array_map('strtolower', $chatdata->getCommandString(10));
+				$chatdata->sendemail_cmd = array_map('strtolower', $chatdata->getCommandString(11));
+				$chatdata->cancel_cmd = array_map('strtolower', $chatdata->getCommandString(12));
+				$chatdata->help_cmd = array_map('strtolower', $chatdata->getCommandString(13));
+				$chatdata->about_cmd = array_map('strtolower', $chatdata->getCommandString(14));
+				if (!$chatdata->cancel_cmd) $chatdata->cancel_cmd['command'] = "Cancel"; // it must always have a cancel command
 
 				// init messages
 				$this->errormsg = $magehelper->__("Something went wrong, please try again.");
-				$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd;
+				$this->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd['command'];
 				$this->canceledmsg = $magehelper->__("Ok, canceled.");
 				$this->loginfirstmsg =  $magehelper->__("Please login first.");
 				array_push($this->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
@@ -1221,21 +1225,21 @@
 					if ($conv_state == $this->start_state)
 					{
 						$cmdarray = array(
-							$chatdata->start_cmd,
-							$chatdata->listacateg_cmd,
-							$chatdata->search_cmd,
-							$chatdata->login_cmd,
-							$chatdata->listorders_cmd,
-							$chatdata->reorder_cmd,
-							$chatdata->add2cart_cmd,
-							$chatdata->checkout_cmd,
-							$chatdata->clearcart_cmd,
-							$chatdata->trackorder_cmd,
-							$chatdata->support_cmd,
-							$chatdata->sendemail_cmd,
-							$chatdata->cancel_cmd,
-							$chatdata->help_cmd,
-							$chatdata->about_cmd
+							$chatdata->start_cmd['command'],
+							$chatdata->listacateg_cmd['command'],
+							$chatdata->search_cmd['command'],
+							$chatdata->login_cmd['command'],
+							$chatdata->listorders_cmd['command'],
+							$chatdata->reorder_cmd['command'],
+							$chatdata->add2cart_cmd['command'],
+							$chatdata->checkout_cmd['command'],
+							$chatdata->clearcart_cmd['command'],
+							$chatdata->trackorder_cmd['command'],
+							$chatdata->support_cmd['command'],
+							$chatdata->sendemail_cmd['command'],
+							$chatdata->cancel_cmd['command'],
+							$chatdata->help_cmd['command'],
+							$chatdata->about_cmd['command']
 						);
 
 						foreach ($cmdarray as $cmd)
@@ -1250,7 +1254,7 @@
 				}
 
 				// cancel command
-				if ($text == $chatdata->cancel_cmd) // && $chatdata->cancel_cmd TODO
+				if ($text == $chatdata->cancel_cmd['command']) // && $chatdata->cancel_cmd['command'] TODO
 				{
 					if ($conv_state == $this->list_cat_state)
 					{
@@ -1280,7 +1284,7 @@
 				}
 
 				// help command
-				if ($chatdata->help_cmd && $text == $chatdata->help_cmd)
+				if ($chatdata->help_cmd['command'] && $text == $chatdata->help_cmd['command'])
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
 					if ($message) // TODO
@@ -1290,7 +1294,7 @@
 				}
 
 				// about command
-				if ($chatdata->about_cmd && $text == $chatdata->about_cmd)
+				if ($chatdata->about_cmd['command'] && $text == $chatdata->about_cmd['command'])
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
 					$cmdlisting = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
@@ -1298,60 +1302,60 @@
 					{
 						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
 						$replies = array(); // quick replies limit is 10 options
-						if ($chatdata->listacateg_cmd)
+						if ($chatdata->listacateg_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listacateg_cmd, 'payload' => str_replace(' ', '_', $chatdata->listacateg_cmd)));
-							$message .= $chatdata->listacateg_cmd . " - " . $magehelper->__("List store categories.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listacateg_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->listacateg_cmd['command'])));
+							$message .= $chatdata->listacateg_cmd['command'] . " - " . $magehelper->__("List store categories.") . "\n";
 						}
-						if ($chatdata->search_cmd)
+						if ($chatdata->search_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->search_cmd, 'payload' => str_replace(' ', '_', $chatdata->search_cmd)));
-							$message .= $chatdata->search_cmd . " - " . $magehelper->__("Search for products.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->search_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->search_cmd['command'])));
+							$message .= $chatdata->search_cmd['command'] . " - " . $magehelper->__("Search for products.") . "\n";
 						}
-						if ($chatdata->login_cmd)
+						if ($chatdata->login_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->login_cmd, 'payload' => str_replace(' ', '_', $chatdata->login_cmd)));
-							$message .= $chatdata->login_cmd . " - " . $magehelper->__("Login into your account.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->login_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->login_cmd['command'])));
+							$message .= $chatdata->login_cmd['command'] . " - " . $magehelper->__("Login into your account.") . "\n";
 						}
-						if ($chatdata->listorders_cmd)
+						if ($chatdata->listorders_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listorders_cmd, 'payload' => str_replace(' ', '_', $chatdata->listorders_cmd)));
-							$message .= $chatdata->listorders_cmd . " - " . $magehelper->__("List your personal orders.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->listorders_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->listorders_cmd['command'])));
+							$message .= $chatdata->listorders_cmd['command'] . " - " . $magehelper->__("List your personal orders.") . "\n";
 						}
-						//$message .= $chatdata->reorder_cmd . " - " . $magehelper->__("Reorder a order.") . "\n";
-						//$message .= $chatdata->add2cart_cmd . " - " . $magehelper->__("Add product to cart.") . "\n";
-						if ($chatdata->checkout_cmd)
+						//$message .= $chatdata->reorder_cmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
+						//$message .= $chatdata->add2cart_cmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
+						if ($chatdata->checkout_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->checkout_cmd, 'payload' => str_replace(' ', '_', $chatdata->checkout_cmd)));
-							$message .= $chatdata->checkout_cmd . " - " . $magehelper->__("Checkout your order.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->checkout_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->checkout_cmd['command'])));
+							$message .= $chatdata->checkout_cmd['command'] . " - " . $magehelper->__("Checkout your order.") . "\n";
 						}
-						if ($chatdata->clearcart_cmd)
+						if ($chatdata->clearcart_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->clearcart_cmd, 'payload' => str_replace(' ', '_', $chatdata->clearcart_cmd)));
-							$message .= $chatdata->clearcart_cmd . " - " . $magehelper->__("Clear your cart.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->clearcart_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->clearcart_cmd['command'])));
+							$message .= $chatdata->clearcart_cmd['command'] . " - " . $magehelper->__("Clear your cart.") . "\n";
 						}
-						if ($chatdata->trackorder_cmd)
+						if ($chatdata->trackorder_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->trackorder_cmd, 'payload' => str_replace(' ', '_', $chatdata->trackorder_cmd)));
-							$message .= $chatdata->trackorder_cmd . " - " . $magehelper->__("Track your order status.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->trackorder_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->trackorder_cmd['command'])));
+							$message .= $chatdata->trackorder_cmd['command'] . " - " . $magehelper->__("Track your order status.") . "\n";
 						}
-						if ($chatdata->support_cmd)
+						if ($chatdata->support_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->support_cmd, 'payload' => str_replace(' ', '_', $chatdata->support_cmd)));
-							$message .= $chatdata->support_cmd . " - " . $magehelper->__("Send message to support.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->support_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->support_cmd['command'])));
+							$message .= $chatdata->support_cmd['command'] . " - " . $magehelper->__("Send message to support.") . "\n";
 						}
-						if ($chatdata->sendemail_cmd)
+						if ($chatdata->sendemail_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->sendemail_cmd, 'payload' => str_replace(' ', '_', $chatdata->sendemail_cmd)));
-							$message .= $chatdata->sendemail_cmd . " - " . $magehelper->__("Send email.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->sendemail_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->sendemail_cmd['command'])));
+							$message .= $chatdata->sendemail_cmd['command'] . " - " . $magehelper->__("Send email.") . "\n";
 						}
-						//$message .= $chatdata->cancel_cmd . " - " . $magehelper->__("Cancel.");
-						if ($chatdata->help_cmd)
+						//$message .= $chatdata->cancel_cmd['command'] . " - " . $magehelper->__("Cancel.");
+						if ($chatdata->help_cmd['command'])
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->help_cmd, 'payload' => str_replace(' ', '_', $chatdata->help_cmd)));
-							$message .= $chatdata->help_cmd . " - " . $magehelper->__("Get help.") . "\n";
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->help_cmd['command'], 'payload' => str_replace(' ', '_', $chatdata->help_cmd['command'])));
+							$message .= $chatdata->help_cmd['command'] . " - " . $magehelper->__("Get help.") . "\n";
 						}
-						//$message .= $chatdata->about_cmd . " - " . $magehelper->__("About.");
+						//$message .= $chatdata->about_cmd['command'] . " - " . $magehelper->__("About.");
 
 						$facebook->sendQuickReply($chat_id, $message, $replies);
 					}
@@ -1430,7 +1434,7 @@
 				}
 
 				//general commands
-				if ($chatdata->listacateg_cmd && $text == $chatdata->listacateg_cmd)
+				if ($chatdata->listacateg_cmd['command'] && $text == $chatdata->listacateg_cmd['command'])
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories

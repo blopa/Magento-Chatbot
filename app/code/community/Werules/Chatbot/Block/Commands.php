@@ -24,9 +24,11 @@ class Werules_Chatbot_Block_Commands extends Mage_Adminhtml_Block_System_Config_
 
 	protected function _getRenderer()
 	{
-		if (!$this->_itemRenderer) {
+		if (!$this->_itemRenderer)
+		{
 			$this->_itemRenderer = $this->getLayout()->createBlock(
-				'werules_chatbot/commandsselect', '',
+				'werules_chatbot/commandsSelect',
+				'',
 				array('is_render_to_js_template' => true)
 			)->setExtraParams("style='width: auto;'");
 		}
