@@ -215,7 +215,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Reserved for future use, for now Facebook dosen't allow bots on group chats</comment>
+							<comment>Reserved for future use, for now Facebook dosen't allow bots on group chats. For now, write "telegram" to send all messages to your Telegram support group.</comment>
 						</facebook_support_group>
 						<facebook_welcome_msg>
 							<label>Messenger Welcome Message</label>
