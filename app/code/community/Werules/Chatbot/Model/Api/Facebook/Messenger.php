@@ -196,6 +196,16 @@
 			return $this->data;
 		}
 
+		/// Get payload
+		public function getPayload() {
+			return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
+		}
+
+		/// Get message timestamp
+		public function getMessageTimestamp() {
+			return $this->data["entry"][0]["time"];
+		}
+
 		/// Get the message_id of the current message
 		public function MessageID() {
 			return $this->data["entry"][0]["messaging"][0]["message"]["mid"];

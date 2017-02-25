@@ -20,6 +20,12 @@
 			$chat_id = $telegram->ChatID();
 			$message_id = $telegram->MessageID();
 
+			// configs
+			$enable_log = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
+
+			if ($enable_log == "1")
+				Mage::log("Post Data:\n" . var_export($telegram->getData(), true) . "\n\n", null, 'chatbot_facebook.log');
+
 			if (!is_null($text) && !is_null($chat_id))
 			{
 				// Instances the model class
@@ -321,7 +327,10 @@
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $magehelper->__("Sorry, no products found in this category.")));
 					}
 					else
+					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $chatdata->errormsg));
+						$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state);
+					}
 					return $telegram->respondSuccess();
 				}
 				else if ($conv_state == $chatdata->search_state) // TODO
@@ -433,6 +442,8 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->checkout_cmd)) // TODO
 				{
+					$sessionId = null;
+					$quoteId = null;
 					if ($chatdata->getIsLogged() == "1")
 					{
 						if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId())
