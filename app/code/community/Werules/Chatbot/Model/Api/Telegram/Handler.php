@@ -11,6 +11,37 @@
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
 		}
 
+		public function foreignSupportMessage($chat_id, $text, $api_name)
+		{
+			$apiKey = Mage::getModel('chatbot/chatdata')->getApikey("telegram"); // TODO
+			if ($apiKey)
+			{
+				$telegram = new Telegram($apiKey);
+
+				$magehelper = Mage::helper('core');
+				//$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID())); // TODO
+				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
+				if (!empty($supportgroup))
+				{
+					try{
+						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
+							$supportgroup = "-" . ltrim($supportgroup, "g");
+
+						$hash_data = "#" . $chat_id;
+						$message = $hash_data . "\n" . $magehelper->__("Message via") . " " . $api_name . ":\n" . $text;
+						$telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
+					}
+					catch (Exception $e){
+						return false;
+					}
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		public function telegramHandler($apiKey)
 		{
 			// Instances the Telegram class
@@ -56,15 +87,27 @@
 					{
 						if ($telegram->ReplyToMessageID()) // if the message is replying another message
 						{
-							$reply_from_user = $telegram->ReplyToMessageFromUserID();
-							if (!is_null($reply_from_user))
+							if (true)
 							{
-								$telegram->sendMessage(array('chat_id' => $reply_from_user, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
-								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Message sent."))); // TODO
+								//$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $text;
+								//$arr = explode(":", str_replace($magehelper->__("Message via") . " ", "", $telegram->ReplyToMessageText()));
+								//$from_api = $arr[0];
+								$arr = explode("\n", $telegram->ReplyToMessageText());
+								$from_id = $arr[0];
+								$from_api = explode(":", str_replace($magehelper->__("Message via") . " ", "", $arr[1]))[0];
 							}
-							else if ($text == "/sendmessagetoall") // TODO
+							else
 							{
-								// TODO
+								$reply_from_user = $telegram->ReplyToMessageFromUserID();
+								if (!is_null($reply_from_user))
+								{
+									$telegram->sendMessage(array('chat_id' => $reply_from_user, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
+									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Message sent."))); // TODO
+								}
+								else if ($text == "/sendmessagetoall") // TODO
+								{
+									// TODO
+								}
 							}
 						}
 						return $telegram->respondSuccess();

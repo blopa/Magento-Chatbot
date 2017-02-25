@@ -27,7 +27,7 @@
 				return $verify;
 
 			// Take text and chat_id from the message
-			$text = $facebook->Text();
+			$text_orig = $facebook->Text();
 			$chat_id = $facebook->ChatID();
 			$message_id = $facebook->MessageID();
 			$is_echo = $facebook->getEcho();
@@ -42,16 +42,16 @@
 			// checking for payload
 			$is_payload = false;
 			$payload = $facebook->getPayload();
-			if ($payload && empty($text))
+			if ($payload && empty($text_orig))
 			{
 				$is_payload = true;
-				$text = $payload;
+				$text_orig = $payload;
 				$message_id = $facebook->getMessageTimestamp();
 			}
 
-			if (!empty($text) && !empty($chat_id) && $is_echo != "true")
+			if (!empty($text_orig) && !empty($chat_id) && $is_echo != "true")
 			{
-				$text = strtolower($text);
+				$text = strtolower($text_orig);
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'facebook_chat_id');
 				$chatdata->api_type = $chatdata->fb_bot;
@@ -429,7 +429,7 @@
 				else if ($conv_state == $chatdata->support_state)
 				{
 					//$facebook->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID())); // TODO
-					$chatdata->supportMessage();
+					$chatdata->supportMessage($chat_id, $text_orig, $chatdata->api_type); // send chat id, original text and "facebook"
 					$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("we have sent your message to support."));
 					return $facebook->respondSuccess();
 				}

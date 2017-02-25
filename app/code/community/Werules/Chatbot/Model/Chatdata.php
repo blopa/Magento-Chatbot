@@ -138,9 +138,20 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return null;
 		}
 
-		protected function supportMessage($text)
+		protected function supportMessage($chat_id, $text, $api_type)
 		{
+			if ($api_type == $this->fb_bot)
+			{ // facebook dosen't allow bots on group chats
+				$group_api = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group'); // TODO workaround for facebook
+				if ($group_api == $this->tg_bot)
+					return Mage::getModel('chatbot/api_telegram_handler')->foreignSupportMessage($chat_id, $text, $this->api_type);
+			}
+			else if ($api_type == $this->tg_bot)
+			{
 
+			}
+
+			return false;
 		}
 		protected function sendEmail($text)
 		{

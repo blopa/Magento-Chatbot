@@ -1271,6 +1271,14 @@ class Telegram {
 		return $this->data["message"]["reply_to_message"]["message_id"];
 	}
 
+	/// Get the text from the replied message
+	/**
+	 * \return the String text from the replied message
+	 */
+	public function ReplyToMessageText() {
+		return $this->data["message"]["reply_to_message"]["text"];
+	}
+
 	/// Get the reply_to_message forward_from user_id of the current message
 	/**
 	 * \return the String reply_to_message forward_from user_id
