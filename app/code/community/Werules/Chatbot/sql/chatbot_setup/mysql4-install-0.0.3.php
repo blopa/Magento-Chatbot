@@ -12,6 +12,8 @@ $installer->run("
 	  `quote_id` varchar(20) NULL,
 	  `hash_key` varchar(150) NULL,
 	  `is_logged` smallint(1) NOT NULL default '0',
+	  `last_support_message_id` varchar(50) NULL,
+	  `last_support_chat` varchar(20) NULL,
 	  `enable_telegram` smallint(1) NOT NULL default '1',
 	  `telegram_chat_id` varchar(50) NULL,
 	  `telegram_message_id` varchar(50) NULL,

@@ -42,8 +42,8 @@
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))
 						{
-							$chatdata->updateChatdata("custom_one", $mid);
-							$chatdata->updateChatdata("custom_two", $api_name);
+							$chatdata->updateChatdata("last_support_message_id", $mid);
+							$chatdata->updateChatdata("last_support_chat", $api_name);
 						}
 					}
 					catch (Exception $e){
@@ -147,10 +147,10 @@
 						$reply_msg_id = $telegram->ReplyToMessageID();
 						if (!empty($reply_msg_id)) // if the message is replying another message
 						{
-							$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($reply_msg_id, 'custom_one');
-							if (!empty($foreignchatdata->getCustomOne()))
+							$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($reply_msg_id, 'last_support_message_id');
+							if (!empty($foreignchatdata->getLastSupportMessageId()))
 							{
-								$api_name = $foreignchatdata->getCustomTwo();
+								$api_name = $foreignchatdata->getLastSupportChat();
 								if ($api_name == $foreignchatdata->fb_bot)
 									Mage::getModel('chatbot/api_facebook_handler')->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text); // send chat id and the original text
 							}
