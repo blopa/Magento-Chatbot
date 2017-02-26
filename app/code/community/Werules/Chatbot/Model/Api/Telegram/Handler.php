@@ -478,17 +478,19 @@
 					$noprodflag = false;
 					$productIDs = $chatdata->getProductIdsBySearch($text);
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+						return $telegram->respondSuccess();
+					}
 					else if ($productIDs)
 					{
 						$i = 0;
 						$total = count($productIDs);
 						foreach ($productIDs as $productID)
 						{
-							$product = Mage::getModel('catalog/product')->load($productID);
 							$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
 							//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
-							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE  && $stock > 0) // only simple products
+							if ($stock > 0) // only in stock
 							{
 								$message = $chatdata->prepareTelegramProdMessages($productID);
 								if ($message) // TODO
