@@ -446,18 +446,18 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 		protected function getProductIdsBySearch($searchstring)
 		{
-			$ids = array();
 			// Code to Search Product by $searchstring and get Product IDs
-			$product_collection = Mage::getResourceModel('catalog/product_collection')
+			$product_collection_ids = Mage::getResourceModel('catalog/product_collection')
 				->addAttributeToSelect('*')
+				->addAttributeToFilter('visibility', 4)
+				->addAttributeToFilter('type_id', 'simple')
 				->addAttributeToFilter('name', array('like' => '%'.$searchstring.'%'))
-				->load();
+				->getAllIds();
 
-			foreach ($product_collection as $product) {
-				$ids[] = $product->getId();
-			}
-			//return array of product ids
-			return $ids;
+			if (!empty($product_collection_ids))
+				return $product_collection_ids;
+
+			return false;
 		}
 
 		protected function loadImageContent($productID)

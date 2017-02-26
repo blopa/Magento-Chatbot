@@ -395,7 +395,13 @@
 					if ($_category) // this works, no need to get the id
 					{
 						$noprodflag = false;
-						$productIDs = $_category->getProductCollection()->addAttributeToFilter('visibility', 4)->getAllIds();
+						//$productIDs = $_category->getProductCollection()->addAttributeToFilter('visibility', 4)->getAllIds();
+						$productIDs = $_category->getProductCollection()
+							->addAttributeToSelect('*')
+							->addAttributeToFilter('visibility', 4)
+							->addAttributeToFilter('type_id', 'simple')
+							->getAllIds()
+						;
 						if ($productIDs)
 						{
 							$i = 0;
@@ -404,10 +410,9 @@
 							$total = count($productIDs);
 							foreach ($productIDs as $productID)
 							{
-								$product = Mage::getModel('catalog/product')->load($productID);
 								$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
 								//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
-								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $stock > 0) // only simple products
+								if ($stock > 0) // only in stock
 								{
 									if ($i >= $show_more)
 									{
