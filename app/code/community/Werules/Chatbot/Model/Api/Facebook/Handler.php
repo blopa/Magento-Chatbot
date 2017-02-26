@@ -62,6 +62,7 @@
 			// configs
 			$enable_predict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			$show_more = 0;
 
 			if ($enable_log == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
@@ -89,7 +90,6 @@
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'facebook_chat_id');
 				$chatdata->api_type = $chatdata->fb_bot;
-				$conv_state = $chatdata->getFacebookConvState();
 
 				if ($message_id == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
 					return $facebook->respondSuccess();
@@ -98,6 +98,31 @@
 
 				// send feedback to user
 				$facebook->sendChatAction($chat_id, "typing_on");
+
+				// payload handler, may change the conversation state
+				if ($chatdata->checkCommandWithValue($text, "show_more_list_cat_"))
+				{
+					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->list_cat_state))
+					{
+						$value = $this->getCommandValue($text, "show_more_list_cat_");
+						$arr = explode(",", $value);
+						$text = $arr[0];
+						$show_more = (int)$arr[1];
+					}
+				}
+				else if ($chatdata->checkCommandWithValue($text, "show_more_search_prod_"))
+				{
+					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->search_state))
+					{
+						$value = $this->getCommandValue($text, "show_more_search_prod_");
+						$arr = explode(",", $value);
+						$text = $arr[0];
+						$show_more = (int)$arr[1];
+					}
+				}
+
+				// instances conversation state
+				$conv_state = $chatdata->getFacebookConvState();
 
 				// mage helper
 				$magehelper = Mage::helper('core');
@@ -348,41 +373,60 @@
 						{
 							$i = 0;
 							$elements = array();
+							$placeholder =  Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
 							foreach ($productIDs as $productID)
 							{
-								$i++;
-								$product = Mage::getModel('catalog/product')->load($productID);
-								$product_url = $product->getProductUrl();
-								$product_image = $product->getImageUrl();
-								if (empty($product_image))
-									$product_image = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeho‌​lder");
-
-								$button = array(
-									array(
-										'type' => 'postback',
-										'title' => $magehelper->__("Add to cart"),
-										'payload' => $chatdata->add2cart_cmd['command'] . $productID
-									),
-									array(
-										'type' => 'web_url',
-										'url' => $product_url,
-										'title' => $magehelper->__("Visit product's page")
-									)
-								);
-								$element = array(
-									'title' => $product->getName(),
-									'item_url' => $product_url,
-									'image_url' => $product_image,
-									'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
-									'buttons' => $button
-								);
-								array_push($elements, $element);
-
-								if ($i >= 9) // facebook api generic template limit
+								if ($i >= $show_more)
 								{
-									// TODO add option to list more products
-									break;
+									$product = Mage::getModel('catalog/product')->load($productID);
+									$product_url = $product->getProductUrl();
+									$product_image = $product->getImageUrl();
+									if (empty($product_image))
+										$product_image = $placeholder;
+
+									$button = array(
+										array(
+											'type' => 'postback',
+											'title' => $magehelper->__("Add to cart"),
+											'payload' => $chatdata->add2cart_cmd['command'] . $productID
+										),
+										array(
+											'type' => 'web_url',
+											'url' => $product_url,
+											'title' => $magehelper->__("Visit product's page")
+										)
+									);
+									$element = array(
+										'title' => $product->getName(),
+										'item_url' => $product_url,
+										'image_url' => $product_image,
+										'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
+										'buttons' => $button
+									);
+									array_push($elements, $element);
+
+									if ($i >= $show_more + 2) // facebook api generic template limit
+									{
+										// TODO add option to list more products
+										$button = array(
+											array(
+												'type' => 'postback',
+												'title' => $magehelper->__("Show more"),
+												'payload' => 'show_more_list_cat_' . $text . "," . (string)$i
+											)
+										);
+										$element = array(
+											'title' => Mage::app()->getStore()->getName(),
+											'item_url' => Mage::getBaseUrl(),
+											'image_url' => $placeholder,
+											'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+											'buttons' => $button
+										);
+										array_push($elements, $element);
+										break;
+									}
 								}
+								$i++;
 							}
 							if ($i == 0)
 								$noprodflag = true;
@@ -415,44 +459,64 @@
 					{
 						$i = 0;
 						$elements = array();
+						$placeholder =  Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
 						foreach ($productIDs as $productID)
 						{
 							$message = $chatdata->prepareFacebookProdMessages($productID);
 							//Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd['command'] . $product->getId();
 							if ($message) // TODO
 							{
-								$i++;
-								$product = Mage::getModel('catalog/product')->load($productID);
-								$product_url = $product->getProductUrl();
-								$product_image = $product->getImageUrl();
-								if (empty($product_image))
-									$product_image = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeho‌​lder");
+								if ($i >= $show_more)
+								{
+									$product = Mage::getModel('catalog/product')->load($productID);
+									$product_url = $product->getProductUrl();
+									$product_image = $product->getImageUrl();
+									if (empty($product_image))
+										$product_image = $placeholder;
 
-								$button = array(
-									array(
-										'type' => 'postback',
-										'title' => $magehelper->__("Add to cart"),
-										'payload' => $chatdata->add2cart_cmd['command'] . $productID
-									),
-									array(
-										'type' => 'web_url',
-										'url' => $product_url,
-										'title' => $magehelper->__("Visit product's page")
-									)
-								);
-								$element = array(
-									'title' => $product->getName(),
-									'item_url' => $product_url,
-									'image_url' => $product_image,
-									'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
-									'buttons' => $button
-								);
-								array_push($elements, $element);
-							}
-							if ($i >= 9)
-							{
-								// TODO add option to list more products
-								break;
+									$button = array(
+										array(
+											'type' => 'postback',
+											'title' => $magehelper->__("Add to cart"),
+											'payload' => $chatdata->add2cart_cmd['command'] . $productID
+										),
+										array(
+											'type' => 'web_url',
+											'url' => $product_url,
+											'title' => $magehelper->__("Visit product's page")
+										)
+									);
+									$element = array(
+										'title' => $product->getName(),
+										'item_url' => $product_url,
+										'image_url' => $product_image,
+										'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
+										'buttons' => $button
+									);
+									array_push($elements, $element);
+
+									if ($i >= $show_more + 2) // facebook api generic template limit
+									{
+										// TODO add option to list more products
+										$button = array(
+											array(
+												'type' => 'postback',
+												'title' => $magehelper->__("Show more"),
+												'payload' => 'show_more_search_prod_' . $text . "," . (string)$i
+											)
+										);
+										$element = array(
+											'title' => Mage::app()->getStore()->getName(),
+											'item_url' => Mage::getBaseUrl(),
+											'image_url' => $placeholder,
+											'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+											'buttons' => $button
+										);
+										array_push($elements, $element);
+										break;
+									}
+								}
+								$i++;
 							}
 						}
 						if ($i == 0)
