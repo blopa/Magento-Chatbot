@@ -418,16 +418,16 @@
 										else
 											$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
 
-										if (($i + 1) != $total && $i >= ($show_more + $listing_limit))
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 										{
 											// TODO add option to list more products
-											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "To show more send " . $list_more_cat . $_category->getId() . "_" . (string)($i + 1)));
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_cat . $_category->getId() . "_" . (string)($i + 1)));
 											if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
 												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
 													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 											break;
 										}
-										else if (($i + 1) == $total)
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
 											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
 												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 									}
@@ -474,16 +474,16 @@
 									else
 										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
 
-									if (($i + 1) != $total && $i >= ($show_more + $listing_limit))
+									if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 									{
 										// TODO add option to list more products
-										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "To show more send " . $list_more_search . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
+										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_search . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
 										if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
 											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
 												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 										break;
 									}
-									else if (($i + 1) == $total)
+									else if (($i + 1) == $total) // if it's the last one, back to start_state
 										if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
 											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 								}
@@ -691,16 +691,16 @@
 									if ($i >= $show_more)
 									{
 										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-										if (($i + 1) != $total && $i >= ($show_more + $listing_limit))
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 										{
 											// TODO add option to list more orders
-											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "To show more send " . $list_more_order . (string)($i + 1)));
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_order . (string)($i + 1)));
 											if ($chatdata->getTelegramConvState() != $chatdata->list_orders_state)
 												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
 													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 											break;
 										}
-										else if (($i + 1) == $total)
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
 											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
 												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 									}
