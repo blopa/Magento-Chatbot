@@ -702,13 +702,18 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->support_cmd)) // TODO
 				{
-					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->support_state))
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
-					else
+					if ($chatdata->getFacebookConvState() != $chatdata->support_state)
 					{
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you need support for?")));
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->cancelmsg));
+						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->support_state))
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+						else
+						{
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you need support for?")));
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->cancelmsg));
+						}
 					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("You're already on support in other chat application, please close it before opening a new one.")));
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->sendemail_cmd)) // TODO

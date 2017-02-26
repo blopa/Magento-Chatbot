@@ -776,13 +776,18 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->support_cmd))
 				{
-					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->support_state))
-						$facebook->sendMessage($chat_id, $chatdata->errormsg);
-					else
+					if ($chatdata->getTelegramConvState() != $chatdata->support_state)
 					{
-						$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you need support for?"));
-						$facebook->sendMessage($chat_id, $chatdata->cancelmsg);
+						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->support_state))
+							$facebook->sendMessage($chat_id, $chatdata->errormsg);
+						else
+						{
+							$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you need support for?"));
+							$facebook->sendMessage($chat_id, $chatdata->cancelmsg);
+						}
 					}
+					else
+						$facebook->sendMessage($chat_id, $magehelper->__("You're already on support in other chat application, please close it before opening a new one."));
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->sendemail_cmd))
