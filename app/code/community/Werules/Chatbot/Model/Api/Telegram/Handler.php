@@ -11,15 +11,25 @@
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
 		}
 
-		public function foreignSupportMessage($chat_id, $text, $api_name)
+		public function foreignMessageToSupport($chat_id, $text, $api_name, $customer_name)
 		{
-			$apiKey = Mage::getModel('chatbot/chatdata')->getApikey("telegram"); // TODO
+			$chatdata = Mage::getModel('chatbot/chatdata');
+			if ($api_name == $chatdata->fb_bot && $chat_id)
+			{
+				$chatdata->load($chat_id, 'facebook_chat_id');
+				if (is_null($chatdata->getFacebookChatId()))
+				{ // should't happen
+					$chatdata->updateChatdata("facebook_chat_id", $chat_id);
+				}
+			}
+
+			$chatdata->api_type = $chatdata->tg_bot;
+			$apiKey = $chatdata->getApikey($chatdata->api_type); // get telegram bot api
 			if ($apiKey)
 			{
 				$telegram = new Telegram($apiKey);
 
 				$magehelper = Mage::helper('core');
-				//$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID())); // TODO
 				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 				if (!empty($supportgroup))
 				{
@@ -27,9 +37,14 @@
 						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
 							$supportgroup = "-" . ltrim($supportgroup, "g");
 
-						$hash_data = "#" . $chat_id;
-						$message = $hash_data . "\n" . $magehelper->__("Message via") . " " . $api_name . ":\n" . $text;
-						$telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
+						$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $magehelper->__("From") . ": " . $customer_name . "\n" . $text;
+						$result = $telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
+						$mid = $result['result']['message_id'];
+						if (!empty($mid))
+						{
+							$chatdata->updateChatdata("custom_one", $mid);
+							$chatdata->updateChatdata("custom_two", $api_name);
+						}
 					}
 					catch (Exception $e){
 						return false;
@@ -85,16 +100,15 @@
 				{
 					if ($chat_id == $supportgroup) // if the group sending the message is the support group
 					{
-						if ($telegram->ReplyToMessageID()) // if the message is replying another message
+						$reply_msg_id = $telegram->ReplyToMessageID();
+						if (!empty($reply_msg_id)) // if the message is replying another message
 						{
-							if (true)
+							$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($reply_msg_id, 'custom_one');
+							if (!empty($foreignchatdata->getCustomOne()))
 							{
-								//$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $text;
-								//$arr = explode(":", str_replace($magehelper->__("Message via") . " ", "", $telegram->ReplyToMessageText()));
-								//$from_api = $arr[0];
-								$arr = explode("\n", $telegram->ReplyToMessageText());
-								$from_id = $arr[0];
-								$from_api = explode(":", str_replace($magehelper->__("Message via") . " ", "", $arr[1]))[0];
+								$api_name = $foreignchatdata->getCustomTwo();
+								if ($api_name == $foreignchatdata->fb_bot)
+									Mage::getModel('chatbot/api_facebook_handler')->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text); // send chat id and the original text
 							}
 							else
 							{

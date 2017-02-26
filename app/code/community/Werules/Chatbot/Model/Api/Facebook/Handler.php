@@ -11,6 +11,33 @@
 			//$this->_init('chatbot/api_facebook_handler'); // this is location of the resource file.
 		}
 
+		public function foreignMessageFromSupport($chat_id, $text)
+		{
+			// Instances the model class
+			$chatdata = Mage::getModel('chatbot/chatdata');
+			$chatdata->load($chat_id, 'facebook_chat_id');
+			$chatdata->api_type = $chatdata->fb_bot;
+
+			if (is_null($chatdata->getFacebookChatId()))
+			{ // should't happen
+				return false;
+			}
+
+			// mage helper
+			$magehelper = Mage::helper('core');
+
+			$apiKey = $chatdata->getApikey($chatdata->api_type); // get facebook bot api
+			if ($apiKey)
+			{
+				$facebook = new Messenger($apiKey);
+				$message = $magehelper->__("Message from support") . ":\n" . $text;
+				$facebook->sendMessage($chat_id, $message);
+				return true;
+			}
+
+			return false;
+		}
+
 		public function facebookHandler($apiKey)
 		{
 			// Instances the Facebook class
@@ -51,7 +78,14 @@
 
 			if (!empty($text_orig) && !empty($chat_id) && $is_echo != "true")
 			{
+				// Instances facebook user details
+				$user_data = $facebook->UserData($chat_id);
+				$username = null;
+				if (!empty($user_data))
+					$username = $user_data['first_name'];
+
 				$text = strtolower($text_orig);
+
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'facebook_chat_id');
 				$chatdata->api_type = $chatdata->fb_bot;
@@ -67,6 +101,14 @@
 
 				// mage helper
 				$magehelper = Mage::helper('core');
+
+				$supportgroup = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
+
+				// if it's a group message
+				if ($chat_id == $supportgroup)
+				{
+					//return $facebook->respondSuccess();
+				}
 
 				if ($chatdata->getIsLogged() == "1") // check if customer is logged
 				{
@@ -428,9 +470,15 @@
 				}
 				else if ($conv_state == $chatdata->support_state)
 				{
-					//$facebook->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID())); // TODO
-					$chatdata->supportMessage($chat_id, $text_orig, $chatdata->api_type); // send chat id, original text and "facebook"
-					$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("we have sent your message to support."));
+					$errorflag = true;
+					if ($supportgroup == $chatdata->tg_bot)
+						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chat_id, $text_orig, $chatdata->api_type, $username)) // send chat id, original text and "facebook"
+							$errorflag = false;
+
+					if ($errorflag)
+						$facebook->sendMessage($chat_id, $chatdata->errormsg);
+					else
+						$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("we have sent your message to support."));
 					return $facebook->respondSuccess();
 				}
 				else if ($conv_state == $chatdata->send_email_state)

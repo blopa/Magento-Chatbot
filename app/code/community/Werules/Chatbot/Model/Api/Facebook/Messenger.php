@@ -33,7 +33,7 @@
 
 		/// Do requests to Messenger Bot API
 		public function endpoint($api, array $content, $post = true) {
-			$url = 'https://graph.facebook.com/' . $this->api_version . '/' . $api . '?access_token=' . $this->bot_id; // . '/' . $api;
+			$url = 'https://graph.facebook.com/' . $this->api_version . '/' . $api . '?access_token=' . $this->bot_id;
 			if ($post)
 				$reply = $this->sendAPIRequest($url, $content);
 			else
@@ -184,6 +184,11 @@
 		/// Get the text of the current message
 		public function Text() {
 			return $this->data["entry"][0]["messaging"][0]["message"]["text"];
+		}
+
+		/// Get the userdata who sent the message
+		public function UserData($chat_id) {
+			return $this->endpoint($chat_id, array(), false);
 		}
 
 		/// Get the chat_id of the current message
