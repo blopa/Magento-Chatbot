@@ -6,7 +6,12 @@ Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), 
 
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
-**Currently not working with Configurable Products and products with custom options**
+## APIs
+- [Telegram API Wrapper](https://github.com/Eleirbag89/TelegramBotPHP)
+- [Facebook API Wrapper](https://github.com/blopa/MessengerBotPHP)
+- *Whatsapp API Wrapper* (soon)
+- *WeChat API Wrapper* (soon)
+
 ## Features
 - List store categories
 - List products from category
@@ -20,6 +25,8 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Send email
 - Send message to support
 - Reply customer support messages from you favorite chat messenger
+
+**Currently not working with Configurable Products and products with custom options**
 
 ## Installation
 
