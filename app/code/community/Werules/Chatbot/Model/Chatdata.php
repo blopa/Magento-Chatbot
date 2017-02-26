@@ -451,7 +451,12 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				->addAttributeToSelect('*')
 				->addAttributeToFilter('visibility', 4)
 				->addAttributeToFilter('type_id', 'simple')
-				->addAttributeToFilter('name', array('like' => '%'.$searchstring.'%'))
+				->addAttributeToFilter(
+					array(
+						array('attribute' => 'sku', 'like' => '%' . $searchstring .'%'),
+						array('attribute' => 'name', 'like' => '%' . $searchstring .'%')
+					)
+				)
 				->getAllIds();
 
 			if (!empty($product_collection_ids))
