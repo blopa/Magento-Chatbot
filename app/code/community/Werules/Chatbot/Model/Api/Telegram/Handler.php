@@ -69,6 +69,7 @@
 
 			// configs
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			$empty_cat_list = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
 			$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 			$show_more = 0;
 			$cat_id = null;
@@ -575,6 +576,7 @@
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
+					$i = 0;
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_cat_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					else if ($categories)
@@ -582,15 +584,38 @@
 						$option = array();
 						foreach ($categories as $_category) // TODO fix buttons max size
 						{
-							array_push($option, $_category->getName());
+							if ($empty_cat_list != "1") // unallow empty categories listing
+							{
+								$category = Mage::getModel('catalog/category')->load($_category->getId()); // reload category because EAV Entity
+								$productIDs = $category->getProductCollection()
+									->addAttributeToSelect('*')
+									->addAttributeToFilter('visibility', 4)
+									->addAttributeToFilter('type_id', 'simple')
+									->getAllIds();
+							}
+							else
+								$productIDs = true;
+							if (!empty($productIDs)) // category with no products
+							{
+								$cat_name = $_category->getName();
+								array_push($option, $cat_name);
+								$i++;
+							}
 						}
 
 						$keyb = $telegram->buildKeyBoard(array($option));
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $magehelper->__("Select a category")));
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $chatdata->cancelmsg));
 					}
+					else if ($i == 0)
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("No categories available at the moment, please try again later.")));
+						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->checkout_cmd)) // TODO

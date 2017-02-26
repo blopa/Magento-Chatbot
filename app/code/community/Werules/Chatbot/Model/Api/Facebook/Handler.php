@@ -62,6 +62,7 @@
 			// configs
 			$enable_predict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			$empty_cat_list = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
 			$supportgroup = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 			$show_more = 0;
 			$listing_limit = 5;
@@ -216,7 +217,7 @@
 				array_push($chatdata->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
 				// $chatdata->positivemsg[array_rand($chatdata->positivemsg)]
 
-				if ($enable_predict == "1") // is enable
+				if ($enable_predict == "1" && !$is_payload) // prediction is enabled and itsn't payload
 				{
 					if ($conv_state == $chatdata->start_state)
 					{
@@ -643,6 +644,7 @@
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
+					$i = 0;
 					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_cat_state))
 						$facebook->sendMessage($chat_id, $chatdata->errormsg);
 					else if ($categories)
@@ -651,15 +653,31 @@
 						foreach ($categories as $_category) // TODO fix buttons max size
 						{
 							//array_push($option, $_category->getName());
-							$cat_name = $_category->getName();
-							if (!empty($cat_name))
+							if ($empty_cat_list != "1") // unallow empty categories listing
 							{
-								$reply = array(
-									'content_type' => 'text',
-									'title' => $cat_name,
-									'payload' => 'CAT_PAYLOAD' // TODO
-								);
-								array_push($replies, $reply);
+								$category = Mage::getModel('catalog/category')->load($_category->getId()); // reload category because EAV Entity
+								$productIDs = $category->getProductCollection()
+									->addAttributeToSelect('*')
+									->addAttributeToFilter('visibility', 4)
+									->addAttributeToFilter('type_id', 'simple')
+									->getAllIds()
+								;
+							}
+							else
+								$productIDs = true;
+							if (!empty($productIDs)) // category with no products
+							{
+								$cat_name = $_category->getName();
+								if (!empty($cat_name))
+								{
+									$reply = array(
+										'content_type' => 'text',
+										'title' => $cat_name,
+										'payload' => 'list_category_' . $_category->getId() // TODO
+									);
+									array_push($replies, $reply);
+									$i++;
+								}
 							}
 						}
 						if (!empty($replies))
@@ -668,8 +686,15 @@
 							$facebook->sendQuickReply($chat_id, $message, $replies);
 						}
 					}
+					else if ($i == 0)
+					{
+						$facebook->sendMessage($chat_id, $magehelper->__("No categories available at the moment, please try again later."));
+						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->start_state))
+							$facebook->sendMessage($chat_id, $chatdata->errormsg);
+					}
 					else
 						$facebook->sendMessage($chat_id, $chatdata->errormsg);
+
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->checkout_cmd))
