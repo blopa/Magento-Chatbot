@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Werules_Chatbot>
-			<version>0.0.1</version>
+			<version>0.0.2</version>
 		</Werules_Chatbot>
 	</modules>
 	<frontend>
@@ -48,6 +48,11 @@
 				</entities>
 			</chatbot_mysql4>
 		</models>
+		<blocks>
+			<werules_chatbot>
+				<class>Werules_Chatbot_Block</class>
+			</werules_chatbot>
+		</blocks>
 		<helpers>
 			<werules_chatbot>
 				<class>Werules_Chatbot_Helper</class>

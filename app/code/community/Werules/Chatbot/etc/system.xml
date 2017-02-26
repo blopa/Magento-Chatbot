@@ -19,7 +19,7 @@
 				<general_config translate="label">
 					<label>General Configuration</label>
 					<frontend_type>text</frontend_type>
-					<sort_order>1</sort_order>
+					<sort_order>0</sort_order>
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
@@ -33,8 +33,57 @@
 							<show_in_store>1</show_in_store>
 							<comment>This is Your Custom Secret Key Used to Activate/Deactivate The API Webhook. Alphanumeric Only! Access http://YOUR_STORE_URL/chatbot/chatdata/API/webhook/YOUR_CUSTOM_KEY. API Can be "telegram", "facebook", "whatsapp" or "wechat".</comment>
 						</your_custom_key>
+						<master_support_group>
+							<label>Master Support Group</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/chats</source_model>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Choose to receive all support messages in one single message app.</comment>
+						</master_support_group>
+						<enable_post_log>
+							<label>Enable Log</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Log will be at root/var/log/. </comment>
+						</enable_post_log>
 					</fields>
 				</general_config>
+				<witai_config translate="label">
+					<label>wit.ai Configurations</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>1</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<enable_witai>
+							<label>Enable WitAI Integration</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Soon</comment>
+						</enable_witai>
+						<witai_api_key>
+							<label>witAI API Key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Soon</comment>
+						</witai_api_key>
+					</fields>
+				</witai_config>
 				<telegram_config translate="label">
 					<label>Telegram Configuration</label>
 					<frontend_type>text</frontend_type>
@@ -42,6 +91,7 @@
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
+					<comment>Telegram Configurations</comment>
 					<fields>
 						<enable_bot>
 							<label>Enable Telegram Bot</label>
@@ -118,15 +168,16 @@
 							<show_in_store>1</show_in_store>
 							<comment>Enabled Commands</comment>
 						</enabled_commands>
-						<commands_code>
-							<label>Commands Code</label>
-							<frontend_type>textarea</frontend_type>
+						<commands_list>
+							<label>Commands List</label>
+							<frontend_model>werules_chatbot/commands</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>8</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Code of the commands, add one code per line. Please add a code for every command, even if it's not enabled.</comment>
-						</commands_code>
+							<show_in_store>0</show_in_store>
+							<comment>Code of the commands and it's alias.</comment>
+						</commands_list>
 					</fields>
 				</telegram_config>
 				<facebook_config translate="label">
@@ -136,7 +187,104 @@
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
-					<comment>Soon</comment>
+					<comment>Facebook Messenger Configurations</comment>
+					<fields>
+						<enable_bot>
+							<label>Enable Messenger Bot</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Messenger Bot</comment>
+						</enable_bot>
+						<facebook_api_key>
+							<label>Messenger Bot API Key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Your Messenger Bot API Key.</comment>
+						</facebook_api_key>
+						<facebook_support_group>
+							<label>Messenger Support Group ID</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Reserved for future use, for now Facebook dosen't allow bots on group chats. For now, write "telegram" to send all messages to your Telegram support group.</comment>
+						</facebook_support_group>
+						<facebook_welcome_msg>
+							<label>Messenger Welcome Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>3</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>First Message The Bot Will Send To Your Client.</comment>
+						</facebook_welcome_msg>
+						<facebook_help_msg>
+							<label>Messenger Help Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>4</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message Will be Sent When Customer Asks For Help.</comment>
+						</facebook_help_msg>
+						<facebook_about_msg>
+							<label>Messenger About Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>5</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message Will be Sent When Customer Asks For About.</comment>
+						</facebook_about_msg>
+						<enable_command_list>
+							<label>Enable Command Listing</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>6</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Command Listing When Customer Ask For About</comment>
+						</enable_command_list>
+						<enable_predict_commands>
+							<label>Enable Command Prediction</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>7</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable The Bot to Try to Predict What Command The Customer Wants by Looking into What He Wrote</comment>
+						</enable_predict_commands>
+						<enabled_commands>
+							<label>Enabled Commands</label>
+							<frontend_type>multiselect</frontend_type>
+							<source_model>chatbot/options</source_model>
+							<sort_order>8</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enabled Commands</comment>
+						</enabled_commands>
+						<commands_list>
+							<label>Commands List</label>
+							<frontend_model>werules_chatbot/commands</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
+							<sort_order>9</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+							<comment>Code of the commands and it's alias.</comment>
+						</commands_list>
+					</fields>
 				</facebook_config>
 			</groups>
 		</chatbot_enable>

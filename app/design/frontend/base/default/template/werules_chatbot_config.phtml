@@ -9,8 +9,13 @@
 	$tg_username = null;
 	if ($response["ok"])
 		$tg_username = $response["result"]["username"];
-	//var_dump($response);
-	//$fb_apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+
+	$fb_apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+	$getme = "https://graph.facebook.com/v2.8/me?access_token=" . $fb_apikey;
+	$response = json_decode(file_get_contents($getme), true);
+	$fb_username = null;
+	if (!empty($response))
+		$fb_username = $response["id"];
 ?>
 <div class="dashboard">
 	<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
@@ -30,7 +35,9 @@
 						<p>
 							<?php
 								echo $this->__("Start a bot conversation on Telegram") . ": ";
-								$url = $chatdata->tg_url . $tg_username . "?start=" . $chatdata->getHashKey();
+								$url = $chatdata->tg_url . $tg_username;
+								if (empty($chatdata->getTelegramChatId()))
+									$url .= "?start=" . $chatdata->getHashKey();
 							?>
 							<a href="<?php echo $url; ?>" target="_blank"><?php echo $this->__('Here') ?></a>
 						</p>
@@ -41,6 +48,15 @@
 						<input <?php if ($chatdata->getEnableFacebook() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Facebook?') ?>" class="checkbox" name="enable_facebook" id="enable_facebook" />
 						<label for="enable_facebook" class="required"><em>*</em><?php echo $this->__('Enable Facebook?') ?></label>
 					</div>
+					<?php if ($fb_username): ?><!-- bot username -->
+					<p>
+						<?php
+							echo $this->__("Start a bot conversation on Facebook Messenger") . ": ";
+							$url = $chatdata->fb_url . $fb_username;
+						?>
+						<a href="<?php echo $url; ?>" target="_blank"><?php echo $this->__('Here') ?></a>
+					</p>
+					<?php endif; ?>
 				</li>
 				<?php
 				/*
