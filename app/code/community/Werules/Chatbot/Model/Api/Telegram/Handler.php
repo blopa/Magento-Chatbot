@@ -418,8 +418,9 @@
 							foreach ($productIDs as $productID)
 							{
 								$product = Mage::getModel('catalog/product')->load($productID);
+								$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
 								//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
-								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
+								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $stock > 0) // only simple products
 								{
 									$message = $chatdata->prepareTelegramProdMessages($productID);
 									if ($message) // TODO
@@ -479,8 +480,9 @@
 						foreach ($productIDs as $productID)
 						{
 							$product = Mage::getModel('catalog/product')->load($productID);
+							$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
 							//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
-							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
+							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE  && $stock > 0) // only simple products
 							{
 								$message = $chatdata->prepareTelegramProdMessages($productID);
 								if ($message) // TODO

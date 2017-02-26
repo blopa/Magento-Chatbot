@@ -404,8 +404,9 @@
 							foreach ($productIDs as $productID)
 							{
 								$product = Mage::getModel('catalog/product')->load($productID);
+								$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
 								//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
-								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
+								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $stock > 0) // only simple products
 								{
 									if ($i >= $show_more)
 									{
@@ -500,8 +501,9 @@
 						foreach ($productIDs as $productID)
 						{
 							$product = Mage::getModel('catalog/product')->load($productID);
+							$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
 							//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
-							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
+							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE && $stock > 0) // only simple products
 							{
 								$message = $chatdata->prepareFacebookProdMessages($productID);
 								//Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd['command'] . $product->getId();
