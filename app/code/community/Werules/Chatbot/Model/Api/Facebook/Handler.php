@@ -64,7 +64,7 @@
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$supportgroup = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 			$show_more = 0;
-			$listing_limit = 2;
+			$listing_limit = 5;
 			$more_orders = false;
 			$list_more_cat = "show_more_list_cat_";
 			$list_more_search = "show_more_search_prod_";
@@ -137,6 +137,8 @@
 							$more_orders = true;
 						}
 					}
+					else
+						$chatdata->updateChatdata('facebook_conv_state', $chatdata->start_state);
 				}
 
 				// instances conversation state
@@ -392,7 +394,7 @@
 					if ($_category) // this works, no need to get the id
 					{
 						$noprodflag = false;
-						$productIDs = $_category->getProductCollection()->getAllIds();
+						$productIDs = $_category->getProductCollection()->addAttributeToFilter('visibility', 4)->getAllIds();
 						if ($productIDs)
 						{
 							$i = 0;
@@ -401,63 +403,67 @@
 							$total = count($productIDs);
 							foreach ($productIDs as $productID)
 							{
-								if ($i >= $show_more)
+								$product = Mage::getModel('catalog/product')->load($productID);
+								if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
 								{
-									$product = Mage::getModel('catalog/product')->load($productID);
-									$product_url = $product->getProductUrl();
-									$product_image = $product->getImageUrl();
-									if (empty($product_image))
-										$product_image = $placeholder;
-
-									$button = array(
-										array(
-											'type' => 'postback',
-											'title' => $magehelper->__("Add to cart"),
-											'payload' => $chatdata->add2cart_cmd['command'] . $productID
-										),
-										array(
-											'type' => 'web_url',
-											'url' => $product_url,
-											'title' => $magehelper->__("Visit product's page")
-										)
-									);
-									$element = array(
-										'title' => $product->getName(),
-										'item_url' => $product_url,
-										'image_url' => $product_image,
-										'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
-										'buttons' => $button
-									);
-									array_push($elements, $element);
-
-									if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+									if ($i >= $show_more)
 									{
-										// TODO add option to list more products
+										$product = Mage::getModel('catalog/product')->load($productID);
+										$product_url = $product->getProductUrl();
+										$product_image = $product->getImageUrl();
+										if (empty($product_image))
+											$product_image = $placeholder;
+
 										$button = array(
 											array(
 												'type' => 'postback',
-												'title' => $magehelper->__("Show more"),
-												'payload' => $list_more_cat . $text . "," . (string)($i + 1)
+												'title' => $magehelper->__("Add to cart"),
+												'payload' => $chatdata->add2cart_cmd['command'] . $productID
+											),
+											array(
+												'type' => 'web_url',
+												'url' => $product_url,
+												'title' => $magehelper->__("Visit product's page")
 											)
 										);
 										$element = array(
-											'title' => Mage::app()->getStore()->getName(),
-											'item_url' => Mage::getBaseUrl(),
-											'image_url' => $placeholder,
-											'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+											'title' => $product->getName(),
+											'item_url' => $product_url,
+											'image_url' => $product_image,
+											'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
 											'buttons' => $button
 										);
 										array_push($elements, $element);
-										if ($chatdata->getFacebookConvState() != $chatdata->list_prod_state)
-											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
+
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										{
+											// TODO add option to list more products
+											$button = array(
+												array(
+													'type' => 'postback',
+													'title' => $magehelper->__("Show more"),
+													'payload' => $list_more_cat . $text . "," . (string)($i + 1)
+												)
+											);
+											$element = array(
+												'title' => Mage::app()->getStore()->getName(),
+												'item_url' => Mage::getBaseUrl(),
+												'image_url' => $placeholder,
+												'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+												'buttons' => $button
+											);
+											array_push($elements, $element);
+											if ($chatdata->getFacebookConvState() != $chatdata->list_prod_state)
+												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
+													$facebook->sendMessage($chat_id, $chatdata->errormsg);
+											break;
+										}
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
+											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->start_state))
 												$facebook->sendMessage($chat_id, $chatdata->errormsg);
-										break;
 									}
-									else if (($i + 1) == $total) // if it's the last one, back to start_state
-										if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
-											$facebook->sendMessage($chat_id, $chatdata->errormsg);
+									$i++;
 								}
-								$i++;
 							}
 							if ($i == 0)
 								$noprodflag = true;
@@ -549,7 +555,7 @@
 										break;
 									}
 									else if (($i + 1) == $total) // if it's the last one, back to start_state
-										if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
+										if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->start_state))
 											$facebook->sendMessage($chat_id, $chatdata->errormsg);
 								}
 								$i++;

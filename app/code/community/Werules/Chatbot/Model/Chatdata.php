@@ -236,6 +236,9 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					$checkout->setSessionId($this->getSessionId());
 				}
 				// add product and save cart
+//				$product = Mage::getModel('catalog/product')->load($prodId);
+//				$product->setSkipCheckRequiredOption(true);
+//				$cart->addProduct($product);
 				$cart->addProduct($prodId);
 				$cart->save();
 				$checkout->setCartWasUpdated(true);
@@ -250,6 +253,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			}
 			catch (Exception $e)
 			{
+				//Mage::logException($e);
 				return false;
 			}
 

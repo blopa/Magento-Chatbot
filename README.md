@@ -6,7 +6,7 @@ Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), 
 
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
-
+**Currently not working with Configurable Products and products with custom options**
 ### Installation
 
 1. Unpack the extension ZIP file in your Magento root directory
@@ -59,6 +59,23 @@ A: I can try. Open a issue and I'll see what I can do.
 **Q: Your bot is awesome. How can I help?**
 
 A: Thank you! You can help by codding more features, creating pull requests, or donating using Bitcoin: **1BdL9w4SscX21b2qeiP1ApAFNAYhPj5GgG**
+
+# TODO
+- **Integrations:**
+	- Whatsapp
+	- WeChat
+	- wit.ai
+	- ???
+- **Features:**
+	- Add compatibility with configurable products
+	- Add compatibility with products with custom options
+	- Add better usage of command alias
+	- Store messages on database before sending to make sure it will be sent eventually
+	- Integrate checkout to Facebook Payment API
+	- Add inline search for Telegram
+	- Add natural language configuration (wit.ai?)
+	- Add a custom in-store chat message app
+	- Documentation / Tutorials / Videos
 
 License
 ----
