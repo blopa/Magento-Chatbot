@@ -4,9 +4,12 @@ class Werules_Chatbot_Block_CommandsSelect extends Mage_Core_Block_Html_Select
 	public function _toHtml()
 	{
 		$options = Mage::getSingleton('chatbot/options')->toOptionArray();
-		foreach ($options as $option)
+		if (!$this->getOptions())
 		{
-			$this->addOption($option['value'], $option['label']);
+			foreach ($options as $option)
+			{
+				$this->addOption($option['value'], $option['label']);
+			}
 		}
 
 		return parent::_toHtml();

@@ -266,6 +266,14 @@
 					{
 						$message = $chatdata->canceledmsg;
 					}
+					else if ($conv_state == $chatdata->list_prod_state)
+					{
+						$message = $chatdata->canceledmsg;
+					}
+					else if ($conv_state == $chatdata->list_orders_state)
+					{
+						$message = $chatdata->canceledmsg;
+					}
 					else
 						$message = $chatdata->errormsg;
 

@@ -362,6 +362,14 @@
 					{
 						$content = array('chat_id' => $chat_id, 'text' => $chatdata->canceledmsg);
 					}
+					else if ($conv_state == $chatdata->list_prod_state)
+					{
+						$content = array('chat_id' => $chat_id, 'text' => $chatdata->canceledmsg);
+					}
+					else if ($conv_state == $chatdata->list_orders_state)
+					{
+						$content = array('chat_id' => $chat_id, 'text' => $chatdata->canceledmsg);
+					}
 					else
 						$content = array('chat_id' => $chat_id, 'text' => $chatdata->errormsg);
 
