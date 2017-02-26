@@ -70,6 +70,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
+	- Fix categories listing limits
+	- List only categories with products
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Integrate checkout to Facebook Payment API
 	- Add inline search for Telegram

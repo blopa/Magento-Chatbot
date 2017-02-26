@@ -404,7 +404,8 @@
 							foreach ($productIDs as $productID)
 							{
 								$product = Mage::getModel('catalog/product')->load($productID);
-								if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+								//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
 								{
 									if ($i >= $show_more)
 									{
@@ -498,67 +499,72 @@
 						$total = count($productIDs);
 						foreach ($productIDs as $productID)
 						{
-							$message = $chatdata->prepareFacebookProdMessages($productID);
-							//Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd['command'] . $product->getId();
-							if ($message) // TODO
+							$product = Mage::getModel('catalog/product')->load($productID);
+							//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
 							{
-								if ($i >= $show_more)
+								$message = $chatdata->prepareFacebookProdMessages($productID);
+								//Mage::helper('core')->__("Add to cart") . ": " . $this->add2cart_cmd['command'] . $product->getId();
+								if ($message) // TODO
 								{
-									$product = Mage::getModel('catalog/product')->load($productID);
-									$product_url = $product->getProductUrl();
-									$product_image = $product->getImageUrl();
-									if (empty($product_image))
-										$product_image = $placeholder;
-
-									$button = array(
-										array(
-											'type' => 'postback',
-											'title' => $magehelper->__("Add to cart"),
-											'payload' => $chatdata->add2cart_cmd['command'] . $productID
-										),
-										array(
-											'type' => 'web_url',
-											'url' => $product_url,
-											'title' => $magehelper->__("Visit product's page")
-										)
-									);
-									$element = array(
-										'title' => $product->getName(),
-										'item_url' => $product_url,
-										'image_url' => $product_image,
-										'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
-										'buttons' => $button
-									);
-									array_push($elements, $element);
-
-									if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+									if ($i >= $show_more)
 									{
-										// TODO add option to list more products
+										$product = Mage::getModel('catalog/product')->load($productID);
+										$product_url = $product->getProductUrl();
+										$product_image = $product->getImageUrl();
+										if (empty($product_image))
+											$product_image = $placeholder;
+
 										$button = array(
 											array(
 												'type' => 'postback',
-												'title' => $magehelper->__("Show more"),
-												'payload' => $list_more_search . $text . "," . (string)($i + 1)
+												'title' => $magehelper->__("Add to cart"),
+												'payload' => $chatdata->add2cart_cmd['command'] . $productID
+											),
+											array(
+												'type' => 'web_url',
+												'url' => $product_url,
+												'title' => $magehelper->__("Visit product's page")
 											)
 										);
 										$element = array(
-											'title' => Mage::app()->getStore()->getName(),
-											'item_url' => Mage::getBaseUrl(),
-											'image_url' => $placeholder,
-											'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+											'title' => $product->getName(),
+											'item_url' => $product_url,
+											'image_url' => $product_image,
+											'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
 											'buttons' => $button
 										);
 										array_push($elements, $element);
-										if ($chatdata->getFacebookConvState() != $chatdata->list_prod_state)
-											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
+
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										{
+											// TODO add option to list more products
+											$button = array(
+												array(
+													'type' => 'postback',
+													'title' => $magehelper->__("Show more"),
+													'payload' => $list_more_search . $text . "," . (string)($i + 1)
+												)
+											);
+											$element = array(
+												'title' => Mage::app()->getStore()->getName(),
+												'item_url' => Mage::getBaseUrl(),
+												'image_url' => $placeholder,
+												'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+												'buttons' => $button
+											);
+											array_push($elements, $element);
+											if ($chatdata->getFacebookConvState() != $chatdata->list_prod_state)
+												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
+													$facebook->sendMessage($chat_id, $chatdata->errormsg);
+											break;
+										}
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
+											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->start_state))
 												$facebook->sendMessage($chat_id, $chatdata->errormsg);
-										break;
 									}
-									else if (($i + 1) == $total) // if it's the last one, back to start_state
-										if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->start_state))
-											$facebook->sendMessage($chat_id, $chatdata->errormsg);
+									$i++;
 								}
-								$i++;
 							}
 						}
 						if ($i == 0)

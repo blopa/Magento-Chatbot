@@ -418,7 +418,8 @@
 							foreach ($productIDs as $productID)
 							{
 								$product = Mage::getModel('catalog/product')->load($productID);
-								if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+								//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+								if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
 								{
 									$message = $chatdata->prepareTelegramProdMessages($productID);
 									if ($message) // TODO
@@ -477,31 +478,36 @@
 						$total = count($productIDs);
 						foreach ($productIDs as $productID)
 						{
-							$message = $chatdata->prepareTelegramProdMessages($productID);
-							if ($message) // TODO
+							$product = Mage::getModel('catalog/product')->load($productID);
+							//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+							if ($product->getTypeId() == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) // only simple products
 							{
-								if ($i >= $show_more)
+								$message = $chatdata->prepareTelegramProdMessages($productID);
+								if ($message) // TODO
 								{
-									$image = $chatdata->loadImageContent($productID);
-									if ($image)
-										$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
-									else
-										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-
-									if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+									if ($i >= $show_more)
 									{
-										// TODO add option to list more products
-										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_search . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
-										if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
-											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
+										$image = $chatdata->loadImageContent($productID);
+										if ($image)
+											$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
+										else
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										{
+											// TODO add option to list more products
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_search . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
+											if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+											break;
+										}
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
+											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
 												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
-										break;
 									}
-									else if (($i + 1) == $total) // if it's the last one, back to start_state
-										if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
-											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+									$i++;
 								}
-								$i++;
 							}
 						}
 						if ($i == 0)
