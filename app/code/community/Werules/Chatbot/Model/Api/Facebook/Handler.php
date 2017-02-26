@@ -803,13 +803,6 @@
 				}
 				else
 					$facebook->sendMessage($chat_id, $magehelper->__("Sorry, I didn't understand that.")); // TODO
-
-				if (true)
-				{
-					$message = $text;
-					$result = $facebook->sendMessage($chat_id, $message);
-					return $facebook->respondSuccess();
-				}
 			}
 
 			return $facebook->respondSuccess();

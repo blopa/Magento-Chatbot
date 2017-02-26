@@ -75,8 +75,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $positivemsg = array();
 
 		// URLS
-		protected $tg_url = "https://t.me/";
-		protected $fb_url = "https://m.me/";
+		public $tg_url = "https://t.me/";
+		public $fb_url = "https://m.me/";
 //		protected $wapp_url = "";
 //		protected $wechat_url = "";
 
