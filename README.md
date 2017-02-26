@@ -6,15 +6,29 @@ Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), 
 
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
+**Currently not working with Configurable Products and products with custom options**
+## Features
+- List store categories
+- List products from category
+- Search for products
+- Add product to cart
+- Clear cart
+- Login to your account
+- List orders
+- Track order status
+- Reorder
+- Send email
+- Send message to support
+- Reply customer support messages from you favorite chat messenger
 
-### Installation
+## Installation
 
 1. Unpack the extension ZIP file in your Magento root directory
 2. Clear the Magento cache: **System > Cache Management**
 3. Log out the Magento admin and log back in to clear the ACL list
 4. Recompile if you are using the Magento Compiler
 
-### Usage
+## Usage
 
 Go to **System > General Settings  > Chatbot Settings**
 
@@ -47,7 +61,7 @@ Go to **System > General Settings  > Chatbot Settings**
 - Enabled Commands: List of Enabled Commands
 - Commands List: Code of the commands and alias
 
-# F.A.Q.
+## F.A.Q.
 **Q: When the other chatbots integrations are going to be ready?**
 
 A: I'm not sure, I work in my free hours. I'm trying to finish it ASAP. Pull requests are very welcome.
@@ -60,8 +74,27 @@ A: I can try. Open a issue and I'll see what I can do.
 
 A: Thank you! You can help by codding more features, creating pull requests, or donating using Bitcoin: **1BdL9w4SscX21b2qeiP1ApAFNAYhPj5GgG**
 
-License
-----
+## TODO
+- **Integrations:**
+	- Whatsapp
+	- WeChat
+	- wit.ai
+	- ???
+- **Features:**
+	- Add compatibility with configurable products
+	- Add compatibility with products with custom options
+	- Add better usage of command alias
+	- Fix categories listing limits
+	- List only categories with products
+	- Store messages on database before sending to make sure it will be sent eventually
+	- Integrate checkout to Facebook Payment API
+	- Add inline search for Telegram
+	- Add natural language configuration (wit.ai?)
+	- Add a custom in-store chat message app
+	- Documentation / Tutorials / Videos
+	- Send message to all customers
+
+## License
 Free. Don't forget to star :D and send pull requests. :D
 
 **Free Software, Hell Yeah!**

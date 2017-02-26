@@ -42,8 +42,8 @@
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))
 						{
-							$chatdata->updateChatdata("custom_one", $mid);
-							$chatdata->updateChatdata("custom_two", $api_name);
+							$chatdata->updateChatdata("last_support_message_id", $mid);
+							$chatdata->updateChatdata("last_support_chat", $api_name);
 						}
 					}
 					catch (Exception $e){
@@ -69,6 +69,15 @@
 
 			// configs
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			$empty_cat_list = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
+			$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
+			$show_more = 0;
+			$cat_id = null;
+			$more_orders = false;
+			$listing_limit = 5;
+			$list_more_cat = "/lmc_";
+			$list_more_search = "/lms_";
+			$list_more_order = "/lmo_";
 
 			if ($enable_log == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($telegram->getData(), true) . "\n\n", null, 'chatbot_telegram.log');
@@ -78,7 +87,6 @@
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chat_id, 'telegram_chat_id');
 				$chatdata->api_type = $chatdata->tg_bot;
-				$conv_state = $chatdata->getTelegramConvState();
 
 				if ($message_id == $chatdata->getTelegramMessageId()) // prevents to reply the same request twice
 					return $telegram->respondSuccess();
@@ -88,10 +96,49 @@
 				// send feedback to user
 				$telegram->sendChatAction(array('chat_id' => $chat_id, 'action' => 'typing'));
 
+				// show more handler, may change the conversation state
+				if ($chatdata->getTelegramConvState() == $chatdata->list_prod_state || $chatdata->getTelegramConvState() == $chatdata->list_orders_state) // listing products
+				{
+					if ($chatdata->checkCommandWithValue($text, $list_more_cat))
+					{
+						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->list_cat_state))
+						{
+							$value = $this->getCommandValue($text, $list_more_cat);
+							$arr = explode("_", $value);
+							$cat_id = (int)$arr[0]; // get category id
+							$show_more = (int)$arr[1]; // get where listing stopped
+						}
+					}
+					else if ($chatdata->checkCommandWithValue($text, $list_more_search))
+					{
+						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->search_state))
+						{
+							$value = $this->getCommandValue($text, $list_more_search);
+							$arr = explode("_", $value);
+							$show_more = (int)end($arr); // get where listing stopped
+							$value = str_replace("_" . (string)$show_more, "", $value);
+							$text = str_replace("_", " ", $value); // get search criteria
+						}
+					}
+					else if ($chatdata->checkCommandWithValue($text, $list_more_order))
+					{
+						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
+						{
+							$value = $this->getCommandValue($text, $list_more_order);
+							$show_more = (int)$value; // get where listing stopped
+							$more_orders = true;
+						}
+					}
+					else
+						$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state);
+				}
+
+				// instances conversation state
+				$conv_state = $chatdata->getTelegramConvState();
+
 				// mage helper
 				$magehelper = Mage::helper('core');
 
-				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 				if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
 					$supportgroup = "-" . ltrim($supportgroup, "g");
 
@@ -103,10 +150,10 @@
 						$reply_msg_id = $telegram->ReplyToMessageID();
 						if (!empty($reply_msg_id)) // if the message is replying another message
 						{
-							$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($reply_msg_id, 'custom_one');
-							if (!empty($foreignchatdata->getCustomOne()))
+							$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($reply_msg_id, 'last_support_message_id');
+							if (!empty($foreignchatdata->getLastSupportMessageId()))
 							{
-								$api_name = $foreignchatdata->getCustomTwo();
+								$api_name = $foreignchatdata->getLastSupportChat();
 								if ($api_name == $foreignchatdata->fb_bot)
 									Mage::getModel('chatbot/api_facebook_handler')->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text); // send chat id and the original text
 							}
@@ -318,6 +365,14 @@
 					{
 						$content = array('chat_id' => $chat_id, 'text' => $chatdata->canceledmsg);
 					}
+					else if ($conv_state == $chatdata->list_prod_state)
+					{
+						$content = array('chat_id' => $chat_id, 'text' => $chatdata->canceledmsg);
+					}
+					else if ($conv_state == $chatdata->list_orders_state)
+					{
+						$content = array('chat_id' => $chat_id, 'text' => $chatdata->canceledmsg);
+					}
 					else
 						$content = array('chat_id' => $chat_id, 'text' => $chatdata->errormsg);
 
@@ -347,38 +402,62 @@
 				if ($conv_state == $chatdata->list_cat_state) // TODO show only in stock products
 				{
 					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Processing...")));
-					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
+					if ($cat_id)
+						$_category = Mage::getModel('catalog/category')->load($cat_id);
+					else
+						$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 
 					if ($_category) // this works, no need to get the id
 					{
 						$noprodflag = false;
-						$productIDs = $_category->getProductCollection()->getAllIds();
+						//$productIDs = $_category->getProductCollection()->addAttributeToFilter('visibility', 4)->getAllIds();
+						$productIDs = $_category->getProductCollection()
+							->addAttributeToSelect('*')
+							->addAttributeToFilter('visibility', 4)
+							->addAttributeToFilter('type_id', 'simple')
+							->getAllIds()
+						;
 						if ($productIDs)
 						{
 							$i = 0;
+							$total = count($productIDs);
 							foreach ($productIDs as $productID)
 							{
-								$message = $chatdata->prepareTelegramProdMessages($productID);
-								if ($message) // TODO
+								$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
+								//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+								if ($stock > 0) // only in stock
 								{
-									$i++;
-									$image = $chatdata->loadImageContent($productID);
-									if ($image)
-										$telegram->sendPhoto(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
-									else
-										$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
-								}
-								if ($i >= 15)
-								{
-									// TODO add option to list more products
-									break;
+									$message = $chatdata->prepareTelegramProdMessages($productID);
+									if ($message) // TODO
+									{
+										if ($i >= $show_more)
+										{
+											$image = $chatdata->loadImageContent($productID);
+											if ($image)
+												$telegram->sendPhoto(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
+											else
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $message));
+
+											if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+											{
+												// TODO add option to list more products
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_cat . $_category->getId() . "_" . (string)($i + 1)));
+												if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
+													if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
+														$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+												break;
+											}
+											else if (($i + 1) == $total) // if it's the last one, back to start_state
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+										}
+										$i++;
+									}
 								}
 							}
 							if ($i == 0)
 								$noprodflag = true;
-							if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
-								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 						}
 						else
 							$noprodflag = true;
@@ -399,26 +478,46 @@
 					$noprodflag = false;
 					$productIDs = $chatdata->getProductIdsBySearch($text);
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+					{
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+						return $telegram->respondSuccess();
+					}
 					else if ($productIDs)
 					{
 						$i = 0;
+						$total = count($productIDs);
 						foreach ($productIDs as $productID)
 						{
-							$message = $chatdata->prepareTelegramProdMessages($productID);
-							if ($message) // TODO
+							$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productID)->getIsInStock();
+							//if (!$product->hasOptions() && !$product->isConfigurable()) // check if product has no options and it's not configurable
+							if ($stock > 0) // only in stock
 							{
-								$i++;
-								$image = $chatdata->loadImageContent($productID);
-								if ($image)
-									$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
-								else
-									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-							}
-							if ($i >= 15)
-							{
-								// TODO add option to list more products
-								break;
+								$message = $chatdata->prepareTelegramProdMessages($productID);
+								if ($message) // TODO
+								{
+									if ($i >= $show_more)
+									{
+										$image = $chatdata->loadImageContent($productID);
+										if ($image)
+											$telegram->sendPhoto(array('chat_id' => $chat_id, 'photo' => $image, 'caption' => $message));
+										else
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										{
+											// TODO add option to list more products
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_search . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
+											if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+											break;
+										}
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
+											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+									}
+									$i++;
+								}
 							}
 						}
 						if ($i == 0)
@@ -484,6 +583,7 @@
 				{
 					$helper = Mage::helper('catalog/category');
 					$categories = $helper->getStoreCategories(); // TODO test with a store without categories
+					$i = 0;
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_cat_state))
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					else if ($categories)
@@ -491,15 +591,38 @@
 						$option = array();
 						foreach ($categories as $_category) // TODO fix buttons max size
 						{
-							array_push($option, $_category->getName());
+							if ($empty_cat_list != "1") // unallow empty categories listing
+							{
+								$category = Mage::getModel('catalog/category')->load($_category->getId()); // reload category because EAV Entity
+								$productIDs = $category->getProductCollection()
+									->addAttributeToSelect('*')
+									->addAttributeToFilter('visibility', 4)
+									->addAttributeToFilter('type_id', 'simple')
+									->getAllIds();
+							}
+							else
+								$productIDs = true;
+							if (!empty($productIDs)) // category with no products
+							{
+								$cat_name = $_category->getName();
+								array_push($option, $cat_name);
+								$i++;
+							}
 						}
 
 						$keyb = $telegram->buildKeyBoard(array($option));
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $magehelper->__("Select a category")));
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'reply_markup' => $keyb, 'text' => $chatdata->cancelmsg));
 					}
+					else if ($i == 0)
+					{
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("No categories available at the moment, please try again later.")));
+						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->checkout_cmd)) // TODO
@@ -603,7 +726,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("You're already logged.")));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkCommand($text, $chatdata->listorders_cmd)) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->listorders_cmd) || $more_orders) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -613,18 +736,29 @@
 						$i = 0;
 						if ($ordersIDs)
 						{
+							$total = count($ordersIDs);
 							foreach($ordersIDs as $orderID)
 							{
 								$message = $chatdata->prepareTelegramOrderMessages($orderID);
 								if ($message) // TODO
 								{
+									if ($i >= $show_more)
+									{
+										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										{
+											// TODO add option to list more orders
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_order . (string)($i + 1)));
+											if ($chatdata->getTelegramConvState() != $chatdata->list_orders_state)
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+											break;
+										}
+										else if (($i + 1) == $total) // if it's the last one, back to start_state
+											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+									}
 									$i++;
-									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-								}
-								if ($i >= 15)
-								{
-									// TODO add option to list more orders
-									break;
 								}
 							}
 						}
@@ -634,8 +768,6 @@
 							return $telegram->respondSuccess();
 						}
 						if ($i == 0)
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
-						else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					}
 					else

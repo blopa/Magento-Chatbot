@@ -236,6 +236,9 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					$checkout->setSessionId($this->getSessionId());
 				}
 				// add product and save cart
+//				$product = Mage::getModel('catalog/product')->load($prodId);
+//				$product->setSkipCheckRequiredOption(true);
+//				$cart->addProduct($product);
 				$cart->addProduct($prodId);
 				$cart->save();
 				$checkout->setCartWasUpdated(true);
@@ -250,6 +253,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			}
 			catch (Exception $e)
 			{
+				//Mage::logException($e);
 				return false;
 			}
 
@@ -442,18 +446,23 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 		protected function getProductIdsBySearch($searchstring)
 		{
-			$ids = array();
 			// Code to Search Product by $searchstring and get Product IDs
-			$product_collection = Mage::getResourceModel('catalog/product_collection')
+			$product_collection_ids = Mage::getResourceModel('catalog/product_collection')
 				->addAttributeToSelect('*')
-				->addAttributeToFilter('name', array('like' => '%'.$searchstring.'%'))
-				->load();
+				->addAttributeToFilter('visibility', 4)
+				->addAttributeToFilter('type_id', 'simple')
+				->addAttributeToFilter(
+					array(
+						array('attribute' => 'sku', 'like' => '%' . $searchstring .'%'),
+						array('attribute' => 'name', 'like' => '%' . $searchstring .'%')
+					)
+				)
+				->getAllIds();
 
-			foreach ($product_collection as $product) {
-				$ids[] = $product->getId();
-			}
-			//return array of product ids
-			return $ids;
+			if (!empty($product_collection_ids))
+				return $product_collection_ids;
+
+			return false;
 		}
 
 		protected function loadImageContent($productID)
