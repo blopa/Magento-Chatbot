@@ -2,7 +2,7 @@
 
 Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate you Magento store with the most popular chat apps in the market.
 
-**For now only Telegram is implemented, try it out at [@MyChatbotStoreBot](https://telegram.me/MyChatbotStoreBot).**
+**For now only Telegram and Facebook Messenger is implemented, try it out Telegram at [@MyChatbotStoreBot](https://telegram.me/MyChatbotStoreBot).**
 
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
@@ -29,15 +29,23 @@ Go to **System > General Settings  > Chatbot Settings**
 - Telegram Support Group ID: ID of Group that the support messages will be forwarded. e.g. g123456789
 - Telegram Welcome Message: First Message The Bot Will Send To Your Client.
 - Telegram Help Message: Message Will be Sent When Customer Asks For Help.
-- Telegram About Message: Message Will be Sent When Customer Asks For Help.
 - Telegram About Message: Message Will be Sent When Customer Asks For About.
 - Enable Command Listing: Enable Command Listing When Customer Ask For About
 - Enabled Commands: List of Enabled Commands
-- Commands Code: Code of the commands
+- Commands List: Code of the commands
 
 **Facebook Configuration**
 
-Soon
+- Enable Messenger Bot: Enable Messenger Bot
+- Messenger Bot API Key: Your Messenger Bot API Key.
+- Messenger Support Group ID: Reserved for future use, for now Facebook dosen't allow bots on group chats
+- Messenger Welcome Message: First Message The Bot Will Send To Your Client.
+- Messenger Help Message: Message Will be Sent When Customer Asks For Help.
+- Messenger About Message: Message Will be Sent When Customer Asks For About.
+- Enable Command Listing: Enable Command Listing When Customer Ask For About
+- Enable Command Prediction: Enable The Bot to Try to Predict What Command The Customer Wants by Looking into What He Wrote
+- Enabled Commands: List of Enabled Commands
+- Commands List: Code of the commands and alias
 
 # F.A.Q.
 **Q: When the other chatbots integrations are going to be ready?**
