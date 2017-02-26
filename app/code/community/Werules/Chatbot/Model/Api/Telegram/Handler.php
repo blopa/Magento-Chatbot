@@ -72,9 +72,11 @@
 			$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 			$show_more = 0;
 			$cat_id = null;
+			$more_orders = false;
 			$listing_limit = 9;
 			$list_more_cat = "/lmc_";
 			$list_more_search = "/lms_";
+			$list_more_order = "/lmo_";
 
 			if ($enable_log == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($telegram->getData(), true) . "\n\n", null, 'chatbot_telegram.log');
@@ -93,8 +95,8 @@
 				// send feedback to user
 				$telegram->sendChatAction(array('chat_id' => $chat_id, 'action' => 'typing'));
 
-				// payload handler, may change the conversation state
-				if ($chatdata->getTelegramConvState() == $chatdata->list_prod_state) // listing products
+				// show more handler, may change the conversation state
+				if ($chatdata->getTelegramConvState() == $chatdata->list_prod_state || $chatdata->getTelegramConvState() == $chatdata->list_orders_state) // listing products
 				{
 					if ($chatdata->checkCommandWithValue($text, $list_more_cat))
 					{
@@ -103,7 +105,7 @@
 							$value = $this->getCommandValue($text, $list_more_cat);
 							$arr = explode("_", $value);
 							$cat_id = (int)$arr[0]; // get category id
-							$show_more = (int)$arr[1]; // get where listing stoped
+							$show_more = (int)$arr[1]; // get where listing stopped
 						}
 					}
 					else if ($chatdata->checkCommandWithValue($text, $list_more_search))
@@ -115,6 +117,15 @@
 							$show_more = (int)end($arr); // get where listing stopped
 							$value = str_replace("_" . (string)$show_more, "", $value);
 							$text = str_replace("_", " ", $value); // get search criteria
+						}
+					}
+					else if ($chatdata->checkCommandWithValue($text, $list_more_order))
+					{
+						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
+						{
+							$value = $this->getCommandValue($text, $list_more_order);
+							$show_more = (int)$value; // get where listing stopped
+							$more_orders = true;
 						}
 					}
 				}
@@ -411,16 +422,20 @@
 										{
 											// TODO add option to list more products
 											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "To show more send " . $list_more_cat . $_category->getId() . "_" . (string)($i + 1)));
+											if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 											break;
 										}
+										else if (($i + 1) == $total)
+											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 									}
 									$i++;
 								}
 							}
 							if ($i == 0)
 								$noprodflag = true;
-							if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
-								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 						}
 						else
 							$noprodflag = true;
@@ -463,8 +478,14 @@
 									{
 										// TODO add option to list more products
 										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "To show more send " . $list_more_search . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
+										if ($chatdata->getTelegramConvState() != $chatdata->list_prod_state)
+											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 										break;
 									}
+									else if (($i + 1) == $total)
+										if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 								}
 								$i++;
 							}
@@ -477,8 +498,6 @@
 
 					if ($noprodflag)
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Sorry, no products found for this criteria.")));
-					else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_prod_state))
-						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 
 					return $telegram->respondSuccess();
 				}
@@ -653,7 +672,7 @@
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("You're already logged.")));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkCommand($text, $chatdata->listorders_cmd)) // TODO
+				else if ($chatdata->checkCommand($text, $chatdata->listorders_cmd) || $more_orders) // TODO
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
@@ -663,18 +682,29 @@
 						$i = 0;
 						if ($ordersIDs)
 						{
+							$total = count($ordersIDs);
 							foreach($ordersIDs as $orderID)
 							{
 								$message = $chatdata->prepareTelegramOrderMessages($orderID);
 								if ($message) // TODO
 								{
+									if ($i >= $show_more)
+									{
+										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+										if (($i + 1) != $total && $i >= ($show_more + $listing_limit))
+										{
+											// TODO add option to list more orders
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => "To show more send " . $list_more_order . (string)($i + 1)));
+											if ($chatdata->getTelegramConvState() != $chatdata->list_orders_state)
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+											break;
+										}
+										else if (($i + 1) == $total)
+											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+									}
 									$i++;
-									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-								}
-								if ($i >= 15)
-								{
-									// TODO add option to list more orders
-									break;
 								}
 							}
 						}
@@ -684,8 +714,6 @@
 							return $telegram->respondSuccess();
 						}
 						if ($i == 0)
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
-						else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					}
 					else
