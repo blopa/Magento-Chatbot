@@ -62,7 +62,9 @@
 			// configs
 			$enable_predict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			$supportgroup = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 			$show_more = 0;
+			$listing_limit = 9;
 
 			if ($enable_log == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
@@ -100,24 +102,27 @@
 				$facebook->sendChatAction($chat_id, "typing_on");
 
 				// payload handler, may change the conversation state
-				if ($chatdata->checkCommandWithValue($text, "show_more_list_cat_"))
+				if ($chatdata->getFacebookConvState() == $chatdata->list_prod_state) // listing products
 				{
-					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->list_cat_state))
+					if ($chatdata->checkCommandWithValue($text, "show_more_list_cat_"))
 					{
-						$value = $this->getCommandValue($text, "show_more_list_cat_");
-						$arr = explode(",", $value);
-						$text = $arr[0];
-						$show_more = (int)$arr[1];
+						if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->list_cat_state))
+						{
+							$value = $this->getCommandValue($text, "show_more_list_cat_");
+							$arr = explode(",", $value);
+							$text = $arr[0];
+							$show_more = (int)$arr[1];
+						}
 					}
-				}
-				else if ($chatdata->checkCommandWithValue($text, "show_more_search_prod_"))
-				{
-					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->search_state))
+					else if ($chatdata->checkCommandWithValue($text, "show_more_search_prod_"))
 					{
-						$value = $this->getCommandValue($text, "show_more_search_prod_");
-						$arr = explode(",", $value);
-						$text = $arr[0];
-						$show_more = (int)$arr[1];
+						if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->search_state))
+						{
+							$value = $this->getCommandValue($text, "show_more_search_prod_");
+							$arr = explode(",", $value);
+							$text = $arr[0];
+							$show_more = (int)$arr[1];
+						}
 					}
 				}
 
@@ -126,8 +131,6 @@
 
 				// mage helper
 				$magehelper = Mage::helper('core');
-
-				$supportgroup = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 
 				// if it's a group message
 				if ($chat_id == $supportgroup)
@@ -374,6 +377,7 @@
 							$i = 0;
 							$elements = array();
 							$placeholder =  Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
+							$total = count($productIDs);
 							foreach ($productIDs as $productID)
 							{
 								if ($i >= $show_more)
@@ -405,14 +409,14 @@
 									);
 									array_push($elements, $element);
 
-									if ($i >= $show_more + 2) // facebook api generic template limit
+									if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // facebook api generic template limit
 									{
 										// TODO add option to list more products
 										$button = array(
 											array(
 												'type' => 'postback',
 												'title' => $magehelper->__("Show more"),
-												'payload' => 'show_more_list_cat_' . $text . "," . (string)$i
+												'payload' => 'show_more_list_cat_' . $text . "," . (string)($i + 1)
 											)
 										);
 										$element = array(
@@ -460,6 +464,7 @@
 						$i = 0;
 						$elements = array();
 						$placeholder =  Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
+						$total = count($productIDs);
 						foreach ($productIDs as $productID)
 						{
 							$message = $chatdata->prepareFacebookProdMessages($productID);
@@ -495,14 +500,14 @@
 									);
 									array_push($elements, $element);
 
-									if ($i >= $show_more + 2) // facebook api generic template limit
+									if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // facebook api generic template limit
 									{
 										// TODO add option to list more products
 										$button = array(
 											array(
 												'type' => 'postback',
 												'title' => $magehelper->__("Show more"),
-												'payload' => 'show_more_search_prod_' . $text . "," . (string)$i
+												'payload' => 'show_more_search_prod_' . $text . "," . (string)($i + 1)
 											)
 										);
 										$element = array(
@@ -527,8 +532,10 @@
 
 					if ($noprodflag)
 						$facebook->sendMessage($chat_id, $magehelper->__("Sorry, no products found for this criteria."));
-					else
-						$facebook->sendGenericTemplate($chat_id, $elements);
+					else if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->list_prod_state))
+							$facebook->sendMessage($chat_id, $chatdata->errormsg);
+						else
+							$facebook->sendGenericTemplate($chat_id, $elements);
 
 					return $facebook->respondSuccess();
 				}
