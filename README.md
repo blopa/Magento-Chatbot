@@ -1,7 +1,6 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
 
-![Chatting](http://i.imgur.com/kPqEV2o.gif)
-<img src="/screenshots/chat.gif?raw=true" width="200px">
+<img src="/screenshots/chat.gif?raw=true" width="550px">
 
 Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate you Magento store with the most popular chat apps in the market.
 
