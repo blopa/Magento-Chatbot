@@ -70,15 +70,19 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Screenshot
 General Configuration
+
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_1.png)
 
 Telegram Configuration
+
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_2.png)
 
 Facebook Messenger Configuration
+
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_3.png)
 
 Conversation
+
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
 ## F.A.Q.
