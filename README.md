@@ -68,6 +68,21 @@ Go to **System > General Settings  > Chatbot Settings**
 - Enabled Commands: List of Enabled Commands
 - Commands List: Code of the commands and alias
 
+## Screenshot
+General Configuration
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_1.png)
+
+Telegram Configuration
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_2.png)
+
+Facebook MEssenger Configuration
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_3.png)
+
+Conversation
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.png)
+
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_5.png)
+
 ## F.A.Q.
 **Q: When the other chatbots integrations are going to be ready?**
 
