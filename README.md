@@ -113,6 +113,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Fix categories listing limits
 	- List only categories with products
 	- Store messages on database before sending to make sure it will be sent eventually
+	- Better "processing" feedback messages
+	- Inform how many itens were found in a category/search
 	- Integrate checkout to Facebook Payment API
 	- Add inline search for Telegram
 	- Add natural language configuration (wit.ai?)
