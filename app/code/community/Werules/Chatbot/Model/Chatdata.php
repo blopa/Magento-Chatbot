@@ -118,7 +118,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				return Mage::getModel('chatbot/api_facebook_handler')->facebookHandler($apiKey);
 			}
 			else
-				return "error 101"; // TODO
+				return "Nothing to see here"; // TODO
 		}
 
 		protected function getApikey($apiType) // check if bot integration is enabled

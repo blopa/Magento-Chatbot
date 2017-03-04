@@ -68,8 +68,10 @@
 			$message_id = $telegram->MessageID();
 
 			// configs
+			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$empty_cat_list = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
+			$enable_final_msg = Mage::getStoreConfig('chatbot_enable/general_config/enable_support_final_message');
 			$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 			$show_more = 0;
 			$cat_id = null;
@@ -568,8 +570,13 @@
 				}
 				else if ($conv_state == $chatdata->support_state)
 				{
-					$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("we have sent your message to support.")));
+					if (!empty($supportgroup))
+					{
+						$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("we have sent your message to support.")));
+					}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					return $telegram->respondSuccess();
 				}
 				else if ($conv_state == $chatdata->send_email_state)
@@ -901,7 +908,26 @@
 					return $telegram->respondSuccess();
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Sorry, I didn't understand that."))); // TODO
+				{
+					if ($enable_final_msg == "1")
+					{
+						if (!empty($supportgroup))
+						{
+							$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' =>
+								$magehelper->__("Sorry, I didn't understand that.") . " " .
+								$magehelper->__("Please wait while our support check your message so you can talk to a real person.") . " " .
+								$chatdata->cancelmsg
+							)); // TODO
+						}
+						else
+							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+						return $telegram->respondSuccess();
+					}
+					//else if ($enable_witai == "1"){}
+					else
+						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Sorry, I didn't understand that."))); // TODO
+				}
 			}
 
 			return $telegram->respondSuccess();

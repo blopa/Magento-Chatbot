@@ -60,9 +60,11 @@
 			$is_echo = $facebook->getEcho();
 
 			// configs
+			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enable_predict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 			$enable_log = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$empty_cat_list = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
+			$enable_final_msg = Mage::getStoreConfig('chatbot_enable/general_config/enable_support_final_message');
 			$supportgroup = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 			$show_more = 0;
 			$listing_limit = 5;
@@ -1003,7 +1005,28 @@
 					return $facebook->respondSuccess();
 				}
 				else
-					$facebook->sendMessage($chat_id, $magehelper->__("Sorry, I didn't understand that.")); // TODO
+				{
+					if ($enable_final_msg == "1")
+					{
+						$errorflag = true;
+						if ($supportgroup == $chatdata->tg_bot)
+							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chat_id, $text_orig, $chatdata->api_type, $username)) // send chat id, original text and "facebook"
+								$errorflag = false;
+
+						if ($errorflag)
+							$facebook->sendMessage($chat_id, $chatdata->errormsg);
+						else
+							$facebook->sendMessage($chat_id,
+								$magehelper->__("Sorry, I didn't understand that.") . " " .
+								$magehelper->__("Please wait while our support check your message so you can talk to a real person.") . " " .
+								$chatdata->cancelmsg
+							); // TODO
+						return $facebook->respondSuccess();
+					}
+					//else if ($enable_witai == "1"){}
+					else
+						$facebook->sendMessage($chat_id, $magehelper->__("Sorry, I didn't understand that.")); // TODO
+				}
 			}
 
 			return $facebook->respondSuccess();
