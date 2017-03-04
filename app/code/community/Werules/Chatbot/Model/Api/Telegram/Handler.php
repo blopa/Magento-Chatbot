@@ -913,8 +913,8 @@
 					{
 						if (!empty($supportgroup))
 						{
-							if ($chatdata->getFacebookConvState() != $chatdata->support_state) // TODO
-								$chatdata->updateChatdata('telegram_conv_state', $chatdata->support_state);
+//							if ($chatdata->getFacebookConvState() != $chatdata->support_state) // TODO
+//								$chatdata->updateChatdata('telegram_conv_state', $chatdata->support_state);
 							$telegram->forwardMessage(array('chat_id' => $supportgroup, 'from_chat_id' => $chat_id, 'message_id' => $telegram->MessageID()));
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' =>
 								$magehelper->__("Sorry, I didn't understand that.") . " " .

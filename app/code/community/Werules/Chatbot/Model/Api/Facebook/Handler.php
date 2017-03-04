@@ -1012,8 +1012,8 @@
 						if ($supportgroup == $chatdata->tg_bot)
 							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chat_id, $text_orig, $chatdata->api_type, $username)) // send chat id, original text and "facebook"
 							{
-								if ($chatdata->getTelegramConvState() != $chatdata->support_state) // TODO
-									$chatdata->updateChatdata('facebook_conv_state', $chatdata->support_state);
+//								if ($chatdata->getTelegramConvState() != $chatdata->support_state) // TODO
+//									$chatdata->updateChatdata('facebook_conv_state', $chatdata->support_state);
 								$errorflag = false;
 							}
 
