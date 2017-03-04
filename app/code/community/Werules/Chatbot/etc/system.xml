@@ -44,14 +44,14 @@
 							<comment>Choose to receive all support messages in one single message app.</comment>
 						</master_support_group>
 						<enable_support_final_message>
-							<label>Automaticcaly Enable Support</label>
+							<label>Forward Unknown Messages to Support</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
 							<sort_order>2</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Automaticcaly Enable Support if Customer Types a Message That The Bot Dosen't Understand</comment>
+							<comment>Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand</comment>
 						</enable_support_final_message>
 						<list_empty_categories>
 							<label>List Empty Categoies</label>
