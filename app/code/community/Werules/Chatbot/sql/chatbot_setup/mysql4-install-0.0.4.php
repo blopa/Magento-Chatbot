@@ -1,11 +1,12 @@
 <?php
 
+$table = 'wr_chatbot';
 $installer = $this;
 $installer->startSetup(); //db installation
 
-$installer->run(" 
-	-- DROP TABLE IF EXISTS {$this->getTable('wr_chatbot')};
-	CREATE TABLE {$this->getTable('wr_chatbot')} (
+$installer->run("
+	-- DROP TABLE IF EXISTS {$this->getTable($table)};
+	CREATE TABLE {$this->getTable($table)} (
 	  `entity_id` int(11) unsigned NOT NULL auto_increment,
 	  `customer_id` int(11) NULL,
 	  `session_id` varchar(150) NULL,
