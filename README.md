@@ -111,7 +111,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Fix categories listing limits
-	- List only categories with products
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Better "processing" feedback messages
 	- Inform how many itens were found in a category/search
@@ -121,6 +120,9 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add a custom in-store chat message app
 	- Documentation / Tutorials / Videos
 	- Send message to all customers
+	- Force exit customer from support mode
+	- Block a customer for using support mode
+	- Save support history
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
