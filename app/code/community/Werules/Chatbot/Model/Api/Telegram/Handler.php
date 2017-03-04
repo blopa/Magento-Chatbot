@@ -234,7 +234,7 @@
 				$chatdata->errormsg = $magehelper->__("Something went wrong, please try again.");
 				$chatdata->cancelmsg = $magehelper->__("To cancel, send") . " " . $chatdata->cancel_cmd['command'];
 				$chatdata->canceledmsg = $magehelper->__("Ok, canceled.");
-				$chatdata->loginfirstmsg =  $magehelper->__("Please login first.");
+				$chatdata->loginfirstmsg = $magehelper->__("Please login first.");
 				array_push($chatdata->positivemsg, $magehelper->__("Ok"), $magehelper->__("Okay"), $magehelper->__("Cool"), $magehelper->__("Awesome"));
 				// $chatdata->positivemsg[array_rand($chatdata->positivemsg)]
 
@@ -261,7 +261,7 @@
 					$startdata = explode(" ", $text);
 					if (is_array($startdata) && count($startdata) > 1) // has hash parameter
 					{
-						$chat_hash =  $chatdata->load(trim($startdata[1]), 'hash_key');
+						$chat_hash = $chatdata->load(trim($startdata[1]), 'hash_key');
 						if ($chat_hash->getHashKey())
 						{
 							try
@@ -768,33 +768,48 @@
 						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("let me fetch that for you.")));
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Processing...")));
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
-						$i = 0;
 						if ($ordersIDs)
 						{
+							$i = 0;
 							$total = count($ordersIDs);
-							foreach($ordersIDs as $orderID)
+							if ($show_more < $total)
 							{
-								$message = $chatdata->prepareTelegramOrderMessages($orderID);
-								if ($message) // TODO
+								if ($show_more == 0)
 								{
-									if ($i >= $show_more)
-									{
-										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
-										if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
-										{
-											// TODO add option to list more orders
-											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_order . (string)($i + 1)));
-											if ($chatdata->getTelegramConvState() != $chatdata->list_orders_state)
-												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
-													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
-											break;
-										}
-										else if (($i + 1) == $total) // if it's the last one, back to start_state
-											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
-												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
-									}
-									$i++;
+									if ($total == 1)
+										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done. You've only one order.", $total)));
+									else
+										$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done. I've found %s orders.", $total)));
 								}
+
+								foreach($ordersIDs as $orderID)
+								{
+									$message = $chatdata->prepareTelegramOrderMessages($orderID);
+									if ($message) // TODO
+									{
+										if ($i >= $show_more)
+										{
+											$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $message));
+											if (($i + 1) != $total && $i >= ($show_more + $listing_limit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+											{
+												// TODO add option to list more orders
+												$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("To show more, send") . " " . $list_more_order . (string)($i + 1)));
+												if ($chatdata->getTelegramConvState() != $chatdata->list_orders_state)
+													if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
+														$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+												break;
+											}
+											else if (($i + 1) == $total) // if it's the last one, back to start_state
+												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->start_state))
+													$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+										}
+										$i++;
+									}
+								}
+								if ($i == 0)
+									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
+//							else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->list_orders_state))
+//								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 							}
 						}
 						else
@@ -802,8 +817,6 @@
 							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("This account has no orders.")));
 							return $telegram->respondSuccess();
 						}
-						if ($i == 0)
-							$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->errormsg));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->loginfirstmsg));
