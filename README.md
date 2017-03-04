@@ -111,9 +111,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Fix categories listing limits
-	- Store messages on database before sending to make sure it will be sent eventually
-	- Better "processing" feedback messages
-	- Inform how many itens were found in a category/search
 	- Integrate checkout to Facebook Payment API
 	- Add inline search for Telegram
 	- Add natural language configuration (wit.ai?)
@@ -122,6 +119,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Send message to all customers
 	- Force exit customer from support mode
 	- Block a customer for using support mode
+	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history
 
 ## License

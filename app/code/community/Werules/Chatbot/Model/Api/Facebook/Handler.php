@@ -294,7 +294,7 @@
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->add2cart_cmd['command']);
 					if ($cmdvalue) // TODO
 					{
-						$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+						$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 						if ($chatdata->addProd2Cart($cmdvalue))
 							$facebook->sendMessage($chat_id, $magehelper->__("Added. To checkout send") . ' "' . $chatdata->checkout_cmd['command'] . '"');
 						else
@@ -390,7 +390,7 @@
 				// states
 				if ($conv_state == $chatdata->list_cat_state) // TODO show only in stock products
 				{
-					$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+					$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					$errorflag = false;
 					if ($_category) // check if variable isn't false/empty
@@ -510,7 +510,7 @@
 				}
 				else if ($conv_state == $chatdata->search_state)
 				{
-					$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+					$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 					$errorflag = false;
 					$noprodflag = false;
 					$productIDs = $chatdata->getProductIdsBySearch($text);
@@ -651,7 +651,7 @@
 					$errorflag = false;
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+						$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 						$order = Mage::getModel('sales/order')->loadByIncrementId($text);
 						if ($order->getId())
 						{
@@ -736,7 +736,7 @@
 				{
 					$sessionId = null;
 					$quoteId = null;
-					$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+					$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 					if ($chatdata->getIsLogged() == "1")
 					{
 						if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId())
@@ -818,10 +818,7 @@
 					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->search_state))
 						$facebook->sendMessage($chat_id, $chatdata->errormsg);
 					else
-					{
-						$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you want to search for?"));
-						$facebook->sendMessage($chat_id, $chatdata->cancelmsg);
-					}
+						$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you want to search for?") . ". " . $chatdata->cancelmsg);
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->login_cmd))
@@ -850,7 +847,7 @@
 					if ($chatdata->getIsLogged() == "1")
 					{
 						//$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("let me fetch that for you."));
-						$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+						$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						$i = 0;
 						if ($ordersIDs)
@@ -927,7 +924,7 @@
 					$facebook->sendMessage($chat_id, "Passei aqui");
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$facebook->sendMessage($chat_id, $magehelper->__("Processing..."));
+						$facebook->sendMessage($chat_id, $magehelper->__("Please wait while I check that for you."));
 						$errorflag = false;
 						$cmdvalue = $chatdata->getCommandValue($text, $chatdata->reorder_cmd['command']);
 						if ($cmdvalue)
@@ -988,10 +985,7 @@
 						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->support_state))
 							$facebook->sendMessage($chat_id, $chatdata->errormsg);
 						else
-						{
-							$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you need support for?"));
-							$facebook->sendMessage($chat_id, $chatdata->cancelmsg);
-						}
+							$facebook->sendMessage($chat_id, $chatdata->positivemsg[array_rand($chatdata->positivemsg)] . ", " . $magehelper->__("what do you need support for?") . ". " . $chatdata->cancelmsg);
 					}
 					else
 						$facebook->sendMessage($chat_id, $magehelper->__("You're already on support in other chat application, please close it before opening a new one."));
