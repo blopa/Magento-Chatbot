@@ -46,8 +46,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			send_email,
 			cancel,
 			help,
-			about"
-		;
+			about
+		";
 		protected $start_cmd = array();
 		protected $listacateg_cmd = array();
 		protected $search_cmd = array();
@@ -63,6 +63,17 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $cancel_cmd = array();
 		protected $help_cmd = array();
 		protected $about_cmd = array();
+		// admin cmds
+
+//		protected $admin_cmd_list =
+//		"
+//			messagetoall,
+//			endsupport,
+//			blocksupport
+//		";
+		protected $adm_send2all = "messagetoall";
+		protected $adm_endsupport = "endsupport";
+		protected $adm_blocksupport = "blocksupport";
 
 		// REGEX
 		protected $unallowed_characters = "/[^A-Za-z0-9 _]/";

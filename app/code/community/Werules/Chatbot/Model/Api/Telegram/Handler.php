@@ -153,7 +153,7 @@
 						if (!empty($reply_msg_id)) // if the message is replying another message
 						{
 							$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($reply_msg_id, 'last_support_message_id');
-							if (!empty($foreignchatdata->getLastSupportMessageId()))
+							if (!empty($foreignchatdata->getLastSupportMessageId())) // check if current reply message id is saved on databse
 							{
 								$api_name = $foreignchatdata->getLastSupportChat();
 								if ($api_name == $foreignchatdata->fb_bot)
@@ -167,9 +167,30 @@
 									$telegram->sendMessage(array('chat_id' => $reply_from_user, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
 									$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Message sent."))); // TODO
 								}
-								else if ($text == "/sendmessagetoall") // TODO
+								else // process admin commands
 								{
-									// TODO
+									$send2all = "/" . $chatdata->adm_send2all;
+									$endsupport = "/" . $chatdata->adm_endsupport;
+									$adm_blocksupport = "/" . $chatdata->adm_blocksupport;
+									if ($text = $send2all)
+									{
+										$message = "test";
+										$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
+										foreach($chatbotcollection as $chatbot)
+										{
+											$tg_chatid = $chatbot->getTelegramChatId();
+											if ($tg_chatid)
+												$telegram->sendMessage(array('chat_id' => $tg_chatid, 'text' => $message));
+										}
+									}
+									else if ($text = $endsupport)
+									{
+
+									}
+									if ($text = $adm_blocksupport)
+									{
+
+									}
 								}
 							}
 						}
