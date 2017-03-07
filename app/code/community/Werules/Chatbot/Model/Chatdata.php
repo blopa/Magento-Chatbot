@@ -8,29 +8,29 @@
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
 		// APIs
-		protected $api_type = "";
+		protected $_apiType = "";
 		protected $tg_bot = "telegram";
 		protected $fb_bot = "facebook";
 		protected $wapp_bot = "whatsapp";
 		protected $wechat_bot = "wechat";
 
 		// CONVERSATION STATES
-		protected $start_state = 0;
-		protected $list_cat_state = 1;
-		protected $list_prod_state = 2;
-		protected $search_state = 3;
-		protected $login_state = 4;
-		protected $list_orders_state = 5;
-		protected $reorder_state = 6;
-		protected $add2cart_state = 7;
-		protected $checkout_state = 9;
-		protected $track_order_state = 10;
-		protected $support_state = 11;
-		protected $send_email_state = 12;
-		protected $clear_cart_state = 13;
+		protected $_startState = 0;
+		protected $_listCategoriesState = 1;
+		protected $_listProductsState = 2;
+		protected $_searchState = 3;
+		protected $_loginState = 4;
+		protected $_listOrdersState = 5;
+		protected $_reorderState = 6;
+		protected $_add2CartState = 7;
+		protected $_checkoutState = 9;
+		protected $_trackOrderState = 10;
+		protected $_supportState = 11;
+		protected $_sendEmailState = 12;
+		protected $_clearCartState = 13;
 
 		// COMMANDS
-		protected $cmd_list =
+		protected $_cmdList =
 		"
 			start,
 			list_cat,
@@ -48,48 +48,48 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			help,
 			about
 		";
-		protected $start_cmd = array();
-		protected $listacateg_cmd = array();
-		protected $search_cmd = array();
-		protected $login_cmd = array();
-		protected $listorders_cmd = array();
-		protected $reorder_cmd = array();
-		protected $add2cart_cmd = array();
-		protected $checkout_cmd = array();
-		protected $clearcart_cmd = array();
-		protected $trackorder_cmd = array();
-		protected $support_cmd = array();
-		protected $sendemail_cmd = array();
-		protected $cancel_cmd = array();
-		protected $help_cmd = array();
-		protected $about_cmd = array();
-		// admin cmds
+		protected $_startCmd = array();
+		protected $_listCategoriesCmd = array();
+		protected $_searchCmd = array();
+		protected $_loginCmd = array();
+		protected $_listOrdersCmd = array();
+		protected $_reorderCmd = array();
+		protected $_add2CartCmd = array();
+		protected $_checkoutCmd = array();
+		protected $_clearCartCmd = array();
+		protected $_trackOrderCmd = array();
+		protected $_supportCmd = array();
+		protected $_sendEmailCmd = array();
+		protected $_cancelCmd = array();
+		protected $_helpCmd = array();
+		protected $_aboutCmd = array();
 
+	// admin cmds
 //		protected $admin_cmd_list =
 //		"
 //			messagetoall,
 //			endsupport,
 //			blocksupport
 //		";
-		protected $adm_send2all = "messagetoall";
-		protected $adm_endsupport = "endsupport";
-		protected $adm_blocksupport = "blocksupport";
+		protected $_admSendMessage2AllCmd = "messagetoall";
+		protected $_admEndSupportCmd = "endsupport";
+		protected $_admBlockSupportCmd = "blocksupport";
 
 		// REGEX
-		protected $unallowed_characters = "/[^A-Za-z0-9 _]/";
+		protected $_unallowedCharacters = "/[^A-Za-z0-9 _]/";
 		
 		// DEFAULT MESSAGES
-		protected $errormsg = "";
-		protected $cancelmsg = "";
-		protected $canceledmsg = "";
-		protected $loginfirstmsg = "";
-		protected $positivemsg = array();
+		protected $_errorMessage = "";
+		protected $_cancelMessage = "";
+		protected $_canceledMessage = "";
+		protected $_loginFirstMessage = "";
+		protected $_positiveMessages = array();
 
 		// URLS
-		public $tg_url = "https://t.me/";
-		public $fb_url = "https://m.me/";
-//		protected $wapp_url = "";
-//		protected $wechat_url = "";
+		public $_tgUrl = "https://t.me/";
+		public $_fbUrl = "https://m.me/";
+//		protected $_wappUrl = "";
+//		protected $_wechatUrl = "";
 
 		public function _construct()
 		{
