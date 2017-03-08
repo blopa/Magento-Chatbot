@@ -40,6 +40,9 @@
 
 		public function facebookHandler($apiKey)
 		{
+			if (empty($apiKey)) // if no apiKey available, break proccess
+				return "";
+			
 			// Instances the Facebook class
 			$facebook = new Messenger($apiKey);
 
@@ -1010,7 +1013,7 @@
 					{
 						$errorFlag = true;
 						if ($supportGroupdId == $chatdata->_tgBot)
-							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiKey, $username)) // send chat id, original text and "facebook"
+							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text and "facebook"
 							{
 //								if ($chatdata->getTelegramConvState() != $chatdata->_supportState) // TODO
 //									$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState);

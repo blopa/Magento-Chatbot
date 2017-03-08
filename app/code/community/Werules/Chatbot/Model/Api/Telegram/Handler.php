@@ -59,6 +59,9 @@
 
 		public function telegramHandler($apiKey)
 		{
+			if (empty($apiKey)) // if no apiKey available, break proccess
+				return "";
+			
 			// Instances the Telegram class
 			$telegram = new Telegram($apiKey);
 
