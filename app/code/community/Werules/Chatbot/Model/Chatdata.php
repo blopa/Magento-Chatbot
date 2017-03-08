@@ -163,7 +163,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 			$mail = new Zend_Mail('UTF-8');
 
-			if ($this->_apiKey == $this->_tgBot)
+			if ($this->_apiType == $this->_tgBot)
 			{
 				$url = $this->_tgUrl . $this->getTelegramChatId();
 				if ($this->getCustomerId())
@@ -177,7 +177,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					}
 				}
 			}
-			else if ($this->_apiKey == $this->_fbBot)
+			else if ($this->_apiType == $this->_fbBot)
 			{
 				// code here etc
 			}
@@ -274,17 +274,17 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected function getCommandString($cmdId)
 		{
 			$rep = "";
-			if ($this->_apiKey == $this->_tgBot)
+			if ($this->_apiType == $this->_tgBot)
 			{
 				$rep = "_";
 				$confpath = 'chatbot_enable/telegram_config/';
 			}
-			else if ($this->_apiKey == $this->_fbBot)
+			else if ($this->_apiType == $this->_fbBot)
 			{
 				$rep = " ";
 				$confpath = 'chatbot_enable/facebook_config/';
 			}
-//			else if ($this->_apiKey == $this->_wappBot)
+//			else if ($this->_apiType == $this->_wappBot)
 //				$confpath = 'chatbot_enable/whatsapp_config/';
 
 			$config = Mage::getStoreConfig($confpath . 'enabled_commands');

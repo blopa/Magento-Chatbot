@@ -16,7 +16,7 @@
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata');
 			$chatdata->load($chat_id, 'facebook_chat_id');
-			$chatdata->_apiKey = $chatdata->_fbBot;
+			$chatdata->_apiType = $chatdata->_fbBot;
 
 			if (is_null($chatdata->getFacebookChatId()))
 			{ // should't happen
@@ -26,7 +26,7 @@
 			// mage helper
 			$magehelper = Mage::helper('core');
 
-			$apiKey = $chatdata->getApikey($chatdata->_apiKey); // get facebook bot api
+			$apiKey = $chatdata->getApikey($chatdata->_apiType); // get facebook bot api
 			if ($apiKey)
 			{
 				$facebook = new Messenger($apiKey);
@@ -98,7 +98,7 @@
 
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
-				$chatdata->_apiKey = $chatdata->_fbBot;
+				$chatdata->_apiType = $chatdata->_fbBot;
 
 				if ($messageId == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
 					return $facebook->respondSuccess();
@@ -626,7 +626,7 @@
 				{
 					$errorflag = true;
 					if ($supportGroupdId == $chatdata->_tgBot)
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiKey, $username)) // send chat id, original text and "facebook"
+						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text and "facebook"
 							$errorflag = false;
 
 					if ($errorflag)

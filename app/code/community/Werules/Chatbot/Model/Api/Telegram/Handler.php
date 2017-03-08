@@ -23,8 +23,8 @@
 				}
 			}
 
-			$chatdata->_apiKey = $chatdata->_tgBot;
-			$apiKey = $chatdata->getApikey($chatdata->_apiKey); // get telegram bot api
+			$chatdata->_apiType = $chatdata->_tgBot;
+			$apiKey = $chatdata->getApikey($chatdata->_apiType); // get telegram bot api
 			if ($apiKey)
 			{
 				$telegram = new Telegram($apiKey);
@@ -88,7 +88,7 @@
 			{
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
-				$chatdata->_apiKey = $chatdata->_tgBot;
+				$chatdata->_apiType = $chatdata->_tgBot;
 
 				if ($messageId == $chatdata->getTelegramMessageId()) // prevents to reply the same request twice
 					return $telegram->respondSuccess();
