@@ -161,37 +161,47 @@
 							}
 							else
 							{
-								$reply_from_user = $telegram->ReplyToMessageFromUserID();
-								if (!is_null($reply_from_user))
+								$replyFromUserId = $telegram->ReplyToMessageFromUserID();
+								if (!is_null($replyFromUserId))
 								{
-									$telegram->sendMessage(array('chat_id' => $reply_from_user, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Message sent."))); // TODO
-								}
-								else // process admin commands
-								{
-									$send2all = "/" . $chatdata->_admSendMessage2AllCmd;
-									$endsupport = "/" . $chatdata->_admEndSupportCmd;
-									$adm_blocksupport = "/" . $chatdata->_admBlockSupportCmd;
-									if ($text = $send2all)
+									$admEndSupport = "/" . $chatdata->_admEndSupportCmd;
+									$admBlockSupport = "/" . $chatdata->_admBlockSupportCmd;
+									if ($text == $admEndSupport)
 									{
-										$message = "test";
-										$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
-										foreach($chatbotcollection as $chatbot)
-										{
-											$tg_chatid = $chatbot->getTelegramChatId();
-											if ($tg_chatid)
-												$telegram->sendMessage(array('chat_id' => $tg_chatid, 'text' => $message));
-										}
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("We're working on this feature.")));
 									}
-									else if ($text = $endsupport)
+									else if ($text == $admBlockSupport)
 									{
-
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("We're working on this feature.")));
 									}
-									if ($text = $adm_blocksupport)
+									else // if no command, then it's replying the user
 									{
-
+										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Message sent."))); // TODO
 									}
 								}
+							}
+						}
+						else // proccess pure admin commands
+						{
+							$admSend2All = "/" . $chatdata->_admSendMessage2AllCmd;
+
+							if ($chatdata->checkCommandWithValue($text, $admSend2All))
+							{
+								$message = trim($chatdata->getCommandValue($text, $admSend2All));
+								if (!empty($message))
+								{
+									$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
+									foreach($chatbotcollection as $chatbot)
+									{
+										$tgChatId = $chatbot->getTelegramChatId();
+										if ($tgChatId)
+											$telegram->sendMessage(array('chat_id' => $tgChatId, 'text' => $message)); // $magehelper->__("Message from support") . ":\n" .
+									}
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Message sent.")));
+								}
+								else
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please use") . ' "' . $admSend2All . " " . $magehelper->__("your message here.") . '"'));
 							}
 						}
 						return $telegram->respondSuccess();
@@ -593,7 +603,7 @@
 				{
 					if (!empty($supportGroupdId))
 					{
-						$telegram->forwardMessage(array('chat_id' => $supportGroupdId, 'from_chat_id' => $chatId, 'message_id' => $telegram->MessageID()));
+						$telegram->forwardMessage(array('chat_id' => $supportGroupdId, 'from_chat_id' => $chatId, 'message_id' => $telegram->MessageID())); // Reply to this message to reply to the customer
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("we have sent your message to support.")));
 					}
 					else
