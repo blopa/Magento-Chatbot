@@ -9,10 +9,10 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
 		// APIs
 		protected $_apiType = "";
-		protected $tg_bot = "telegram";
-		protected $fb_bot = "facebook";
-		protected $wapp_bot = "whatsapp";
-		protected $wechat_bot = "wechat";
+		protected $_tgBot = "telegram";
+		protected $_fbBot = "facebook";
+		protected $_wappBot = "whatsapp";
+		protected $_wechatBot = "wechat";
 
 		// CONVERSATION STATES
 		protected $_startState = 0;
