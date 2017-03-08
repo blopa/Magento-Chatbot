@@ -166,9 +166,13 @@
 								{
 									$admEndSupport = "/" . $chatdata->_admEndSupportCmd;
 									$admBlockSupport = "/" . $chatdata->_admBlockSupportCmd;
+
+									$customerData = Mage::getModel('chatbot/chatdata')->load($replyFromUserId, 'telegram_chat_id');
 									if ($text == $admEndSupport)
 									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("We're working on this feature.")));
+										$customerData->updateChatdata('telegram_conv_state', $chatdata->_startState);
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. The customer is no longer on support.")));
+										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $magehelper->__("Support ended."))); // TODO
 									}
 									else if ($text == $admBlockSupport)
 									{
@@ -176,8 +180,13 @@
 									}
 									else // if no command, then it's replying the user
 									{
-										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // TODO
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Message sent."))); // TODO
+										if ($customerData->getTelegramConvState() != $chatdata->_supportState)
+										{
+											$customerData->updateChatdata('telegram_conv_state', $chatdata->_supportState);
+											$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $magehelper->__("You're now on support mode.")));
+										}
+										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $magehelper->__("Message from support") . ":\n" . $text)); // send message to customer TODO
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Message sent."))); // send message to admin group TODO
 									}
 								}
 							}
@@ -921,7 +930,7 @@
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_supportState))
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you need support for?") . ". " . $chatdata->_cancelMessage));
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you need support for?") . " " . $chatdata->_cancelMessage));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're already on support in other chat application, please close it before opening a new one.")));
@@ -949,8 +958,8 @@
 							$telegram->forwardMessage(array('chat_id' => $supportGroupdId, 'from_chat_id' => $chatId, 'message_id' => $telegram->MessageID()));
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' =>
 								$magehelper->__("Sorry, I didn't understand that.") . " " .
-								$magehelper->__("Please wait while our support check your message so you can talk to a real person.") . " " .
-								$chatdata->_cancelMessage
+								$magehelper->__("Please wait while our support check your message so you can talk to a real person.")// . " " .
+								//$chatdata->_cancelMessage
 							)); // TODO
 						}
 						else

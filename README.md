@@ -116,8 +116,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store chat message app
 	- Documentation / Tutorials / Videos
-	- Send message to all customers
-	- Force exit customer from support mode
+	- Send message to all customers (done for Telegram)
+	- Force exit customer from support mode (done for Telegram)
 	- Block a customer for using support mode
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history
