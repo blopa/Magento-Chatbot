@@ -65,7 +65,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $_aboutCmd = array();
 
 	// admin cmds
-//		protected $admin_cmd_list =
+//		protected $adminCmdList =
 //		"
 //			messagetoall,
 //			endsupport,
@@ -153,13 +153,13 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 		protected function sendEmail($text)
 		{
-			$storename = Mage::app()->getStore()->getName();
-			$storeemail = Mage::getStoreConfig('trans_email/ident_general/email');// TODO
+			$storeName = Mage::app()->getStore()->getName();
+			$storeEmail = Mage::getStoreConfig('trans_email/ident_general/email');// TODO
 			$magehelper = Mage::helper('core');
 
 			$url = $magehelper->__("Not informed");
-			$customer_email = $magehelper->__("Not informed");
-			$customer_name = $magehelper->__("Not informed");
+			$customerEmail = $magehelper->__("Not informed");
+			$customerName = $magehelper->__("Not informed");
 
 			$mail = new Zend_Mail('UTF-8');
 
@@ -171,9 +171,9 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
 					if ($customer->getId())
 					{
-						$customer_email = $customer->getEmail();
-						$customer_name = $customer->getName();
-						$mail->setReplyTo($customer_email);
+						$customerEmail = $customer->getEmail();
+						$customerName = $customer->getName();
+						$mail->setReplyTo($customerEmail);
 					}
 				}
 			}
@@ -182,19 +182,19 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				// code here etc
 			}
 
-			$email_body =
+			$emailBody =
 				$magehelper->__("Message from chatbot customer") . "<br><br>" .
 				$magehelper->__("Customer name") . ": " .
-				$customer_name . "<br>" .
+				$customerName . "<br>" .
 				$magehelper->__("Message") . ":<br>" .
 				$text . "<br><br>" .
 				$magehelper->__("Contacts") . ":<br>" .
 				$magehelper->__("Chatbot") . ": " . $url . "<br>" .
-				$magehelper->__("Email") . ": " . $customer_email . "<br>";
+				$magehelper->__("Email") . ": " . $customerEmail . "<br>";
 
-			$mail->setBodyHtml($email_body);
-			$mail->setFrom($storeemail, $storename);
-			$mail->addTo($storeemail, $storename);
+			$mail->setBodyHtml($emailBody);
+			$mail->setFrom($storeEmail, $storeName);
+			$mail->addTo($storeEmail, $storeName);
 			$mail->setSubject(Mage::helper('core')->__("Contact from chatbot"));
 
 			try
@@ -219,7 +219,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			$cart = Mage::getModel("checkout/cart");
 			try
 			{
-				$hasquote = $this->getSessionId() && $this->getQuoteId(); // has class quote and session ids
+				$hasQuote = $this->getSessionId() && $this->getQuoteId(); // has class quote and session ids
 				if ($this->getIsLogged() == "1")
 				{
 					$customer = Mage::getModel('customer/customer')->load((int)$this->getCustomerId());
@@ -227,7 +227,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					{
 						// if user is set as logged, then login using magento singleton
 						Mage::getSingleton('customer/session')->loginById($this->getCustomerId());
-						if (!$hasquote)
+						if (!$hasQuote)
 						{ // if class still dosen't have quote and session ids, init here
 							// set current quote as customer quote
 							$quote = Mage::getModel('sales/quote')->loadByCustomer($customer);
@@ -240,7 +240,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 						}
 					}
 				}
-				if ($hasquote)
+				if ($hasQuote)
 				{
 					// init quote and session from chatbot class
 					$cart->setQuote(Mage::getModel('sales/quote')->loadByIdWithoutStore((int)$this->getQuoteId()));
@@ -296,7 +296,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					$defaultCmds = explode(',', $this->_cmdList);
 					if (is_array($defaultCmds))
 					{
-						$cmd_code = "";
+						$cmdCode = "";
 						$alias = array();
 						$config = Mage::getStoreConfig($confpath . 'commands_list');
 						if ($config)
@@ -308,31 +308,31 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 								{
 									if ($cmd['command_id'] == $cmdId)
 									{
-										$cmd_code = $cmd['command_code'];
+										$cmdCode = $cmd['command_code'];
 										$alias = array_map('strtolower', explode(',', $cmd['command_alias_list']));
 										break;
 									}
 								}
-								if (empty($cmd_code)) // if no command found, return the default
-									$cmd_code = $defaultCmds[$cmdId - 1];
+								if (empty($cmdCode)) // if no command found, return the default
+									$cmdCode = $defaultCmds[$cmdId - 1];
 							}
 							else // if no command found, return the default
-								$cmd_code = $defaultCmds[$cmdId - 1];
+								$cmdCode = $defaultCmds[$cmdId - 1];
 						}
 						else // if no command found, return the default
-							$cmd_code = $defaultCmds[$cmdId - 1];
+							$cmdCode = $defaultCmds[$cmdId - 1];
 
-						$cmd_code = preg_replace( // remove all non-alphanumerics
+						$cmdCode = preg_replace( // remove all non-alphanumerics
 							$this->_unallowedCharacters,
 							'',
 							str_replace( // replace whitespace for underscore
 								' ',
 								$rep,
-								trim($cmd_code)
+								trim($cmdCode)
 							)
 						);
 
-						return array('command' => strtolower($cmd_code), 'alias' => $alias);
+						return array('command' => strtolower($cmdCode), 'alias' => $alias);
 					}
 				}
 			}
@@ -483,7 +483,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			{
 				$absolutePath =
 					Mage::getBaseDir('media') .
-					"/catalog/product" .
+					DS . "catalog" . DS . "product" .
 					$imagepath;
 
 				return curl_file_create($absolutePath, 'image/jpg');
