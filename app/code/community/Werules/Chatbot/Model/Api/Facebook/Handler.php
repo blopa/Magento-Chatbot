@@ -715,7 +715,9 @@
 
 								)
 							);
-							$facebook->sendButtonTemplate($supportGroupId, $magehelper->__("From") . ": " . $username . "\n" . $text, $buttons);
+
+							$message = $magehelper->__("From") . ": " . $username . "\n" . $magehelper->__("ID") . ": " . $chatId . "\n" . $text;
+							$facebook->sendButtonTemplate($supportGroupId, $message, $buttons);
 							$errorFlag = false;
 						}
 					}
