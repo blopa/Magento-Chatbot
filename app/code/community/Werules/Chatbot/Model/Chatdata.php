@@ -29,6 +29,9 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $_sendEmailState = 12;
 		protected $_clearCartState = 13;
 
+		// ADMIN STATES
+		protected $_replyToSupportMessageState = 14;
+
 		// COMMANDS
 		protected $_cmdList =
 		"

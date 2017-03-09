@@ -42,7 +42,7 @@
 		{
 			if (empty($apiKey)) // if no apiKey available, break proccess
 				return "";
-			
+
 			// Instances the Facebook class
 			$facebook = new Messenger($apiKey);
 
@@ -68,13 +68,14 @@
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
 			$enableFinalMessage2Support = Mage::getStoreConfig('chatbot_enable/general_config/enable_support_final_message');
-			$supportGroupdId = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
+			$supportGroupId = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 			$showMore = 0;
 			$moreOrders = false;
 			$listingLimit = 5;
 			$listMoreCategories = "show_more_list_cat_";
 			$listMoreSearch = "show_more_search_prod_";
 			$listMoreOrders = "show_more_order_";
+			$replyToCustomerMessage = "reply_to_message";
 
 			if ($enableLog == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
@@ -148,15 +149,72 @@
 				}
 
 				// instances conversation state
-				$conv_state = $chatdata->getFacebookConvState();
+				$conversationState = $chatdata->getFacebookConvState();
 
 				// mage helper
 				$magehelper = Mage::helper('core');
 
-				// if it's a group message
-				if ($chatId == $supportGroupdId)
+				// if it's the admin
+				// handle admin stuff
+				//$isAdmin = $chatdata->getIsAdmin();
+				if ($chatId == $supportGroupId)// || $isAdmin == "1")
 				{
-					//return $facebook->respondSuccess();
+//					if ($isAdmin == "0") // set user as admin
+//						$chatdata->updateChatdata('is_admin', "1");
+
+					if ($conversationState == $chatdata->_replyToSupportMessageState) // check if admin is replying to a customer
+					{
+						$customerChatId = $chatdata->getFacebookSupportReplyChatId(); // get customer chat id
+						if (!empty($customerChatId))
+						{
+							$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState); // set admin to _startState
+							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
+
+							if ($customerData->getFacebookConvState() != $chatdata->_supportState) // if user isn't on support, switch to support
+							{
+								// TODO IMPORTANT remember to switch off all other supports
+								$customerData->updateChatdata('facebook_conv_state', $chatdata->_supportState);
+								$facebook->sendMessage($customerChatId, $magehelper->__("You're now on support mode."));
+							}
+							$facebook->sendMessage($customerChatId, $magehelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
+							$facebook->sendMessage($chatId, $magehelper->__("Message sent."));
+						}
+						return $facebook->respondSuccess();
+					}
+					else if ($isPayload)
+					{
+						if ($chatdata->checkCommand($text, $chatdata->_admEndSupportCmd)) // finish customer support
+						{
+							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admEndSupportCmd)); // get customer chatId from payload
+							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
+							$customerData->updateChatdata('facebook_conv_state', $chatdata->_startState); // update conversation state
+
+							$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is no longer on support."));
+							$facebook->sendMessage($customerChatId, $magehelper->__("Support ended."));
+						}
+						else if ($chatdata->checkCommand($text, $chatdata->_admBlockSupportCmd)) // block user from using support
+						{
+							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
+							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
+							$customerData->updateChatdata('enable_support', "0"); // disable support
+
+							$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is no longer able to enter support."));
+						}
+						else if ($chatdata->checkCommand($text, $replyToCustomerMessage))
+						{
+							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
+							$chatdata->updateChatdata('facebook_support_reply_chat_id', $customerChatId);
+							$chatdata->updateChatdata('facebook_conv_state', $chatdata->_replyToSupportMessageState);
+
+							$facebook->sendMessage($chatId, $magehelper->__("Ok, send me the message and I'll forward it to the customer."));
+						}
+						else if ($chatdata->checkCommand($text, $chatdata->_admSendMessage2AllCmd)) // TODO
+						{
+
+						}
+
+						return $facebook->respondSuccess();
+					}
 				}
 
 				if ($chatdata->getIsLogged() == "1") // check if customer is logged
@@ -224,7 +282,7 @@
 
 				if ($enablePredict == "1" && !$isPayload) // prediction is enabled and itsn't payload
 				{
-					if ($conv_state == $chatdata->_startState)
+					if ($conversationState == $chatdata->_startState)
 					{
 						$cmdarray = array(
 							$chatdata->_startCmd['command'],
@@ -258,27 +316,27 @@
 				// cancel command
 				if ($chatdata->checkCommand($text, $chatdata->_cancelCmd))
 				{
-					if ($conv_state == $chatdata->_listCategoriesState)
+					if ($conversationState == $chatdata->_listCategoriesState)
 					{
 						$message = $chatdata->_canceledMessage;
 					}
-					else if ($conv_state == $chatdata->_supportState)
+					else if ($conversationState == $chatdata->_supportState)
 					{
 						$message = $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("exiting support mode.");
 					}
-					else if ($conv_state == $chatdata->_searchState)
+					else if ($conversationState == $chatdata->_searchState)
 					{
 						$message = $chatdata->_canceledMessage;
 					}
-					else if ($conv_state == $chatdata->_sendEmailState)
+					else if ($conversationState == $chatdata->_sendEmailState)
 					{
 						$message = $chatdata->_canceledMessage;
 					}
-					else if ($conv_state == $chatdata->_listProductsState)
+					else if ($conversationState == $chatdata->_listProductsState)
 					{
 						$message = $chatdata->_canceledMessage;
 					}
-					else if ($conv_state == $chatdata->_listOrdersState)
+					else if ($conversationState == $chatdata->_listOrdersState)
 					{
 						$message = $chatdata->_canceledMessage;
 					}
@@ -393,7 +451,7 @@
 				}
 
 				// states
-				if ($conv_state == $chatdata->_listCategoriesState) // TODO show only in stock products
+				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
 					$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
@@ -513,11 +571,11 @@
 					}
 					return $facebook->respondSuccess();
 				}
-				else if ($conv_state == $chatdata->_searchState)
+				else if ($conversationState == $chatdata->_searchState)
 				{
 					$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
 					$errorFlag = false;
-					$noProductFlag = false;
+					$noprodflag = false;
 					$productIDs = $chatdata->getProductIdsBySearch($text);
 					$elements = array();
 					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
@@ -625,12 +683,41 @@
 
 					return $facebook->respondSuccess();
 				}
-				else if ($conv_state == $chatdata->_supportState)
+				else if ($conversationState == $chatdata->_supportState)
 				{
 					$errorFlag = true;
-					if ($supportGroupdId == $chatdata->_tgBot)
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text and "facebook"
-							$errorFlag = false;
+					if (!empty($supportGroupId))
+					{
+						if ($supportGroupId == $chatdata->_tgBot)
+						{
+							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiKey, $username)) // send chat id, original text and "facebook"
+								$errorFlag = false;
+						}
+						else // probably have the admin chat id set
+						{
+							$buttons = array(
+								array(
+									'type' => 'postback',
+									'title' => $magehelper->__("End support"),
+									'payload' => $chatdata->_admEndSupportCmd . $chatId
+
+								),
+								array(
+									'type' => 'postback',
+									'title' => $magehelper->__("Block support"),
+									'payload' => $chatdata->_admBlockSupportCmd . $chatId
+
+								),
+								array(
+									'type' => 'postback',
+									'title' => $magehelper->__("Reply this message"),
+									'payload' => $replyToCustomerMessage . $chatId
+
+								)
+							);
+							$facebook->sendButtonTemplate($supportGroupId, $text, $buttons);
+						}
+					}
 
 					if ($errorFlag)
 						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
@@ -638,7 +725,7 @@
 						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("we have sent your message to support."));
 					return $facebook->respondSuccess();
 				}
-				else if ($conv_state == $chatdata->_sendEmailState)
+				else if ($conversationState == $chatdata->_sendEmailState)
 				{
 					$facebook->sendMessage($chatId, $magehelper->__("Trying to send the email..."));
 					if ($chatdata->sendEmail($text))
@@ -651,7 +738,7 @@
 						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 					return $facebook->respondSuccess();
 				}
-				else if ($conv_state == $chatdata->_trackOrderState)
+				else if ($conversationState == $chatdata->_trackOrderState)
 				{
 					$errorFlag = false;
 					if ($chatdata->getIsLogged() == "1")
@@ -985,15 +1072,25 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_supportCmd))
 				{
-					if ($chatdata->getTelegramConvState() != $chatdata->_supportState)
+					$supportEnabled = $chatdata->getEnableSupport();
+					$errorFlag = false;
+					if ($supportEnabled == "1")
 					{
-						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState))
-							$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+						if ($chatdata->getTelegramConvState() != $chatdata->_supportState) // TODO
+						{
+							if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState))
+								$errorFlag = true;
+							else
+								$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you need support for?") . " " . $chatdata->_cancelMessage);
+						}
 						else
-							$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you need support for?") . ". " . $chatdata->_cancelMessage);
+							$facebook->sendMessage($chatId, $magehelper->__("You're already on support in other chat application, please close it before opening a new one."));
 					}
 					else
-						$facebook->sendMessage($chatId, $magehelper->__("You're already on support in other chat application, please close it before opening a new one."));
+						$facebook->sendMessage($chatId, $magehelper->__("I'm sorry, you can't ask for support now. Please try again later."));
+
+					if ($errorFlag)
+						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_sendEmailCmd))
@@ -1012,8 +1109,8 @@
 					if ($enableFinalMessage2Support == "1")
 					{
 						$errorFlag = true;
-						if ($supportGroupdId == $chatdata->_tgBot)
-							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text and "facebook"
+						if ($supportGroupId == $chatdata->_tgBot)
+							if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiKey, $username)) // send chat id, original text and "facebook"
 							{
 //								if ($chatdata->getTelegramConvState() != $chatdata->_supportState) // TODO
 //									$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState);
