@@ -695,6 +695,25 @@
 						}
 						else // probably have the admin chat id set
 						{
+							if ($chatdata->getEnableSupport() == "1")
+							{
+								$blockEnableSupport = array(
+									'type' => 'postback',
+									'title' => $magehelper->__("Block support"),
+									'payload' => $chatdata->_admBlockSupportCmd . $chatId
+
+								);
+							}
+							else //($chatdata->getEnableSupport() == "0")
+							{
+								$blockEnableSupport = array(
+									'type' => 'postback',
+									'title' => $magehelper->__("Enable support"),
+									'payload' => $chatdata->_admBlockSupportCmd . $chatId
+
+								);
+							}
+
 							$buttons = array(
 								array(
 									'type' => 'postback',
@@ -702,12 +721,7 @@
 									'payload' => $chatdata->_admEndSupportCmd . $chatId
 
 								),
-								array(
-									'type' => 'postback',
-									'title' => $magehelper->__("Block support"),
-									'payload' => $chatdata->_admBlockSupportCmd . $chatId
-
-								),
+								$blockEnableSupport,
 								array(
 									'type' => 'postback',
 									'title' => $magehelper->__("Reply this message"),
