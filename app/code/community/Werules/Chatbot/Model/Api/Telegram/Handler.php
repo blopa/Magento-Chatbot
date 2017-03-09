@@ -147,6 +147,8 @@
 				if ($supportGroupId[0] == "g") // remove the 'g' from groupd id, and add '-'
 					$supportGroupId = "-" . ltrim($supportGroupId, "g");
 
+				// handle admin stuff
+				//$isAdmin = $chatdata->getIsAdmin();
 				// if it's a group message
 				if ($telegram->messageFromGroup())
 				{

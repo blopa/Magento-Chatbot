@@ -154,9 +154,9 @@
 				// mage helper
 				$magehelper = Mage::helper('core');
 
-				// if it's the admin
 				// handle admin stuff
 				//$isAdmin = $chatdata->getIsAdmin();
+				// if it's the admin chat id
 				if ($chatId == $supportGroupId)// || $isAdmin == "1")
 				{
 //					if ($isAdmin == "0") // set user as admin
@@ -183,7 +183,7 @@
 					}
 					else if ($isPayload)
 					{
-						if ($chatdata->checkCommand($text, $chatdata->_admEndSupportCmd)) // finish customer support
+						if ($chatdata->checkCommandWithValue($text, $chatdata->_admEndSupportCmd)) // finish customer support
 						{
 							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admEndSupportCmd)); // get customer chatId from payload
 							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
@@ -192,7 +192,7 @@
 							$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is no longer on support."));
 							$facebook->sendMessage($customerChatId, $magehelper->__("Support ended."));
 						}
-						else if ($chatdata->checkCommand($text, $chatdata->_admBlockSupportCmd)) // block user from using support
+						else if ($chatdata->checkCommandWithValue($text, $chatdata->_admBlockSupportCmd)) // block user from using support
 						{
 							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
 							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
@@ -200,9 +200,9 @@
 
 							$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is no longer able to enter support."));
 						}
-						else if ($chatdata->checkCommand($text, $replyToCustomerMessage))
+						else if ($chatdata->checkCommandWithValue($text, $replyToCustomerMessage))
 						{
-							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
+							$customerChatId = trim($chatdata->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
 							$chatdata->updateChatdata('facebook_support_reply_chat_id', $customerChatId);
 							$chatdata->updateChatdata('facebook_conv_state', $chatdata->_replyToSupportMessageState);
 
@@ -716,6 +716,7 @@
 								)
 							);
 							$facebook->sendButtonTemplate($supportGroupId, $text, $buttons);
+							$errorFlag = false;
 						}
 					}
 
