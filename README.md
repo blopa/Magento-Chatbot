@@ -27,6 +27,10 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Send email
 - Send message to support
 - Reply customer support messages from you favorite chat messenger
+- Send message to all customers (promotion messages, etc)
+- Force exit customer from support mode
+- Block a customer for using support mode
+- Use Telegram to receive and reply messages from Facebook
 
 **Currently not working with Configurable Products and products with custom options**
 
@@ -116,9 +120,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store chat message app
 	- Documentation / Tutorials / Videos
-	- Send message to all customers (done for Telegram)
-	- Force exit customer from support mode (done for Telegram)
-	- Block a customer for using support mode
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history
 
