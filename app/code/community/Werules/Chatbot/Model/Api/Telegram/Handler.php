@@ -171,6 +171,7 @@
 								{
 									$admEndSupport = "/" . $chatdata->_admEndSupportCmd;
 									$admBlockSupport = "/" . $chatdata->_admBlockSupportCmd;
+									$admEnableSupport = "/" . $chatdata->_admEnableSupportCmd;
 
 									$customerData = Mage::getModel('chatbot/chatdata')->load($replyFromUserId, 'telegram_chat_id');
 									if ($text == $admEndSupport) // finish customer support
@@ -184,6 +185,11 @@
 									{
 										$customerData->updateChatdata('enable_support', "0"); // disable support
 										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. The customer is no longer able to enter support."))); // TODO
+									}
+									else if ($text == $admEnableSupport) // block user from using support
+									{
+										$customerData->updateChatdata('enable_support', "1"); // enable support
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. The customer is now able to enter support."))); // TODO
 									}
 									else // if no command, then it's replying the user
 									{

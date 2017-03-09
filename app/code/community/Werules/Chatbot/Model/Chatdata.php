@@ -77,6 +77,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $_admSendMessage2AllCmd = "messagetoall";
 		protected $_admEndSupportCmd = "endsupport";
 		protected $_admBlockSupportCmd = "blocksupport";
+		protected $_admEnableSupportCmd = "enablesupport";
 
 		// REGEX
 		protected $_unallowedCharacters = "/[^A-Za-z0-9 _]/";

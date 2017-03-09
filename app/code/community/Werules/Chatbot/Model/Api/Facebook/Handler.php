@@ -196,9 +196,17 @@
 						{
 							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
 							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
-							$customerData->updateChatdata('enable_support', "0"); // disable support
+							if ($customerData->getEnableSupport() == "1")
+							{
+								$customerData->updateChatdata('enable_support', "0"); // disable support
+								$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is no longer able to enter support."));
+							}
+							else //if ($customerData->getEnableSupport() == "0")
+							{
+								$customerData->updateChatdata('enable_support', "1"); // enable support
+								$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is now able to enter support."));
+							}
 
-							$facebook->sendMessage($chatId, $magehelper->__("Done. The customer is no longer able to enter support."));
 						}
 						else if ($chatdata->checkCommandWithValue($text, $replyToCustomerMessage))
 						{
@@ -704,7 +712,7 @@
 								),
 								array(
 									'type' => 'postback',
-									'title' => $magehelper->__("Block support"),
+									'title' => $magehelper->__("Enable/Disable support"),
 									'payload' => $chatdata->_admBlockSupportCmd . $chatId
 
 								),
