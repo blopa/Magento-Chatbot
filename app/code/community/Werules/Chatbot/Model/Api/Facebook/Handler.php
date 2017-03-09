@@ -181,6 +181,23 @@
 						}
 						return $facebook->respondSuccess();
 					}
+					else if ($chatdata->checkCommandWithValue($text, $chatdata->_admSendMessage2AllCmd))
+					{
+						$message = trim($chatdata->getCommandValue($text, $chatdata->_admSendMessage2AllCmd));
+						if (!empty($message))
+						{
+							$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
+							foreach($chatbotcollection as $chatbot)
+							{
+								$fbChatId = $chatbot->getFacebookChatId();
+								if ($fbChatId)
+									$facebook->sendMessage($fbChatId, $message); // $magehelper->__("Message from support") . ":\n" .
+							}
+							$facebook->sendMessage($chatId, $magehelper->__("Message sent."));
+						}
+						else
+							$facebook->sendMessage($chatId, $magehelper->__("Please use") . ' "' . $chatdata->_admSendMessage2AllCmd . " " . $magehelper->__("your message here.") . '"');
+					}
 					else if ($isPayload)
 					{
 						if ($chatdata->checkCommandWithValue($text, $chatdata->_admEndSupportCmd)) // finish customer support
