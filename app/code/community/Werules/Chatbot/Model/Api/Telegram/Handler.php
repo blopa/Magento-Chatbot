@@ -11,7 +11,7 @@
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
 		}
 
-		public function foreignMessageToSupport($chat_id, $text, $api_name, $customer_name)
+		public function foreignMessageToSupport($chat_id, $text, $api_name, $customerName)
 		{
 			$chatdata = Mage::getModel('chatbot/chatdata');
 			if ($api_name == $chatdata->_fbBot && $chat_id)
@@ -37,7 +37,7 @@
 						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
 							$supportgroup = "-" . ltrim($supportgroup, "g");
 
-						$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $magehelper->__("From") . ": " . $customer_name . "\n" . $text;
+						$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $magehelper->__("From") . ": " . $customerName . "\n" . $text;
 						$result = $telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))
