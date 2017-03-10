@@ -971,24 +971,30 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_logoutCmd)) // TODO
 				{
-					$facebook->sendMessage($chatId, $magehelper->__("Ok, logging out."));
-					$errorFlag = false;
-					try
+					if ($chatdata->getIsLogged() == "1")
 					{
-						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
-						$chatdata->updateChatdata('is_logged', "0");
-						$chatdata->updateChatdata('customer_id', ""); // TODO null?
-						$chatdata->clearCart();
-					}
-					catch (Exception $e)
-					{
-						$errorFlag = true;
-					}
+						$facebook->sendMessage($chatId, $magehelper->__("Ok, logging out."));
+						$errorFlag = false;
+						try
+						{
+							$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
+							$chatdata->updateChatdata('is_logged', "0");
+							$chatdata->updateChatdata('customer_id', ""); // TODO null?
+							$chatdata->clearCart();
+						}
+						catch (Exception $e)
+						{
+							$errorFlag = true;
+						}
 
-					if ($errorFlag)
-						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+						if ($errorFlag)
+							$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+						else
+							$facebook->sendMessage($chatId, $magehelper->__("Done."));
+					}
 					else
-						$facebook->sendMessage($chatId, $magehelper->__("Done."));
+						$facebook->sendMessage($chatId, $magehelper->__("You're not logged."));
+
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders)

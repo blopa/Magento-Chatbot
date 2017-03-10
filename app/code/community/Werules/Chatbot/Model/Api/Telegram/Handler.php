@@ -821,24 +821,30 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_logoutCmd)) // TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Ok, logging out.")));
-					$errorFlag = false;
-					try
+					if ($chatdata->getIsLogged() == "1")
 					{
-						$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
-						$chatdata->updateChatdata('is_logged', "0");
-						$chatdata->updateChatdata('customer_id', ""); // TODO null?
-						$chatdata->clearCart();
-					}
-					catch (Exception $e)
-					{
-						$errorFlag = true;
-					}
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Ok, logging out.")));
+						$errorFlag = false;
+						try
+						{
+							$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
+							$chatdata->updateChatdata('is_logged', "0");
+							$chatdata->updateChatdata('customer_id', ""); // TODO null?
+							$chatdata->clearCart();
+						}
+						catch (Exception $e)
+						{
+							$errorFlag = true;
+						}
 
-					if ($errorFlag)
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						if ($errorFlag)
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						else
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done.")));
+					}
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done.")));
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're not logged.")));
+
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders) // TODO
