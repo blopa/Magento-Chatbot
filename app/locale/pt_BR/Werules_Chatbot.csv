@@ -36,6 +36,7 @@
 "List store categories.","Listar categorias."
 "Search for products.","Buscar por produtos."
 "Login into your account.","Acesse sua conta."
+"Logout from your account.","Saia de sua conta."
 "List your personal orders.","Listar pedidos."
 "Reorder a order.","Refazer pedido."
 "Add product to cart.","Adicionar produto ao carrinho."
@@ -111,3 +112,4 @@
 "Reply this message","Responder essa mensagem"
 "ID","ID"
 "Enable/Disable support","Habilita/desabilita suporte"
+""Ok, logging out."","Ok, saindo de sua conta."

@@ -282,6 +282,7 @@
 				$chatdata->_cancelCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(12)['command']);
 				$chatdata->_helpCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(13)['command']);
 				$chatdata->_aboutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(14)['command']);
+				$chatdata->_logoutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(15)['command']);
 
 				if (!$chatdata->_cancelCmd['command']) $chatdata->_cancelCmd['command'] = "/cancel"; // it must always have a cancel command
 
@@ -382,6 +383,7 @@
 						if ($chatdata->_listCategoriesCmd['command']) $message .= $chatdata->_listCategoriesCmd['command'] . " - " . $magehelper->__("List store categories.") . "\n";
 						if ($chatdata->_searchCmd['command']) $message .= $chatdata->_searchCmd['command'] . " - " . $magehelper->__("Search for products.") . "\n";
 						if ($chatdata->_loginCmd['command']) $message .= $chatdata->_loginCmd['command'] . " - " . $magehelper->__("Login into your account.") . "\n";
+						if ($chatdata->_logoutCmd['command']) $message .= $chatdata->_logoutCmd['command'] . " - " . $magehelper->__("Logout from your account.") . "\n";
 						if ($chatdata->_listOrdersCmd['command']) $message .= $chatdata->_listOrdersCmd['command'] . " - " . $magehelper->__("List your personal orders.") . "\n";
 						//$message .= $chatdata->_reorderCmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
 						//$message .= $chatdata->_add2CartCmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
@@ -815,6 +817,28 @@
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're already logged.")));
+					return $telegram->respondSuccess();
+				}
+				else if ($chatdata->checkCommand($text, $chatdata->_logoutCmd)) // TODO
+				{
+					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Ok, logging out.")));
+					$errorFlag = false;
+					try
+					{
+						$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
+						$chatdata->updateChatdata('is_logged', "0");
+						$chatdata->updateChatdata('customer_id', ""); // TODO null?
+						$chatdata->clearCart();
+					}
+					catch (Exception $e)
+					{
+						$errorFlag = true;
+					}
+
+					if ($errorFlag)
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					else
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done.")));
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders) // TODO

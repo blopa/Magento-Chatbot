@@ -20,7 +20,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Search for products
 - Add product to cart
 - Clear cart
-- Login to your account
+- Login/Logout to your account
 - List orders
 - Track order status
 - Reorder

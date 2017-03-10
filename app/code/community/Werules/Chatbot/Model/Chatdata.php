@@ -49,7 +49,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			send_email,
 			cancel,
 			help,
-			about
+			about,
+			logout
 		";
 		protected $_startCmd = array();
 		protected $_listCategoriesCmd = array();
@@ -66,6 +67,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $_cancelCmd = array();
 		protected $_helpCmd = array();
 		protected $_aboutCmd = array();
+		protected $_logoutCmd = array();
 
 	// admin cmds
 //		protected $adminCmdList =

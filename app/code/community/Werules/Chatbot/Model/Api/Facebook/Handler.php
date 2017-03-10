@@ -295,6 +295,7 @@
 				$chatdata->_cancelCmd = $chatdata->getCommandString(12);
 				$chatdata->_helpCmd = $chatdata->getCommandString(13);
 				$chatdata->_aboutCmd = $chatdata->getCommandString(14);
+				$chatdata->_logoutCmd = $chatdata->getCommandString(15);
 				if (!$chatdata->_cancelCmd['command']) $chatdata->_cancelCmd['command'] = "cancel"; // it must always have a cancel command
 
 				// init messages
@@ -324,7 +325,8 @@
 							$chatdata->_sendEmailCmd['command'],
 							$chatdata->_cancelCmd['command'],
 							$chatdata->_helpCmd['command'],
-							$chatdata->_aboutCmd['command']
+							$chatdata->_aboutCmd['command'],
+							$chatdata->_logoutCmd['command']
 						);
 
 						foreach ($cmdarray as $cmd)
@@ -425,6 +427,11 @@
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_loginCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
 							$message .= $chatdata->_loginCmd['command'] . " - " . $magehelper->__("Login into your account.") . "\n";
+						}
+						if ($chatdata->_logoutCmd['command'])
+						{
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_logoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
+							$message .= $chatdata->_logoutCmd['command'] . " - " . $magehelper->__("Logout from your account.") . "\n";
 						}
 						if ($chatdata->_listOrdersCmd['command'])
 						{
@@ -962,6 +969,28 @@
 						$facebook->sendMessage($chatId, $magehelper->__("You're already logged."));
 					return $facebook->respondSuccess();
 				}
+				else if ($chatdata->checkCommand($text, $chatdata->_logoutCmd)) // TODO
+				{
+					$facebook->sendMessage($chatId, $magehelper->__("Ok, logging out."));
+					$errorFlag = false;
+					try
+					{
+						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
+						$chatdata->updateChatdata('is_logged', "0");
+						$chatdata->updateChatdata('customer_id', ""); // TODO null?
+						$chatdata->clearCart();
+					}
+					catch (Exception $e)
+					{
+						$errorFlag = true;
+					}
+
+					if ($errorFlag)
+						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+					else
+						$facebook->sendMessage($chatId, $magehelper->__("Done."));
+					return $facebook->respondSuccess();
+				}
 				else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders)
 				{
 					if ($chatdata->getIsLogged() == "1")
@@ -1041,7 +1070,6 @@
 				}
 				else if ($chatdata->checkCommandWithValue($text, $chatdata->_reorderCmd['command'])) // ignore alias
 				{
-					$facebook->sendMessage($chatId, "Passei aqui");
 					if ($chatdata->getIsLogged() == "1")
 					{
 						$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
