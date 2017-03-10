@@ -265,8 +265,9 @@
 					{
 						$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
 						$chatdata // using magento model to insert data into database the proper way
-						->setFacebookChatId($chatId)
+							->setFacebookChatId($chatId)
 							->setHashKey($hash) // TODO
+							->setCreatedAt(date('Y-m-d H:i:s'))
 							->save();
 						//$chatdata->updateChatdata('facebook_chat_id', $chat_id);
 						//$chatdata->updateChatdata('hash_key', $hash);

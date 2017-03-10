@@ -351,8 +351,9 @@
 						{
 							$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
 							Mage::getModel('chatbot/chatdata') // using magento model to insert data into database the proper way
-							->setTelegramChatId($chatId)
+								->setTelegramChatId($chatId)
 								->setHashKey($hash) // TODO
+								->setCreatedAt(date('Y-m-d H:i:s'))
 								->save();
 						}
 						catch (Exception $e)

@@ -8,6 +8,8 @@ $installer->run("
 	-- DROP TABLE IF EXISTS {$this->getTable($table)};
 	CREATE TABLE {$this->getTable($table)} (
 	  `entity_id` int(11) unsigned NOT NULL auto_increment,
+	  `created_at` timestamp NULL,
+	  `updated_at` timestamp NULL,
 	  `customer_id` int(11) NULL,
 	  `session_id` varchar(150) NULL,
 	  `quote_id` varchar(20) NULL,

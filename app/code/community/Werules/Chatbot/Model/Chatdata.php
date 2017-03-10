@@ -421,7 +421,10 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		{
 			try
 			{
-				$data = array($datatype => $state); // data to be insert on database
+				$data = array(
+					$datatype => $state,
+					"updated_at" => date('Y-m-d H:i:s')
+				); // data to be insert on database
 				$this->addData($data);
 				$this->save();
 			}
