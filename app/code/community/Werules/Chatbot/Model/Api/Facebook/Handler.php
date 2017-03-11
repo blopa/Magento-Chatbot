@@ -64,6 +64,7 @@
 
 			// configs
 			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			$enableReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_default_replies');
 			$enablePredict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
@@ -111,6 +112,45 @@
 
 				// send feedback to user
 				$facebook->sendChatAction($chatId, "typing_on");
+
+				// handle default replies
+				if ($enableReplies == "1")
+				{
+					$defaultReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/default_replies');
+					if ($defaultReplies)
+					{
+						$replies = unserialize($defaultReplies);
+						if (is_array($replies))
+						{
+							foreach($replies as $reply)
+							{
+								$match = $reply["catch_phrase"];
+								$similarity = $reply["similarity"];
+								if (is_numeric($similarity))
+								{
+									if (!($similarity >= 1 && $similarity <= 100))
+										$similarity = 100;
+								}
+								else
+									$similarity = 100;
+
+								if ($reply["match_case"] == "0")
+								{
+									$match = strtolower($match);
+									$text = strtolower($text);
+								}
+
+								similar_text($text, $match, $percent);
+								if ($percent >= $similarity)
+								{
+									$facebook->sendMessage($chatId, $reply["reply_phrase"]);
+									return $facebook->respondSuccess();
+									break; // probably useless
+								}
+							}
+						}
+					}
+				}
 
 				// payload handler, may change the conversation state
 				if ($chatdata->getFacebookConvState() == $chatdata->_listProductsState || $chatdata->getFacebookConvState() == $chatdata->_listOrdersState) // listing products
@@ -418,8 +458,8 @@
 				if ($chatdata->checkCommand($text, $chatdata->_aboutCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
-					$cmdlisting = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
-					if ($cmdlisting == 1)
+					$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
+					if ($cmdListing == 1)
 					{
 						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
 						$replies = array(); // quick replies limit is 10 options
