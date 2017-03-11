@@ -28,6 +28,7 @@
 						<your_custom_key>
 							<label>Your Secret Key</label>
 							<frontend_type>text</frontend_type>
+							<validate>validate-alphanum</validate>
 							<sort_order>0</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
