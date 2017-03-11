@@ -444,22 +444,33 @@
 				// add2cart commands
 				if ($chatdata->checkCommandWithValue($text, $chatdata->_add2CartCmd['command'])) // ignore alias
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+					$errorFlag = false;
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_add2CartCmd['command']);
 					if ($cmdvalue) // TODO
 					{
+						$productName = Mage::getModel('catalog/product')->load($cmdvalue)->getName();
+						if (empty($productName))
+							$productName = $magehelper->__("this product");
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("adding %s to your cart.", $productName)));
+						$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 						if ($chatdata->addProd2Cart($cmdvalue))
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->_checkoutCmd['command']));
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+							$errorFlag = true;
 					}
+					else
+						$errorFlag = true;
+
+					if ($errorFlag)
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 					return $telegram->respondSuccess();
 				}
 
 				// states
 				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you.")));
+					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					if ($cat_id)
 						$_category = Mage::getModel('catalog/category')->load($cat_id);
 					else
@@ -551,9 +562,10 @@
 				}
 				else if ($conversationState == $chatdata->_searchState) // TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text)));
+					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$errorFlag = false;
-					$noprodflag = false;
+					$noProductFlag = false;
 					$productIDs = $chatdata->getProductIdsBySearch($text);
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
 					{
@@ -653,7 +665,8 @@
 					$errorFlag = false;
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I check the status for order %s.", $text)));
+						$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 						$order = Mage::getModel('sales/order')->loadByIncrementId($text);
 						if ($order->getId())
 						{
@@ -726,7 +739,8 @@
 				{
 					$sessionId = null;
 					$quoteId = null;
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I prepare the checkout for you.")));
+					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					if ($chatdata->getIsLogged() == "1")
 					{
 						if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId())
@@ -853,7 +867,8 @@
 					if ($chatdata->getIsLogged() == "1")
 					{
 						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("let me fetch that for you.")));
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather your orders for listing.")));
+						$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						if ($ordersIDs)
 						{
@@ -913,7 +928,8 @@
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Please wait while I check that for you.")));
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I add the products from this order to your cart.")));
+						$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 						$errorFlag = false;
 						$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_reorderCmd['command']);
 						if ($cmdvalue)

@@ -382,15 +382,25 @@
 				// add2cart commands
 				if ($chatdata->checkCommandWithValue($text, $chatdata->_add2CartCmd['command'])) // ignore alias
 				{
+					$errorFlag = false;
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_add2CartCmd['command']);
 					if ($cmdvalue) // TODO
 					{
-						$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+						$productName = Mage::getModel('catalog/product')->load($cmdvalue)->getName();
+						if (empty($productName))
+							$productName = $magehelper->__("this product");
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("adding %s to your cart.", $productName));
+						$facebook->sendChatAction($chatId, "typing_on");
 						if ($chatdata->addProd2Cart($cmdvalue))
 							$facebook->sendMessage($chatId, $magehelper->__("Added. To checkout send") . ' "' . $chatdata->_checkoutCmd['command'] . '"');
 						else
-							$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+							$errorFlag = true;
 					}
+					else
+						$errorFlag = true;
+
+					if ($errorFlag)
+						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 					return $facebook->respondSuccess();
 				}
 
@@ -486,7 +496,8 @@
 				// states
 				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
-					$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you."));
+					$facebook->sendChatAction($chatId, "typing_on");
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					$errorFlag = false;
 					if ($_category) // check if variable isn't false/empty
@@ -606,9 +617,10 @@
 				}
 				else if ($conversationState == $chatdata->_searchState)
 				{
-					$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text));
+					$facebook->sendChatAction($chatId, "typing_on");
 					$errorFlag = false;
-					$noprodflag = false;
+					$noProductFlag = false;
 					$productIDs = $chatdata->getProductIdsBySearch($text);
 					$elements = array();
 					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
@@ -779,7 +791,8 @@
 					$errorFlag = false;
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I check the status for order %s.", $text));
+						$facebook->sendChatAction($chatId, "typing_on");
 						$order = Mage::getModel('sales/order')->loadByIncrementId($text);
 						if ($order->getId())
 						{
@@ -864,7 +877,8 @@
 				{
 					$sessionId = null;
 					$quoteId = null;
-					$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I prepare the checkout for you."));
+					$facebook->sendChatAction($chatId, "typing_on");
 					if ($chatdata->getIsLogged() == "1")
 					{
 						if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId())
@@ -1003,7 +1017,9 @@
 					if ($chatdata->getIsLogged() == "1")
 					{
 						//$facebook->sendMessage($chat_id, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("let me fetch that for you."));
-						$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather your orders for listing."));
+						$facebook->sendChatAction($chatId, "typing_on");
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						$i = 0;
 						if ($ordersIDs)
@@ -1079,7 +1095,8 @@
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
-						$facebook->sendMessage($chatId, $magehelper->__("Please wait while I check that for you."));
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I add the products from this order to your cart."));
+						$facebook->sendChatAction($chatId, "typing_on");
 						$errorFlag = false;
 						$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_reorderCmd['command']);
 						if ($cmdvalue)
