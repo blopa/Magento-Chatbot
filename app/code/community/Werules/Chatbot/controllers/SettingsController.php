@@ -74,7 +74,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			{
 				while ($chatdata->getCustomerId()) // gather all data from all chatdata models
 				{
-					if ($chatdata->getTelegramChatId() && $chatdata->getFacebookChatId() && $chatdata->getWhatsappChatId())
+					if ($chatdata->getTelegramChatId() && $chatdata->getFacebookChatId() && $chatdata->getWhatsappChatId() && $chatdata->getWechatChatId())
 						break;
 					if ($chatdata->getTelegramChatId()) {
 						$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
@@ -88,11 +88,18 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 						$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
 						$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
 					}
+					if ($chatdata->getWechatChatId()) {
+						$data["wechat_chat_id"] = $chatdata->getWhatsappChatId();
+						$data["wechat_conv_state"] = $chatdata->getWhatsappConvState();
+					}
+					if (!isset($data["created_at"]))
+						$data["created_at"] = $chatdata->getCreatedAt();
 					$chatdata->delete();
-					$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id');
+					$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id'); // reload
 				}
 				if ($data) // if any found, prepare to merge
 				{
+					$data["updated_at"] = date('Y-m-d H:i:s');
 					$data["is_logged"] = "1";
 					$data["customer_id"] = $customerid;
 
