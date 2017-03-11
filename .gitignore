@@ -1,2 +1,5 @@
 .idea
 copy.bat
+conf.php
+packager.php
+extension/
