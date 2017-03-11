@@ -72,6 +72,7 @@
 
 			// configs
 			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			$enabledBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_default_replies');
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
@@ -98,6 +99,15 @@
 					return $telegram->respondSuccess();
 				else if ($chatdata->getTelegramChatId())
 					$chatdata->updateChatdata('telegram_message_id', $messageId); // if this fails, it may send the same message twice
+
+				// bot enabled/disabled
+				if ($enabledBot != "1")
+				{
+					$disabledMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/disabled_message');
+					if (!empty($disabledMessage))
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $disabledMessage));
+					return $telegram->respondSuccess();
+				}
 
 				// send feedback to user
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));

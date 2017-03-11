@@ -64,6 +64,7 @@
 
 			// configs
 			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			$enabledBot = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_default_replies');
 			$enablePredict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
@@ -109,6 +110,15 @@
 					return $facebook->respondSuccess();
 				else if ($chatdata->getFacebookChatId())
 					$chatdata->updateChatdata('facebook_message_id', $messageId); // if this fails, it may send the same message twice
+
+				// bot enabled/disabled
+				if ($enabledBot != "1")
+				{
+					$disabledMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/disabled_message');
+					if (!empty($disabledMessage))
+						$facebook->sendMessage($chatId, $disabledMessage);
+					return $facebook->respondSuccess();
+				}
 
 				// send feedback to user
 				$facebook->sendChatAction($chatId, "typing_on");
