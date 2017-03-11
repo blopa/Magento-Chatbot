@@ -637,8 +637,11 @@
 												break;
 											}
 											else if (($i + 1) == $total) // if it's the last one, back to _startState
+											{
+												$facebook->sendMessage($chatId, $magehelper->__("And that was the last one."));
 												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 													$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+											}
 										}
 										$i++;
 									}
@@ -760,8 +763,11 @@
 											break;
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
+										{
+											$facebook->sendMessage($chatId, $magehelper->__("And that was the last one."));
 											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 												$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+										}
 									}
 									$i++;
 								}
@@ -1128,8 +1134,11 @@
 												$flagBreak = true;
 											}
 											else if (($i + 1) == $total) // if it's the last one, back to _startState
+											{
+												$facebook->sendMessage($chatId, $magehelper->__("And that was the last one."));
 												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 													$facebook->sendMessage($chatId, $chatdata->_errorMessage);
+											}
 
 											$facebook->sendButtonTemplate($chatId, $message, $buttons);
 											if ($flagBreak)
