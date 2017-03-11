@@ -582,8 +582,11 @@
 													break;
 												}
 												else if (($i + 1) == $total) // if it's the last one, back to _startState
+												{
+													$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("And that was the last one.")));
 													if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
 														$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+												}
 											}
 											$i++;
 										}
@@ -667,8 +670,11 @@
 											break;
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
+										{
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("And that was the last one.")));
 											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
 												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+										}
 									}
 									$i++;
 								}
@@ -965,8 +971,11 @@
 												break;
 											}
 											else if (($i + 1) == $total) // if it's the last one, back to _startState
+											{
+												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("And that was the last one.")));
 												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
 													$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+											}
 										}
 										$i++;
 									}
