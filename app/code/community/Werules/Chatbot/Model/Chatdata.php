@@ -322,13 +322,13 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 									}
 								}
 								if (empty($cmdCode)) // if no command found, return the default
-									$cmdCode = $defaultCmds[$cmdId - 1];
+									$cmdCode = $defaultCmds[$cmdId];
 							}
 							else // if no command found, return the default
-								$cmdCode = $defaultCmds[$cmdId - 1];
+								$cmdCode = $defaultCmds[$cmdId];
 						}
 						else // if no command found, return the default
-							$cmdCode = $defaultCmds[$cmdId - 1];
+							$cmdCode = $defaultCmds[$cmdId];
 
 						$cmdCode = preg_replace( // remove all non-alphanumerics
 							$this->_unallowedCharacters,
