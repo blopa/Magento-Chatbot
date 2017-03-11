@@ -72,6 +72,7 @@
 
 			// configs
 			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			$enableReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_default_replies');
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
 			$enableFinalMessage2Support = Mage::getStoreConfig('chatbot_enable/general_config/enable_support_final_message');
@@ -100,6 +101,45 @@
 
 				// send feedback to user
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
+
+				// handle default replies
+				if ($enableReplies == "1")
+				{
+					$defaultReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/default_replies');
+					if ($defaultReplies)
+					{
+						$replies = unserialize($defaultReplies);
+						if (is_array($replies))
+						{
+							foreach($replies as $reply)
+							{
+								$match = $reply["catch_phrase"];
+								$similarity = $reply["similarity"];
+								if (is_numeric($similarity))
+								{
+									if (!($similarity >= 1 && $similarity <= 100))
+										$similarity = 100;
+								}
+								else
+									$similarity = 100;
+
+								if ($reply["match_case"] == "0")
+								{
+									$match = strtolower($match);
+									$text = strtolower($text);
+								}
+
+								similar_text($text, $match, $percent);
+								if ($percent >= $similarity)
+								{
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
+									return $telegram->respondSuccess();
+									break; // probably useless
+								}
+							}
+						}
+					}
+				}
 
 				// show more handler, may change the conversation state
 				if ($chatdata->getTelegramConvState() == $chatdata->_listProductsState || $chatdata->getTelegramConvState() == $chatdata->_listOrdersState) // listing products
@@ -377,8 +417,8 @@
 				if ($chatdata->checkCommand($text, $chatdata->_aboutCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
-					$cmdlisting = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_command_list');
-					if ($cmdlisting == 1)
+					$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_command_list');
+					if ($cmdListing == 1)
 					{
 						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
 						if ($chatdata->_listCategoriesCmd['command']) $message .= $chatdata->_listCategoriesCmd['command'] . " - " . $magehelper->__("List store categories.") . "\n";
