@@ -78,19 +78,27 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 						break;
 					if ($chatdata->getTelegramChatId()) {
 						$data["telegram_chat_id"] = $chatdata->getTelegramChatId();
+						$data["telegram_message_id"] = $chatdata->getTelegramMessageId();
 						$data["telegram_conv_state"] = $chatdata->getTelegramConvState();
+						$data["telegram_support_reply_chat_id"] = $chatdata->getTelegramSupportReplyChatId();
 					}
 					if ($chatdata->getFacebookChatId()) {
 						$data["facebook_chat_id"] = $chatdata->getFacebookChatId();
+						$data["facebook_message_id"] = $chatdata->getFacebookMessageId();
 						$data["facebook_conv_state"] = $chatdata->getFacebookConvState();
+						$data["facebook_support_reply_chat_id"] = $chatdata->getFacebookSupportReplyChatId();
 					}
 					if ($chatdata->getWhatsappChatId()) {
 						$data["whatsapp_chat_id"] = $chatdata->getWhatsappChatId();
+						$data["whatsapp_message_id"] = $chatdata->getWhatsappMessageId();
 						$data["whatsapp_conv_state"] = $chatdata->getWhatsappConvState();
+						$data["whatsapp_support_reply_chat_id"] = $chatdata->getWhatsappSupportReplyChatId();
 					}
 					if ($chatdata->getWechatChatId()) {
-						$data["wechat_chat_id"] = $chatdata->getWhatsappChatId();
-						$data["wechat_conv_state"] = $chatdata->getWhatsappConvState();
+						$data["wechat_chat_id"] = $chatdata->getWechatChatId();
+						$data["wechat_message_id"] = $chatdata->getWechatMessageId();
+						$data["wechat_conv_state"] = $chatdata->getWechatpConvState();
+						$data["wechat_support_reply_chat_id"] = $chatdata->getWechatSupportReplyChatId();
 					}
 					if (!isset($data["created_at"]))
 						$data["created_at"] = $chatdata->getCreatedAt();
@@ -125,7 +133,8 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 				if ($chatdata->getHashKey()) {
 					$data = array(
 						"customer_id" => $customerid,
-						"is_logged" => "1"
+						"is_logged" => "1",
+						"updated_at" => date('Y-m-d H:i:s')
 					);
 					$chatdata->addData($data);
 					$chatdata->save();
