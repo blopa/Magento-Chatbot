@@ -39,11 +39,7 @@ $installer->run("
 	  `wechat_message_id` varchar(50) NULL,
 	  `wechat_conv_state` int(10) NOT NULL default '0',
 	  `wechat_support_reply_chat_id` varchar(50) NULL,
-	  `custom_one` varchar(150) NULL,
-	  `custom_two` varchar(150) NULL,
-	  `custom_three` varchar(150) NULL,
-	  `custom_four` varchar(150) NULL,
-	  key (entity_id)
+	  PRIMARY KEY (entity_id)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 	");
 

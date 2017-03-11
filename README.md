@@ -36,6 +36,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Force exit customer from support mode
 - Block a customer for using support mode
 - Use Telegram to receive and reply messages from Facebook
+- Set custom reply messages for predetermined phrases
 
 **Currently not working with Configurable Products and products with custom options**
 
@@ -119,7 +120,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
-	- Fix categories listing limits
+	- Fix categories buttons listing for Telegram
 	- Integrate checkout to Facebook Payment API
 	- Add inline search for Telegram
 	- Add natural language configuration (wit.ai?)
