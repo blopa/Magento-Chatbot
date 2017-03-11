@@ -200,6 +200,16 @@
 							<show_in_store>0</show_in_store>
 							<comment>Code of the commands and it's alias.</comment>
 						</commands_list>
+						<default_replies>
+							<label>Default Replies</label>
+							<frontend_model>werules_chatbot/replies</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+							<comment>Default Replies.</comment>
+						</default_replies>
 					</fields>
 				</telegram_config>
 				<facebook_config translate="label">
@@ -306,6 +316,16 @@
 							<show_in_store>0</show_in_store>
 							<comment>Code of the commands and it's alias.</comment>
 						</commands_list>
+						<default_replies>
+							<label>Default Replies</label>
+							<frontend_model>werules_chatbot/replies</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+							<comment>Default Replies.</comment>
+						</default_replies>
 					</fields>
 				</facebook_config>
 			</groups>
