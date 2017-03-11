@@ -25,6 +25,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$postData = $this->getRequest()->getPost(); // get all post data
 		if ($postData)
 		{
+			$rand = str_shuffle("11e09rg009UUu89FSwe9yGRE4h");
 			$clientid = Mage::getSingleton('customer/session')->getCustomer()->getId(); // get customer id
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($clientid, 'customer_id'); // load profile info from customer id
 			try
@@ -37,7 +38,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 				);
 				if (!$chatdata->getCustomerId()) // attach class to customer id
 				{
-					$data["hash_key"] = substr(md5(uniqid(str_shuffle("e09rgu89y54h"), true)), 0, 150); // TODO
+					$data["hash_key"] = substr(md5(uniqid(str_shuffle($rand), true)), 0, 150); // TODO
 					$data["customer_id"] = $clientid;
 				}
 				$chatdata->addData($data);
@@ -124,6 +125,8 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 						$chatdata->save();
 						$success = true;
 					}
+					else
+						$error = true;
 				}
 				catch (Exception $e)
 				{
@@ -155,9 +158,9 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		// messages
 		if ($success)
 			Mage::getSingleton('customer/session')->addSuccess($magehelper->__("Your account is now attached with our chatbot."));
-		if ($error)
+		else if ($error)
 			Mage::getSingleton('customer/session')->addError($magehelper->__("Something went wrong, please try again."));
-		if ($logged)
+		else if ($logged)
 			Mage::getSingleton('customer/session')->addNotice($magehelper->__("You're already logged."));
 	}
 }
