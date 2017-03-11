@@ -1,8 +1,13 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
 
+**Become part of the chatbots revolution**
+
 <img src="/screenshots/chat.gif?raw=true" width="550px">
 
-Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate you Magento store with the most popular chat apps in the market.
+Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
+Very easy to use! Try now, it's FREE.
+
+To use this module you'll need to have SSL enabled in your store, this is a requirement from Facebook and Telegram, not by me.
 
 **For now only Telegram and Facebook Messenger is implemented, try it out Telegram at [@MyChatbotStoreBot](https://telegram.me/MyChatbotStoreBot).**
 
@@ -20,13 +25,17 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Search for products
 - Add product to cart
 - Clear cart
-- Login to your account
+- Login/Logout to your account
 - List orders
 - Track order status
 - Reorder
 - Send email
 - Send message to support
 - Reply customer support messages from you favorite chat messenger
+- Send message to all customers (promotion messages, etc)
+- Force exit customer from support mode
+- Block a customer for using support mode
+- Use Telegram to receive and reply messages from Facebook
 
 **Currently not working with Configurable Products and products with custom options**
 
@@ -111,17 +120,12 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Fix categories listing limits
-	- Store messages on database before sending to make sure it will be sent eventually
-	- Better "processing" feedback messages
-	- Inform how many itens were found in a category/search
 	- Integrate checkout to Facebook Payment API
 	- Add inline search for Telegram
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store chat message app
 	- Documentation / Tutorials / Videos
-	- Send message to all customers
-	- Force exit customer from support mode
-	- Block a customer for using support mode
+	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history
 
 ## License

@@ -15,6 +15,7 @@
 			<show_in_default>1</show_in_default>
 			<show_in_website>1</show_in_website>
 			<show_in_store>1</show_in_store>
+			<comment>To Use This Module You'll Need to Have SSL Enabled in Your Store.</comment>
 			<groups>
 				<general_config translate="label">
 					<label>General Configuration</label>
@@ -31,7 +32,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>This is Your Custom Secret Key Used to Activate/Deactivate The API Webhook. Alphanumeric Only! Access http://YOUR_STORE_URL/chatbot/chatdata/API/webhook/YOUR_CUSTOM_KEY. API Can be "telegram", "facebook", "whatsapp" or "wechat".</comment>
+							<comment>This is Your Custom Secret Key Used to Activate/Deactivate The API Webhook For Telegram, And to Use as Your Challenge Hub For Facebook. Alphanumeric Only! Access http://YOUR_STORE_URL/chatbot/chatdata/API/telegram/YOUR_CUSTOM_KEY to Set Telegram Webhook.</comment>
 						</your_custom_key>
 						<master_support_group>
 							<label>Master Support Group</label>
@@ -41,13 +42,23 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Choose to receive all support messages in one single message app.</comment>
+							<comment>Choose to receive all support messages in one single message app. In Development.</comment>
 						</master_support_group>
+						<enable_support_final_message>
+							<label>Forward Unknown Messages to Support</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand</comment>
+						</enable_support_final_message>
 						<list_empty_categories>
 							<label>List Empty Categoies</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>2</sort_order>
+							<sort_order>3</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -57,7 +68,7 @@
 							<label>Enable Log</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>3</sort_order>
+							<sort_order>4</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -72,6 +83,7 @@
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
+					<comment>Still in Development</comment>
 					<fields>
 						<enable_witai>
 							<label>Enable WitAI Integration</label>
@@ -219,13 +231,13 @@
 							<comment>Your Messenger Bot API Key.</comment>
 						</facebook_api_key>
 						<facebook_support_group>
-							<label>Messenger Support Group ID</label>
+							<label>Messenger Support Chat ID</label>
 							<frontend_type>text</frontend_type>
 							<sort_order>2</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Reserved for future use, for now Facebook dosen't allow bots on group chats. For now, write "telegram" to send all messages to your Telegram support group.</comment>
+							<comment>The Chat ID of The Support Admin. This Feature Isn't Very Useful Since You Can Simply Log Into Your Page And Directly Reply Your Customers From There. You Can Forward All Messages to Telegram, Just Write "telegram" in Here to Enable This Feature.</comment>
 						</facebook_support_group>
 						<facebook_welcome_msg>
 							<label>Messenger Welcome Message</label>

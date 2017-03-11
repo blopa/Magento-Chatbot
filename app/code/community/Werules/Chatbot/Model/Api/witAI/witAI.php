@@ -1,11 +1,11 @@
 <?php
 	class witAI {
 
-		private $api_key = "";
+		private $_apiKey = "";
 
 		/// Class constructor
-		public function __construct($api_key) {
-			$this->api_key = $api_key;
+		public function __construct($apiKey) {
+			$this->_apiKey = $apiKey;
 		}
 
 		// get witAI response
@@ -14,7 +14,7 @@
 			$options = array(
 				'http' => array(
 					'method' => 'GET',
-					'header' => "Authorization: Bearer " . $this->api_key . "\r\n" .
+					'header' => "Authorization: Bearer " . $this->_apiKey . "\r\n" .
 						"Accept: appliation/vnd.wit.20141022+json\r\n"
 				)
 			);
