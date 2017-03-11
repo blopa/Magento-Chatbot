@@ -142,16 +142,18 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		{
 			if ($apiType == $this->_tgBot) // telegram api
 			{
-				$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
+				//$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
 				$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-				if ($enabled == 1 && $apikey) // is enabled and has API
+				//if ($enabled == 1 && $apikey) // is enabled and has API
+				if ($apikey) // has API
 					return $apikey;
 			}
 			else if ($apiType == $this->_fbBot)
 			{
-				$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
+				//$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
 				$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-				if ($enabled == 1 && $apikey) // is enabled and has API
+				//if ($enabled == 1 && $apikey) // is enabled and has API
+				if ($apikey) // has API
 					return $apikey;
 			}
 			return null;
