@@ -497,7 +497,7 @@
 				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
 					if ($showMore == 0) // show only in the first time
-						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you."));
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all products from %s for you.", $text));
 					else
 						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more."));
 
@@ -826,6 +826,9 @@
 				//general commands
 				if ($chatdata->checkCommand($text, $chatdata->_listCategoriesCmd))
 				{
+					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you."));
+					$facebook->sendChatAction($chatId, "typing_on");
+
 					$categoryHelper = Mage::helper('catalog/category');
 					$categories = $categoryHelper->getStoreCategories(); // TODO test with a store without categories
 					$i = 0;
@@ -968,7 +971,7 @@
 					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState))
 						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 					else
-						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you want to search for?") . ". " . $chatdata->_cancelMessage);
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you want to search for?") . " " . $chatdata->_cancelMessage);
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_loginCmd))

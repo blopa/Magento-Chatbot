@@ -469,18 +469,18 @@
 				// states
 				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
-					if ($showMore == 0) // show only in the first time
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you.")));
-					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
-
-					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					if ($cat_id)
 						$_category = Mage::getModel('catalog/category')->load($cat_id);
 					else
 						$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
-					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 
+					if ($showMore == 0) // show only in the first time
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all products from %s for you.", $_category->getName())));
+					else
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
+
+					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
+					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 					$errorFlag = false;
 					if ($_category) // check if variable isn't false/empty
 					{
@@ -696,9 +696,12 @@
 					return $telegram->respondSuccess();
 				}
 
-				// commands
+				// general commands
 				if ($chatdata->checkCommand($text, $chatdata->_listCategoriesCmd))
 				{
+					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you.")));
+					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
+
 					$categoryHelper = Mage::helper('catalog/category');
 					$categories = $categoryHelper->getStoreCategories(); // TODO test with a store without categories
 					$i = 0;
@@ -824,7 +827,7 @@
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState))
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you want to search for?") . ". " . $chatdata->_cancelMessage));
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("what do you want to search for?") . " " . $chatdata->_cancelMessage));
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_loginCmd)) // TODO
