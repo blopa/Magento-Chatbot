@@ -134,8 +134,8 @@
 							$moreOrders = true;
 						}
 					}
-					else
-						$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
+//					else
+//						$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
 				}
 
 				// instances conversation state

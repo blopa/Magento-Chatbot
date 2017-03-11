@@ -144,8 +144,8 @@
 							$moreOrders = true;
 						}
 					}
-					else
-						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
+//					else
+//						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
 				}
 
 				// instances conversation state
