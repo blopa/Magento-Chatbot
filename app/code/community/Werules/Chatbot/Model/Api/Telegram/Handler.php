@@ -469,7 +469,11 @@
 				// states
 				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you.")));
+					if ($showMore == 0) // show only in the first time
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you.")));
+					else
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
+
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					if ($cat_id)
 						$_category = Mage::getModel('catalog/category')->load($cat_id);
@@ -562,7 +566,10 @@
 				}
 				else if ($conversationState == $chatdata->_searchState) // TODO
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text)));
+					if ($showMore == 0) // show only in the first time
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text)));
+					else
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$errorFlag = false;
 					$noProductFlag = false;
@@ -866,8 +873,11 @@
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
-						//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("let me fetch that for you.")));
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather your orders for listing.")));
+						if ($showMore == 0) // show only in the first time
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather your orders for listing.")));
+						else
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
+
 						$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						if ($ordersIDs)

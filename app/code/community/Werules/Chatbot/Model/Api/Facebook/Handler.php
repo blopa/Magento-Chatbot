@@ -496,7 +496,11 @@
 				// states
 				if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 				{
-					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you."));
+					if ($showMore == 0) // show only in the first time
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather all categories for you."));
+					else
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more."));
+
 					$facebook->sendChatAction($chatId, "typing_on");
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 					$errorFlag = false;
@@ -617,7 +621,11 @@
 				}
 				else if ($conversationState == $chatdata->_searchState)
 				{
-					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text));
+					if ($showMore == 0) // show only in the first time
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text));
+					else
+						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more."));
+
 					$facebook->sendChatAction($chatId, "typing_on");
 					$errorFlag = false;
 					$noProductFlag = false;
@@ -1016,9 +1024,11 @@
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
-						//$facebook->sendMessage($chat_id, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("let me fetch that for you."));
+						if ($showMore == 0) // show only in the first time
+							$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather your orders for listing."));
+						else
+							$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more."));
 
-						$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I gather your orders for listing."));
 						$facebook->sendChatAction($chatId, "typing_on");
 						$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
 						$i = 0;
