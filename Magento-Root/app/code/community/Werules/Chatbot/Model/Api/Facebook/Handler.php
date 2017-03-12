@@ -347,6 +347,7 @@
 				$chatdata->_helpCmd = $chatdata->getCommandString(13);
 				$chatdata->_aboutCmd = $chatdata->getCommandString(14);
 				$chatdata->_logoutCmd = $chatdata->getCommandString(15);
+				$chatdata->_registerCmd = $chatdata->getCommandString(16);
 				if (!$chatdata->_cancelCmd['command']) $chatdata->_cancelCmd['command'] = "cancel"; // it must always have a cancel command
 
 				// init messages
@@ -377,7 +378,8 @@
 							$chatdata->_cancelCmd['command'],
 							$chatdata->_helpCmd['command'],
 							$chatdata->_aboutCmd['command'],
-							$chatdata->_logoutCmd['command']
+							$chatdata->_logoutCmd['command'],
+							$chatdata->_registerCmd['command']
 						);
 
 						foreach ($cmdarray as $cmd)
@@ -493,6 +495,11 @@
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_logoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
 							$message .= $chatdata->_logoutCmd['command'] . " - " . $magehelper->__("Logout from your account.") . "\n";
+						}
+						if ($chatdata->_registerCmd['command'])
+						{
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_registerCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
+							$message .= $chatdata->_registerCmd['command'] . " - " . $magehelper->__("Create a new account.") . "\n";
 						}
 						if ($chatdata->_listOrdersCmd['command'])
 						{
@@ -1081,6 +1088,15 @@
 					else
 						$facebook->sendMessage($chatId, $magehelper->__("You're not logged."));
 
+					return $facebook->respondSuccess();
+				}
+				else if ($chatdata->checkCommand($text, $chatdata->_registerCmd)) // TODO
+				{
+					$registerUrl = strtok(Mage::getUrl('customer/account/create'), '?');
+					if (!empty($registerUrl))
+						$facebook->sendMessage($chatId, $magehelper->__("Access %s to register a new account on our shop.", $registerUrl));
+					else
+						$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 					return $facebook->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders)

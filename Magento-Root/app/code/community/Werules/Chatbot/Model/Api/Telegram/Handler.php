@@ -333,7 +333,7 @@
 				$chatdata->_helpCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(13)['command']);
 				$chatdata->_aboutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(14)['command']);
 				$chatdata->_logoutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(15)['command']);
-
+				$chatdata->_registerCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(16)['command']);
 				if (!$chatdata->_cancelCmd['command']) $chatdata->_cancelCmd['command'] = "/cancel"; // it must always have a cancel command
 
 				// init messages
@@ -435,6 +435,7 @@
 						if ($chatdata->_searchCmd['command']) $message .= $chatdata->_searchCmd['command'] . " - " . $magehelper->__("Search for products.") . "\n";
 						if ($chatdata->_loginCmd['command']) $message .= $chatdata->_loginCmd['command'] . " - " . $magehelper->__("Login into your account.") . "\n";
 						if ($chatdata->_logoutCmd['command']) $message .= $chatdata->_logoutCmd['command'] . " - " . $magehelper->__("Logout from your account.") . "\n";
+						if ($chatdata->_registerCmd['command']) $message .= $chatdata->_registerCmd['command'] . " - " . $magehelper->__("Create a new account.") . "\n";
 						if ($chatdata->_listOrdersCmd['command']) $message .= $chatdata->_listOrdersCmd['command'] . " - " . $magehelper->__("List your personal orders.") . "\n";
 						//$message .= $chatdata->_reorderCmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
 						//$message .= $chatdata->_add2CartCmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
@@ -930,6 +931,15 @@
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're not logged.")));
 
+					return $telegram->respondSuccess();
+				}
+				else if ($chatdata->checkCommand($text, $chatdata->_registerCmd)) // TODO
+				{
+					$registerUrl = strtok(Mage::getUrl('customer/account/create'), '?');
+					if (!empty($registerUrl))
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Access %s to register a new account on our shop.", $registerUrl)));
+					else
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 					return $telegram->respondSuccess();
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders) // TODO

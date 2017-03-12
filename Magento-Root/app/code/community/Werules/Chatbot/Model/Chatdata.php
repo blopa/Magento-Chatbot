@@ -50,7 +50,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			cancel,
 			help,
 			about,
-			logout
+			logout,
+			register
 		";
 		protected $_startCmd = array();
 		protected $_listCategoriesCmd = array();
@@ -68,6 +69,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $_helpCmd = array();
 		protected $_aboutCmd = array();
 		protected $_logoutCmd = array();
+		protected $_registerCmd = array();
 
 	// admin cmds
 //		protected $adminCmdList =
@@ -113,7 +115,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				$magehelper = Mage::helper('core');
 				$telegram = new Telegram($apiKey);
 				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
-				$webhookUrl = str_replace("http://", "https://", Mage::getUrl('chatbot/chatdata/' . $this->_tgBot, array('_forced_secure' => true)));
+				// replace http by https, and remove all url parameters with strok
+				$webhookUrl = str_replace("http://", "https://", strtok(Mage::getUrl('chatbot/chatdata/' . $this->_tgBot, array('_forced_secure' => true)), '?'));
 				try {
 					$telegram->setWebhook($webhookUrl);
 				}
@@ -134,7 +137,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			else if ($webhook && $apiKey && $action == $this->_fbBot) // set facebook webhook
 			{
 				$magehelper = Mage::helper('core');
-				$webhookUrl = str_replace("http://", "https://", Mage::getUrl('chatbot/chatdata/' . $this->_fbBot, array('_forced_secure' => true)));
+				// replace http by https, and remove all url parameters with strok
+				$webhookUrl = str_replace("http://", "https://", strtok(Mage::getUrl('chatbot/chatdata/' . $this->_fbBot, array('_forced_secure' => true)), '?'));
 
 				$message = $magehelper->__("To configure Facebook webhook access") .
 					" https://developers.facebook.com/apps/(FACEBOOK_APP_ID)/webhooks/" .
