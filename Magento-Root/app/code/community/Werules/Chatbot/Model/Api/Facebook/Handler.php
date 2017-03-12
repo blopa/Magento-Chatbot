@@ -1008,6 +1008,8 @@
 				}
 				else if ($chatdata->checkCommand($text, $chatdata->_clearCartCmd))
 				{
+					$facebook->sendMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I clear your cart."));
+					$facebook->sendChatAction($chatId, "typing_on");
 					$errorFlag = false;
 					if ($chatdata->clearCart())
 					{
