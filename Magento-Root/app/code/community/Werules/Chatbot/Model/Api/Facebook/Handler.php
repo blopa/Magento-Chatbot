@@ -559,11 +559,12 @@
 						if ($_category->getId()) // check if is a valid category
 						{
 							$noProductFlag = false;
-							$productIDs = $_category->getProductCollection()
+							$productCollection = $_category->getProductCollection()
 								->addAttributeToSelect('*')
 								->addAttributeToFilter('visibility', 4)
-								->addAttributeToFilter('type_id', 'simple')
-								->getAllIds();
+								->addAttributeToFilter('type_id', 'simple');
+							Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
+							$productIDs = $productCollection->getAllIds();
 
 							$elements = array();
 							if ($productIDs)
@@ -1036,11 +1037,12 @@
 				{
 					if ($chatdata->getIsLogged() != "1") // customer not logged
 					{
-						$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash" . DS . $chatdata->getHashKey();
+						$hashUrl = Mage::getUrl('chatbot/settings/index/'); // get base module URL
+						$hashUrl = strtok($hashUrl, '?') . "hash" . DS . $chatdata->getHashKey(); // remove magento parameters
 						$buttons = array(
 							array(
 								'type' => 'web_url',
-								'url' => $hashlink,
+								'url' => $hashUrl,
 								'title' => $magehelper->__("Login")
 							)
 						);

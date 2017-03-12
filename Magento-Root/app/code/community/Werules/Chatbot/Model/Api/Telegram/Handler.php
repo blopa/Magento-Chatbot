@@ -623,6 +623,7 @@
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text)));
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
+
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$errorFlag = false;
 					$noProductFlag = false;
@@ -892,11 +893,12 @@
 				{
 					if ($chatdata->getIsLogged() != "1") // customer not logged
 					{
-						$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash" . DS . $chatdata->getHashKey();
+						$hashUrl = Mage::getUrl('chatbot/settings/index/'); // get base module URL
+						$hashUrl = strtok($hashUrl, '?') . "hash" . DS . $chatdata->getHashKey(); // remove magento parameters
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_loginState))
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("To login to your account, click this link") . ": " . $hashlink));
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("To login to your account, click this link") . ": " . $hashUrl));
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're already logged.")));
