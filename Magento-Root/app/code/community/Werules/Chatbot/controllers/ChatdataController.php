@@ -11,6 +11,10 @@ class Werules_Chatbot_ChatdataController extends Mage_Core_Controller_Front_Acti
 	{
 		$this->loadLayout();
 		$this->getLayout()->getBlock('root')->setTemplate("werules_chatbot_view.phtml"); // use root block to output pure values without html tags
+		//$this->getLayout()->getBlock('root')->setTemplate("werules_chatbot_view.phtml")->setTitle(Mage::helper('core')->__('Chatbot')); // use root block to output pure values without html tags
+		//$this->getLayout()->getBlock('head')->setTitle(Mage::helper('core')->__('Chatbot'));
+		//$this->getLayout()->getBlock('head')->setTitle($this->__('My Title')); // then this works
+		//$this->getLayout()->unsetBlock('head');
 		$this->renderLayout();
 	}
 

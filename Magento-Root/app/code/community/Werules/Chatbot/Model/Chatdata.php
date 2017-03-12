@@ -110,19 +110,37 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			// handle webhook configuration
 			if ($webhook && $apiKey && $action == $this->_tgBot) // set telegram webhook
 			{
-				try
-				{
-					$telegram = new Telegram($apiKey);
-					$webhook_url = Mage::getUrl('chatbot/chatdata/', array('_forced_secure' => true)) . $this->_tgBot;
-					$webhook_url = str_replace("http://", "https://", $webhook_url);
-					$telegram->setWebhook($webhook_url);
+				$magehelper = Mage::helper('core');
+				$telegram = new Telegram($apiKey);
+				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
+				$webhookUrl = str_replace("http://", "https://", Mage::getUrl('chatbot/chatdata/' . $this->_tgBot, array('_forced_secure' => true)));
+				try {
+					$telegram->setWebhook($webhookUrl);
 				}
-				catch (Exception $e)
-				{
-					return Mage::helper('core')->__("Something went wrong, please try again.");
+				catch (Exception $e) {
+					return $magehelper->__("Something went wrong, please try again.");
 				}
 
-				return Mage::helper('core')->__("Webhook for Telegram configured.");
+				//return var_dump(array('url' => $webhookUrl));
+				$tgGetWebhook = "<a href='https://api.telegram.org/bot" . $apiKey . "/getWebhookInfo' target='_blank'>" . $magehelper->__("here") . "</a>";
+				$tgSetWebhook = "<a href='https://api.telegram.org/bot" . $apiKey . "/setWebhook?url=" . $webhookUrl . "' target='_blank'>" . $magehelper->__("here") . "</a>";
+				$message = $magehelper->__("Webhook for Telegram configured.") .
+					$magehelper->__("Webhook URL") . ": " .
+					$webhookUrl . "<br>" .
+					$magehelper->__("Click %s to check that information on Telegram website. If a wrong URL is set, try reloading this page or click %s.", $tgGetWebhook, $tgSetWebhook)
+				;
+				return $message;
+			}
+			else if ($webhook && $apiKey && $action == $this->_fbBot) // set telegram webhook
+			{
+				$magehelper = Mage::helper('core');
+				$webhookUrl = str_replace("http://", "https://", Mage::getUrl('chatbot/chatdata/' . $this->_fbBot, array('_forced_secure' => true)));
+
+				$message = $magehelper->__("To configure Facebook webhook access") .
+					" https://developers.facebook.com/apps/(FACEBOOK_APP_ID)/webhooks/" .
+					$magehelper->__("and set the webhook URL as") . " " . $webhookUrl
+				;
+				return $message;
 			} // start to handle conversation
 			else if ($action == $this->_tgBot && $apiKey) // telegram api
 			{
