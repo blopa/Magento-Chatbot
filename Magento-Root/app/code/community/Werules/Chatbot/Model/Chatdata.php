@@ -131,7 +131,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				;
 				return $message;
 			}
-			else if ($webhook && $apiKey && $action == $this->_fbBot) // set telegram webhook
+			else if ($webhook && $apiKey && $action == $this->_fbBot) // set facebook webhook
 			{
 				$magehelper = Mage::helper('core');
 				$webhookUrl = str_replace("http://", "https://", Mage::getUrl('chatbot/chatdata/' . $this->_fbBot, array('_forced_secure' => true)));
