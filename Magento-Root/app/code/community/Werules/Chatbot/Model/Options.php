@@ -24,7 +24,8 @@ class Werules_Chatbot_Model_Options
 			array('value'=>12, 'label'=>'Cancel'),
 			array('value'=>13, 'label'=>'Help'),
 			array('value'=>14, 'label'=>'About'),
-			array('value'=>15, 'label'=>'Logout')
+			array('value'=>15, 'label'=>'Logout'),
+			array('value'=>16, 'label'=>'Register')
 		);
 	}
 }
