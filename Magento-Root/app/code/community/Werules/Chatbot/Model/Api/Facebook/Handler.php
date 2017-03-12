@@ -559,11 +559,12 @@
 						if ($_category->getId()) // check if is a valid category
 						{
 							$noProductFlag = false;
-							$productIDs = $_category->getProductCollection()
+							$productCollection = $_category->getProductCollection()
 								->addAttributeToSelect('*')
 								->addAttributeToFilter('visibility', 4)
-								->addAttributeToFilter('type_id', 'simple')
-								->getAllIds();
+								->addAttributeToFilter('type_id', 'simple');
+							Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
+							$productIDs = $productCollection->getAllIds();
 
 							$elements = array();
 							if ($productIDs)

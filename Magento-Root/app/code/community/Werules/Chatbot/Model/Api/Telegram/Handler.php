@@ -623,6 +623,7 @@
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("please wait while I search for '%s' for you.", $text)));
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("listing more.")));
+
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$errorFlag = false;
 					$noProductFlag = false;
