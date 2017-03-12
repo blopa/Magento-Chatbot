@@ -496,16 +496,29 @@
 				if ($chatdata->checkCommandWithValue($text, $chatdata->_add2CartCmd['command'])) // ignore alias
 				{
 					$errorFlag = false;
+					$notInStock = false;
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_add2CartCmd['command']);
 					if ($cmdvalue) // TODO
 					{
-						$productName = Mage::getModel('catalog/product')->load($cmdvalue)->getName();
-						if (empty($productName))
-							$productName = $magehelper->__("this product");
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("adding %s to your cart.", $productName)));
-						$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
-						if ($chatdata->addProd2Cart($cmdvalue))
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->_checkoutCmd['command']));
+						$product = Mage::getModel('catalog/product')->load($cmdvalue);
+						if ($product->getId())
+						{
+							$stock = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product)->getIsInStock();
+							if ($stock > 0)
+							{
+								$productName = $product->getName();
+								if (empty($productName))
+									$productName = $magehelper->__("this product");
+								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $magehelper->__("adding %s to your cart.", $productName)));
+								$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
+								if ($chatdata->addProd2Cart($cmdvalue))
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Added. To checkout send") . " " . $chatdata->_checkoutCmd['command']));
+								else
+									$errorFlag = true;
+							}
+							else
+								$notInStock = true;
+						}
 						else
 							$errorFlag = true;
 					}
@@ -514,6 +527,9 @@
 
 					if ($errorFlag)
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					else if ($notInStock)
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("This product is not in stock.")));
+
 					return $telegram->respondSuccess();
 				}
 
