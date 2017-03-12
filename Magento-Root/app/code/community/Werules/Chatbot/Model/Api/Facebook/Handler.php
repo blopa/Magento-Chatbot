@@ -1036,11 +1036,12 @@
 				{
 					if ($chatdata->getIsLogged() != "1") // customer not logged
 					{
-						$hashlink = Mage::getUrl('chatbot/settings/index/') . "hash" . DS . $chatdata->getHashKey();
+						$hashUrl = Mage::getUrl('chatbot/settings/index/'); // get base module URL
+						$hashUrl = strtok($hashUrl, '?') . "hash" . DS . $chatdata->getHashKey(); // remove magento parameters
 						$buttons = array(
 							array(
 								'type' => 'web_url',
-								'url' => $hashlink,
+								'url' => $hashUrl,
 								'title' => $magehelper->__("Login")
 							)
 						);
