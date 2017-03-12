@@ -47,6 +47,10 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 3. Log out the Magento admin and log back in to clear the ACL list
 4. Recompile if you are using the Magento Compiler
 
+**Attention to blocks from other modules, it may overwrite the webhook URL, which must NOT contain any blocks.**
+
+If you find yourself in this situation, exclude the block by adding ```<remove name="BLOCK_NAME" />``` at ```Magento-Root/app/design/frontend/base/default/layout/werules_chatbot.xml```
+
 ## Usage
 
 Go to **System > General Settings  > Chatbot Settings**
