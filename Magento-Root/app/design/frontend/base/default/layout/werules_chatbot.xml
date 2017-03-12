@@ -20,6 +20,9 @@
 		<remove name="left" />
 		<remove name="header" />
 		<remove name="footer" />
+		<remove name="customer_form_login" />
+		<remove name="customer_form_register" />
+		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
 		<reference name="content">
 			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
 		</reference>
@@ -30,6 +33,9 @@
 		<remove name="left" />
 		<remove name="header" />
 		<remove name="footer" />
+		<remove name="customer_form_login" />
+		<remove name="customer_form_register" />
+		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
 		<reference name="content">
 			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
 		</reference>
@@ -40,6 +46,9 @@
 		<remove name="left" />
 		<remove name="header" />
 		<remove name="footer" />
+		<remove name="customer_form_login" />
+		<remove name="customer_form_register" />
+		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
 		<reference name="content">
 			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
 		</reference>
