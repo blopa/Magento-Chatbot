@@ -112,45 +112,6 @@
 				// send feedback to user
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 
-				// handle default replies
-				if ($enableReplies == "1")
-				{
-					$defaultReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/default_replies');
-					if ($defaultReplies)
-					{
-						$replies = unserialize($defaultReplies);
-						if (is_array($replies))
-						{
-							foreach($replies as $reply)
-							{
-								$match = $reply["catch_phrase"];
-								$similarity = $reply["similarity"];
-								if (is_numeric($similarity))
-								{
-									if (!($similarity >= 1 && $similarity <= 100))
-										$similarity = 100;
-								}
-								else
-									$similarity = 100;
-
-								if ($reply["match_case"] == "0")
-								{
-									$match = strtolower($match);
-									$text = strtolower($text);
-								}
-
-								similar_text($text, $match, $percent);
-								if ($percent >= $similarity)
-								{
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
-									return $telegram->respondSuccess();
-									break; // probably useless
-								}
-							}
-						}
-					}
-				}
-
 				// show more handler, may change the conversation state
 				if ($chatdata->getTelegramConvState() == $chatdata->_listProductsState || $chatdata->getTelegramConvState() == $chatdata->_listOrdersState) // listing products
 				{
@@ -282,6 +243,8 @@
 					return $telegram->respondSuccess(); // ignore all group messages
 				}
 
+				// ALL CUSTOMER HANDLERS GOES AFTER HERE
+
 				if ($chatdata->getIsLogged() == "1") // check if customer is logged
 				{
 					if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId()) // if is a valid customer id
@@ -290,6 +253,53 @@
 						{
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("To talk with me, please enable Telegram on your account chatbot settings.")));
 							return $telegram->respondSuccess();
+						}
+					}
+				}
+
+				$blockerStates = (
+					$conversationState == $chatdata->_listCategoriesState ||
+					$conversationState == $chatdata->_searchState ||
+					$conversationState == $chatdata->_supportState ||
+					$conversationState == $chatdata->_sendEmailState ||
+					$conversationState == $chatdata->_trackOrderState
+				);
+
+				// handle default replies
+				if ($enableReplies == "1" && !$blockerStates)
+				{
+					$defaultReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/default_replies');
+					if ($defaultReplies)
+					{
+						$replies = unserialize($defaultReplies);
+						if (is_array($replies))
+						{
+							foreach($replies as $reply)
+							{
+								$match = $reply["catch_phrase"];
+								$similarity = $reply["similarity"];
+								if (is_numeric($similarity))
+								{
+									if (!($similarity >= 1 && $similarity <= 100))
+										$similarity = 100;
+								}
+								else
+									$similarity = 100;
+
+								if ($reply["match_case"] == "0")
+								{
+									$match = strtolower($match);
+									$text = strtolower($text);
+								}
+
+								similar_text($text, $match, $percent);
+								if ($percent >= $similarity)
+								{
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
+									return $telegram->respondSuccess();
+									break; // probably useless
+								}
+							}
 						}
 					}
 				}

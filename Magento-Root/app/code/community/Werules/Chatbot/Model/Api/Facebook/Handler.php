@@ -123,45 +123,6 @@
 				// send feedback to user
 				$facebook->sendChatAction($chatId, "typing_on");
 
-				// handle default replies
-				if ($enableReplies == "1")
-				{
-					$defaultReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/default_replies');
-					if ($defaultReplies)
-					{
-						$replies = unserialize($defaultReplies);
-						if (is_array($replies))
-						{
-							foreach($replies as $reply)
-							{
-								$match = $reply["catch_phrase"];
-								$similarity = $reply["similarity"];
-								if (is_numeric($similarity))
-								{
-									if (!($similarity >= 1 && $similarity <= 100))
-										$similarity = 100;
-								}
-								else
-									$similarity = 100;
-
-								if ($reply["match_case"] == "0")
-								{
-									$match = strtolower($match);
-									$text = strtolower($text);
-								}
-
-								similar_text($text, $match, $percent);
-								if ($percent >= $similarity)
-								{
-									$facebook->sendMessage($chatId, $reply["reply_phrase"]);
-									return $facebook->respondSuccess();
-									break; // probably useless
-								}
-							}
-						}
-					}
-				}
-
 				// payload handler, may change the conversation state
 				if ($chatdata->getFacebookConvState() == $chatdata->_listProductsState || $chatdata->getFacebookConvState() == $chatdata->_listOrdersState) // listing products
 				{
@@ -292,6 +253,8 @@
 					}
 				}
 
+				// ALL CUSTOMER HANDLERS GOES AFTER HERE
+
 				if ($chatdata->getIsLogged() == "1") // check if customer is logged
 				{
 					if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId()) // if is a valid customer id
@@ -301,6 +264,53 @@
 							$facebook->sendMessage($chatId, $magehelper->__("To talk with me, please enable Facebook Messenger on your account chatbot settings."));
 							$facebook->sendChatAction($chatId, "typing_off");
 							return $facebook->respondSuccess();
+						}
+					}
+				}
+
+				$blockerStates = (
+					$conversationState == $chatdata->_listCategoriesState ||
+					$conversationState == $chatdata->_searchState ||
+					$conversationState == $chatdata->_supportState ||
+					$conversationState == $chatdata->_sendEmailState ||
+					$conversationState == $chatdata->_trackOrderState
+				);
+
+				// handle default replies
+				if ($enableReplies == "1" && !$blockerStates)
+				{
+					$defaultReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/default_replies');
+					if ($defaultReplies)
+					{
+						$replies = unserialize($defaultReplies);
+						if (is_array($replies))
+						{
+							foreach($replies as $reply)
+							{
+								$match = $reply["catch_phrase"];
+								$similarity = $reply["similarity"];
+								if (is_numeric($similarity))
+								{
+									if (!($similarity >= 1 && $similarity <= 100))
+										$similarity = 100;
+								}
+								else
+									$similarity = 100;
+
+								if ($reply["match_case"] == "0")
+								{
+									$match = strtolower($match);
+									$text = strtolower($text);
+								}
+
+								similar_text($text, $match, $percent);
+								if ($percent >= $similarity)
+								{
+									$facebook->sendMessage($chatId, $reply["reply_phrase"]);
+									return $facebook->respondSuccess();
+									break; // probably useless
+								}
+							}
 						}
 					}
 				}
@@ -326,8 +336,8 @@
 					{
 						$facebook->sendMessage($chatId, $chatdata->_errorMessage); // TODO
 					}
-					$facebook->sendChatAction($chatId, "typing_off");
-					return $facebook->respondSuccess();
+					//$facebook->sendChatAction($chatId, "typing_off");
+					//return $facebook->respondSuccess(); // commented to keep processing the message
 				}
 
 				// init commands
