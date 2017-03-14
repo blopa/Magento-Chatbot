@@ -611,7 +611,7 @@
 									if ($showMore == 0)
 									{
 										if ($total == 1)
-											$facebook->sendMessage($chatId, $mageHelper->__("Done. This category has only one product.", $total));
+											$facebook->sendMessage($chatId, $mageHelper->__("Done. This category has only one product."));
 										else
 											$facebook->sendMessage($chatId, $mageHelper->__("Done. This category has %s products.", $total));
 									}
@@ -733,7 +733,7 @@
 							if ($showMore == 0)
 							{
 								if ($total == 1)
-									$facebook->sendMessage($chatId, $mageHelper->__("Done. I've found only one product for your criteria.", $total));
+									$facebook->sendMessage($chatId, $mageHelper->__("Done. I've found only one product for your criteria."));
 								else
 									$facebook->sendMessage($chatId, $mageHelper->__("Done. I've found %s products for your criteria.", $total));
 							}
@@ -1152,7 +1152,7 @@
 								if ($showMore == 0)
 								{
 									if ($total == 1)
-										$facebook->sendMessage($chatId, $mageHelper->__("Done. You've only one order.", $total));
+										$facebook->sendMessage($chatId, $mageHelper->__("Done. You've only one order."));
 									else
 										$facebook->sendMessage($chatId, $mageHelper->__("Done. I've found %s orders.", $total));
 								}

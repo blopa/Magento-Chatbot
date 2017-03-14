@@ -587,7 +587,7 @@
 									if ($showMore == 0)
 									{
 										if ($total == 1)
-											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. This category has only one product.", $total)));
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. This category has only one product.")));
 										else
 											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. This category has %s products.", $total)));
 									}
@@ -676,7 +676,7 @@
 							if ($showMore == 0)
 							{
 								if ($total == 1)
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. I've found only one product for your criteria.", $total)));
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. I've found only one product for your criteria.")));
 								else
 									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. I've found %s products for your criteria.", $total)));
 							}
@@ -1001,7 +1001,7 @@
 								if ($showMore == 0)
 								{
 									if ($total == 1)
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. You've only one order.", $total)));
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. You've only one order.")));
 									else
 										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done. I've found %s orders.", $total)));
 								}
