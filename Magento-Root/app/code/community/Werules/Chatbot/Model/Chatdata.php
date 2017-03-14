@@ -494,7 +494,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected function getProductIdsBySearch($searchstring)
 		{
 			// Code to Search Product by $searchstring and get Product IDs
-			$product_collection_ids = Mage::getResourceModel('catalog/product_collection')
+			$productCollection = Mage::getResourceModel('catalog/product_collection')
 				->addAttributeToSelect('*')
 				->addAttributeToFilter('visibility', 4)
 				->addAttributeToFilter('type_id', 'simple')
@@ -503,11 +503,13 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 						array('attribute' => 'sku', 'like' => '%' . $searchstring .'%'),
 						array('attribute' => 'name', 'like' => '%' . $searchstring .'%')
 					)
-				)
-				->getAllIds();
+				);
+				//->getAllIds();
+			Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
+			$productIDs = $productCollection->getAllIds();
 
-			if (!empty($product_collection_ids))
-				return $product_collection_ids;
+			if (!empty($productIDs))
+				return $productIDs;
 
 			return false;
 		}
