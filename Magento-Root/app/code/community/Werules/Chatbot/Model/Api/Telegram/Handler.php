@@ -434,8 +434,15 @@
 				if ($chatdata->checkCommand($text, $chatdata->_helpCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
-					if ($message) // TODO
+					if (!empty($message)) // TODO
+					{
+						$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_help_command_list');
+						if ($cmdListing == 1)
+							$message .= $chatdata->listTelegramCommandsMessage();
+
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+					}
+
 					return $telegram->respondSuccess();
 				}
 
@@ -443,30 +450,9 @@
 				if ($chatdata->checkCommand($text, $chatdata->_aboutCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
-					$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_help_command_list');
-					if ($cmdListing == 1)
-					{
-						$message .= $chatdata->listTelegramCommandsMessage();
-//						$message .= "\n\n" . $mageHelper->__("Command list") . ":\n";
-//						if ($chatdata->_listCategoriesCmd['command']) $message .= $chatdata->_listCategoriesCmd['command'] . " - " . $mageHelper->__("List store categories.") . "\n";
-//						if ($chatdata->_searchCmd['command']) $message .= $chatdata->_searchCmd['command'] . " - " . $mageHelper->__("Search for products.") . "\n";
-//						if ($chatdata->_loginCmd['command']) $message .= $chatdata->_loginCmd['command'] . " - " . $mageHelper->__("Login into your account.") . "\n";
-//						if ($chatdata->_logoutCmd['command']) $message .= $chatdata->_logoutCmd['command'] . " - " . $mageHelper->__("Logout from your account.") . "\n";
-//						if ($chatdata->_registerCmd['command']) $message .= $chatdata->_registerCmd['command'] . " - " . $mageHelper->__("Create a new account.") . "\n";
-//						if ($chatdata->_listOrdersCmd['command']) $message .= $chatdata->_listOrdersCmd['command'] . " - " . $mageHelper->__("List your personal orders.") . "\n";
-//						//$message .= $chatdata->_reorderCmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
-//						//$message .= $chatdata->_add2CartCmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
-//						if ($chatdata->_checkoutCmd['command']) $message .= $chatdata->_checkoutCmd['command'] . " - " . $mageHelper->__("Checkout your order.") . "\n";
-//						if ($chatdata->_clearCartCmd['command']) $message .= $chatdata->_clearCartCmd['command'] . " - " . $mageHelper->__("Clear your cart.") . "\n";
-//						if ($chatdata->_trackOrderCmd['command']) $message .= $chatdata->_trackOrderCmd['command'] . " - " . $mageHelper->__("Track your order status.") . "\n";
-//						if ($chatdata->_supportCmd['command']) $message .= $chatdata->_supportCmd['command'] . " - " . $mageHelper->__("Send message to support.") . "\n";
-//						if ($chatdata->_sendEmailCmd['command']) $message .= $chatdata->_sendEmailCmd['command'] . " - " . $mageHelper->__("Send email.") . "\n";
-//						//$message .= $chatdata->_cancelCmd['command'] . " - " . $magehelper->__("Cancel.");
-//						if ($chatdata->_helpCmd['command']) $message .= $chatdata->_helpCmd['command'] . " - " . $mageHelper->__("Get help.") . "\n";
-//						//$message .= $chatdata->_aboutCmd['command'] . " - " . $magehelper->__("About.");
-					}
+					if (!empty($message))
+						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
 
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
 					return $telegram->respondSuccess();
 				}
 
