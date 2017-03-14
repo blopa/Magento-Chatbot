@@ -931,7 +931,14 @@
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_loginState))
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("To login to your account, click this link") . ": " . $hashUrl));
+						{
+							$telegram->sendMessage(array(
+								'chat_id' => $chatId, 'text' => $magehelper->__("To login to your account, click this link") . ": " .
+									$hashUrl . " . " .
+									$magehelper->__("If you want to logout from your account, just send") . " " .
+									$chatdata->_logoutCmd
+							));
+						}
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're already logged.")));

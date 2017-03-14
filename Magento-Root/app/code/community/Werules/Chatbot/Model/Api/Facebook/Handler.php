@@ -1083,7 +1083,12 @@
 						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_loginState))
 							$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 						else
-							$facebook->sendButtonTemplate($chatId, $magehelper->__("To login to your account, access the link below") . ". " . $magehelper->__("If you want to logout from your account, just send") . " " . $chatdata->_logoutCmd, $buttons);
+						{
+							$facebook->sendButtonTemplate(
+								$chatId, $magehelper->__("To login to your account, access the link below") . ". " .
+								$magehelper->__("If you want to logout from your account, just send") . " " . $chatdata->_logoutCmd, $buttons
+							);
+						}
 					}
 					else
 						$facebook->sendMessage($chatId, $magehelper->__("You're already logged."));
