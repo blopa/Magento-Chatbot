@@ -29,7 +29,7 @@
 			{
 				$telegram = new Telegram($apiKey);
 
-				$magehelper = Mage::helper('core');
+				$mageHelper = Mage::helper('core');
 				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 				if (!empty($supportgroup))
 				{
@@ -38,9 +38,9 @@
 							$supportgroup = "-" . ltrim($supportgroup, "g");
 
 						if (!$customerName)
-							$customerName = $magehelper->__("Not informed");
+							$customerName = $mageHelper->__("Not informed");
 
-						$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $magehelper->__("From") . ": " . $customerName . "\n" . $text;
+						$message = $mageHelper->__("Message via") . " " . $api_name . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
 						$result = $telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))
