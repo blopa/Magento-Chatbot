@@ -486,8 +486,19 @@
 				if ($chatdata->checkCommand($text, $chatdata->_helpCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
-					if ($message) // TODO
-						$facebook->sendMessage($chatId, $message);
+					if (!empty($message)) // TODO
+					{
+						$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_help_command_list');
+						if ($cmdListing == 1)
+						{
+							$content = $chatdata->listFacebookCommandsMessage();
+
+							$facebook->sendQuickReply($chatId, $content[0], $content[1]);
+						}
+						else
+							$facebook->sendMessage($chatId, $message);
+					}
+
 					$facebook->sendChatAction($chatId, "typing_off");
 					return $facebook->respondSuccess();
 				}
@@ -496,14 +507,7 @@
 				if ($chatdata->checkCommand($text, $chatdata->_aboutCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
-					$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_command_list');
-					if ($cmdListing == 1)
-					{
-						$content = $chatdata->listFacebookCommandsMessage();
-
-						$facebook->sendQuickReply($chatId, $content[0], $content[1]);
-					}
-					else
+					if (!empty($message))
 						$facebook->sendMessage($chatId, $message);
 
 					$facebook->sendChatAction($chatId, "typing_off");

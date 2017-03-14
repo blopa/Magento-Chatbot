@@ -443,7 +443,7 @@
 				if ($chatdata->checkCommand($text, $chatdata->_aboutCmd))
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
-					$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_command_list');
+					$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_help_command_list');
 					if ($cmdListing == 1)
 					{
 						$message .= $chatdata->listTelegramCommandsMessage();
