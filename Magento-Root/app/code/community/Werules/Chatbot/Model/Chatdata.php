@@ -112,7 +112,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			// handle webhook configuration
 			if ($webhook && $apiKey && $action == $this->_tgBot) // set telegram webhook
 			{
-				$magehelper = Mage::helper('core');
+				$mageHelper = Mage::helper('core');
 				$telegram = new Telegram($apiKey);
 				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
 				// replace http by https, and remove all url parameters with strok
@@ -121,28 +121,28 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					$telegram->setWebhook($webhookUrl);
 				}
 				catch (Exception $e) {
-					return $magehelper->__("Something went wrong, please try again.");
+					return $mageHelper->__("Something went wrong, please try again.");
 				}
 
 				//return var_dump(array('url' => $webhookUrl));
-				$tgGetWebhook = "<a href='https://api.telegram.org/bot" . $apiKey . "/getWebhookInfo' target='_blank'>" . $magehelper->__("here") . "</a>";
-				$tgSetWebhook = "<a href='https://api.telegram.org/bot" . $apiKey . "/setWebhook?url=" . $webhookUrl . "' target='_blank'>" . $magehelper->__("here") . "</a>";
-				$message = $magehelper->__("Webhook for Telegram configured.") .
-					$magehelper->__("Webhook URL") . ": " .
+				$tgGetWebhook = "<a href='https://api.telegram.org/bot" . $apiKey . "/getWebhookInfo' target='_blank'>" . $mageHelper->__("here") . "</a>";
+				$tgSetWebhook = "<a href='https://api.telegram.org/bot" . $apiKey . "/setWebhook?url=" . $webhookUrl . "' target='_blank'>" . $mageHelper->__("here") . "</a>";
+				$message = $mageHelper->__("Webhook for Telegram configured.") .
+					$mageHelper->__("Webhook URL") . ": " .
 					$webhookUrl . "<br>" .
-					$magehelper->__("Click %s to check that information on Telegram website. If a wrong URL is set, try reloading this page or click %s.", $tgGetWebhook, $tgSetWebhook)
+					$mageHelper->__("Click %s to check that information on Telegram website. If a wrong URL is set, try reloading this page or click %s.", $tgGetWebhook, $tgSetWebhook)
 				;
 				return $message;
 			}
 			else if ($webhook && $apiKey && $action == $this->_fbBot) // set facebook webhook
 			{
-				$magehelper = Mage::helper('core');
+				$mageHelper = Mage::helper('core');
 				// replace http by https, and remove all url parameters with strok
 				$webhookUrl = str_replace("http://", "https://", strtok(Mage::getUrl('chatbot/chatdata/' . $this->_fbBot, array('_forced_secure' => true)), '?'));
 
-				$message = $magehelper->__("To configure Facebook webhook access") .
+				$message = $mageHelper->__("To configure Facebook webhook access") .
 					" https://developers.facebook.com/apps/(FACEBOOK_APP_ID)/webhooks/" .
-					$magehelper->__("and set the webhook URL as") . " " . $webhookUrl
+					$mageHelper->__("and set the webhook URL as") . " " . $webhookUrl
 				;
 				return $message;
 			} // start to handle conversation
@@ -185,14 +185,14 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		{
 			$storeName = Mage::app()->getStore()->getName();
 			$storeEmail = Mage::getStoreConfig('trans_email/ident_general/email');// TODO
-			$magehelper = Mage::helper('core');
+			$mageHelper = Mage::helper('core');
 
-			$url = $magehelper->__("Not informed");
-			$customerEmail = $magehelper->__("Not informed");
+			$url = $mageHelper->__("Not informed");
+			$customerEmail = $mageHelper->__("Not informed");
 			if ($username)
 				$customerName = $username;
 			else
-				$customerName = $magehelper->__("Not informed");
+				$customerName = $mageHelper->__("Not informed");
 
 			$mail = new Zend_Mail('UTF-8');
 
@@ -216,14 +216,14 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			}
 
 			$emailBody =
-				$magehelper->__("Message from chatbot customer") . "<br><br>" .
-				$magehelper->__("Customer name") . ": " .
+				$mageHelper->__("Message from chatbot customer") . "<br><br>" .
+				$mageHelper->__("Customer name") . ": " .
 				$customerName . "<br>" .
-				$magehelper->__("Message") . ":<br>" .
+				$mageHelper->__("Message") . ":<br>" .
 				$text . "<br><br>" .
-				$magehelper->__("Contacts") . ":<br>" .
-				$magehelper->__("Chatbot") . ": " . $url . "<br>" .
-				$magehelper->__("Email") . ": " . $customerEmail . "<br>";
+				$mageHelper->__("Contacts") . ":<br>" .
+				$mageHelper->__("Chatbot") . ": " . $url . "<br>" .
+				$mageHelper->__("Email") . ": " . $customerEmail . "<br>";
 
 			$mail->setBodyHtml($emailBody);
 			$mail->setFrom($storeEmail, $storeName);
@@ -307,20 +307,21 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected function getCommandString($cmdId)
 		{
 			$rep = "";
+			$confPath = "";
 			if ($this->_apiType == $this->_tgBot)
 			{
 				$rep = "_";
-				$confpath = 'chatbot_enable/telegram_config/';
+				$confPath = 'chatbot_enable/telegram_config/';
 			}
 			else if ($this->_apiType == $this->_fbBot)
 			{
 				$rep = " ";
-				$confpath = 'chatbot_enable/facebook_config/';
+				$confPath = 'chatbot_enable/facebook_config/';
 			}
 //			else if ($this->_apiType == $this->_wappBot)
 //				$confpath = 'chatbot_enable/whatsapp_config/';
 
-			$config = Mage::getStoreConfig($confpath . 'enabled_commands');
+			$config = Mage::getStoreConfig($confPath . 'enabled_commands');
 			$enabledCmds = explode(',', $config);
 			if (is_array($enabledCmds))
 			{
@@ -331,7 +332,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					{
 						$cmdCode = "";
 						$alias = array();
-						$config = Mage::getStoreConfig($confpath . 'commands_list');
+						$config = Mage::getStoreConfig($confPath . 'commands_list');
 						if ($config)
 						{
 							$commands = unserialize($config);
@@ -444,12 +445,12 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return true;
 		}
 
-		public function updateChatdata($datatype, $state)
+		public function updateChatdata($dataType, $state)
 		{
 			try
 			{
 				$data = array(
-					$datatype => $state,
+					$dataType => $state,
 					"updated_at" => date('Y-m-d H:i:s')
 				); // data to be insert on database
 				$this->addData($data);
@@ -491,23 +492,25 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return false;
 		}
 
-		protected function getProductIdsBySearch($searchstring)
+		protected function getProductIdsBySearch($searchString)
 		{
 			// Code to Search Product by $searchstring and get Product IDs
-			$product_collection_ids = Mage::getResourceModel('catalog/product_collection')
+			$productCollection = Mage::getResourceModel('catalog/product_collection')
 				->addAttributeToSelect('*')
 				->addAttributeToFilter('visibility', 4)
 				->addAttributeToFilter('type_id', 'simple')
 				->addAttributeToFilter(
 					array(
-						array('attribute' => 'sku', 'like' => '%' . $searchstring .'%'),
-						array('attribute' => 'name', 'like' => '%' . $searchstring .'%')
+						array('attribute' => 'sku', 'like' => '%' . $searchString .'%'),
+						array('attribute' => 'name', 'like' => '%' . $searchString .'%')
 					)
-				)
-				->getAllIds();
+				);
+				//->getAllIds();
+			Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
+			$productIDs = $productCollection->getAllIds();
 
-			if (!empty($product_collection_ids))
-				return $product_collection_ids;
+			if (!empty($productIDs))
+				return $productIDs;
 
 			return false;
 		}
