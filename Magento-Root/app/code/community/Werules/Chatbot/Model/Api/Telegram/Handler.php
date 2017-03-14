@@ -37,6 +37,9 @@
 						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
 							$supportgroup = "-" . ltrim($supportgroup, "g");
 
+						if (!$customerName)
+							$customerName = $magehelper->__("Not informed");
+
 						$message = $magehelper->__("Message via") . " " . $api_name . ":\n" . $magehelper->__("From") . ": " . $customerName . "\n" . $text;
 						$result = $telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
 						$mid = $result['result']['message_id'];
@@ -91,6 +94,9 @@
 
 			if (!is_null($text) && !is_null($chatId))
 			{
+				// Instances facebook user details
+				$username = $telegram->Username();
+
 				// Instances the model class
 				$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 				$chatdata->_apiType = $chatdata->_tgBot;
@@ -741,7 +747,7 @@
 				else if ($conversationState == $chatdata->_sendEmailState)
 				{
 					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Trying to send the email...")));
-					if ($chatdata->sendEmail($text))
+					if ($chatdata->sendEmail($text, $username))
 					{
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("Done.")));
 					}
@@ -925,7 +931,14 @@
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_loginState))
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("To login to your account, click this link") . ": " . $hashUrl));
+						{
+							$telegram->sendMessage(array(
+								'chat_id' => $chatId, 'text' => $magehelper->__("To login to your account, click this link") . ": " .
+									$hashUrl . " . " .
+									$magehelper->__("If you want to logout from your account, just send") . " " .
+									$chatdata->_logoutCmd
+							));
+						}
 					}
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $magehelper->__("You're already logged.")));

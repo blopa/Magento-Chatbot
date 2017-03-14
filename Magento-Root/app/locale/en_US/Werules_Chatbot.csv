@@ -23,6 +23,7 @@
 "Cart cleared.","Cart cleared."
 "what do you want to search for?","what do you want to search for?"
 "To login to your account, click this link","To login to your account, click this link"
+"To login to your account, access the link below","To login to your account, access the link below"
 "let me fetch that for you.","let me fetch that for you."
 "Please login first.","Please login first."
 "to checkout send","to checkout send"
@@ -142,3 +143,4 @@
 "Create a new account.","Create a new account."
 "Access %s to register a new account on our shop.","Access %s to register a new account on our shop."
 "This product is not in stock.","This product is not in stock."
+"If you want to logout from your account, just send","If you want to logout from your account, just send"

@@ -23,6 +23,7 @@
 "Cart cleared.","Carrinho esvaziado"
 "what do you want to search for?","digite o que você quer procurar."
 "To login to your account, click this link","Para acessar sua conta, clique nesse link"
+"To login to your account, access the link below","Para acessar sua conta, clique no link abaixo"
 "let me fetch that for you.","deixa eu buscar essa informação para você."
 "Please login first.","Por favor, faça o login primeiro."
 "to checkout send","para finalizar o pedido envie"
@@ -142,3 +143,4 @@
 "Create a new account.","Criar uma nova conta."
 "Access %s to register a new account on our shop.","Acesse %s para criar uma nova conta em nossa loja."
 "This product is not in stock.","Não temos estoque para esse produto."
+"If you want to logout from your account, just send","Se você quiser sair da sua conta, envie"

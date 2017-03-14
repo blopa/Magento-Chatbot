@@ -95,10 +95,10 @@
 			if (!empty($originalText) && !empty($chatId) && $isEcho != "true")
 			{
 				// Instances facebook user details
-				$user_data = $facebook->UserData($chatId);
+				$userData = $facebook->UserData($chatId);
 				$username = null;
-				if (!empty($user_data))
-					$username = $user_data['first_name'];
+				if (!empty($userData))
+					$username = $userData['first_name'];
 
 				$text = strtolower($originalText);
 
@@ -501,66 +501,67 @@
 					{
 						$message .= "\n\n" . $magehelper->__("Command list") . ":\n";
 						$replies = array(); // quick replies limit is 10 options
+						// some commands are commented because of the 10 limit from Facebook
 						// just getting the command string, not checking the command
-						if ($chatdata->_listCategoriesCmd['command'])
+						if ($chatdata->_listCategoriesCmd['command']) // 1
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_listCategoriesCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_listCategoriesCmd['command'])));
 							$message .= $chatdata->_listCategoriesCmd['command'] . " - " . $magehelper->__("List store categories.") . "\n";
 						}
-						if ($chatdata->_searchCmd['command'])
+						if ($chatdata->_searchCmd['command']) // 2
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_searchCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_searchCmd['command'])));
 							$message .= $chatdata->_searchCmd['command'] . " - " . $magehelper->__("Search for products.") . "\n";
 						}
-						if ($chatdata->_loginCmd['command'])
+						if ($chatdata->_loginCmd['command']) // 3
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_loginCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
 							$message .= $chatdata->_loginCmd['command'] . " - " . $magehelper->__("Login into your account.") . "\n";
 						}
-						if ($chatdata->_logoutCmd['command'])
+						if ($chatdata->_logoutCmd['command']) // 4
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_logoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
+							//array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_logoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
 							$message .= $chatdata->_logoutCmd['command'] . " - " . $magehelper->__("Logout from your account.") . "\n";
 						}
-						if ($chatdata->_registerCmd['command'])
+						if ($chatdata->_registerCmd['command']) // 5
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_registerCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
+							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_registerCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_registerCmd['command'])));
 							$message .= $chatdata->_registerCmd['command'] . " - " . $magehelper->__("Create a new account.") . "\n";
 						}
-						if ($chatdata->_listOrdersCmd['command'])
+						if ($chatdata->_listOrdersCmd['command']) // 6
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_listOrdersCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_listOrdersCmd['command'])));
 							$message .= $chatdata->_listOrdersCmd['command'] . " - " . $magehelper->__("List your personal orders.") . "\n";
 						}
 						//$message .= $chatdata->_reorderCmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
 						//$message .= $chatdata->_add2CartCmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
-						if ($chatdata->_checkoutCmd['command'])
+						if ($chatdata->_checkoutCmd['command']) // 7
 						{
-							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_checkoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_checkoutCmd['command'])));
+							//array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_checkoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_checkoutCmd['command'])));
 							$message .= $chatdata->_checkoutCmd['command'] . " - " . $magehelper->__("Checkout your order.") . "\n";
 						}
-						if ($chatdata->_clearCartCmd['command'])
+						if ($chatdata->_clearCartCmd['command']) // 8
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_clearCartCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_clearCartCmd['command'])));
 							$message .= $chatdata->_clearCartCmd['command'] . " - " . $magehelper->__("Clear your cart.") . "\n";
 						}
-						if ($chatdata->_trackOrderCmd['command'])
+						if ($chatdata->_trackOrderCmd['command']) // 9
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_trackOrderCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_trackOrderCmd['command'])));
 							$message .= $chatdata->_trackOrderCmd['command'] . " - " . $magehelper->__("Track your order status.") . "\n";
 						}
-						if ($chatdata->_supportCmd['command'])
+						if ($chatdata->_supportCmd['command']) // 10
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_supportCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_supportCmd['command'])));
 							$message .= $chatdata->_supportCmd['command'] . " - " . $magehelper->__("Send message to support.") . "\n";
 						}
-						if ($chatdata->_sendEmailCmd['command'])
+						if ($chatdata->_sendEmailCmd['command']) // 11
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_sendEmailCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_sendEmailCmd['command'])));
 							$message .= $chatdata->_sendEmailCmd['command'] . " - " . $magehelper->__("Send email.") . "\n";
 						}
 						//$message .= $chatdata->_cancelCmd['command'] . " - " . $magehelper->__("Cancel.");
-						if ($chatdata->_helpCmd['command'])
+						if ($chatdata->_helpCmd['command']) // 12
 						{
 							array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_helpCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_helpCmd['command'])));
 							$message .= $chatdata->_helpCmd['command'] . " - " . $magehelper->__("Get help.") . "\n";
@@ -874,7 +875,7 @@
 				else if ($conversationState == $chatdata->_sendEmailState)
 				{
 					$facebook->sendMessage($chatId, $magehelper->__("Trying to send the email..."));
-					if ($chatdata->sendEmail($text))
+					if ($chatdata->sendEmail($text, $username))
 					{
 						$facebook->sendMessage($chatId, $magehelper->__("Done."));
 					}
@@ -1082,7 +1083,12 @@
 						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_loginState))
 							$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 						else
-							$facebook->sendButtonTemplate($chatId, $magehelper->__("To login to your account, access the link below"), $buttons);
+						{
+							$facebook->sendButtonTemplate(
+								$chatId, $magehelper->__("To login to your account, access the link below") . ". " .
+								$magehelper->__("If you want to logout from your account, just send") . " " . $chatdata->_logoutCmd, $buttons
+							);
+						}
 					}
 					else
 						$facebook->sendMessage($chatId, $magehelper->__("You're already logged."));

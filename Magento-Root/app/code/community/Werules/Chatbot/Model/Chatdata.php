@@ -181,7 +181,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return null;
 		}
 
-		protected function sendEmail($text)
+		protected function sendEmail($text, $username)
 		{
 			$storeName = Mage::app()->getStore()->getName();
 			$storeEmail = Mage::getStoreConfig('trans_email/ident_general/email');// TODO
@@ -189,7 +189,10 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 			$url = $magehelper->__("Not informed");
 			$customerEmail = $magehelper->__("Not informed");
-			$customerName = $magehelper->__("Not informed");
+			if ($username)
+				$customerName = $username;
+			else
+				$customerName = $magehelper->__("Not informed");
 
 			$mail = new Zend_Mail('UTF-8');
 
