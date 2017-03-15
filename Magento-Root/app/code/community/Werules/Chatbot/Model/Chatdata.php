@@ -558,7 +558,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			if ($this->_sendEmailCmd['command']) $message .= $this->_sendEmailCmd['command'] . " - " . $mageHelper->__("Send email.") . "\n";
 			//$message .= $chatdata->_cancelCmd['command'] . " - " . $magehelper->__("Cancel.");
 			if ($this->_helpCmd['command']) $message .= $this->_helpCmd['command'] . " - " . $mageHelper->__("Get help.") . "\n";
-			//$message .= $chatdata->_aboutCmd['command'] . " - " . $magehelper->__("About.");
+			if ($this->_aboutCmd['command']) $message .= $this->_aboutCmd['command'] . " - " . $mageHelper->__("About.") . "\n";
 
 			return $message;
 		}
@@ -669,12 +669,16 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				$message .= '"' . $this->_sendEmailCmd['command'] . '"' . " - " . $mageHelper->__("Send email.") . "\n";
 			}
 			//$message .= '"' . $chatdata->_cancelCmd['command'] . '"' . " - " . $magehelper->__("Cancel.");
-			if ($this->_helpCmd['command']) // 12
+			if ($this->_aboutCmd['command']) // 12
 			{
-				array_push($replies, array('content_type' => 'text', 'title' => $this->_helpCmd['command'], 'payload' => str_replace(' ', '_', $this->_helpCmd['command'])));
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_aboutCmd['command'], 'payload' => str_replace(' ', '_', $this->_aboutCmd['command'])));
+				$message .= '"' . $this->_aboutCmd['command'] . '"' . " - " . $mageHelper->__("About.") . "\n";
+			}
+			if ($this->_helpCmd['command']) // 13
+			{
+				//array_push($replies, array('content_type' => 'text', 'title' => $this->_helpCmd['command'], 'payload' => str_replace(' ', '_', $this->_helpCmd['command'])));
 				$message .= '"' . $this->_helpCmd['command'] . '"' . " - " . $mageHelper->__("Get help.") . "\n";
 			}
-			//$message .= '"' . $chatdata->_aboutCmd['command'] . '"' . " - " . $magehelper->__("About.");
 
 			array_push($content, $message); // $content[0] -> $message
 			array_push($content, $replies); // $content[1] -> $replies
