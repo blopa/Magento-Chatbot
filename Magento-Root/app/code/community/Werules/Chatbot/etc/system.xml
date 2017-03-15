@@ -133,7 +133,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message.</comment>
+							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</disabled_message>
 						<telegram_api_key>
 							<label>Telegram Bot API Key</label>
@@ -160,7 +160,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>First Message The Bot Will Send To Your Client.</comment>
+							<comment>First Message The Bot Will Send To Your Client. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</telegram_welcome_msg>
 						<telegram_help_msg>
 							<label>Telegram Help Message</label>
@@ -169,7 +169,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For Help.</comment>
+							<comment>Message Will be Sent When Customer Asks For Help. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</telegram_help_msg>
 						<telegram_about_msg>
 							<label>Telegram About Message</label>
@@ -178,7 +178,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For About.</comment>
+							<comment>Message Will be Sent When Customer Asks For About. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</telegram_about_msg>
 						<enable_help_command_list>
 							<label>Enable Command Listing On Help</label>
@@ -268,7 +268,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message.</comment>
+							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
 						</disabled_message>
 						<facebook_api_key>
 							<label>Messenger Bot API Key</label>
@@ -295,7 +295,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>First Message The Bot Will Send To Your Client.</comment>
+							<comment>First Message The Bot Will Send To Your Client. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
 						</facebook_welcome_msg>
 						<facebook_help_msg>
 							<label>Messenger Help Message</label>
@@ -304,7 +304,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For Help.</comment>
+							<comment>Message Will be Sent When Customer Asks For Help. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
 						</facebook_help_msg>
 						<facebook_about_msg>
 							<label>Messenger About Message</label>
@@ -313,7 +313,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For About.</comment>
+							<comment>Message Will be Sent When Customer Asks For About. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
 						</facebook_about_msg>
 						<enable_help_command_list>
 							<label>Enable Command Listing On Help</label>
