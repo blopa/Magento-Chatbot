@@ -488,14 +488,13 @@
 					$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
 					if (!empty($message)) // TODO
 					{
+						$facebook->sendMessage($chatId, $message);
 						$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_help_command_list');
 						if ($cmdListing == "1")
 						{
 							$content = $chatdata->listFacebookCommandsMessage();
-							$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
+							$facebook->sendQuickReply($chatId, $content[0], $content[1]);
 						}
-						else
-							$facebook->sendMessage($chatId, $message);
 					}
 
 					$facebook->sendChatAction($chatId, "typing_off");
