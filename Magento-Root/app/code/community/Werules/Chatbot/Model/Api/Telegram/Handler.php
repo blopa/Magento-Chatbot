@@ -437,7 +437,7 @@
 					if (!empty($message)) // TODO
 					{
 						$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_help_command_list');
-						if ($cmdListing == 1)
+						if ($cmdListing == "1")
 							$message .= $chatdata->listTelegramCommandsMessage();
 
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
@@ -1154,7 +1154,7 @@
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, I didn't understand that."))); // TODO
 
 						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_error_command_list');
-						if ($cmdListingOnError == 1)
+						if ($cmdListingOnError == "1")
 						{
 							$message = $mageHelper->__("Please try one of the following commands.");
 							$message .= $chatdata->listTelegramCommandsMessage();
