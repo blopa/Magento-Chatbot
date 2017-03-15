@@ -21,7 +21,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 
 	public function saveAction()
 	{
-		$magehelper = Mage::helper('core');
+		$mageHelper = Mage::helper('core');
 		$postData = $this->getRequest()->getPost(); // get all post data
 		if ($postData)
 		{
@@ -44,11 +44,11 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 				$chatdata->addData($data);
 				$chatdata->save();
 
-				Mage::getSingleton('customer/session')->addSuccess($magehelper->__("Chatbot settings saved successfully.")); // throw success message to the html page
+				Mage::getSingleton('customer/session')->addSuccess($mageHelper->__("Chatbot settings saved successfully.")); // throw success message to the html page
 			}
 			catch (Exception $e)
 			{
-				Mage::getSingleton('customer/session')->addError($magehelper->__("Something went wrong, please try again.")); // throw error message to the html page
+				Mage::getSingleton('customer/session')->addError($mageHelper->__("Something went wrong, please try again.")); // throw error message to the html page
 			}
 		}
 		$this->_redirect('chatbot/settings/index'); // redirect customer to settings page
@@ -67,7 +67,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$error = false;
 		$logged = true;
 		$data = array();
-		$magehelper = Mage::helper('core');
+		$mageHelper = Mage::helper('core');
 		$chatdataHash = Mage::getModel('chatbot/chatdata')->load($hash, 'hash_key');
 		if ($chatdataHash->getIsLogged() == "0")
 		{
@@ -157,10 +157,10 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		}
 		// messages
 		if ($success)
-			Mage::getSingleton('customer/session')->addSuccess($magehelper->__("Your account is now attached with our chatbot."));
+			Mage::getSingleton('customer/session')->addSuccess($mageHelper->__("Your account is now attached with our chatbot."));
 		else if ($error)
-			Mage::getSingleton('customer/session')->addError($magehelper->__("Something went wrong, please try again."));
+			Mage::getSingleton('customer/session')->addError($mageHelper->__("Something went wrong, please try again."));
 		else if ($logged)
-			Mage::getSingleton('customer/session')->addNotice($magehelper->__("You're already logged."));
+			Mage::getSingleton('customer/session')->addNotice($mageHelper->__("You're already logged."));
 	}
 }

@@ -538,6 +538,31 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return $cmd;
 		}
 
+		protected function listTelegramCommandsMessage()
+		{
+			$mageHelper = Mage::helper('core');
+
+			$message = "\n\n" . $mageHelper->__("Command list") . ":\n";
+			if ($this->_listCategoriesCmd['command']) $message .= $this->_listCategoriesCmd['command'] . " - " . $mageHelper->__("List store categories.") . "\n";
+			if ($this->_searchCmd['command']) $message .= $this->_searchCmd['command'] . " - " . $mageHelper->__("Search for products.") . "\n";
+			if ($this->_loginCmd['command']) $message .= $this->_loginCmd['command'] . " - " . $mageHelper->__("Login into your account.") . "\n";
+			if ($this->_logoutCmd['command']) $message .= $this->_logoutCmd['command'] . " - " . $mageHelper->__("Logout from your account.") . "\n";
+			if ($this->_registerCmd['command']) $message .= $this->_registerCmd['command'] . " - " . $mageHelper->__("Create a new account.") . "\n";
+			if ($this->_listOrdersCmd['command']) $message .= $this->_listOrdersCmd['command'] . " - " . $mageHelper->__("List your personal orders.") . "\n";
+			//$message .= $chatdata->_reorderCmd['command'] . " - " . $magehelper->__("Reorder a order.") . "\n";
+			//$message .= $chatdata->_add2CartCmd['command'] . " - " . $magehelper->__("Add product to cart.") . "\n";
+			if ($this->_checkoutCmd['command']) $message .= $this->_checkoutCmd['command'] . " - " . $mageHelper->__("Checkout your order.") . "\n";
+			if ($this->_clearCartCmd['command']) $message .= $this->_clearCartCmd['command'] . " - " . $mageHelper->__("Clear your cart.") . "\n";
+			if ($this->_trackOrderCmd['command']) $message .= $this->_trackOrderCmd['command'] . " - " . $mageHelper->__("Track your order status.") . "\n";
+			if ($this->_supportCmd['command']) $message .= $this->_supportCmd['command'] . " - " . $mageHelper->__("Send message to support.") . "\n";
+			if ($this->_sendEmailCmd['command']) $message .= $this->_sendEmailCmd['command'] . " - " . $mageHelper->__("Send email.") . "\n";
+			//$message .= $chatdata->_cancelCmd['command'] . " - " . $magehelper->__("Cancel.");
+			if ($this->_helpCmd['command']) $message .= $this->_helpCmd['command'] . " - " . $mageHelper->__("Get help.") . "\n";
+			if ($this->_aboutCmd['command']) $message .= $this->_aboutCmd['command'] . " - " . $mageHelper->__("About.") . "\n";
+
+			return $message;
+		}
+
 		protected function prepareTelegramOrderMessages($orderID) // TODO add link to product name
 		{
 			$order = Mage::getModel('sales/order')->load($orderID);
@@ -574,6 +599,90 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				}
 			}
 			return null;
+		}
+
+		// FACEBOOK FUNCTIONS
+		protected function listFacebookCommandsMessage()
+		{
+			$mageHelper = Mage::helper('core');
+
+			$message = "\n\n" . $mageHelper->__("Command list") . ":\n";
+			$replies = array(); // quick replies limit is 10 options
+			$content = array();
+			// some commands are commented because of the 10 limit from Facebook
+			// just getting the command string, not checking the command
+			if ($this->_listCategoriesCmd['command']) // 1
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_listCategoriesCmd['command'], 'payload' => str_replace(' ', '_', $this->_listCategoriesCmd['command'])));
+				$message .= '"' . $this->_listCategoriesCmd['command'] . '"' . " - " . $mageHelper->__("List store categories.") . "\n";
+			}
+			if ($this->_searchCmd['command']) // 2
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_searchCmd['command'], 'payload' => str_replace(' ', '_', $this->_searchCmd['command'])));
+				$message .= '"' . $this->_searchCmd['command'] . '"' . " - " . $mageHelper->__("Search for products.") . "\n";
+			}
+			if ($this->_loginCmd['command']) // 3
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_loginCmd['command'], 'payload' => str_replace(' ', '_', $this->_loginCmd['command'])));
+				$message .= '"' . $this->_loginCmd['command'] . '"' . " - " . $mageHelper->__("Login into your account.") . "\n";
+			}
+			if ($this->_logoutCmd['command']) // 4
+			{
+				//array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_logoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_loginCmd['command'])));
+				$message .= '"' . $this->_logoutCmd['command'] . '"' . " - " . $mageHelper->__("Logout from your account.") . "\n";
+			}
+			if ($this->_registerCmd['command']) // 5
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_registerCmd['command'], 'payload' => str_replace(' ', '_', $this->_registerCmd['command'])));
+				$message .= '"' . $this->_registerCmd['command'] . '"' . " - " . $mageHelper->__("Create a new account.") . "\n";
+			}
+			if ($this->_listOrdersCmd['command']) // 6
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_listOrdersCmd['command'], 'payload' => str_replace(' ', '_', $this->_listOrdersCmd['command'])));
+				$message .= '"' . $this->_listOrdersCmd['command'] . '"' . " - " . $mageHelper->__("List your personal orders.") . "\n";
+			}
+			//$message .= '"' . $chatdata->_reorderCmd['command'] . '"' . " - " . $magehelper->__("Reorder a order.") . "\n";
+			//$message .= '"' . $chatdata->_add2CartCmd['command'] . '"' . " - " . $magehelper->__("Add product to cart.") . "\n";
+			if ($this->_checkoutCmd['command']) // 7
+			{
+				//array_push($replies, array('content_type' => 'text', 'title' => $chatdata->_checkoutCmd['command'], 'payload' => str_replace(' ', '_', $chatdata->_checkoutCmd['command'])));
+				$message .= '"' . $this->_checkoutCmd['command'] . '"' . " - " . $mageHelper->__("Checkout your order.") . "\n";
+			}
+			if ($this->_clearCartCmd['command']) // 8
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_clearCartCmd['command'], 'payload' => str_replace(' ', '_', $this->_clearCartCmd['command'])));
+				$message .= '"' . $this->_clearCartCmd['command'] . '"' . " - " . $mageHelper->__("Clear your cart.") . "\n";
+			}
+			if ($this->_trackOrderCmd['command']) // 9
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_trackOrderCmd['command'], 'payload' => str_replace(' ', '_', $this->_trackOrderCmd['command'])));
+				$message .= '"' . $this->_trackOrderCmd['command'] . '"' . " - " . $mageHelper->__("Track your order status.") . "\n";
+			}
+			if ($this->_supportCmd['command']) // 10
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_supportCmd['command'], 'payload' => str_replace(' ', '_', $this->_supportCmd['command'])));
+				$message .= '"' . $this->_supportCmd['command'] . '"' . " - " . $mageHelper->__("Send message to support.") . "\n";
+			}
+			if ($this->_sendEmailCmd['command']) // 11
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_sendEmailCmd['command'], 'payload' => str_replace(' ', '_', $this->_sendEmailCmd['command'])));
+				$message .= '"' . $this->_sendEmailCmd['command'] . '"' . " - " . $mageHelper->__("Send email.") . "\n";
+			}
+			//$message .= '"' . $chatdata->_cancelCmd['command'] . '"' . " - " . $magehelper->__("Cancel.");
+			if ($this->_aboutCmd['command']) // 12
+			{
+				array_push($replies, array('content_type' => 'text', 'title' => $this->_aboutCmd['command'], 'payload' => str_replace(' ', '_', $this->_aboutCmd['command'])));
+				$message .= '"' . $this->_aboutCmd['command'] . '"' . " - " . $mageHelper->__("About.") . "\n";
+			}
+			if ($this->_helpCmd['command']) // 13
+			{
+				//array_push($replies, array('content_type' => 'text', 'title' => $this->_helpCmd['command'], 'payload' => str_replace(' ', '_', $this->_helpCmd['command'])));
+				$message .= '"' . $this->_helpCmd['command'] . '"' . " - " . $mageHelper->__("Get help.") . "\n";
+			}
+
+			array_push($content, $message); // $content[0] -> $message
+			array_push($content, $replies); // $content[1] -> $replies
+			return $content;
 		}
 
 		protected function prepareFacebookProdMessages($productID) // TODO add link to product name

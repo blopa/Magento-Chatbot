@@ -133,7 +133,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message.</comment>
+							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</disabled_message>
 						<telegram_api_key>
 							<label>Telegram Bot API Key</label>
@@ -160,7 +160,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>First Message The Bot Will Send To Your Client.</comment>
+							<comment>First Message The Bot Will Send To Your Client. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</telegram_welcome_msg>
 						<telegram_help_msg>
 							<label>Telegram Help Message</label>
@@ -169,7 +169,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For Help.</comment>
+							<comment>Message Will be Sent When Customer Asks For Help. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</telegram_help_msg>
 						<telegram_about_msg>
 							<label>Telegram About Message</label>
@@ -178,153 +178,28 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For About.</comment>
+							<comment>Message Will be Sent When Customer Asks For About. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.</comment>
 						</telegram_about_msg>
-						<enable_command_list>
-							<label>Enable Command Listing</label>
+						<enable_help_command_list>
+							<label>Enable Command Listing On Help</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
 							<sort_order>7</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Enable Command Listing When Customer Ask For About</comment>
-						</enable_command_list>
-						<enabled_commands>
-							<label>Enabled Commands</label>
-							<frontend_type>multiselect</frontend_type>
-							<source_model>chatbot/options</source_model>
-							<sort_order>8</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Enabled Commands</comment>
-						</enabled_commands>
-						<commands_list>
-							<label>Commands List</label>
-							<frontend_model>werules_chatbot/commands</frontend_model>
-							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
-							<sort_order>9</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>0</show_in_store>
-							<comment>Code of the commands and it's alias.</comment>
-						</commands_list>
-						<enable_default_replies>
-							<label>Enable Default Replies</label>
-							<frontend_type>select</frontend_type>
-							<source_model>chatbot/enable</source_model>
-							<sort_order>10</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Enable Default Replies</comment>
-						</enable_default_replies>
-						<default_replies>
-							<label>Default Replies</label>
-							<frontend_model>werules_chatbot/replies</frontend_model>
-							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
-							<sort_order>11</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>0</show_in_store>
-							<comment>Default Replies.</comment>
-						</default_replies>
-					</fields>
-				</telegram_config>
-				<facebook_config translate="label">
-					<label>Facebook Configuration</label>
-					<frontend_type>text</frontend_type>
-					<sort_order>3</sort_order>
-					<show_in_default>1</show_in_default>
-					<show_in_website>1</show_in_website>
-					<show_in_store>1</show_in_store>
-					<comment>Facebook Messenger Configurations</comment>
-					<fields>
-						<enable_bot>
-							<label>Enable Messenger Bot</label>
-							<frontend_type>select</frontend_type>
-							<source_model>chatbot/enable</source_model>
-							<sort_order>0</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Enable Messenger Bot</comment>
-						</enable_bot>
-						<disabled_message>
-							<label>Unavailability Message</label>
-							<frontend_type>text</frontend_type>
-							<sort_order>1</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message.</comment>
-						</disabled_message>
-						<facebook_api_key>
-							<label>Messenger Bot API Key</label>
-							<frontend_type>text</frontend_type>
-							<sort_order>2</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Your Messenger Bot API Key.</comment>
-						</facebook_api_key>
-						<facebook_support_group>
-							<label>Messenger Support Chat ID</label>
-							<frontend_type>text</frontend_type>
-							<sort_order>3</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>The Chat ID of The Support Admin. This Feature Isn't Very Useful Since You Can Simply Log Into Your Page And Directly Reply Your Customers From There. You Can Forward All Messages to Telegram, Just Write "telegram" in Here to Enable This Feature.</comment>
-						</facebook_support_group>
-						<facebook_welcome_msg>
-							<label>Messenger Welcome Message</label>
-							<frontend_type>text</frontend_type>
-							<sort_order>4</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>First Message The Bot Will Send To Your Client.</comment>
-						</facebook_welcome_msg>
-						<facebook_help_msg>
-							<label>Messenger Help Message</label>
-							<frontend_type>text</frontend_type>
-							<sort_order>5</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For Help.</comment>
-						</facebook_help_msg>
-						<facebook_about_msg>
-							<label>Messenger About Message</label>
-							<frontend_type>text</frontend_type>
-							<sort_order>6</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Message Will be Sent When Customer Asks For About.</comment>
-						</facebook_about_msg>
-						<enable_command_list>
-							<label>Enable Command Listing</label>
-							<frontend_type>select</frontend_type>
-							<source_model>chatbot/enable</source_model>
-							<sort_order>7</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Enable Command Listing When Customer Ask For About</comment>
-						</enable_command_list>
-						<enable_predict_commands>
-							<label>Enable Command Prediction</label>
+							<comment>Enable Command Listing When Customer Ask For Help</comment>
+						</enable_help_command_list>
+						<enable_error_command_list>
+							<label>Enable Command Listing On Error</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
 							<sort_order>8</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Enable The Bot to Try to Predict What Command The Customer Wants by Looking into What He Wrote</comment>
-						</enable_predict_commands>
+							<comment>Enable Command Listing When The Bot Don't Understand What The Customer Typed</comment>
+						</enable_error_command_list>
 						<enabled_commands>
 							<label>Enabled Commands</label>
 							<frontend_type>multiselect</frontend_type>
@@ -360,6 +235,151 @@
 							<frontend_model>werules_chatbot/replies</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>12</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+							<comment>Default Replies.</comment>
+						</default_replies>
+					</fields>
+				</telegram_config>
+				<facebook_config translate="label">
+					<label>Facebook Configuration</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>3</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<comment>Facebook Messenger Configurations</comment>
+					<fields>
+						<enable_bot>
+							<label>Enable Messenger Bot</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Messenger Bot</comment>
+						</enable_bot>
+						<disabled_message>
+							<label>Unavailability Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
+						</disabled_message>
+						<facebook_api_key>
+							<label>Messenger Bot API Key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Your Messenger Bot API Key.</comment>
+						</facebook_api_key>
+						<facebook_support_group>
+							<label>Messenger Support Chat ID</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>3</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>The Chat ID of The Support Admin. This Feature Isn't Very Useful Since You Can Simply Log Into Your Page And Directly Reply Your Customers From There. You Can Forward All Messages to Telegram, Just Write "telegram" in Here to Enable This Feature.</comment>
+						</facebook_support_group>
+						<facebook_welcome_msg>
+							<label>Messenger Welcome Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>4</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>First Message The Bot Will Send To Your Client. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
+						</facebook_welcome_msg>
+						<facebook_help_msg>
+							<label>Messenger Help Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>5</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message Will be Sent When Customer Asks For Help. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
+						</facebook_help_msg>
+						<facebook_about_msg>
+							<label>Messenger About Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>6</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message Will be Sent When Customer Asks For About. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
+						</facebook_about_msg>
+						<enable_help_command_list>
+							<label>Enable Command Listing On Help</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>7</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Command Listing When Customer Ask For About</comment>
+						</enable_help_command_list>
+						<enable_error_command_list>
+							<label>Enable Command Listing On Error</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>8</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Command Listing When The Bot Don't Understand What The Customer Typed</comment>
+						</enable_error_command_list>
+						<enable_predict_commands>
+							<label>Enable Command Prediction</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>9</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable The Bot to Try to Predict What Command The Customer Wants by Looking into What He Wrote</comment>
+						</enable_predict_commands>
+						<enabled_commands>
+							<label>Enabled Commands</label>
+							<frontend_type>multiselect</frontend_type>
+							<source_model>chatbot/options</source_model>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enabled Commands</comment>
+						</enabled_commands>
+						<commands_list>
+							<label>Commands List</label>
+							<frontend_model>werules_chatbot/commands</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
+							<sort_order>11</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+							<comment>Code of the commands and it's alias.</comment>
+						</commands_list>
+						<enable_default_replies>
+							<label>Enable Default Replies</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>12</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Default Replies</comment>
+						</enable_default_replies>
+						<default_replies>
+							<label>Default Replies</label>
+							<frontend_model>werules_chatbot/replies</frontend_model>
+							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
+							<sort_order>13</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
