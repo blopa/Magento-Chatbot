@@ -1266,7 +1266,7 @@
 							); // TODO
 						return $facebook->respondSuccess();
 					}
-					else
+					else // process cases where the customer message wasn't understandable
 					{
 						//if ($enable_witai == "1"){}
 

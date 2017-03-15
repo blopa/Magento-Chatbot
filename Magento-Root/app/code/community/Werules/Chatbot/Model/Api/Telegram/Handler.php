@@ -1148,7 +1148,7 @@
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 						return $telegram->respondSuccess();
 					}
-					else
+					else // process cases where the customer message wasn't understandable
 					{
 						//else if ($enable_witai == "1"){}
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, I didn't understand that."))); // TODO
