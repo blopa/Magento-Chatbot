@@ -492,8 +492,7 @@
 						if ($cmdListing == 1)
 						{
 							$content = $chatdata->listFacebookCommandsMessage();
-
-							$facebook->sendQuickReply($chatId, $content[0], $content[1]);
+							$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
 						}
 						else
 							$facebook->sendMessage($chatId, $message);
@@ -1268,9 +1267,20 @@
 							); // TODO
 						return $facebook->respondSuccess();
 					}
-					//else if ($enable_witai == "1"){}
 					else
+					{
+						//if ($enable_witai == "1"){}
+
 						$facebook->sendMessage($chatId, $mageHelper->__("Sorry, I didn't understand that.")); // TODO
+
+						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_error_command_list');
+						if ($cmdListingOnError == 1)
+						{
+							$message = $mageHelper->__("Please try one of the following commands.");
+							$content = $chatdata->listFacebookCommandsMessage();
+							$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
+						}
+					}
 				}
 			}
 

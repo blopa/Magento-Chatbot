@@ -1148,9 +1148,20 @@
 							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
 						return $telegram->respondSuccess();
 					}
-					//else if ($enable_witai == "1"){}
 					else
+					{
+						//else if ($enable_witai == "1"){}
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, I didn't understand that."))); // TODO
+
+						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_error_command_list');
+						if ($cmdListingOnError == 1)
+						{
+							$message = $mageHelper->__("Please try one of the following commands.");
+							$message .= $chatdata->listTelegramCommandsMessage();
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
+						}
+
+					}
 				}
 			}
 
