@@ -303,8 +303,9 @@
 								if ($percent >= $similarity)
 								{
 									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
-									return $telegram->respondSuccess();
-									break; // probably useless
+									if ($reply["stop_processing"] == "1")
+										return $telegram->respondSuccess();
+									break;
 								}
 							}
 						}
