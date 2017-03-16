@@ -6,12 +6,12 @@ class Werules_Chatbot_Block_Commands extends Mage_Adminhtml_Block_System_Config_
 
 	public function _prepareToRender()
 	{
-		$this->addColumn('enable_command', array(
-			'label' => Mage::helper('core')->__('Enable Command'),
-			'renderer' => $this->_getRendererCommands()
-		));
 		$this->addColumn('command_id', array(
 			'label' => Mage::helper('core')->__('Command'),
+			'renderer' => $this->_getRendererCommands()
+		));
+		$this->addColumn('enable_command', array(
+			'label' => Mage::helper('core')->__('Enable Command'),
 			'renderer' => $this->_getRendererEnable()
 		));
 		$this->addColumn('command_code', array(

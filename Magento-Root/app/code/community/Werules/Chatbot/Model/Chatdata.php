@@ -318,58 +318,56 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				$rep = " ";
 				$confPath = 'chatbot_enable/facebook_config/';
 			}
-//			else if ($this->_apiType == $this->_wappBot)
-//				$confpath = 'chatbot_enable/whatsapp_config/';
 
-			$config = Mage::getStoreConfig($confPath . 'enabled_commands');
-			$enabledCmds = explode(',', $config);
-			if (is_array($enabledCmds))
+			$defaultCmds = explode(',', $this->_cmdList);
+			if (is_array($defaultCmds)) // should never fail
 			{
-				if (in_array($cmdId, $enabledCmds))
+				$cmdCode = "";
+				$alias = array();
+				$config = Mage::getStoreConfig($confPath . 'commands_list');
+				if (!empty($config))
 				{
-					$defaultCmds = explode(',', $this->_cmdList);
-					if (is_array($defaultCmds))
+					$commands = unserialize($config);
+					if (is_array($commands))
 					{
-						$cmdCode = "";
-						$alias = array();
-						$config = Mage::getStoreConfig($confPath . 'commands_list');
-						if ($config)
+						foreach($commands as $cmd)
 						{
-							$commands = unserialize($config);
-							if (is_array($commands))
+							if ($cmd['command_id'] == $cmdId && $cmd['enable_command'] == "1")
 							{
-								foreach($commands as $cmd)
+								if (empty($cmd['command_code']))
 								{
-									if ($cmd['command_id'] == $cmdId)
-									{
-										$cmdCode = $cmd['command_code'];
-										$alias = array_map('strtolower', explode(',', $cmd['command_alias_list']));
-										break;
-									}
-								}
-								if (empty($cmdCode)) // if no command found, return the default
 									$cmdCode = $defaultCmds[$cmdId];
+									break;
+								}
+
+								$cmdCode = $cmd['command_code'];
+								$alias = array_map('strtolower', explode(',', $cmd['command_alias_list']));
+								break;
 							}
-							else // if no command found, return the default
-								$cmdCode = $defaultCmds[$cmdId];
 						}
-						else // if no command found, return the default
-							$cmdCode = $defaultCmds[$cmdId];
-
-						$cmdCode = preg_replace( // remove all non-alphanumerics
-							$this->_unallowedCharacters,
-							'',
-							str_replace( // replace whitespace for underscore
-								' ',
-								$rep,
-								trim($cmdCode)
-							)
-						);
-
-						return array('command' => strtolower($cmdCode), 'alias' => $alias);
 					}
+					else // if no command found, return the default
+						$cmdCode = $defaultCmds[$cmdId];
 				}
+				else // if no command found, return the default
+					$cmdCode = $defaultCmds[$cmdId];
+
+				if (empty($cmdCode)) // if no command enabled found, return null
+					return array('command' => null, 'alias' => null);
+
+				$cmdCode = preg_replace( // remove all non-alphanumerics
+					$this->_unallowedCharacters,
+					'',
+					str_replace( // replace whitespace for underscore
+						' ',
+						$rep,
+						trim($cmdCode)
+					)
+				);
+
+				return array('command' => strtolower($cmdCode), 'alias' => $alias);
 			}
+
 			return array('command' => null, 'alias' => null);
 		}
 
