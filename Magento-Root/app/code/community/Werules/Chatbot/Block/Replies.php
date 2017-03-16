@@ -1,7 +1,8 @@
 <?php
 class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
 {
-	protected $_itemRenderer;
+	protected $_itemRendererEnable;
+	protected $_itemRendererReplyMode;
 
 	public function _prepareToRender()
 	{
@@ -22,38 +23,61 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 		));
 		$this->addColumn('match_case', array(
 			'label' => Mage::helper('core')->__('Match Case'),
-			'renderer' => $this->_getRenderer()
+			'renderer' => $this->_getRendererEnable()
 		));
 		$this->addColumn('stop_processing', array(
 			'label' => Mage::helper('core')->__('Stop Processing'),
-			'renderer' => $this->_getRenderer()
+			'renderer' => $this->_getRendererEnable()
+		));
+		$this->addColumn('reply_mode', array(
+			'label' => Mage::helper('core')->__('Reply Mode'),
+			'renderer' => $this->_getRendererReplyMode()
 		));
 
 		$this->_addAfter = false;
 		$this->_addButtonLabel = Mage::helper('core')->__('Add');
 	}
 
-	protected function _getRenderer()
+	protected function _getRendererEnable()
 	{
-		if (!$this->_itemRenderer)
+		if (!$this->_itemRendererEnable)
 		{
-			$this->_itemRenderer = $this->getLayout()->createBlock(
+			$this->_itemRendererEnable = $this->getLayout()->createBlock(
 				'werules_chatbot/enable',
+				//'werules_chatbot/replyMode',
 				'',
 				array('is_render_to_js_template' => true)
 			)->setExtraParams("style='width: auto;'");
 		}
-		return $this->_itemRenderer;
+		return $this->_itemRendererEnable;
+	}
+
+	protected function _getRendererReplyMode()
+	{
+		if (!$this->_itemRendererReplyMode)
+		{
+			$this->_itemRendererReplyMode = $this->getLayout()->createBlock(
+				//'werules_chatbot/enable',
+				'werules_chatbot/replyMode',
+				'',
+				array('is_render_to_js_template' => true)
+			)->setExtraParams("style='width: auto;'");
+		}
+		return $this->_itemRendererReplyMode;
 	}
 
 	protected function _prepareArrayRow(Varien_Object $row)
 	{
 		$row->setData(
-			'option_extra_attr_' . $this->_getRenderer()->calcOptionHash($row->getData('match_case')),
+			'option_extra_attr_' . $this->_getRendererEnable()->calcOptionHash($row->getData('match_case')),
 			'selected="selected"'
 		);
 		$row->setData(
-			'option_extra_attr_' . $this->_getRenderer()->calcOptionHash($row->getData('stop_processing')),
+			'option_extra_attr_' . $this->_getRendererEnable()->calcOptionHash($row->getData('stop_processing')),
+			'selected="selected"'
+		);
+		$row->setData(
+			'option_extra_attr_' . $this->_getRendererReplyMode()->calcOptionHash($row->getData('reply_mode')),
 			'selected="selected"'
 		);
 	}
