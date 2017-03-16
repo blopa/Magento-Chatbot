@@ -36,7 +36,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		protected $_cmdList =
 		"
 			start,
-			list_cat,
+			list_categories,
 			search,
 			login,
 			list_orders,
