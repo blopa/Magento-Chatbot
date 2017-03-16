@@ -85,6 +85,7 @@
 			$cat_id = null;
 			$moreOrders = false;
 			$listingLimit = 5;
+			$categoryLimit = 18;
 			$listMoreCategories = "/lmc_";
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
@@ -302,8 +303,9 @@
 								if ($percent >= $similarity)
 								{
 									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
-									return $telegram->respondSuccess();
-									break; // probably useless
+									if ($reply["stop_processing"] == "1")
+										return $telegram->respondSuccess();
+									break;
 								}
 							}
 						}
@@ -787,11 +789,13 @@
 					else if ($categories)
 					{
 						$option = array();
-						foreach ($categories as $_category) // TODO fix buttons max size
+						$arr = array();
+						$charCount = 0;
+						foreach ($categories as $category) // TODO fix buttons max size
 						{
 							if ($enableEmptyCategoriesListing != "1") // unallow empty categories listing
 							{
-								$category = Mage::getModel('catalog/category')->load($_category->getId()); // reload category because EAV Entity
+								$category = Mage::getModel('catalog/category')->load($category->getId()); // reload category because EAV Entity
 								$productIDs = $category->getProductCollection()
 									->addAttributeToSelect('*')
 									->addAttributeToFilter('visibility', 4)
@@ -802,14 +806,23 @@
 								$productIDs = true;
 							if (!empty($productIDs)) // category with no products
 							{
-								$cat_name = $_category->getName();
-								array_push($option, $cat_name);
+								//$option = array( array("A", "B"), array("C", "D") );
+								$catName = $category->getName();
+								$charCount = $charCount + strlen($catName);
+								array_push($arr, $catName); // push category name into array arr
+								if ($charCount > $categoryLimit) // size limit for Telegram buttons
+								{
+									array_push($option, $arr); // when hits the limit, add array to options
+									$arr = array(); // clear array
+									$charCount = 0;
+								}
+								
 								$i++;
 							}
 						}
 
-						$keyb = $telegram->buildKeyBoard(array($option));
-						$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $mageHelper->__("Select a category") . ". " . $chatdata->_cancelMessage));
+						$keyb = $telegram->buildKeyBoard($option);
+						$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'resize_keyboard' => true, 'text' => $mageHelper->__("Select a category") . ". " . $chatdata->_cancelMessage));
 					}
 					else if ($i == 0)
 					{

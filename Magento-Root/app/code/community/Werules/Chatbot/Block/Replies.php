@@ -24,6 +24,10 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			'label' => Mage::helper('core')->__('Match Case'),
 			'renderer' => $this->_getRenderer()
 		));
+		$this->addColumn('stop_processing', array(
+			'label' => Mage::helper('core')->__('Stop Processing'),
+			'renderer' => $this->_getRenderer()
+		));
 
 		$this->_addAfter = false;
 		$this->_addButtonLabel = Mage::helper('core')->__('Add');
@@ -46,6 +50,10 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 	{
 		$row->setData(
 			'option_extra_attr_' . $this->_getRenderer()->calcOptionHash($row->getData('match_case')),
+			'selected="selected"'
+		);
+		$row->setData(
+			'option_extra_attr_' . $this->_getRenderer()->calcOptionHash($row->getData('stop_processing')),
 			'selected="selected"'
 		);
 	}

@@ -307,8 +307,9 @@
 								if ($percent >= $similarity)
 								{
 									$facebook->sendMessage($chatId, $reply["reply_phrase"]);
-									return $facebook->respondSuccess();
-									break; // probably useless
+									if ($reply["stop_processing"] == "1")
+										return $facebook->respondSuccess();
+									break;
 								}
 							}
 						}
