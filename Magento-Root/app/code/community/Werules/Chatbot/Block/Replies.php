@@ -7,12 +7,8 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 
 	public function _prepareToRender()
 	{
-		$this->addColumn('catch_phrase', array(
-			'label' => Mage::helper('core')->__('Phrase'),
-			'style' => 'width: 250px'
-		));
-		$this->addColumn('reply_phrase', array(
-			'label' => Mage::helper('core')->__('Reply'),
+		$this->addColumn('match_sintax', array(
+			'label' => Mage::helper('core')->__('Match Text or Regular Expression'),
 			'style' => 'width: 250px'
 		));
 		$this->addColumn('match_case', array(
@@ -34,9 +30,9 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			//'maxlength' => '3',
 			'class' => 'input-number validate-number validate-number-range number-range-1-100'
 		));
-		$this->addColumn('regular_expression', array(
-			'label' => Mage::helper('core')->__('Regular Expression'),
-			'style' => 'width: 100%'
+		$this->addColumn('reply_phrase', array(
+			'label' => Mage::helper('core')->__('Reply'),
+			'style' => 'width: 250px'
 		));
 
 		$this->_addAfter = false;

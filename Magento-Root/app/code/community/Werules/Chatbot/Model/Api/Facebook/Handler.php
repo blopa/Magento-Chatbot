@@ -287,24 +287,73 @@
 						{
 							foreach($replies as $reply)
 							{
-								$match = $reply["catch_phrase"];
-								$similarity = $reply["similarity"];
-								if (is_numeric($similarity))
-								{
-									if (!($similarity >= 1 && $similarity <= 100))
-										$similarity = 100;
-								}
-								else
-									$similarity = 100;
+//								MODES
+//								0 =>'Similarity'
+//								1 =>'Starts With'
+//								2 =>'Ends With'
+//								3 =>'Contains'
+//								4 =>'Match Regular Expression'
+//								5 =>'Equals to'
+
+								$matched = false;
+								$match = $reply["match_sintax"];
+								$mode = $reply["reply_mode"];
 
 								if ($reply["match_case"] == "0")
 								{
 									$match = strtolower($match);
-									$text = strtolower($text);
+									$textToMatch = strtolower($text);
+								}
+								else
+									$textToMatch = $text;
+
+								if ($mode == "0") // Similarity
+								{
+									$similarity = $reply["similarity"];
+									if (is_numeric($similarity))
+									{
+										if (!($similarity >= 1 && $similarity <= 100))
+											$similarity = 100;
+									}
+									else
+										$similarity = 100;
+
+									similar_text($textToMatch, $match, $percent);
+									if ($percent >= $similarity)
+										$matched = true;
+								}
+								else if ($mode == "1") // Starts With
+								{
+									if ($chatdata->startsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($mode == "2") // Ends With
+								{
+									if ($chatdata->endsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($mode == "3") // Contains
+								{
+									if (strpos($textToMatch, $match) !== false)
+										$matched = true;
+								}
+								else if ($mode == "4") // Match Regular Expression
+								{
+									if ($match[0] != "/")
+										$match = "/" . $match;
+									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
+										$match .= "/";
+									//if (preg_match("/[a-zA-Z]+/", $textToMatch))
+									if (preg_match($match, $textToMatch))
+										$matched = true;
+								}
+								else if ($mode == "5") // Equals to
+								{
+									if ($textToMatch == $match)
+										$matched = true;
 								}
 
-								similar_text($text, $match, $percent);
-								if ($percent >= $similarity)
+								if ($matched)
 								{
 									$facebook->sendMessage($chatId, $reply["reply_phrase"]);
 									if ($reply["stop_processing"] == "1")

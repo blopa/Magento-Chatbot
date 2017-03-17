@@ -292,7 +292,7 @@
 //								5 =>'Equals to'
 
 								$matched = false;
-								$match = $reply["catch_phrase"];
+								$match = $reply["match_sintax"];
 								$mode = $reply["reply_mode"];
 
 								if ($reply["match_case"] == "0")
@@ -335,13 +335,12 @@
 								}
 								else if ($mode == "4") // Match Regular Expression
 								{
-									$regex = $reply["regular_expression"];
-									if ($regex[0] != "/")
-										$regex = "/" . $regex;
-									if ((substr($regex, -1) != "/") && ($regex[strlen($regex) - 2] != "/"))
-										$regex .= "/";
+									if ($match[0] != "/")
+										$match = "/" . $match;
+									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
+										$match .= "/";
 									//if (preg_match("/[a-zA-Z]+/", $textToMatch))
-									if (preg_match($regex, $textToMatch))
+									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
 								else if ($mode == "5") // Equals to
