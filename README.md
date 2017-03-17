@@ -101,6 +101,44 @@ Conversation
 
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
+## Release Notes
+- **v0.0.8:**
+	- [Backend] Add "starts with", "end with", "contains", "equals to" and "regex" to default replies
+	- [Backend] Better backend layout
+	- [Backend] Better way to enable/disable commands
+- **v0.0.7:**
+	- [Backend] Fix problems with URL
+	- [Customer] Add register command
+	- Add Chinese translation
+	- Show command list on "help" instead of "about"
+	- Fix buttons size on Telegram when listing categories
+	- Add option to stop processing when sending a default reply
+- **v0.0.6:**
+	- [Backend] Better admin descriptions and typos
+- **v0.0.5:**
+	- [Backend] Add default replies
+	- [Backend] Add option to unavailability message
+	- Better feedback messages
+- **v0.0.4:**
+	- Fix glitch on order listing
+	- Fix glitchs with product search and category listing
+	- Better feedback messages
+	- [Customer] Add logout command
+	- [Admin] Add feature to send message to all customers
+	- [Admin] Add option to enable/disable support for a customer
+- **v0.0.3:**
+	- Limit products/orders listing
+	- Add stock validation for listing
+	- [Backend] Add option to enable/disable empty categories listing
+	- [Customer] Add search by SKU
+- **v0.0.2:**
+	- Facebook integration
+	- [Admin] Cross platform messages with support mode
+- **v0.0.1:**
+	- First working version
+	- Telegram integration
+
+
 ## F.A.Q.
 **Q: When the other chatbots integrations are going to be ready?**
 
