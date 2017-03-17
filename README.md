@@ -109,7 +109,7 @@ Conversation
 - **v0.0.7:**
 	- [Backend] Fix problems with URL
 	- [Customer] Add register command
-	- Add Chinese translation
+	- Add Chinese translation (big thanks to [leedssheung](https://github.com/leedssheung/))
 	- Show command list on "help" instead of "about"
 	- Fix buttons size on Telegram when listing categories
 	- [Backend] Add option to stop processing when sending a default reply
