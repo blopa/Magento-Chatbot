@@ -1,6 +1,6 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
 
-**Become part of the chatbots revolution**
+**Become part of the chatbots revolution. Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest).**
 
 <img src="/screenshots/chat.gif?raw=true" width="550px">
 
@@ -103,13 +103,13 @@ Conversation
 
 ## Release Notes
 - **v0.0.8:**
-	- [Backend] Add "starts with", "end with", "contains", "equals to" and "regex" options to default replies
+	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to default replies
 	- [Backend] Better backend layout
 	- [Backend] Better way to enable/disable commands
 - **v0.0.7:**
 	- [Backend] Fix problems with URL
 	- [Customer] Add register command
-	- Add Chinese translation
+	- Add Chinese translation (big thanks to [leedssheung](https://github.com/leedssheung/))
 	- Show command list on "help" instead of "about"
 	- Fix buttons size on Telegram when listing categories
 	- [Backend] Add option to stop processing when sending a default reply
