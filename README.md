@@ -103,7 +103,7 @@ Conversation
 
 ## Release Notes
 - **v0.0.8:**
-	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to default replies
+	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to default replies.
 	- [Backend] Better backend layout
 	- [Backend] Better way to enable/disable commands
 - **v0.0.7:**
