@@ -122,7 +122,7 @@
 				// show more handler, may change the conversation state
 				if ($chatdata->getTelegramConvState() == $chatdata->_listProductsState || $chatdata->getTelegramConvState() == $chatdata->_listOrdersState) // listing products
 				{
-					if ($chatdata->checkCommandWithValue($text, $listMoreCategories))
+					if ($chatdata->startsWith($text, $listMoreCategories)) // old checkCommandWithValue
 					{
 						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_listCategoriesState))
 						{
@@ -132,7 +132,7 @@
 							$showMore = (int)$arr[1]; // get where listing stopped
 						}
 					}
-					else if ($chatdata->checkCommandWithValue($text, $listMoreSearch))
+					else if ($chatdata->startsWith($text, $listMoreSearch)) // old checkCommandWithValue
 					{
 						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState))
 						{
@@ -143,7 +143,7 @@
 							$text = str_replace("_", " ", $value); // get search criteria
 						}
 					}
-					else if ($chatdata->checkCommandWithValue($text, $listMoreOrders))
+					else if ($chatdata->startsWith($text, $listMoreOrders)) // old checkCommandWithValue
 					{
 						if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_listOrdersState))
 						{
@@ -226,7 +226,7 @@
 						{
 							$admSend2All = "/" . $chatdata->_admSendMessage2AllCmd;
 
-							if ($chatdata->checkCommandWithValue($text, $admSend2All))
+							if ($chatdata->startsWith($text, $admSend2All)) // old checkCommandWithValue
 							{
 								$message = trim($chatdata->getCommandValue($text, $admSend2All));
 								if (!empty($message))
@@ -283,24 +283,73 @@
 						{
 							foreach($replies as $reply)
 							{
-								$match = $reply["catch_phrase"];
-								$similarity = $reply["similarity"];
-								if (is_numeric($similarity))
-								{
-									if (!($similarity >= 1 && $similarity <= 100))
-										$similarity = 100;
-								}
-								else
-									$similarity = 100;
+//								MODES
+//								0 =>'Similarity'
+//								1 =>'Starts With'
+//								2 =>'Ends With'
+//								3 =>'Contains'
+//								4 =>'Match Regular Expression'
+//								5 =>'Equals to'
+
+								$matched = false;
+								$match = $reply["match_sintax"];
+								$mode = $reply["reply_mode"];
 
 								if ($reply["match_case"] == "0")
 								{
 									$match = strtolower($match);
-									$text = strtolower($text);
+									$textToMatch = strtolower($text);
+								}
+								else
+									$textToMatch = $text;
+
+								if ($mode == "0") // Similarity
+								{
+									$similarity = $reply["similarity"];
+									if (is_numeric($similarity))
+									{
+										if (!($similarity >= 1 && $similarity <= 100))
+											$similarity = 100;
+									}
+									else
+										$similarity = 100;
+
+									similar_text($textToMatch, $match, $percent);
+									if ($percent >= $similarity)
+										$matched = true;
+								}
+								else if ($mode == "1") // Starts With
+								{
+									if ($chatdata->startsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($mode == "2") // Ends With
+								{
+									if ($chatdata->endsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($mode == "3") // Contains
+								{
+									if (strpos($textToMatch, $match) !== false)
+										$matched = true;
+								}
+								else if ($mode == "4") // Match Regular Expression
+								{
+									if ($match[0] != "/")
+										$match = "/" . $match;
+									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
+										$match .= "/";
+									//if (preg_match("/[a-zA-Z]+/", $textToMatch))
+									if (preg_match($match, $textToMatch))
+										$matched = true;
+								}
+								else if ($mode == "5") // Equals to
+								{
+									if ($textToMatch == $match)
+										$matched = true;
 								}
 
-								similar_text($text, $match, $percent);
-								if ($percent >= $similarity)
+								if ($matched)
 								{
 									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
 									if ($reply["stop_processing"] == "1")
@@ -315,7 +364,7 @@
 				// init start command
 				$chatdata->_startCmd['command'] = "/start";
 
-				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->checkCommandWithValue($text, $chatdata->_startCmd['command'])) // if user isn't registred, and not using the start command
+				if (is_null($chatdata->getTelegramChatId()) && !$chatdata->startsWith($text, $chatdata->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 					if ($message) // TODO
@@ -379,7 +428,7 @@
 				//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $conversationState));
 
 				// start command
-				if ($chatdata->checkCommandWithValue($text, $chatdata->_startCmd['command'])) // ignore alias
+				if ($chatdata->startsWith($text, $chatdata->_startCmd['command'])) // ignore alias // old checkCommandWithValue
 				//if ($text == $chatdata->_startCmd['command'])
 				{
 					$startdata = explode(" ", $text);
@@ -498,7 +547,7 @@
 				}
 
 				// add2cart commands
-				if ($chatdata->checkCommandWithValue($text, $chatdata->_add2CartCmd['command'])) // ignore alias
+				if ($chatdata->startsWith($text, $chatdata->_add2CartCmd['command'])) // ignore alias // old checkCommandWithValue
 				{
 					$errorFlag = false;
 					$notInStock = false;
@@ -1049,7 +1098,7 @@
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
 					return $telegram->respondSuccess();
 				}
-				else if ($chatdata->checkCommandWithValue($text, $chatdata->_reorderCmd['command'])) // ignore alias TODO
+				else if ($chatdata->startsWith($text, $chatdata->_reorderCmd['command'])) // ignore alias TODO // old checkCommandWithValue
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{
