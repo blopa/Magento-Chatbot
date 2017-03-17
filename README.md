@@ -1,7 +1,6 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
 
-**Become part of the chatbots revolution**
-**Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest).**
+**Become part of the chatbots revolution. Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest).**
 
 <img src="/screenshots/chat.gif?raw=true" width="550px">
 
