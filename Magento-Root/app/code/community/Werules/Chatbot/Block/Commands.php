@@ -16,7 +16,7 @@ class Werules_Chatbot_Block_Commands extends Mage_Adminhtml_Block_System_Config_
 		));
 		$this->addColumn('command_code', array(
 			'label' => Mage::helper('core')->__('Command Code'),
-			'style' => 'width: 150px'
+			'style' => 'width: 100%'
 		));
 
 		$this->_addAfter = false;
@@ -31,7 +31,7 @@ class Werules_Chatbot_Block_Commands extends Mage_Adminhtml_Block_System_Config_
 				'werules_chatbot/commandsSelect',
 				'',
 				array('is_render_to_js_template' => true)
-			)->setExtraParams("style='width: auto;'");
+			)->setExtraParams("style='width: 100%;'");
 		}
 		return $this->_itemRendererCommands;
 	}
@@ -44,7 +44,7 @@ class Werules_Chatbot_Block_Commands extends Mage_Adminhtml_Block_System_Config_
 				'werules_chatbot/enable',
 				'',
 				array('is_render_to_js_template' => true)
-			)->setExtraParams("style='width: auto;'");
+			)->setExtraParams("style='width: 100%;'");
 		}
 		return $this->_itemRendererEnable;
 	}

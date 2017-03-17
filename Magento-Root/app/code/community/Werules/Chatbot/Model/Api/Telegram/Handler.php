@@ -335,7 +335,13 @@
 								}
 								else if ($mode == "4") // Match Regular Expression
 								{
-									if (preg_match($reply["regular_expression"], $textToMatch))
+									$regex = $reply["regular_expression"];
+									if ($regex[0] != "/")
+										$regex = "/" . $regex;
+									if ((substr($regex, -1) != "/") && ($regex[strlen($regex) - 2] != "/"))
+										$regex .= "/";
+									//if (preg_match("/[a-zA-Z]+/", $textToMatch))
+									if (preg_match($regex, $textToMatch))
 										$matched = true;
 								}
 								else if ($mode == "5") // Equals to
