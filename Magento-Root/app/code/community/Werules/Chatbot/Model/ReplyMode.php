@@ -9,9 +9,12 @@ class Werules_Chatbot_Model_ReplyMode
 	public function toOptionArray()
 	{
 		return array(
-			array('value'=>0, 'label'=>'Mode 1'),
-			array('value'=>1, 'label'=>'Mode 2'),
-			array('value'=>2, 'label'=>'Mode 3')
+			array('value'=>0, 'label'=>'Similarity'),
+			array('value'=>1, 'label'=>'Starts With'),
+			array('value'=>2, 'label'=>'Ends With'),
+			array('value'=>3, 'label'=>'Contains'),
+			array('value'=>4, 'label'=>'Match Regular Expression'),
+			array('value'=>5, 'label'=>'Equals to')
 		);
 	}
 }

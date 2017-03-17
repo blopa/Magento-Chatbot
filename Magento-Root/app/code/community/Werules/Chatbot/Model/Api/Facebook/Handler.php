@@ -126,7 +126,7 @@
 				// payload handler, may change the conversation state
 				if ($chatdata->getFacebookConvState() == $chatdata->_listProductsState || $chatdata->getFacebookConvState() == $chatdata->_listOrdersState) // listing products
 				{
-					if ($chatdata->checkCommandWithValue($text, $listMoreCategories))
+					if ($chatdata->startsWith($text, $listMoreCategories)) // old checkCommandWithValue
 					{
 						if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_listCategoriesState))
 						{
@@ -136,7 +136,7 @@
 							$showMore = (int)$arr[1];
 						}
 					}
-					else if ($chatdata->checkCommandWithValue($text, $listMoreSearch))
+					else if ($chatdata->startsWith($text, $listMoreSearch)) // old checkCommandWithValue
 					{
 						if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState))
 						{
@@ -146,7 +146,7 @@
 							$showMore = (int)$arr[1];
 						}
 					}
-					else if ($chatdata->checkCommandWithValue($text, $listMoreOrders))
+					else if ($chatdata->startsWith($text, $listMoreOrders)) // old checkCommandWithValue
 					{
 						if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_listOrdersState))
 						{
@@ -192,7 +192,7 @@
 						}
 						return $facebook->respondSuccess();
 					}
-					else if ($chatdata->checkCommandWithValue($text, $chatdata->_admSendMessage2AllCmd))
+					else if ($chatdata->startsWith($text, $chatdata->_admSendMessage2AllCmd)) // old checkCommandWithValue
 					{
 						$message = trim($chatdata->getCommandValue($text, $chatdata->_admSendMessage2AllCmd));
 						if (!empty($message))
@@ -211,7 +211,7 @@
 					}
 					else if ($isPayload)
 					{
-						if ($chatdata->checkCommandWithValue($text, $chatdata->_admEndSupportCmd)) // finish customer support
+						if ($chatdata->startsWith($text, $chatdata->_admEndSupportCmd)) // finish customer support  // old checkCommandWithValue
 						{
 							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admEndSupportCmd)); // get customer chatId from payload
 							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
@@ -220,7 +220,7 @@
 							$facebook->sendMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
 							$facebook->sendMessage($customerChatId, $mageHelper->__("Support ended."));
 						}
-						else if ($chatdata->checkCommandWithValue($text, $chatdata->_admBlockSupportCmd)) // block user from using support
+						else if ($chatdata->startsWith($text, $chatdata->_admBlockSupportCmd)) // block user from using support // old checkCommandWithValue
 						{
 							$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
 							$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
@@ -236,7 +236,7 @@
 							}
 
 						}
-						else if ($chatdata->checkCommandWithValue($text, $replyToCustomerMessage))
+						else if ($chatdata->startsWith($text, $replyToCustomerMessage)) // old checkCommandWithValue
 						{
 							$customerChatId = trim($chatdata->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
 							$chatdata->updateChatdata('facebook_support_reply_chat_id', $customerChatId);
@@ -443,7 +443,7 @@
 				}
 
 				// add2cart commands
-				if ($chatdata->checkCommandWithValue($text, $chatdata->_add2CartCmd['command'])) // ignore alias
+				if ($chatdata->startsWith($text, $chatdata->_add2CartCmd['command'])) // ignore alias // old checkCommandWithValue
 				{
 					$errorFlag = false;
 					$notInStock = false;
@@ -1151,7 +1151,7 @@
 						$facebook->sendMessage($chatId, $chatdata->_loginFirstMessage);
 					return $facebook->respondSuccess();
 				}
-				else if ($chatdata->checkCommandWithValue($text, $chatdata->_reorderCmd['command'])) // ignore alias
+				else if ($chatdata->startsWith($text, $chatdata->_reorderCmd['command'])) // ignore alias // old checkCommandWithValue
 				{
 					if ($chatdata->getIsLogged() == "1")
 					{

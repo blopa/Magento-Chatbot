@@ -404,11 +404,20 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return false;
 		}
 
-		protected function checkCommandWithValue($text, $cmd)
+		protected function startsWith($haystack, $needle)
 		{
-			if ($cmd)
-				return substr($text, 0, strlen($cmd)) == $cmd;
+			if ($needle)
+				return substr($haystack, 0, strlen($needle)) == $needle;
 			return false;
+		}
+
+		protected function endsWith($haystack, $needle)
+		{
+			$length = strlen($needle);
+			if ($length == 0)
+				return true;
+
+			return (substr($haystack, -$length) === $needle);
 		}
 
 		protected function clearCart()

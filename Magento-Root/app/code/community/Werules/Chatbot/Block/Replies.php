@@ -14,13 +14,6 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			'label' => Mage::helper('core')->__('Reply'),
 			'style' => 'width: 250px'
 		));
-		$this->addColumn('similarity', array(
-			'label' => Mage::helper('core')->__('Similarity (%)'),
-			'style' => 'width: 50px',
-			//'type' => 'number',
-			//'maxlength' => '3',
-			'class' => 'input-number validate-number validate-number-range number-range-1-100'
-		));
 		$this->addColumn('match_case', array(
 			'label' => Mage::helper('core')->__('Match Case'),
 			'renderer' => $this->_getRendererEnable()
@@ -32,6 +25,17 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 		$this->addColumn('reply_mode', array(
 			'label' => Mage::helper('core')->__('Reply Mode'),
 			'renderer' => $this->_getRendererReplyMode()
+		));
+		$this->addColumn('similarity', array(
+			'label' => Mage::helper('core')->__('Similarity (%)'),
+			'style' => 'width: 50px',
+			//'type' => 'number',
+			//'maxlength' => '3',
+			'class' => 'input-number validate-number validate-number-range number-range-1-100'
+		));
+		$this->addColumn('regular_expression', array(
+			'label' => Mage::helper('core')->__('Regular Expression'),
+			'style' => 'width: 250px'
 		));
 
 		$this->_addAfter = false;
