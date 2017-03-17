@@ -103,7 +103,7 @@ Conversation
 
 ## Release Notes
 - **v0.0.8:**
-	- [Backend] Add "starts with", "end with", "contains", "equals to" and "regex" to default replies
+	- [Backend] Add "starts with", "end with", "contains", "equals to" and "regex" options to default replies
 	- [Backend] Better backend layout
 	- [Backend] Better way to enable/disable commands
 - **v0.0.7:**
@@ -112,7 +112,7 @@ Conversation
 	- Add Chinese translation
 	- Show command list on "help" instead of "about"
 	- Fix buttons size on Telegram when listing categories
-	- Add option to stop processing when sending a default reply
+	- [Backend] Add option to stop processing when sending a default reply
 - **v0.0.6:**
 	- [Backend] Better admin descriptions and typos
 - **v0.0.5:**
@@ -135,8 +135,8 @@ Conversation
 	- Facebook integration
 	- [Admin] Cross platform messages with support mode
 - **v0.0.1:**
-	- First working version
 	- Telegram integration
+	- First working version
 
 
 ## F.A.Q.
