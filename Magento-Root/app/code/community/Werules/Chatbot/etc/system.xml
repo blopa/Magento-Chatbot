@@ -228,7 +228,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
-							<comment>Default Replies.</comment>
+							<comment>Replies to be Send to The Customer Whenever Matches One of The Requirements.</comment>
 						</default_replies>
 					</fields>
 				</telegram_config>
@@ -363,7 +363,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
-							<comment>Default Replies.</comment>
+							<comment>Replies to be Send to The Customer Whenever Matches One of The Requirements.</comment>
 						</default_replies>
 					</fields>
 				</facebook_config>

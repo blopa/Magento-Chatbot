@@ -36,7 +36,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Force exit customer from support mode
 - Block a customer for using support mode
 - Use Telegram to receive and reply messages from Facebook
-- Set custom reply messages for predetermined phrases
+- Set custom reply messages for predetermined text or regex
 
 **Currently not working with Configurable Products and products with custom options**
 
@@ -58,31 +58,41 @@ Go to **System > General Settings  > Chatbot Settings**
 **General Configuration**
 
 - Your Secret Key: This is Your Custom Secret Key Used to Activate/Deactivate The API Webhook
+- Master Support Group: Choose to receive all support messages in one single message app (currently not developed)
+- Forward Unknown Messages to Support: Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand
+- List Empty Categoies: Enable Listing of Categories With No Products or Unallowed Products
+- Enable Log: Enable Log. Log will be at root/var/log/.
 
 **Telegram Configuration**
 
 - Enable Telegram Bot: Enable Telegram Bot
+- Unavailability Message: Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.
 - Telegram Bot API Key: Your Telegram Bot API Key.
 - Telegram Support Group ID: ID of Group that the support messages will be forwarded. e.g. g123456789
 - Telegram Welcome Message: First Message The Bot Will Send To Your Client.
 - Telegram Help Message: Message Will be Sent When Customer Asks For Help.
 - Telegram About Message: Message Will be Sent When Customer Asks For About.
-- Enable Command Listing: Enable Command Listing When Customer Ask For About
-- Enabled Commands: List of Enabled Commands
-- Commands List: Code of the commands
+- Enable Command Listing On Help: Enable Command Listing When Customer Ask For Help
+- Enable Command Listing On Error: Enable Command Listing When The Bot Don't Understand What The Customer Typed
+- Commands List: Code of the commands and it's alias
+- Enable Default Replies: Enable Default Replies
+- Default Replies: Replies to be Send to The Customer Whenever Matches One of The Requirements.
 
 **Facebook Configuration**
 
 - Enable Messenger Bot: Enable Messenger Bot
+- Unavailability Message: Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.
 - Messenger Bot API Key: Your Messenger Bot API Key.
-- Messenger Support Group ID: Reserved for future use, for now Facebook dosen't allow bots on group chats
+- Messenger Support Chat ID: The Chat ID of The Support Admin. This Feature Isn't Very Useful Since You Can Simply Log Into Your Page And Directly Reply Your Customers From There. You Can Forward All Messages to Telegram, Just Write "telegram" in Here to Enable This Feature.
 - Messenger Welcome Message: First Message The Bot Will Send To Your Client.
 - Messenger Help Message: Message Will be Sent When Customer Asks For Help.
 - Messenger About Message: Message Will be Sent When Customer Asks For About.
-- Enable Command Listing: Enable Command Listing When Customer Ask For About
+- Enable Command Listing On Help: Enable Command Listing When Customer Ask For Help
+- Enable Command Listing On Error: Enable Command Listing When The Bot Don't Understand What The Customer Typed
 - Enable Command Prediction: Enable The Bot to Try to Predict What Command The Customer Wants by Looking into What He Wrote
-- Enabled Commands: List of Enabled Commands
-- Commands List: Code of the commands and alias
+- Commands List: Code of the commands and it's alias
+- Enable Default Replies: Enable Default Replies
+- Default Replies: Replies to be Send to The Customer Whenever Matches One of The Requirements.
 
 ## Screenshot
 General Configuration
