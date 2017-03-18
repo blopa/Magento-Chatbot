@@ -607,10 +607,10 @@
 										if ($i >= $showMore)
 										{
 											$product = Mage::getModel('catalog/product')->load($productID);
-											$product_url = $product->getProductUrl();
-											$product_image = $product->getImageUrl();
-											if (empty($product_image))
-												$product_image = $placeholder;
+											$productUrl = $product->getProductUrl();
+											$productImage = $product->getImageUrl();
+											if (empty($productImage))
+												$productImage = $placeholder;
 
 											$button = array(
 												array(
@@ -620,14 +620,14 @@
 												),
 												array(
 													'type' => 'web_url',
-													'url' => $product_url,
+													'url' => $productUrl,
 													'title' => $mageHelper->__("Visit product's page")
 												)
 											);
 											$element = array(
 												'title' => $product->getName(),
-												'item_url' => $product_url,
-												'image_url' => $product_image,
+												'item_url' => $productUrl,
+												'image_url' => $productImage,
 												'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
 												'buttons' => $button
 											);
@@ -733,10 +733,10 @@
 									if ($i >= $showMore)
 									{
 										$product = Mage::getModel('catalog/product')->load($productID);
-										$product_url = $product->getProductUrl();
-										$product_image = $product->getImageUrl();
-										if (empty($product_image))
-											$product_image = $placeholder;
+										$productUrl = $product->getProductUrl();
+										$productImage = $product->getImageUrl();
+										if (empty($productImage))
+											$productImage = $placeholder;
 
 										$button = array(
 											array(
@@ -746,14 +746,14 @@
 											),
 											array(
 												'type' => 'web_url',
-												'url' => $product_url,
+												'url' => $productUrl,
 												'title' => $mageHelper->__("Visit product's page")
 											)
 										);
 										$element = array(
 											'title' => $product->getName(),
-											'item_url' => $product_url,
-											'image_url' => $product_image,
+											'item_url' => $productUrl,
+											'image_url' => $productImage,
 											'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
 											'buttons' => $button
 										);
