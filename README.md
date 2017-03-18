@@ -40,6 +40,11 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 
 **Currently not working with Configurable Products and products with custom options**
 
+## Languages
+- English (US)
+- Portuguese (BR)
+- Chinese (Greater China region)
+
 ## Installation
 
 1. Unpack the extension ZIP file in your Magento root directory
