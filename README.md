@@ -106,6 +106,7 @@ Conversation
 	- [Customer] Add inline search for Telegram
 	- Add price to product listing on Telegram
 	- Fix category buttons listing glitch on Telegram
+	- Fix regex validation
 	- Fix webhook security issue
 	- New webhook URL
 - **v0.0.8:**

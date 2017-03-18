@@ -412,11 +412,10 @@
 								}
 								else if ($mode == "4") // Match Regular Expression
 								{
-									if ($match[0] != "/")
-										$match = "/" . $match;
-									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
-										$match .= "/";
-									//if (preg_match("/[a-zA-Z]+/", $textToMatch))
+//									if ($match[0] != "/")
+//										$match = "/" . $match;
+//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
+//										$match .= "/";
 									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
