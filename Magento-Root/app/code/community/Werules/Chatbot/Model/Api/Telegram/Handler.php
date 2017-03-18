@@ -84,48 +84,51 @@
 				$queryId = $inlineQuery['id'];
 				$results = array();
 				$chatdataInline = Mage::getModel('chatbot/chatdata');
-				$productIDs = $chatdataInline->getProductIdsBySearch($query);
-				if (!empty($productIDs))
+				if (!empty($query))
 				{
-					$total = count($productIDs);
-					$i = 0;
-					foreach($productIDs as $productID)
+					$productIDs = $chatdataInline->getProductIdsBySearch($query);
+					if (!empty($productIDs))
 					{
-						$product = Mage::getModel('catalog/product')->load($productID);
-						if ($product->getId())
+						$total = count($productIDs);
+						$i = 0;
+						foreach($productIDs as $productID)
 						{
-							if ($product->getStockItem()->getIsInStock() > 0)
+							$product = Mage::getModel('catalog/product')->load($productID);
+							if ($product->getId())
 							{
-								if ($i > 5)
-									break;
-								$productUrl = $product->getProductUrl();
-								$productImage = $product->getImageUrl();
-								$productName = $product->getName();
-								$productDescription = $chatdataInline->excerpt($product->getShortDescription(), 60);
-								$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
-								if (empty($productImage))
-									$productImage = $placeholder;
+								if ($product->getStockItem()->getIsInStock() > 0)
+								{
+									if ($i >= 5)
+										break;
+									$productUrl = $product->getProductUrl();
+									$productImage = $product->getImageUrl();
+									$productName = $product->getName();
+									$productDescription = $chatdataInline->excerpt($product->getShortDescription(), 60);
+									$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
+									if (empty($productImage))
+										$productImage = $placeholder;
 
-								$message = $productName . "\n" . $productDescription;
+									$message = $productName . "\n" . $productDescription;
 
-								$result = array(
-									'type' => 'article',
-									'id' => $queryId . "/" . (string)$i,
-									'title' => $productName,
-									'description' => $productDescription,
-									'input_message_content' => array(
-										'message_text' => $message,
-										'parse_mode' => 'HTML'
-									)
-								);
+									$result = array(
+										'type' => 'article',
+										'id' => $queryId . "/" . (string)$i,
+										'title' => $productName,
+										'description' => $productDescription,
+										'input_message_content' => array(
+											'message_text' => $message,
+											'parse_mode' => 'HTML'
+										)
+									);
 
-								array_push($results, $result);
-								$i++;
+									array_push($results, $result);
+									$i++;
+								}
 							}
 						}
-					}
 
-					$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+					}
 				}
 
 				$telegram->respondSuccess();
