@@ -102,6 +102,9 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
 ## Release Notes
+- **v0.0.9:**
+	- [Customer] Add inline search for Telegram
+	- Add price to product listing
 - **v0.0.8:**
 	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to default replies
 	- [Backend] Better backend layout
