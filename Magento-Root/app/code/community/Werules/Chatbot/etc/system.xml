@@ -33,7 +33,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>This is Your Custom Secret Key Used to Activate/Deactivate The API Webhook For Telegram, And to Use as Your Challenge Hub For Facebook. Alphanumeric Only! Access http://(YOUR_STORE_URL)/chatbot/chatdata/(API)/webhook/(YOUR_CUSTOM_KEY) to Set The Webhook, change API to "telegram" or "facebook".</comment>
+							<comment>This is Your Custom Secret Key Used For The Webhook URL, to Activate/Deactivate The API Webhook For Telegram, And to Use as Your Challenge Hub For Facebook. Alphanumeric Only! Access http://(YOUR_STORE_URL)/chatbot/chatdata/(API)/webhook/(YOUR_CUSTOM_KEY) to Set The Webhook, change API to "telegram" or "facebook".</comment>
 						</your_custom_key>
 						<master_support_group>
 							<label>Master Support Group</label>

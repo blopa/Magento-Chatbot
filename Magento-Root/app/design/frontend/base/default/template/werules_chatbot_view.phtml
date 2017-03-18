@@ -1,8 +1,13 @@
 <?php
 	$action = $this->getRequest()->getActionName();
 	$webhook = Mage::app()->getRequest()->getParam('webhook');
-	$custom_key = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
-	if ($webhook != $custom_key)
-		$webhook = null;
-	echo Mage::getModel('chatbot/chatdata')->requestHandler($action, $webhook);
+	$key = Mage::app()->getRequest()->getParam('key');
+	$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
+
+	if ($webhook == $customKey) // set webhook
+		echo Mage::getModel('chatbot/chatdata')->requestHandler($action, $webhook);
+	else if ($key == $customKey) // process request
+		echo Mage::getModel('chatbot/chatdata')->requestHandler($action, null);
+	else // error
+		echo json_encode(array("status" => "error"));
 ?>
