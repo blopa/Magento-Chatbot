@@ -185,7 +185,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Integrate checkout to Facebook Payment API
-	- Add inline search for Telegram
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store chat message app
 	- Documentation / Tutorials / Videos
