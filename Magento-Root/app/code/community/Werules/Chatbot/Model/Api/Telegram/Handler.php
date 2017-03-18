@@ -72,12 +72,92 @@
 			$text = $telegram->Text();
 			$chatId = $telegram->ChatID();
 			$messageId = $telegram->MessageID();
+			$inlineQuery = $telegram->Inline_Query();
+
+			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			if ($enableLog == "1") // log all posts
+				Mage::log("Post Data:\n" . var_export($telegram->getData(), true) . "\n\n", null, 'chatbot_telegram.log');
+
+			if (!empty($inlineQuery))
+			{
+				$query = $inlineQuery['query'];
+				$queryId = $inlineQuery['id'];
+				$results = array();
+				$chatdataInline = Mage::getModel('chatbot/chatdata');
+				if (!empty($query))
+				{
+					$productIDs = $chatdataInline->getProductIdsBySearch($query);
+					$mageHelperInline = Mage::helper('core');
+					if (!empty($productIDs))
+					{
+						//$total = count($productIDs);
+						$i = 0;
+						foreach($productIDs as $productID)
+						{
+							$product = Mage::getModel('catalog/product')->load($productID);
+							if ($product->getId())
+							{
+								if ($product->getStockItem()->getIsInStock() > 0)
+								{
+									if ($i >= 5)
+										break;
+									$productUrl = $product->getProductUrl();
+									$productImage = $product->getImageUrl();
+									$productName = $product->getName();
+									$productDescription = $chatdataInline->excerpt($product->getShortDescription(), 60);
+									$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
+									if (empty($productImage))
+										$productImage = $placeholder;
+
+									$message = $productName . "\n" .
+										$mageHelperInline->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
+										$productDescription . "\n" .
+										$productUrl
+									;
+
+									$result = array(
+										'type' => 'article',
+										'id' => $queryId . "/" . (string)$i,
+										'title' => $productName,
+										'description' => $productDescription,
+										'thumb_url' => $productImage,
+										'input_message_content' => array(
+											'message_text' => $message,
+											'parse_mode' => 'HTML'
+										)
+									);
+
+									array_push($results, $result);
+									$i++;
+								}
+							}
+						}
+
+						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+					}
+					else
+					{
+						$results = array(
+							array(
+								'type' => 'article',
+								'id' => $queryId . "/0",
+								'title' => $mageHelperInline->__("Sorry, no products found for this criteria."),
+								'input_message_content' => array(
+									'message_text' => $mageHelperInline->__("Sorry, no products found for this criteria.")
+								)
+							)
+						);
+						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+					}
+				}
+
+				$telegram->respondSuccess();
+			}
 
 			// configs
 			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enabledBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_default_replies');
-			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
 			$enableFinalMessage2Support = Mage::getStoreConfig('chatbot_enable/general_config/enable_support_final_message');
 			$supportGroupId = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
@@ -89,9 +169,6 @@
 			$listMoreCategories = "/lmc_";
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
-
-			if ($enableLog == "1") // log all posts
-				Mage::log("Post Data:\n" . var_export($telegram->getData(), true) . "\n\n", null, 'chatbot_telegram.log');
 
 			if (!is_null($text) && !is_null($chatId))
 			{

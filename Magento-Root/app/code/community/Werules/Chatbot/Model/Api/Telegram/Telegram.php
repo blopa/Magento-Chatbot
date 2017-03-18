@@ -1245,7 +1245,7 @@ class Telegram {
 	 * \return the String users's text
 	 */
 	public function Text() {
-		return $this->data["message"] ["text"];
+		return $this->data["message"]["text"];
 	}
 
 	/// Get the chat_id of the current message
