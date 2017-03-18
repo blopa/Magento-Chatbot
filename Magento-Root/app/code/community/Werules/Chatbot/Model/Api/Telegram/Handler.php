@@ -947,6 +947,9 @@
 							}
 						}
 
+						if (!empty($arr)) // if the loop ended, and there's still categories on arr
+							array_push($option, $arr);
+
 						$keyb = $telegram->buildKeyBoard($option);
 						$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'resize_keyboard' => true, 'text' => $mageHelper->__("Select a category") . ". " . $chatdata->_cancelMessage));
 					}

@@ -104,7 +104,8 @@ Conversation
 ## Release Notes
 - **v0.0.9:**
 	- [Customer] Add inline search for Telegram
-	- Add price to product listing
+	- Add price to product listing on Telegram
+	- Fix category buttons listing glitch on Telegram
 	- Fix webhook security issue
 	- New webhook URL
 - **v0.0.8:**
