@@ -599,9 +599,11 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			{
 				if ($product->getStockItem()->getIsInStock() > 0)
 				{
+					$mageHelper = Mage::helper('core');
 					$message = $product->getName() . "\n" .
+						$mageHelper->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
 						$this->excerpt($product->getShortDescription(), 60) . "\n" .
-						Mage::helper('core')->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
+						$mageHelper->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
 					return $message;
 				}
 			}

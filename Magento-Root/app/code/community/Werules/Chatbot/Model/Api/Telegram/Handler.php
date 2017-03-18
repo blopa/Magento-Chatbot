@@ -87,9 +87,10 @@
 				if (!empty($query))
 				{
 					$productIDs = $chatdataInline->getProductIdsBySearch($query);
+					$mageHelperInline = Mage::helper('core');
 					if (!empty($productIDs))
 					{
-						$total = count($productIDs);
+						//$total = count($productIDs);
 						$i = 0;
 						foreach($productIDs as $productID)
 						{
@@ -108,13 +109,18 @@
 									if (empty($productImage))
 										$productImage = $placeholder;
 
-									$message = $productName . "\n" . $productDescription;
+									$message = $productName . "\n" .
+										$mageHelperInline->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
+										$productDescription . "\n" .
+										$productUrl
+									;
 
 									$result = array(
 										'type' => 'article',
 										'id' => $queryId . "/" . (string)$i,
 										'title' => $productName,
 										'description' => $productDescription,
+										'thumb_url' => $productImage,
 										'input_message_content' => array(
 											'message_text' => $message,
 											'parse_mode' => 'HTML'
@@ -127,6 +133,20 @@
 							}
 						}
 
+						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+					}
+					else
+					{
+						$results = array(
+							array(
+								'type' => 'article',
+								'id' => $queryId . "/0",
+								'title' => $mageHelperInline->__("Sorry, no products found for this criteria."),
+								'input_message_content' => array(
+									'message_text' => $mageHelperInline->__("Sorry, no products found for this criteria.")
+								)
+							)
+						);
 						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
 					}
 				}
