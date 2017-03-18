@@ -672,13 +672,13 @@
 					else
 						$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 
+					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 					if ($showMore == 0) // show only in the first time
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $_category->getName())));
+						$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $_category->getName())));
 					else
 						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more.")));
 
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
-					$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 					$errorFlag = false;
 					if ($_category) // check if variable isn't false/empty
 					{
@@ -716,9 +716,9 @@
 											{
 												$image = $chatdata->loadImageContent($productID);
 												if ($image)
-													$telegram->sendPhoto(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'photo' => $image, 'caption' => $message));
+													$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
 												else
-													$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $message));
+													$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
 
 												if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 												{
