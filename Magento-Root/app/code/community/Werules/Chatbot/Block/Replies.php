@@ -21,7 +21,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			'label' => Mage::helper('core')->__('Stop Processing'),
 			'renderer' => $this->_getRendererEnableProcessing()
 		));
-		$this->addColumn('reply_mode', array(
+		$this->addColumn('match_mode', array(
 			'label' => Mage::helper('core')->__('Reply Mode'),
 			'renderer' => $this->_getRendererMatchMode()
 		));
@@ -73,6 +73,19 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 		return $this->_itemRendererEnableProcessing;
 	}
 
+	protected function _getRendererReplyMode()
+	{
+		if (!$this->_itemRendererReplyMode)
+		{
+			$this->_itemRendererReplyMode = $this->getLayout()->createBlock(
+				'werules_chatbot/replyMode',
+				'',
+				array('is_render_to_js_template' => true)
+			)->setExtraParams("style='width: 100%;'");
+		}
+		return $this->_itemRendererReplyMode;
+	}
+
 	protected function _getRendererCommandCode()
 	{
 		if (!$this->_itemRendererCommandCode)
@@ -92,7 +105,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 		{
 			$this->_itemRendererMatchMode = $this->getLayout()->createBlock(
 				//'werules_chatbot/enable',
-				'werules_chatbot/replyMode',
+				'werules_chatbot/matchMode',
 				'',
 				array('is_render_to_js_template' => true)
 			)->setExtraParams("style='width: auto;'");
@@ -111,11 +124,15 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			'selected="selected"'
 		);
 		$row->setData(
-			'option_extra_attr_' . $this->_getRendererMatchMode()->calcOptionHash($row->getData('reply_mode')),
+			'option_extra_attr_' . $this->_getRendererMatchMode()->calcOptionHash($row->getData('match_mode')),
 			'selected="selected"'
 		);
 		$row->setData(
 			'option_extra_attr_' . $this->_getRendererCommandCode()->calcOptionHash($row->getData('command_id')),
+			'selected="selected"'
+		);
+		$row->setData(
+			'option_extra_attr_' . $this->_getRendererReplyMode()->calcOptionHash($row->getData('reply_mode')),
 			'selected="selected"'
 		);
 	}

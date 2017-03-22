@@ -1,9 +1,9 @@
 <?php
-class Werules_Chatbot_Block_ReplyMode extends Mage_Core_Block_Html_Select
+class Werules_Chatbot_Block_MatchMode extends Mage_Core_Block_Html_Select
 {
 	public function _toHtml()
 	{
-		$options = Mage::getSingleton('chatbot/replyMode')->toOptionArray();
+		$options = Mage::getSingleton('chatbot/matchMode')->toOptionArray();
 		if (!$this->getOptions())
 		{
 			foreach ($options as $option)

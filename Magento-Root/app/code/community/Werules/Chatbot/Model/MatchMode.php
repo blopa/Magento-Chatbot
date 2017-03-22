@@ -1,5 +1,5 @@
 <?php
-class Werules_Chatbot_Model_ReplyMode
+class Werules_Chatbot_Model_MatchMode
 {
 	/**
 	 * Provide available enable as a value/label array
