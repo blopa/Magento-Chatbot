@@ -32,6 +32,10 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			//'maxlength' => '3',
 			'class' => 'input-number validate-number validate-number-range number-range-1-100'
 		));
+		$this->addColumn('reply_mode', array(
+			'label' => Mage::helper('core')->__('Reply Mode'),
+			'renderer' => $this->_getRendererReplyMode()
+		));
 		$this->addColumn('reply_phrase', array(
 			'label' => Mage::helper('core')->__('Reply Text'),
 			'style' => 'width: 250px'
