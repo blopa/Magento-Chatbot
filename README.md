@@ -9,7 +9,7 @@
 **Become part of the chatbots revolution.**
 **Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest). Or get it via Magento Connect https://www.magentocommerce.com/magento-connect/chatbot-integration.html**
 
-Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
+This repository is the source code for the Magento Chatbot (Telegram, Messenger, Whatsapp, WeChat and Skype), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
 Very easy to use! Try now, it's FREE.
 
 To use this module you'll need to have SSL enabled in your store, this is a requirement from Facebook and Telegram, not by me.
@@ -123,6 +123,10 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
 ## Release Notes
+- **v0.0.10:**
+	- [Backend] Add option to match a 'default reply' as a command
+	- [Backend] Add default fallback message
+	- [Backend] Add option to disable Telegram inline search
 - **v0.0.9:**
 	- [Customer] Add inline search for Telegram
 	- Add price to product listing on Telegram
