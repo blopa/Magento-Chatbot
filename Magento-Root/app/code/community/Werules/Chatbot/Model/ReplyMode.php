@@ -9,8 +9,8 @@ class Werules_Chatbot_Model_ReplyMode
 	public function toOptionArray()
 	{
 		return array(
-			array('value'=>0, 'label'=>'Command'),
-			array('value'=>1, 'label'=>'Text')
+			array('value'=>0, 'label'=>'Text Only'),
+			array('value'=>1, 'label'=>'Text and Command')
 		);
 	}
 }
