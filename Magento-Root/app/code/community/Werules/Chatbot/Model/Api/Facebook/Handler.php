@@ -63,7 +63,7 @@
 			$isEcho = $facebook->getEcho();
 
 			// configs
-			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			//$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enabledBot = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_default_replies');
 			$enablePredict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
@@ -1294,6 +1294,7 @@
 				}
 				else
 				{
+					$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState); // back to start state
 					if ($enableFinalMessage2Support == "1")
 					{
 						$errorFlag = true;
@@ -1317,16 +1318,34 @@
 					}
 					else // process cases where the customer message wasn't understandable
 					{
-						//if ($enable_witai == "1"){}
-
-						$facebook->sendMessage($chatId, $mageHelper->__("Sorry, I didn't understand that.")); // TODO
-
-						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_error_command_list');
-						if ($cmdListingOnError == "1")
+						//if ($enableWitai == "1"){}
+						//else
 						{
-							$message = $mageHelper->__("Please try one of the following commands.");
-							$content = $chatdata->listFacebookCommandsMessage();
-							$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
+							$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
+							$fallbackQty++;
+							$message = $mageHelper->__("Sorry, I didn't understand that.");
+
+							$fallbackLimit = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message_quantity');
+							if ($fallbackQty >= (int)$fallbackLimit)
+							{
+								$fallbackMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message');
+								if (!empty($fallbackMessage))
+								{
+									$fallbackQty = 0;
+									$message = $fallbackMessage;
+								}
+							}
+
+							$chatdata->updateChatdata("telegram_fallback_qty", (string)$fallbackQty);
+							$facebook->sendMessage($chatId, $message); // TODO
+
+							$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_error_command_list');
+							if ($cmdListingOnError == "1")
+							{
+								$message = $mageHelper->__("Please try one of the following commands.");
+								$content = $chatdata->listFacebookCommandsMessage();
+								$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
+							}
 						}
 					}
 				}

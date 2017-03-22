@@ -144,6 +144,16 @@
 							<show_in_store>1</show_in_store>
 							<comment>Your Telegram Bot API Key.</comment>
 						</telegram_api_key>
+						<enable_inline_search>
+							<label>Enable Inline Search</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Telegram Inline Search</comment>
+						</enable_inline_search>
 						<telegram_support_group>
 							<label>Telegram Support Group ID</label>
 							<frontend_type>text</frontend_type>
@@ -230,6 +240,24 @@
 							<show_in_store>0</show_in_store>
 							<comment>Replies to be Send to The Customer Whenever Matches One of The Requirements.</comment>
 						</default_replies>
+						<fallback_message>
+							<label>Fallback Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>14</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message Will be Sent When The Bot Don't Understand Customer Messages For The Nst Time.</comment>
+						</fallback_message>
+						<fallback_message_quantity>
+							<label>Fallback Times</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>15</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Number of Fallbacks Before Sending The Fallback Message.</comment>
+						</fallback_message_quantity>
 					</fields>
 				</telegram_config>
 				<facebook_config translate="label">
@@ -365,6 +393,24 @@
 							<show_in_store>0</show_in_store>
 							<comment>Replies to be Send to The Customer Whenever Matches One of The Requirements.</comment>
 						</default_replies>
+						<fallback_message>
+							<label>Fallback Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>14</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Message Will be Sent When The Bot Don't Understand Customer Messages For The Nst Time.</comment>
+						</fallback_message>
+						<fallback_message_quantity>
+							<label>Fallback Times</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>15</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Number of Fallbacks Before Sending The Fallback Message.</comment>
+						</fallback_message_quantity>
 					</fields>
 				</facebook_config>
 			</groups>
