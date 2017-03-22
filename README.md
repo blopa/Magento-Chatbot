@@ -180,14 +180,17 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Whatsapp
 	- WeChat
 	- wit.ai
+	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
+	- Better order searching / listing
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Integrate checkout to Facebook Payment API
+	- Use Facebook receipt layout to display orders
 	- Add natural language configuration (wit.ai?)
-	- Add a custom in-store chat message app
+	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history
