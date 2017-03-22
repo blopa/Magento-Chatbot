@@ -1304,6 +1304,8 @@
 							$message = $mageHelper->__("Sorry, I didn't understand that.");
 
 							$fallbackLimit = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message_quantity');
+							if (!is_numeric($fallbackLimit))
+								$fallbackLimit = 3;
 							if ($fallbackQty >= (int)$fallbackLimit)
 							{
 								$fallbackMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message');
