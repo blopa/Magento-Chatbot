@@ -184,6 +184,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- ???
 - **Features:**
 	- Better order searching / listing
+	- Add regex to commands
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
