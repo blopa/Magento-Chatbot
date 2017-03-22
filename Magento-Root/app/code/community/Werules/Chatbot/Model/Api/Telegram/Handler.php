@@ -374,7 +374,7 @@
 
 								$matched = false;
 								$match = $reply["match_sintax"];
-								$mode = $reply["reply_mode"];
+								$matchMode = $reply["match_mode"];
 
 								if ($reply["match_case"] == "0")
 								{
@@ -384,7 +384,7 @@
 								else
 									$textToMatch = $text;
 
-								if ($mode == "0") // Similarity
+								if ($matchMode == "0") // Similarity
 								{
 									$similarity = $reply["similarity"];
 									if (is_numeric($similarity))
@@ -399,22 +399,22 @@
 									if ($percent >= $similarity)
 										$matched = true;
 								}
-								else if ($mode == "1") // Starts With
+								else if ($matchMode == "1") // Starts With
 								{
 									if ($chatdata->startsWith($textToMatch, $match))
 										$matched = true;
 								}
-								else if ($mode == "2") // Ends With
+								else if ($matchMode == "2") // Ends With
 								{
 									if ($chatdata->endsWith($textToMatch, $match))
 										$matched = true;
 								}
-								else if ($mode == "3") // Contains
+								else if ($matchMode == "3") // Contains
 								{
 									if (strpos($textToMatch, $match) !== false)
 										$matched = true;
 								}
-								else if ($mode == "4") // Match Regular Expression
+								else if ($matchMode == "4") // Match Regular Expression
 								{
 //									if ($match[0] != "/")
 //										$match = "/" . $match;
@@ -423,7 +423,7 @@
 									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
-								else if ($mode == "5") // Equals to
+								else if ($matchMode == "5") // Equals to
 								{
 									if ($textToMatch == $match)
 										$matched = true;
@@ -431,9 +431,24 @@
 
 								if ($matched)
 								{
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
-									if ($reply["stop_processing"] == "1")
-										return $telegram->respondSuccess();
+									$message = $reply["reply_phrase"];
+									if ($reply['reply_mode'] == "1")
+									{
+										$cmdId = $reply['command_id'];
+										if (!empty($cmdId))
+											$text = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
+										if (!empty($message))
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+									}
+									else //if ($reply['reply_mode'] == "0")
+									{
+										if (!empty($message))
+										{
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+											if ($reply["stop_processing"] == "1")
+												return $telegram->respondSuccess();
+										}
+									}
 									break;
 								}
 							}
