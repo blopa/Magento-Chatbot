@@ -1,10 +1,15 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
 
-**Become part of the chatbots revolution. Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest). Or get it via Magento Connect https://www.magentocommerce.com/magento-connect/chatbot-integration.html**
+**Chatbots!** They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
 <img src="/screenshots/chat.gif?raw=true" width="550px">
 
-Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
+> Chatbots are computer programs that you interact with via a chat interface. Using a chatbot is as simple as having a conversation with it. You can ask it questions or give it commands, and it'll respond to you and carry out your actions. Chatbots can be run in any number of chat apps, including Facebook Messenger, your phone's text messaging app, and most others.
+
+**Become part of the chatbots revolution.**
+**Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest). Or get it via Magento Connect https://www.magentocommerce.com/magento-connect/chatbot-integration.html**
+
+This repository is the source code for the Magento Chatbot (Telegram, Messenger, Whatsapp, WeChat and Skype), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
 Very easy to use! Try now, it's FREE.
 
 To use this module you'll need to have SSL enabled in your store, this is a requirement from Facebook and Telegram, not by me.
@@ -37,6 +42,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Block a customer for using support mode
 - Use Telegram to receive and reply messages from Facebook
 - Set custom reply messages for predetermined text or regex
+- Custom fallback messages
 
 **Currently not working with Configurable Products and products with custom options**
 
@@ -117,6 +123,10 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
 ## Release Notes
+- **v0.0.10:**
+	- [Backend] Add option to match a 'default reply' as a command
+	- [Backend] Add default fallback message
+	- [Backend] Add option to disable Telegram inline search
 - **v0.0.9:**
 	- [Customer] Add inline search for Telegram
 	- Add price to product listing on Telegram
@@ -179,14 +189,17 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Whatsapp
 	- WeChat
 	- wit.ai
+	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
+	- Better order searching / listing
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Integrate checkout to Facebook Payment API
+	- Use Facebook receipt layout to display orders
 	- Add natural language configuration (wit.ai?)
-	- Add a custom in-store chat message app
+	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history

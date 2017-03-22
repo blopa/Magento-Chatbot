@@ -63,7 +63,7 @@
 			$isEcho = $facebook->getEcho();
 
 			// configs
-			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			//$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enabledBot = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_default_replies');
 			$enablePredict = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_predict_commands');
@@ -297,7 +297,7 @@
 
 								$matched = false;
 								$match = $reply["match_sintax"];
-								$mode = $reply["reply_mode"];
+								$matchMode = $reply["match_mode"];
 
 								if ($reply["match_case"] == "0")
 								{
@@ -307,7 +307,7 @@
 								else
 									$textToMatch = $text;
 
-								if ($mode == "0") // Similarity
+								if ($matchMode == "0") // Similarity
 								{
 									$similarity = $reply["similarity"];
 									if (is_numeric($similarity))
@@ -322,22 +322,22 @@
 									if ($percent >= $similarity)
 										$matched = true;
 								}
-								else if ($mode == "1") // Starts With
+								else if ($matchMode == "1") // Starts With
 								{
 									if ($chatdata->startsWith($textToMatch, $match))
 										$matched = true;
 								}
-								else if ($mode == "2") // Ends With
+								else if ($matchMode == "2") // Ends With
 								{
 									if ($chatdata->endsWith($textToMatch, $match))
 										$matched = true;
 								}
-								else if ($mode == "3") // Contains
+								else if ($matchMode == "3") // Contains
 								{
 									if (strpos($textToMatch, $match) !== false)
 										$matched = true;
 								}
-								else if ($mode == "4") // Match Regular Expression
+								else if ($matchMode == "4") // Match Regular Expression
 								{
 //									if ($match[0] != "/")
 //										$match = "/" . $match;
@@ -346,7 +346,7 @@
 									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
-								else if ($mode == "5") // Equals to
+								else if ($matchMode == "5") // Equals to
 								{
 									if ($textToMatch == $match)
 										$matched = true;
@@ -354,9 +354,24 @@
 
 								if ($matched)
 								{
-									$facebook->sendMessage($chatId, $reply["reply_phrase"]);
-									if ($reply["stop_processing"] == "1")
-										return $facebook->respondSuccess();
+									$message = $reply["reply_phrase"];
+									if ($reply['reply_mode'] == "1")
+									{
+										$cmdId = $reply['command_id'];
+										if (!empty($cmdId))
+											$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
+										if (!empty($message))
+											$facebook->sendMessage($chatId, $message);
+									}
+									else //if ($reply['reply_mode'] == "0")
+									{
+										if (!empty($message))
+										{
+											$facebook->sendMessage($chatId, $message);
+											if ($reply["stop_processing"] == "1")
+												return $facebook->respondSuccess();
+										}
+									}
 									break;
 								}
 							}
@@ -1294,6 +1309,7 @@
 				}
 				else
 				{
+					$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState); // back to start state
 					if ($enableFinalMessage2Support == "1")
 					{
 						$errorFlag = true;
@@ -1317,16 +1333,39 @@
 					}
 					else // process cases where the customer message wasn't understandable
 					{
-						//if ($enable_witai == "1"){}
-
-						$facebook->sendMessage($chatId, $mageHelper->__("Sorry, I didn't understand that.")); // TODO
-
-						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_error_command_list');
-						if ($cmdListingOnError == "1")
+						//if ($enableWitai == "1"){}
+						//else
 						{
-							$message = $mageHelper->__("Please try one of the following commands.");
-							$content = $chatdata->listFacebookCommandsMessage();
-							$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
+							$message = $mageHelper->__("Sorry, I didn't understand that.");
+
+							$fallbackLimit = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message_quantity');
+							if (!empty($fallbackLimit))
+							{
+								$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
+								$fallbackQty++;
+								if (!is_numeric($fallbackLimit))
+									$fallbackLimit = 3;
+								if ($fallbackQty >= (int)$fallbackLimit)
+								{
+									$fallbackMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message');
+									if (!empty($fallbackMessage))
+									{
+										$fallbackQty = 0;
+										$message = $fallbackMessage;
+									}
+								}
+							}
+
+							$chatdata->updateChatdata("telegram_fallback_qty", (string)$fallbackQty);
+							$facebook->sendMessage($chatId, $message); // TODO
+
+							$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_error_command_list');
+							if ($cmdListingOnError == "1")
+							{
+								$message = $mageHelper->__("Please try one of the following commands.");
+								$content = $chatdata->listFacebookCommandsMessage();
+								$facebook->sendQuickReply($chatId, $message . $content[0], $content[1]);
+							}
 						}
 					}
 				}

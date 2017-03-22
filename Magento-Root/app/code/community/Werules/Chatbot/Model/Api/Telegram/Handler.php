@@ -78,84 +78,88 @@
 			if ($enableLog == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($telegram->getData(), true) . "\n\n", null, 'chatbot_telegram.log');
 
+			$enableInlineBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_inline_search');
+			// handle inline search
 			if (!empty($inlineQuery))
 			{
-				$query = $inlineQuery['query'];
-				$queryId = $inlineQuery['id'];
-				$results = array();
-				$chatdataInline = Mage::getModel('chatbot/chatdata');
-				if (!empty($query))
+				if ($enableInlineBot == "1")
 				{
-					$productIDs = $chatdataInline->getProductIdsBySearch($query);
-					$mageHelperInline = Mage::helper('core');
-					if (!empty($productIDs))
+					$query = $inlineQuery['query'];
+					$queryId = $inlineQuery['id'];
+					$results = array();
+					$chatdataInline = Mage::getModel('chatbot/chatdata');
+					if (!empty($query))
 					{
-						//$total = count($productIDs);
-						$i = 0;
-						foreach($productIDs as $productID)
+						$productIDs = $chatdataInline->getProductIdsBySearch($query);
+						$mageHelperInline = Mage::helper('core');
+						if (!empty($productIDs))
 						{
-							$product = Mage::getModel('catalog/product')->load($productID);
-							if ($product->getId())
+							//$total = count($productIDs);
+							$i = 0;
+							foreach($productIDs as $productID)
 							{
-								if ($product->getStockItem()->getIsInStock() > 0)
+								$product = Mage::getModel('catalog/product')->load($productID);
+								if ($product->getId())
 								{
-									if ($i >= 5)
-										break;
-									$productUrl = $product->getProductUrl();
-									$productImage = $product->getImageUrl();
-									$productName = $product->getName();
-									$productDescription = $chatdataInline->excerpt($product->getShortDescription(), 60);
-									$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
-									if (empty($productImage))
-										$productImage = $placeholder;
+									if ($product->getStockItem()->getIsInStock() > 0)
+									{
+										if ($i >= 5)
+											break;
+										$productUrl = $product->getProductUrl();
+										$productImage = $product->getImageUrl();
+										$productName = $product->getName();
+										$productDescription = $chatdataInline->excerpt($product->getShortDescription(), 60);
+										$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
+										if (empty($productImage))
+											$productImage = $placeholder;
 
-									$message = $productName . "\n" .
-										$mageHelperInline->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
-										$productDescription . "\n" .
-										$productUrl
-									;
+										$message = $productName . "\n" .
+											$mageHelperInline->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
+											$productDescription . "\n" .
+											$productUrl
+										;
 
-									$result = array(
-										'type' => 'article',
-										'id' => $queryId . "/" . (string)$i,
-										'title' => $productName,
-										'description' => $productDescription,
-										'thumb_url' => $productImage,
-										'input_message_content' => array(
-											'message_text' => $message,
-											'parse_mode' => 'HTML'
-										)
-									);
+										$result = array(
+											'type' => 'article',
+											'id' => $queryId . "/" . (string)$i,
+											'title' => $productName,
+											'description' => $productDescription,
+											'thumb_url' => $productImage,
+											'input_message_content' => array(
+												'message_text' => $message,
+												'parse_mode' => 'HTML'
+											)
+										);
 
-									array_push($results, $result);
-									$i++;
+										array_push($results, $result);
+										$i++;
+									}
 								}
 							}
-						}
 
-						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
-					}
-					else
-					{
-						$results = array(
-							array(
-								'type' => 'article',
-								'id' => $queryId . "/0",
-								'title' => $mageHelperInline->__("Sorry, no products found for this criteria."),
-								'input_message_content' => array(
-									'message_text' => $mageHelperInline->__("Sorry, no products found for this criteria.")
+							$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+						}
+						else
+						{
+							$results = array(
+								array(
+									'type' => 'article',
+									'id' => $queryId . "/0",
+									'title' => $mageHelperInline->__("Sorry, no products found for this criteria."),
+									'input_message_content' => array(
+										'message_text' => $mageHelperInline->__("Sorry, no products found for this criteria.")
+									)
 								)
-							)
-						);
-						$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+							);
+							$telegram->answerInlineQuery(array('inline_query_id' => $queryId, 'results' => json_encode($results)));
+						}
 					}
 				}
-
 				$telegram->respondSuccess();
 			}
 
 			// configs
-			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			//$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enabledBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_default_replies');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
@@ -370,7 +374,7 @@
 
 								$matched = false;
 								$match = $reply["match_sintax"];
-								$mode = $reply["reply_mode"];
+								$matchMode = $reply["match_mode"];
 
 								if ($reply["match_case"] == "0")
 								{
@@ -380,7 +384,7 @@
 								else
 									$textToMatch = $text;
 
-								if ($mode == "0") // Similarity
+								if ($matchMode == "0") // Similarity
 								{
 									$similarity = $reply["similarity"];
 									if (is_numeric($similarity))
@@ -395,22 +399,22 @@
 									if ($percent >= $similarity)
 										$matched = true;
 								}
-								else if ($mode == "1") // Starts With
+								else if ($matchMode == "1") // Starts With
 								{
 									if ($chatdata->startsWith($textToMatch, $match))
 										$matched = true;
 								}
-								else if ($mode == "2") // Ends With
+								else if ($matchMode == "2") // Ends With
 								{
 									if ($chatdata->endsWith($textToMatch, $match))
 										$matched = true;
 								}
-								else if ($mode == "3") // Contains
+								else if ($matchMode == "3") // Contains
 								{
 									if (strpos($textToMatch, $match) !== false)
 										$matched = true;
 								}
-								else if ($mode == "4") // Match Regular Expression
+								else if ($matchMode == "4") // Match Regular Expression
 								{
 //									if ($match[0] != "/")
 //										$match = "/" . $match;
@@ -419,7 +423,7 @@
 									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
-								else if ($mode == "5") // Equals to
+								else if ($matchMode == "5") // Equals to
 								{
 									if ($textToMatch == $match)
 										$matched = true;
@@ -427,9 +431,24 @@
 
 								if ($matched)
 								{
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $reply["reply_phrase"]));
-									if ($reply["stop_processing"] == "1")
-										return $telegram->respondSuccess();
+									$message = $reply["reply_phrase"];
+									if ($reply['reply_mode'] == "1")
+									{
+										$cmdId = $reply['command_id'];
+										if (!empty($cmdId))
+											$text = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
+										if (!empty($message))
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+									}
+									else //if ($reply['reply_mode'] == "0")
+									{
+										if (!empty($message))
+										{
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+											if ($reply["stop_processing"] == "1")
+												return $telegram->respondSuccess();
+										}
+									}
 									break;
 								}
 							}
@@ -1272,6 +1291,7 @@
 				}
 				else
 				{
+					$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState); // back to start state
 					if ($enableFinalMessage2Support == "1")
 					{
 						if (!empty($supportGroupId))
@@ -1291,17 +1311,40 @@
 					}
 					else // process cases where the customer message wasn't understandable
 					{
-						//else if ($enable_witai == "1"){}
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, I didn't understand that."))); // TODO
-
-						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_error_command_list');
-						if ($cmdListingOnError == "1")
+						//if ($enableWitai == "1"){}
+						//else
 						{
-							$message = $mageHelper->__("Please try one of the following commands.");
-							$message .= $chatdata->listTelegramCommandsMessage();
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
-						}
+							$message = $mageHelper->__("Sorry, I didn't understand that.");
 
+							$fallbackLimit = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message_quantity');
+							if (!empty($fallbackLimit))
+							{
+								$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
+								$fallbackQty++;
+								if (!is_numeric($fallbackLimit))
+									$fallbackLimit = 3;
+								if ($fallbackQty >= (int)$fallbackLimit)
+								{
+									$fallbackMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message');
+									if (!empty($fallbackMessage))
+									{
+										$fallbackQty = 0;
+										$message = $fallbackMessage;
+									}
+								}
+							}
+
+							$chatdata->updateChatdata("telegram_fallback_qty", (string)$fallbackQty);
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
+
+							$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_error_command_list');
+							if ($cmdListingOnError == "1")
+							{
+								$message = $mageHelper->__("Please try one of the following commands.");
+								$message .= $chatdata->listTelegramCommandsMessage();
+								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
+							}
+						}
 					}
 				}
 			}
@@ -1309,6 +1352,4 @@
 			return $telegram->respondSuccess();
 		}
 	}
-
-
 ?>
