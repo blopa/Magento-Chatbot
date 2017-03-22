@@ -159,7 +159,7 @@
 			}
 
 			// configs
-			//$enable_witai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			//$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enabledBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_default_replies');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
@@ -1296,7 +1296,7 @@
 					}
 					else // process cases where the customer message wasn't understandable
 					{
-						//if ($enable_witai == "1"){}
+						//if ($enableWitai == "1"){}
 						//else
 						{
 							$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
