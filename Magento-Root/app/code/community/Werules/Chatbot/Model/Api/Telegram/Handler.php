@@ -1299,20 +1299,23 @@
 						//if ($enableWitai == "1"){}
 						//else
 						{
-							$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
-							$fallbackQty++;
 							$message = $mageHelper->__("Sorry, I didn't understand that.");
 
 							$fallbackLimit = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message_quantity');
-							if (!is_numeric($fallbackLimit))
-								$fallbackLimit = 3;
-							if ($fallbackQty >= (int)$fallbackLimit)
+							if (!empty($fallbackLimit))
 							{
-								$fallbackMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message');
-								if (!empty($fallbackMessage))
+								$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
+								$fallbackQty++;
+								if (!is_numeric($fallbackLimit))
+									$fallbackLimit = 3;
+								if ($fallbackQty >= (int)$fallbackLimit)
 								{
-									$fallbackQty = 0;
-									$message = $fallbackMessage;
+									$fallbackMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message');
+									if (!empty($fallbackMessage))
+									{
+										$fallbackQty = 0;
+										$message = $fallbackMessage;
+									}
 								}
 							}
 

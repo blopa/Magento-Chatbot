@@ -256,7 +256,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Number of Fallbacks Before Sending The Fallback Message.</comment>
+							<comment>Number of Fallbacks Before Sending The Fallback Message. To disable, Just Leave it Empty.</comment>
 						</fallback_message_quantity>
 					</fields>
 				</telegram_config>
@@ -409,7 +409,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Number of Fallbacks Before Sending The Fallback Message.</comment>
+							<comment>Number of Fallbacks Before Sending The Fallback Message. To disable, Just Leave it Empty.</comment>
 						</fallback_message_quantity>
 					</fields>
 				</facebook_config>
