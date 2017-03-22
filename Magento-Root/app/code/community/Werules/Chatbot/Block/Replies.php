@@ -22,7 +22,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 			'renderer' => $this->_getRendererEnableProcessing()
 		));
 		$this->addColumn('match_mode', array(
-			'label' => Mage::helper('core')->__('Reply Mode'),
+			'label' => Mage::helper('core')->__('Match Mode'),
 			'renderer' => $this->_getRendererMatchMode()
 		));
 		$this->addColumn('similarity', array(
