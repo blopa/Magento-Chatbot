@@ -1,8 +1,13 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
 
-**Become part of the chatbots revolution. Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest). Or get it via Magento Connect https://www.magentocommerce.com/magento-connect/chatbot-integration.html**
+Chatbots! They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
 <img src="/screenshots/chat.gif?raw=true" width="550px">
+
+**Become part of the chatbots revolution.**
+**Download the latest version [here](https://github.com/blopa/Magento-Chatbot/releases/latest). Or get it via Magento Connect https://www.magentocommerce.com/magento-connect/chatbot-integration.html**
+
+Chatbots are computer programs that you interact with via a chat interface. Using a chatbot is as simple as having a conversation with it. You can ask it questions or give it commands, and it'll respond to you and carry out your actions. Chatbots can be run in any number of chat apps, including Facebook Messenger, your phone's text messaging app, and most others.
 
 Source code for the Magento Chatbot (Telegram, Messenger, Whatsapp and WeChat), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
 Very easy to use! Try now, it's FREE.
