@@ -37,6 +37,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Block a customer for using support mode
 - Use Telegram to receive and reply messages from Facebook
 - Set custom reply messages for predetermined text or regex
+- Custom fallback messages
 
 **Currently not working with Configurable Products and products with custom options**
 
