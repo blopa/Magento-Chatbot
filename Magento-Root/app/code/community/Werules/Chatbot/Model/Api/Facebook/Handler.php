@@ -672,7 +672,7 @@
 											}
 											else if (($i + 1) == $total) // if it's the last one, back to _startState
 											{
-												$facebook->sendMessage($chatId, $mageHelper->__("And that was the last one."));
+												//$facebook->sendMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
 												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 													$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 											}
