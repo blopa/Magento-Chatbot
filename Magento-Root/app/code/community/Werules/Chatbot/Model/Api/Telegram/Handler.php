@@ -8,19 +8,18 @@
 		public $_text;
 		public $_chatId;
 		public $_messageId;
-
-		public function processText()
-		{
-
-		}
 	}
 
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
 	{
+		protected $_telegram;
+
 		public function _construct()
 		{
 			//parent::_construct();
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
+			$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+			$this->_telegram = new TelegramBot($apikey);
 		}
 
 		public function foreignMessageToSupport($chat_id, $text, $api_name, $customerName)
@@ -35,12 +34,10 @@
 				}
 			}
 
-			$chatdata->_apiType = $chatdata->_tgBot;
-			$apiKey = $chatdata->getApikey($chatdata->_apiType); // get telegram bot api
-			if ($apiKey)
+			//$chatdata->_apiType = $chatdata->_tgBot;
+			$telegram = $this->_telegram;
+			if (isset($telegram))
 			{
-				$telegram = new TelegramBot($apiKey);
-
 				$mageHelper = Mage::helper('core');
 				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 				if (!empty($supportgroup))
@@ -72,13 +69,13 @@
 			return false;
 		}
 
-		public function telegramHandler($apiKey)
+		public function telegramHandler()
 		{
-			if (empty($apiKey)) // if no apiKey available, break process
-				return "";
-
 			// Instances the Telegram class
-			$telegram = new TelegramBot($apiKey);
+			$telegram = $this->_telegram;
+
+			if (!isset($telegram)) // if no apiKey available, break process
+				return "";
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
@@ -280,7 +277,10 @@
 							{
 								$api_name = $foreignchatdata->getLastSupportChat();
 								if ($api_name == $foreignchatdata->_fbBot)
-									Mage::getModel('chatbot/api_facebook_handler')->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text); // send chat id and the original text
+								{
+									$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
+									$handler->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text); // send chat id and the original text
+								}
 							}
 							else
 							{

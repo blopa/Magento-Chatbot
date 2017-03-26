@@ -3,12 +3,23 @@
 	//$api_path = Mage::getModuleDir('', 'Werules_Chatbot') . DS . "Model" . DS . "Api" . DS . "witAI" . DS;
 	//include($api_path . "witAI.php");
 
+	class MessengerBot extends Messenger
+	{
+		public $_Originaltext;
+		public $_chatId;
+		public $_messageId;
+	}
+
 	class Werules_Chatbot_Model_Api_Facebook_Handler extends Werules_Chatbot_Model_Chatdata
 	{
+		protected $_facebook;
+
 		public function _construct()
 		{
 			//parent::_construct();
 			//$this->_init('chatbot/api_facebook_handler'); // this is location of the resource file.
+			$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+			$this->_facebook = new MessengerBot($apikey);
 		}
 
 		public function foreignMessageFromSupport($chat_id, $text)
@@ -26,10 +37,10 @@
 			// mage helper
 			$mageHelper = Mage::helper('core');
 
-			$apiKey = $chatdata->getApikey($chatdata->_apiType); // get facebook bot api
-			if ($apiKey)
+			//$chatdata->_apiType = $chatdata->_fbBot;
+			$facebook = $this->_facebook;
+			if (isset($facebook))
 			{
-				$facebook = new Messenger($apiKey);
 				$message = $mageHelper->__("Message from support") . ":\n" . $text;
 				$facebook->sendMessage($chat_id, $message);
 				return true;
@@ -38,13 +49,13 @@
 			return false;
 		}
 
-		public function facebookHandler($apiKey)
+		public function facebookHandler()
 		{
-			if (empty($apiKey)) // if no apiKey available, break proccess
-				return "";
-
 			// Instances the Facebook class
-			$facebook = new Messenger($apiKey);
+			$facebook = $this->_facebook;
+
+			if (!isset($facebook)) // if no apiKey available, break process
+				return "";
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
