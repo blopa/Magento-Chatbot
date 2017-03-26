@@ -27,6 +27,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - *WeChat API Wrapper* (soon)
 
 ## Features
+- wit.ai integration for NLP
 - List store categories
 - List products from category
 - Search for products
@@ -75,6 +76,12 @@ Go to **System > General Settings  > Chatbot Settings**
 - Forward Unknown Messages to Support: Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand
 - List Empty Categoies: Enable Listing of Categories With No Products or Unallowed Products
 - Enable Log: Enable Log. Log will be at root/var/log/.
+
+**wit.ai Configuration**
+
+- Enable witAI Integration: Enable witAI Integration
+- witAI API Key: witAI API Key
+- witAI Confidence Percentage: witAI Confidence Percentage
 
 **Telegram Configuration**
 
@@ -190,7 +197,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 - **Integrations:**
 	- Whatsapp
 	- WeChat
-	- wit.ai
 	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
