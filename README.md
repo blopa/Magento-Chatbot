@@ -215,6 +215,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Store messages on database before sending to make sure it will be sent eventually
 	- Save support history
 	- Better uses for wit.ai
+	- Use wit.ai on Default Replies
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
