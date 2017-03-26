@@ -1369,6 +1369,10 @@
 				{
 					if (isset($this->_witAi) && !($this->_isWitAi))
 					{
+						$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
+						if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
+							$witAiConfidence = 85; // default acceptable confidence percentage
+
 						$witResponse = $this->_witAi->getWitAIResponse($text);
 						if (isset($witResponse->entities->intent))
 						{
@@ -1399,7 +1403,7 @@
 								$key = $chatdata->getCommandString($i)['command'];
 								foreach ($witResponse->entities->intent as $intent)
 								{
-									if ($intent->value == $key)
+									if ($intent->value == $key && (((float)$intent->confidence * 100) >= (float)$witAiConfidence))
 									{
 										if (property_exists($witResponse->entities, "keyword"))
 										{
@@ -1483,9 +1487,10 @@
 							}
 						}
 					}
-					else
+					if (!$this->_isWitAi)
 					{
 						$message = $mageHelper->__("Sorry, I didn't understand that.");
+						$fallbackQty = 0;
 
 						$fallbackLimit = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message_quantity');
 						if (!empty($fallbackLimit))
@@ -1518,6 +1523,7 @@
 					}
 				}
 			}
+			return null;
 		}
 	}
 
