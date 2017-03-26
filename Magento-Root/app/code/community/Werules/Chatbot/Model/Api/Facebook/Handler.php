@@ -5,7 +5,7 @@
 
 	class MessengerBot extends Messenger
 	{
-		public $_Originaltext;
+		public $_originalText;
 		public $_chatId;
 		public $_messageId;
 	}
