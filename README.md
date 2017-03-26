@@ -1,4 +1,4 @@
-# Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
+# Magento Chatbot Module (Telegram, Messenger, Whatsapp, WeChat and Skype)
 
 **Chatbots!** They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
@@ -132,6 +132,9 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
 ## Release Notes
+- **v0.0.11:**
+	- Code improvements
+	- [Backend] Integration with wit.ai
 - **v0.0.10:**
 	- [Backend] Add option to match a 'default reply' as a command
 	- [Backend] Add default fallback message
