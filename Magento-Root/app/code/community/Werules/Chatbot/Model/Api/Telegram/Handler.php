@@ -1349,7 +1349,7 @@
 				}
 				else // process cases where the customer message wasn't understandable
 				{
-					if (isset($this->_witAi))
+					if (isset($this->_witAi) && !($this->_isWitAi))
 					{
 						$witResponse = $this->_witAi->getWitAIResponse($text);
 						if (isset($witResponse->entities->intent))
@@ -1374,6 +1374,8 @@
 							);
 
 							$i = 1;
+							$hasKeyword = false;
+							$break = false;
 							foreach ($messages as $message)
 							{
 								$key = $chatdata->getCommandString($i)['command'];
@@ -1381,10 +1383,77 @@
 								{
 									if ($intent->value == $key)
 									{
-										if (property_exists($witResponse->entities, "keyword")){}
+										if (property_exists($witResponse->entities, "keyword"))
+										{
+											if (isset($witResponse->entities->keyword))
+											{
+												foreach ($witResponse->entities->keyword as $keyword)
+												{
+													if ("/" . $intent->value == $chatdata->_searchCmd['command'])
+													{
+														$chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState);
+														//$telegram->_text = $listMoreSearch . str_replace(" ", "_", $keyword->value) . "_1";
+														$telegram->_text = $keyword->value;
+														$hasKeyword = true;
+														break;
+													}
+													else if ("/" . $intent->value == $chatdata->_listCategoriesCmd['command'])
+													{
+														$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $keyword->value);
+														if ($_category) // check if variable isn't false/empty
+														{
+															if ($_category->getId()) // check if is a valid category
+															{
+																$chatdata->updateChatdata('telegram_conv_state', $chatdata->_listCategoriesState);
+																//$telegram->_text = $listMoreCategories . $_category->getId() . "_1";
+																$telegram->_text = $keyword->value;
+																$hasKeyword = true;
+															}
+														}
+														break;
+													}
+													else if ("/" . $intent->value == $chatdata->_trackOrderCmd['command'])
+													{
+														if ($chatdata->getIsLogged() == "1")
+														{
+															$chatdata->updateChatdata('telegram_conv_state', $chatdata->_trackOrderState);
+															$telegram->_text = $keyword->value;
+															$hasKeyword = true;
+														}
+														else
+														{
+															$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+															$break = true;
+															return $telegram->respondSuccess();
+														}
+														break;
+													}
+													else if ("/" . $intent->value == $chatdata->_supportCmd['command'])
+													{
+														$chatdata->updateChatdata('telegram_conv_state', $chatdata->_supportState);
+														$telegram->_text = $keyword->value;
+														$hasKeyword = true;
+														break;
+													}
+													else if ("/" . $intent->value == $chatdata->_sendEmailCmd['command'])
+													{
+														$chatdata->updateChatdata('telegram_conv_state', $chatdata->_sendEmailState);
+														$telegram->_text = $keyword->value;
+														$hasKeyword = true;
+														break;
+													}
+												}
+												if ($break)
+													break;
+											}
+										}
+										if(!$hasKeyword)
+										{
+											$telegram->_text = "/" . $key; // replace text with command
+											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__($message))); // TODO
+										}
+
 										$this->_isWitAi = true;
-										$telegram->_text = "/" . $key; // replace text with command
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__($message))); // TODO
 										return $this->processText();
 										break;
 									}

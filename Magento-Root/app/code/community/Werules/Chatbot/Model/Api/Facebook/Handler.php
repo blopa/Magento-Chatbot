@@ -832,7 +832,7 @@
 									}
 									else if (($i + 1) == $total) // if it's the last one, back to _startState
 									{
-										$facebook->sendMessage($chatId, $mageHelper->__("And that was the last one."));
+										//$facebook->sendMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
 										if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 											$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 									}
@@ -1220,7 +1220,7 @@
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
 										{
-											$facebook->sendMessage($chatId, $mageHelper->__("And that was the last one."));
+											//$facebook->sendMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
 											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 												$facebook->sendMessage($chatId, $chatdata->_errorMessage);
 										}
@@ -1367,7 +1367,7 @@
 				}
 				else // process cases where the customer message wasn't understandable
 				{
-					if (isset($this->_witAi))
+					if (isset($this->_witAi) && !($this->_isWitAi))
 					{
 						$witResponse = $this->_witAi->getWitAIResponse($text);
 						if (isset($witResponse->entities->intent))
@@ -1377,14 +1377,14 @@
 								"Okay, so you want to search for a product.",					//_searchCmd
 								"Okay, so you want to login.",									//_loginCmd
 								"Okay, so you want to list orders.",							//_listOrdersCmd
-								"Okay, so you want to reorder.",								//_reorderCmd
-								"Okay, so you want to add a product to the cart.",				//_add2CartCmd
+								"Okay, so you want to reorder.",								//_reorderCmd shouldn't be used
+								"Okay, so you want to add a product to the cart.",				//_add2CartCmd shouldn't be used
 								"Okay, so you want to checkout.",								//_checkoutCmd
 								"Okay, so you want to clear your cart.",						//_clearCartCmd
 								"Okay, so you want to track your order.",						//_trackOrderCmd
 								"Okay, so you want support.",									//_supportCmd
 								"Okay, so you want to send us an email.",						//_sendEmailCmd
-								"Okay, so you want to cancel.",									//_cancelCmd
+								"Okay, so you want to cancel.",									//_cancelCmd shouldn't be used
 								"Okay, so you want to help.",									//_helpCmd
 								"Okay, so you want to know more about us.",						//_aboutCmd
 								"Okay, so you want to logout.",									//_logoutCmd
@@ -1392,6 +1392,8 @@
 							);
 
 							$i = 1;
+							$hasKeyword = false;
+							$break = false;
 							foreach ($messages as $message)
 							{
 								$key = $chatdata->getCommandString($i)['command'];
@@ -1399,10 +1401,80 @@
 								{
 									if ($intent->value == $key)
 									{
-										if (property_exists($witResponse->entities, "keyword")){}
+										if (property_exists($witResponse->entities, "keyword"))
+										{
+											if (isset($witResponse->entities->keyword))
+											{
+												if (isset($witResponse->entities->keyword))
+												{
+													foreach ($witResponse->entities->keyword as $keyword)
+													{
+														if ($intent->value == $chatdata->_searchCmd['command'])
+														{
+															$chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState);
+															//$facebook->_originalText = $listMoreSearch . $witResponse->entities->keyword . ",1";
+															$facebook->_originalText = $keyword->value;
+															$hasKeyword = true;
+															break;
+														}
+														else if ($intent->value == $chatdata->_listCategoriesCmd['command'])
+														{
+															$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $keyword->value);
+															if ($_category) // check if variable isn't false/empty
+															{
+																if ($_category->getId()) // check if is a valid category
+																{
+																	$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listCategoriesState);
+																	//$facebook->_originalText = $listMoreCategories . $witResponse->entities->keyword . ",1";
+																	$facebook->_originalText = $keyword->value;
+																	$hasKeyword = true;
+																}
+															}
+															break;
+														}
+														else if ($intent->value == $chatdata->_trackOrderCmd['command'])
+														{
+															if ($chatdata->getIsLogged() == "1")
+															{
+																$chatdata->updateChatdata('facebook_conv_state', $chatdata->_trackOrderState);
+																$facebook->_originalText = $keyword->value;
+																$hasKeyword = true;
+															}
+															else
+															{
+																$facebook->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+																$break = true;
+																return $facebook->respondSuccess();
+															}
+															break;
+														}
+														else if ($intent->value == $chatdata->_supportCmd['command'])
+														{
+															$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState);
+															$facebook->_originalText = $keyword->value;
+															$hasKeyword = true;
+															break;
+														}
+														else if ($intent->value == $chatdata->_sendEmailCmd['command'])
+														{
+															$chatdata->updateChatdata('facebook_conv_state', $chatdata->_sendEmailState);
+															$facebook->_originalText = $keyword->value;
+															$hasKeyword = true;
+															break;
+														}
+													}
+													if ($break)
+														break;
+												}
+											}
+										}
+										if(!$hasKeyword)
+										{
+											$facebook->_originalText = $key; // replace text with command
+											$facebook->sendMessage($chatId, $mageHelper->__($message));
+										}
+
 										$this->_isWitAi = true;
-										$facebook->_originalText = "/" . $key; // replace text with command
-										$facebook->sendMessage($chatId, $mageHelper->__($message));
 										return $this->processText();
 										break;
 									}
