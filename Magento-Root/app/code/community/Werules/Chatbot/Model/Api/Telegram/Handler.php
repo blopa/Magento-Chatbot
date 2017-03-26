@@ -1354,24 +1354,23 @@
 						$witResponse = $this->_witAi->getWitAIResponse($text);
 						if (isset($witResponse->entities->intent))
 						{
-							//if (isset($witResponse->entities[$chatdata->getCommandString(1)['command']])){}
 							$messages = array(
-								"_listCategoriesCmd",
-								"_searchCmd",
-								"_loginCmd",
-								"_listOrdersCmd",
-								"_reorderCmd",
-								"_add2CartCmd",
-								"_checkoutCmd",
-								"_clearCartCmd",
-								"_trackOrderCmd",
-								"_supportCmd",
-								"_sendEmailCmd",
-								"_cancelCmd",
-								"_helpCmd",
-								"_aboutCmd",
-								"_logoutCmd",
-								"_registerCmd"
+								"Okay, so you want me to list the categories for you.",			//_listCategoriesCmd
+								"Okay, so you want to search for a product.",					//_searchCmd
+								"Okay, so you want to login.",									//_loginCmd
+								"Okay, so you want to list orders.",							//_listOrdersCmd
+								"Okay, so you want to reorder.",								//_reorderCmd
+								"Okay, so you want to add a product to the cart.",				//_add2CartCmd
+								"Okay, so you want to checkout.",								//_checkoutCmd
+								"Okay, so you want to clear your cart.",						//_clearCartCmd
+								"Okay, so you want to track your order.",						//_trackOrderCmd
+								"Okay, so you want support.",									//_supportCmd
+								"Okay, so you want to send us an email.",						//_sendEmailCmd
+								"Okay, so you want to cancel.",									//_cancelCmd
+								"Okay, so you want to help.",									//_helpCmd
+								"Okay, so you want to know more about us.",						//_aboutCmd
+								"Okay, so you want to logout.",									//_logoutCmd
+								"Okay, so you want to register to our store."					//registerCmd
 							);
 
 							$i = 1;
@@ -1385,7 +1384,7 @@
 										if (property_exists($witResponse->entities, "keyword")){}
 										$this->_isWitAi = true;
 										$telegram->_text = "/" . $key; // replace text with command
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $telegram->_text)); // TODO
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__($message))); // TODO
 										return $this->processText();
 										break;
 									}
