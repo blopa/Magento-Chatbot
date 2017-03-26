@@ -1377,7 +1377,7 @@
 
 						$hasIntent = true;
 						if (property_exists($witResponse->entities, "facebook_intent"))
-							$intents = $witResponse->entities->telegram_intent;
+							$intents = $witResponse->entities->facebook_intent;
 						else if (property_exists($witResponse->entities, "intent"))
 							$intents = $witResponse->entities->intent;
 						else
@@ -1506,7 +1506,7 @@
 						$fallbackLimit = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message_quantity');
 						if (!empty($fallbackLimit))
 						{
-							$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
+							$fallbackQty = (int)$chatdata->getFacebookFallbackQty();
 							$fallbackQty++;
 							if (!is_numeric($fallbackLimit))
 								$fallbackLimit = 3;
@@ -1521,7 +1521,7 @@
 							}
 						}
 
-						$chatdata->updateChatdata("telegram_fallback_qty", (string)$fallbackQty);
+						$chatdata->updateChatdata("facebook_fallback_qty", (string)$fallbackQty);
 						$facebook->sendMessage($chatId, $message); // TODO
 
 						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_error_command_list');
