@@ -171,7 +171,7 @@
 
 			if (!is_null($telegram->_text) && !is_null($telegram->_chatId))
 			{
-				$this->processText();
+				return $this->processText();
 			}
 
 			return $telegram->respondSuccess();
@@ -218,7 +218,7 @@
 				}
 			}
 
-			if ($messageId == $chatdata->getTelegramMessageId()) // prevents to reply the same request twice
+			if ($messageId == $chatdata->getTelegramMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
 				return $telegram->respondSuccess();
 			else if ($chatdata->getTelegramChatId())
 				$chatdata->updateChatdata('telegram_message_id', $messageId); // if this fails, it may send the same message twice
@@ -1352,7 +1352,7 @@
 					if (isset($this->_witAi))
 					{
 						$witResponse = $this->_witAi->getWitAIResponse($text);
-						if (isset($witResponse->entities))
+						if (isset($witResponse->entities->intent))
 						{
 							//if (isset($witResponse->entities[$chatdata->getCommandString(1)['command']])){}
 							$messages = array(
@@ -1378,13 +1378,17 @@
 							foreach ($messages as $message)
 							{
 								$key = $chatdata->getCommandString($i)['command'];
-								if (property_exists($witResponse->entities, $key))
+								foreach ($witResponse->entities->intent as $intent)
 								{
-									$chatdata->_isWitAi = true;
-									$telegram->_text = "/" . $key; // replace text with command
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
-									$this->processText();
-									break;
+									if ($intent->value == $key)
+									{
+										if (property_exists($witResponse->entities, "keyword")){}
+										$this->_isWitAi = true;
+										$telegram->_text = "/" . $key; // replace text with command
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $telegram->_text)); // TODO
+										return $this->processText();
+										break;
+									}
 								}
 								$i++;
 							}
@@ -1425,6 +1429,7 @@
 					}
 				}
 			}
+			return null;
 		}
 	}
 ?>
