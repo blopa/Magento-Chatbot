@@ -47,8 +47,12 @@
 			$facebook = new Messenger($apiKey);
 
 			// Instances the witAI class
-//			$witapi = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
-//			$witai = new witAI($witapi);
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ($enableWitai == "1")
+			{
+				$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+				$witAi = new witAI($witApi);
+			}
 
 			// hub challenge
 			$hubToken = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');

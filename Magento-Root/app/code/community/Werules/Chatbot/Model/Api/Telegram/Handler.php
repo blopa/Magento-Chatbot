@@ -62,11 +62,19 @@
 
 		public function telegramHandler($apiKey)
 		{
-			if (empty($apiKey)) // if no apiKey available, break proccess
+			if (empty($apiKey)) // if no apiKey available, break process
 				return "";
 
 			// Instances the Telegram class
 			$telegram = new Telegram($apiKey);
+
+			// Instances the witAI class
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ($enableWitai == "1")
+			{
+				$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+				$witAi = new witAI($witApi);
+			}
 
 			// Take text and chat_id from the message
 			$text = $telegram->Text();
@@ -159,7 +167,6 @@
 			}
 
 			// configs
-			//$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			$enabledBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
 			$enableReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_default_replies');
 			$enableEmptyCategoriesListing = Mage::getStoreConfig('chatbot_enable/general_config/list_empty_categories');
@@ -176,7 +183,7 @@
 
 			if (!is_null($text) && !is_null($chatId))
 			{
-				// Instances facebook user details
+				// Instances Telegram user details
 				$username = $telegram->Username();
 
 				// Instances the model class
@@ -1311,8 +1318,11 @@
 					}
 					else // process cases where the customer message wasn't understandable
 					{
-						//if ($enableWitai == "1"){}
-						//else
+						if (isset($witAi))
+						{
+							$witResponse = $witAi->getWitAIResponse($message);
+						}
+						else
 						{
 							$message = $mageHelper->__("Sorry, I didn't understand that.");
 
