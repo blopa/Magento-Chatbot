@@ -5,6 +5,10 @@
 
 	class TelegramBot extends Telegram
 	{
+		public $_text;
+		public $_chatId;
+		public $_messageId;
+
 		public function processText()
 		{
 
@@ -74,7 +78,7 @@
 				return "";
 
 			// Instances the Telegram class
-			$telegram = new Telegram($apiKey);
+			$telegram = new TelegramBot($apiKey);
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
