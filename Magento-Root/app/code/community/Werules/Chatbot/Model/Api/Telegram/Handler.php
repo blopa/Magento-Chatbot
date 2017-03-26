@@ -1320,7 +1320,8 @@
 					{
 						if (isset($witAi))
 						{
-							$witResponse = $witAi->getWitAIResponse($message);
+							$witResponse = $witAi->getWitAIResponse($text);
+							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => var_export($witResponse, true))); // TODO
 						}
 						else
 						{
