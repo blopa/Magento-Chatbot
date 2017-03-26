@@ -3,6 +3,14 @@
 	//$api_path = Mage::getModuleDir('', 'Werules_Chatbot') . DS . "Model" . DS . "Api" . DS . "witAI" . DS;
 	//include($api_path . "witAI.php");
 
+	class TelegramBot extends Telegram
+	{
+		public function processText()
+		{
+
+		}
+	}
+
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
 	{
 		public function _construct()
@@ -27,7 +35,7 @@
 			$apiKey = $chatdata->getApikey($chatdata->_apiType); // get telegram bot api
 			if ($apiKey)
 			{
-				$telegram = new Telegram($apiKey);
+				$telegram = new TelegramBot($apiKey);
 
 				$mageHelper = Mage::helper('core');
 				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
