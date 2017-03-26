@@ -1394,6 +1394,8 @@
 											{
 												foreach ($witResponse->entities->keyword as $keyword)
 												{
+													if (((float)$keyword->confidence * 100) < (float)$witAiConfidence)
+														continue;
 													if ("/" . $intent->value == $chatdata->_searchCmd['command'])
 													{
 														$chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState);
