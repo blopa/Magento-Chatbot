@@ -7,8 +7,12 @@
 
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
+		// WITAI
+		protected $_isWitAi = false;
+
 		// APIs
 		protected $_apiType = "";
+		protected $_apiKey = "";
 		protected $_tgBot = "telegram";
 		protected $_fbBot = "facebook";
 		protected $_wappBot = "whatsapp";
@@ -108,11 +112,11 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		// GENERAL FUNCTIONS
 		public function requestHandler($action, $webhook) // handle request
 		{
-			$apiKey = $this->getApikey($action);
 			// handle webhook configuration
-			if ($webhook && $apiKey && $action == $this->_tgBot) // set telegram webhook
+			if ($webhook && $action == $this->_tgBot) // set telegram webhook
 			{
 				$mageHelper = Mage::helper('core');
+				$apiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 				$telegram = new Telegram($apiKey);
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
@@ -135,7 +139,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				;
 				return $message;
 			}
-			else if ($webhook && $apiKey && $action == $this->_fbBot) // set facebook webhook
+			else if ($webhook && $action == $this->_fbBot) // set facebook webhook
 			{
 				$mageHelper = Mage::helper('core');
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
@@ -148,39 +152,20 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				;
 				return $message;
 			} // start to handle conversation
-			else if ($action == $this->_tgBot && $apiKey) // telegram api
+			else if ($action == $this->_tgBot) // telegram api
 			{
 				// all logic goes here
-				return Mage::getModel('chatbot/api_telegram_handler')->telegramHandler($apiKey);
+				$handler = Mage::getModel('chatbot/api_telegram_handler');
+				return $handler->telegramHandler();
 			}
-			else if ($action == $this->_fbBot && $apiKey) // facebook api
+			else if ($action == $this->_fbBot) // facebook api
 			{
 				// all logic goes here
-				return Mage::getModel('chatbot/api_facebook_handler')->facebookHandler($apiKey);
+				$handler = Mage::getModel('chatbot/api_facebook_handler');
+				return $handler->facebookHandler();
 			}
 			else
 				return "Nothing to see here"; // TODO
-		}
-
-		protected function getApikey($apiType) // check if bot integration is enabled
-		{
-			if ($apiType == $this->_tgBot) // telegram api
-			{
-				//$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
-				$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-				//if ($enabled == 1 && $apikey) // is enabled and has API
-				if ($apikey) // has API
-					return $apikey;
-			}
-			else if ($apiType == $this->_fbBot)
-			{
-				//$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
-				$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-				//if ($enabled == 1 && $apikey) // is enabled and has API
-				if ($apikey) // has API
-					return $apikey;
-			}
-			return null;
 		}
 
 		protected function sendEmail($text, $username)

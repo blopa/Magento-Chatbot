@@ -1,4 +1,4 @@
-# Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
+# Magento Chatbot Module (Telegram, Messenger, Whatsapp, WeChat and Skype)
 
 **Chatbots!** They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
@@ -20,12 +20,14 @@ To use this module you'll need to have SSL enabled in your store, this is a requ
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
 ## APIs
+- [wit.ai](https://github.com/DrMikeyS/FacebookBotPHP/blob/master/FacebookBotPHP.php)
 - [Telegram API Wrapper](https://github.com/Eleirbag89/TelegramBotPHP)
 - [Facebook API Wrapper](https://github.com/blopa/MessengerBotPHP)
 - *Whatsapp API Wrapper* (soon)
 - *WeChat API Wrapper* (soon)
 
 ## Features
+- wit.ai integration for NLP
 - List store categories
 - List products from category
 - Search for products
@@ -74,6 +76,12 @@ Go to **System > General Settings  > Chatbot Settings**
 - Forward Unknown Messages to Support: Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand
 - List Empty Categoies: Enable Listing of Categories With No Products or Unallowed Products
 - Enable Log: Enable Log. Log will be at root/var/log/.
+
+**wit.ai Configuration**
+
+- Enable witAI Integration: Enable witAI Integration
+- witAI API Key: witAI API Key
+- witAI Confidence Percentage: witAI Confidence Percentage
 
 **Telegram Configuration**
 
@@ -124,6 +132,9 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
 
 ## Release Notes
+- **v0.0.11:**
+	- Code improvements
+	- [Backend] Integration with wit.ai
 - **v0.0.10:**
 	- [Backend] Add option to match a 'default reply' as a command
 	- [Backend] Add default fallback message
@@ -189,7 +200,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 - **Integrations:**
 	- Whatsapp
 	- WeChat
-	- wit.ai
 	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**

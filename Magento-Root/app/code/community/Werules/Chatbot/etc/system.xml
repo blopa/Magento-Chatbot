@@ -84,17 +84,17 @@
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
-					<comment>Still in Development</comment>
+					<comment>***Still in Development***</comment>
 					<fields>
 						<enable_witai>
-							<label>Enable WitAI Integration</label>
+							<label>Enable witAI Integration</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
 							<sort_order>0</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Soon</comment>
+							<comment>Enable witAI Integration</comment>
 						</enable_witai>
 						<witai_api_key>
 							<label>witAI API Key</label>
@@ -103,8 +103,17 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Soon</comment>
+							<comment>witAI API Key</comment>
 						</witai_api_key>
+						<witai_confidence>
+							<label>Acceptable witAI Confidence Percentage</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Acceptable witAI Confidence Percentage</comment>
+						</witai_confidence>
 					</fields>
 				</witai_config>
 				<telegram_config translate="label">
