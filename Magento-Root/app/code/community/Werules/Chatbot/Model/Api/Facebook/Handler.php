@@ -1374,7 +1374,16 @@
 							$witAiConfidence = 85; // default acceptable confidence percentage
 
 						$witResponse = $this->_witAi->getWitAIResponse($text);
-						if (isset($witResponse->entities->intent))
+
+						$hasIntent = true;
+						if (property_exists($witResponse->entities, "facebook_intent"))
+							$intents = $witResponse->entities->telegram_intent;
+						else if (property_exists($witResponse->entities, "intent"))
+							$intents = $witResponse->entities->intent;
+						else
+							$hasIntent = false;
+
+						if ($hasIntent)
 						{
 							$messages = array(
 								"Okay, so you want me to list the categories for you.",			//_listCategoriesCmd
@@ -1401,7 +1410,7 @@
 							foreach ($messages as $message)
 							{
 								$key = $chatdata->getCommandString($i)['command'];
-								foreach ($witResponse->entities->intent as $intent)
+								foreach ($intents as $intent)
 								{
 									if ($intent->value == $key && (((float)$intent->confidence * 100) >= (float)$witAiConfidence))
 									{
