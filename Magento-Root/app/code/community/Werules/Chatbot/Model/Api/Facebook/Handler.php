@@ -140,7 +140,7 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatdata->_fbBot;
 
-			if ($messageId == $chatdata->getFacebookMessageId()) // prevents to reply the same request twice
+			if ($messageId == $chatdata->getFacebookMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
 				return $facebook->respondSuccess();
 			else if ($chatdata->getFacebookChatId())
 				$chatdata->updateChatdata('facebook_message_id', $messageId); // if this fails, it may send the same message twice
@@ -1370,7 +1370,48 @@
 					if (isset($this->_witAi))
 					{
 						$witResponse = $this->_witAi->getWitAIResponse($text);
+						if (isset($witResponse->entities->intent))
+						{
+							$messages = array(
+								"Okay, so you want me to list the categories for you.",			//_listCategoriesCmd
+								"Okay, so you want to search for a product.",					//_searchCmd
+								"Okay, so you want to login.",									//_loginCmd
+								"Okay, so you want to list orders.",							//_listOrdersCmd
+								"Okay, so you want to reorder.",								//_reorderCmd
+								"Okay, so you want to add a product to the cart.",				//_add2CartCmd
+								"Okay, so you want to checkout.",								//_checkoutCmd
+								"Okay, so you want to clear your cart.",						//_clearCartCmd
+								"Okay, so you want to track your order.",						//_trackOrderCmd
+								"Okay, so you want support.",									//_supportCmd
+								"Okay, so you want to send us an email.",						//_sendEmailCmd
+								"Okay, so you want to cancel.",									//_cancelCmd
+								"Okay, so you want to help.",									//_helpCmd
+								"Okay, so you want to know more about us.",						//_aboutCmd
+								"Okay, so you want to logout.",									//_logoutCmd
+								"Okay, so you want to register to our store."					//registerCmd
+							);
+
+							$i = 1;
+							foreach ($messages as $message)
+							{
+								$key = $chatdata->getCommandString($i)['command'];
+								foreach ($witResponse->entities->intent as $intent)
+								{
+									if ($intent->value == $key)
+									{
+										if (property_exists($witResponse->entities, "keyword")){}
+										$this->_isWitAi = true;
+										$facebook->_originalText = "/" . $key; // replace text with command
+										$facebook->sendMessage($chatId, $mageHelper->__($message));
+										return $this->processText();
+										break;
+									}
+								}
+								$i++;
+							}
+						}
 					}
+					else
 					{
 						$message = $mageHelper->__("Sorry, I didn't understand that.");
 
