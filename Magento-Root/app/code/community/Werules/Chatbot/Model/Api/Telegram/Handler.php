@@ -13,6 +13,7 @@
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
 	{
 		protected $_telegram;
+		protected $_witAi;
 
 		public function _construct()
 		{
@@ -210,8 +211,11 @@
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			if ($enableWitai == "1")
 			{
-				$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
-				$witAi = new witAI($witApi);
+				if (!isset($this->_witAi))
+				{
+					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+					$this->_witAi = new witAI($witApi);
+				}
 			}
 
 			if ($messageId == $chatdata->getTelegramMessageId()) // prevents to reply the same request twice
@@ -1345,10 +1349,46 @@
 				}
 				else // process cases where the customer message wasn't understandable
 				{
-					if (isset($witAi))
+					if (isset($this->_witAi))
 					{
-						$witResponse = $witAi->getWitAIResponse($text);
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => var_export($witResponse, true))); // TODO
+						$witResponse = $this->_witAi->getWitAIResponse($text);
+						if (isset($witResponse->entities))
+						{
+							//if (isset($witResponse->entities[$chatdata->getCommandString(1)['command']])){}
+							$messages = array(
+								"_listCategoriesCmd",
+								"_searchCmd",
+								"_loginCmd",
+								"_listOrdersCmd",
+								"_reorderCmd",
+								"_add2CartCmd",
+								"_checkoutCmd",
+								"_clearCartCmd",
+								"_trackOrderCmd",
+								"_supportCmd",
+								"_sendEmailCmd",
+								"_cancelCmd",
+								"_helpCmd",
+								"_aboutCmd",
+								"_logoutCmd",
+								"_registerCmd"
+							);
+
+							$i = 1;
+							foreach ($messages as $message)
+							{
+								$key = $chatdata->getCommandString($i)['command'];
+								if (property_exists($witResponse->entities, $key))
+								{
+									$chatdata->_isWitAi = true;
+									$telegram->_text = "/" . $key; // replace text with command
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
+									$this->processText();
+									break;
+								}
+								$i++;
+							}
+						}
 					}
 					else
 					{

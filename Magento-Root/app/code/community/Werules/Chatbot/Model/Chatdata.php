@@ -7,6 +7,9 @@
 
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
+		// WITAI
+		protected $_isWitAi = false;
+
 		// APIs
 		protected $_apiType = "";
 		protected $_apiKey = "";

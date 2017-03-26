@@ -14,6 +14,7 @@
 	class Werules_Chatbot_Model_Api_Facebook_Handler extends Werules_Chatbot_Model_Chatdata
 	{
 		protected $_facebook;
+		protected $_witAi;
 
 		public function _construct()
 		{
@@ -126,8 +127,11 @@
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
 			if ($enableWitai == "1")
 			{
-				$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
-				$witAi = new witAI($witApi);
+				if (!isset($this->_witAi))
+				{
+					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+					$this->_witAi = new witAI($witApi);
+				}
 			}
 
 			$text = strtolower($originalText);
@@ -1363,9 +1367,9 @@
 				}
 				else // process cases where the customer message wasn't understandable
 				{
-					if (isset($witAi))
+					if (isset($this->_witAi))
 					{
-						$witResponse = $witAi->getWitAIResponse($text);
+						$witResponse = $this->_witAi->getWitAIResponse($text);
 					}
 					{
 						$message = $mageHelper->__("Sorry, I didn't understand that.");
