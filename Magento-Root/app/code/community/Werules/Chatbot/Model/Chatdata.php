@@ -113,7 +113,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		public function requestHandler($action, $webhook) // handle request
 		{
 			// handle webhook configuration
-			if ($webhook && $action == $this->_tgBot) // set telegram webhook
+			if (!empty($webhook) && $action == $this->_tgBot) // set telegram webhook
 			{
 				$mageHelper = Mage::helper('core');
 				$apiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
@@ -139,7 +139,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				;
 				return $message;
 			}
-			else if ($webhook && $action == $this->_fbBot) // set facebook webhook
+			else if (!empty($webhook) && $action == $this->_fbBot) // set facebook webhook
 			{
 				$mageHelper = Mage::helper('core');
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
@@ -148,6 +148,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 				$message = $mageHelper->__("To configure Facebook webhook access") .
 					" https://developers.facebook.com/apps/(FACEBOOK_APP_ID)/webhooks/ " .
+					$mageHelper->__("use your Custom Key (%s) as your Verify Token", $webhook) . " " .
 					$mageHelper->__("and set the webhook URL as") . " " . $webhookUrl
 				;
 				return $message;
@@ -165,7 +166,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				return $handler->facebookHandler();
 			}
 			else
-				return "Nothing to see here"; // TODO
+				return json_encode(array("status" => "error")); // TODO
 		}
 
 		protected function sendEmail($text, $username)

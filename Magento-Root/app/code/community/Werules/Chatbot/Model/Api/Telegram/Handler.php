@@ -77,7 +77,7 @@
 			//$telegram = new TelegramBot("");
 
 			if (!isset($telegram)) // if no apiKey available, break process
-				return "";
+				return json_encode(array("status" => "error"));
 
 			// Take text and chat_id from the message
 			$telegram->_text = $telegram->Text();

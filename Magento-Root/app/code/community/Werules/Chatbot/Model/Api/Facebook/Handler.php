@@ -57,7 +57,7 @@
 			$facebook = $this->_facebook;
 
 			if (!isset($facebook)) // if no apiKey available, break process
-				return "";
+				return json_encode(array("status" => "error"));
 
 			// hub challenge
 			$hubToken = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
@@ -86,7 +86,7 @@
 
 			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && $isEcho != "true")
 			{
-				$this->processText();
+				return $this->processText();
 			}
 
 			return $facebook->respondSuccess();
