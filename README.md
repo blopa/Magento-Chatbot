@@ -216,8 +216,9 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos
-	- Store messages on database before sending to make sure it will be sent eventually
+	- Save messages on database before sending to make sure it will be sent eventually
 	- Save support history
+	- Support for audio commands
 	- Better uses for wit.ai
 	- Use wit.ai on Default Replies
 
