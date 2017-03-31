@@ -102,7 +102,7 @@ Go to **System > General Settings  > Chatbot Settings**
 
 - Enable Messenger Bot: Enable Messenger Bot
 - Unavailability Message: Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.
-- Messenger Bot API Key: Your Messenger Bot API Key.
+- Page Access Token: Your Page Access Token.
 - Messenger Support Chat ID: The Chat ID of The Support Admin. This Feature Isn't Very Useful Since You Can Simply Log Into Your Page And Directly Reply Your Customers From There. You Can Forward All Messages to Telegram, Just Write "telegram" in Here to Enable This Feature.
 - Messenger Welcome Message: First Message The Bot Will Send To Your Client.
 - Messenger Help Message: Message Will be Sent When Customer Asks For Help.

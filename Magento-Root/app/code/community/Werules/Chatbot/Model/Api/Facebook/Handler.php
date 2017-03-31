@@ -24,11 +24,11 @@
 			$this->_facebook = new MessengerBot($apikey);
 		}
 
-		public function foreignMessageFromSupport($chat_id, $text)
+		public function foreignMessageFromSupport($chatId, $text)
 		{
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata');
-			$chatdata->load($chat_id, 'facebook_chat_id');
+			$chatdata->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatdata->_fbBot;
 
 			if (is_null($chatdata->getFacebookChatId()))
@@ -44,7 +44,7 @@
 			if (isset($facebook))
 			{
 				$message = $mageHelper->__("Message from support") . ":\n" . $text;
-				$facebook->sendMessage($chat_id, $message);
+				$facebook->sendMessage($chatId, $message);
 				return true;
 			}
 
@@ -867,7 +867,7 @@
 				{
 					if ($supportGroupId == $chatdata->_tgBot)
 					{
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiKey, $username)) // send chat id, original text and "facebook"
+						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 							$errorFlag = false;
 					}
 					else // probably have the admin chat id set
@@ -1348,7 +1348,7 @@
 				{
 					$errorFlag = true;
 					if ($supportGroupId == $chatdata->_tgBot)
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiKey, $username)) // send chat id, original text and "facebook"
+						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 						{
 //								if ($chatdata->getTelegramConvState() != $chatdata->_supportState) // TODO
 //									$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState);

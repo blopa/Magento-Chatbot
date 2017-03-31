@@ -298,13 +298,13 @@
 							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
 						</disabled_message>
 						<facebook_api_key>
-							<label>Messenger Bot API Key</label>
+							<label>Page Access Token</label>
 							<frontend_type>text</frontend_type>
 							<sort_order>2</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Your Messenger Bot API Key.</comment>
+							<comment>Your Page Access Token.</comment>
 						</facebook_api_key>
 						<facebook_support_group>
 							<label>Messenger Support Chat ID</label>
