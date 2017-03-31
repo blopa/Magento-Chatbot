@@ -23,15 +23,15 @@
 			$this->_telegram = new TelegramBot($apikey);
 		}
 
-		public function foreignMessageToSupport($chat_id, $text, $api_name, $customerName)
+		public function foreignMessageToSupport($chatId, $text, $apiName, $customerName)
 		{
 			$chatdata = Mage::getModel('chatbot/chatdata');
-			if ($api_name == $chatdata->_fbBot && $chat_id)
+			if ($apiName == $chatdata->_fbBot && $chatId)
 			{
-				$chatdata->load($chat_id, 'facebook_chat_id');
+				$chatdata->load($chatId, 'facebook_chat_id');
 				if (is_null($chatdata->getFacebookChatId()))
 				{ // should't happen
-					$chatdata->updateChatdata("facebook_chat_id", $chat_id);
+					$chatdata->updateChatdata("facebook_chat_id", $chatId);
 				}
 			}
 
@@ -50,13 +50,13 @@
 						if (!$customerName)
 							$customerName = $mageHelper->__("Not informed");
 
-						$message = $mageHelper->__("Message via") . " " . $api_name . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
+						$message = $mageHelper->__("Message via") . " " . $apiName . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
 						$result = $telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))
 						{
 							$chatdata->updateChatdata("last_support_message_id", $mid);
-							$chatdata->updateChatdata("last_support_chat", $api_name);
+							$chatdata->updateChatdata("last_support_chat", $apiName);
 						}
 					}
 					catch (Exception $e){
@@ -294,11 +294,12 @@
 						$foreignchatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
 						if (!empty($foreignchatdata->getLastSupportMessageId())) // check if current reply message id is saved on databse
 						{
-							$api_name = $foreignchatdata->getLastSupportChat();
-							if ($api_name == $foreignchatdata->_fbBot)
+							$apiName = $foreignchatdata->getLastSupportChat();
+							if ($apiName == $foreignchatdata->_fbBot)
 							{
 								$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
-								$handler->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text); // send chat id and the original text
+								if ($handler->foreignMessageFromSupport($foreignchatdata->getFacebookChatId(), $text)) // send chat id and the original text
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent."))); // TODO
 							}
 						}
 						else
