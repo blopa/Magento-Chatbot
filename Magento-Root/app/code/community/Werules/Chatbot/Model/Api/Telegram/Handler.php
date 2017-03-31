@@ -291,80 +291,72 @@
 					$replyMessageId = $telegram->ReplyToMessageID();
 					if (!empty($replyMessageId)) // if the message is replying another message
 					{
-						if (true)
+						$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
+						$replyFromUserId = $telegram->ReplyToMessageFromUserID();
+						$isForeign = !empty($foreignChatdata->getLastSupportMessageId()); // check if current reply message id is saved on databse
+						$isLocal = !is_null($replyFromUserId);
+						if ($isLocal != $isForeign) // XOR
 						{
-							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
-							$replyFromUserId = $telegram->ReplyToMessageFromUserID();
-							$isForeign = !empty($foreignChatdata->getLastSupportMessageId()); // check if current reply message id is saved on databse
-							$isLocal = !is_null($replyFromUserId);
-							if ($isLocal || $isForeign)
-							{
-								$admEndSupport = "/" . $chatdata->_admEndSupportCmd;
-								$admBlockSupport = "/" . $chatdata->_admBlockSupportCmd;
-								$admEnableSupport = "/" . $chatdata->_admEnableSupportCmd;
+							$admEndSupport = "/" . $chatdata->_admEndSupportCmd;
+							$admBlockSupport = "/" . $chatdata->_admBlockSupportCmd;
+							$admEnableSupport = "/" . $chatdata->_admEnableSupportCmd;
 
+							if ($isLocal)
 								$customerChatdata = Mage::getModel('chatbot/chatdata')->load($replyFromUserId, 'telegram_chat_id');
-								$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
-								if ($text == $admEndSupport) // finish customer support
-								{
-									// TODO IMPORTANT remember to switch off all other supports
-									if ($isLocal)
-									{
-										$customerChatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
-										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("Support ended."))); // TODO
-									}
-									else if ($isForeign)
-									{
-										$foreignChatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
-										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
-									}
-									else
-									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Something went wrong, please try again.")));
-										return $telegram->respondSuccess();
-									}
+							else //if ($isForeign)
+								$customerChatdata = $foreignChatdata;
 
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is no longer on support.")));
-								}
-								else if ($text == $admBlockSupport) // block user from using support
+							$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
+							if ($text == $admEndSupport) // finish customer support
+							{
+								$error = true;
+								// TODO IMPORTANT remember to switch off all other supports
+								if ($isLocal)
 								{
-									if ($isLocal)
-										$customerChatdata->updateChatdata('enable_support', "0"); // disable support
-									else if ($isForeign)
-										$foreignChatdata->updateChatdata('enable_support', "0"); // disable support
-									else
-									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Something went wrong, please try again.")));
-										return $telegram->respondSuccess();
-									}
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is no longer able to enter support."))); // TODO
+									$error = false;
+									$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("Support ended."))); // TODO
 								}
-								else if ($text == $admEnableSupport) // unblock user from using support
+								else if ($isForeign)
 								{
-									if ($isLocal)
-										$customerChatdata->updateChatdata('enable_support', "1"); // enable support
-									else if ($isForeign)
-										$foreignChatdata->updateChatdata('enable_support', "1"); // enable support
-									else
-									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Something went wrong, please try again.")));
-										return $telegram->respondSuccess();
-									}
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is now able to enter support."))); // TODO
+									$error = false;
+									// TODO make this generic
+									$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
 								}
-								else // if no command, then it's replying the user
-								{
-									if ($handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $text)) // send chat id and the original text
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent."))); // TODO
 
-									if ($customerChatdata->getTelegramConvState() != $chatdata->_supportState) // if user isn't on support, switch to support
-									{
-										$customerChatdata->updateChatdata('telegram_conv_state', $chatdata->_supportState);
+								if ($error)
+								{
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Something went wrong, please try again.")));
+									return $telegram->respondSuccess();
+								}
+
+								$customerChatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
+								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is no longer on support.")));
+							}
+							else if ($text == $admBlockSupport) // block user from using support
+							{
+								$customerChatdata->updateChatdata('enable_support', "0"); // disable support
+								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is no longer able to enter support."))); // TODO
+							}
+							else if ($text == $admEnableSupport) // unblock user from using support
+							{
+								$customerChatdata->updateChatdata('enable_support', "1"); // enable support
+								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is now able to enter support."))); // TODO
+							}
+							else // if no command, then it's replying the user
+							{
+								if ($customerChatdata->getTelegramConvState() != $chatdata->_supportState) // if user isn't on support, switch to support
+								{
+									$customerChatdata->updateChatdata('telegram_conv_state', $chatdata->_supportState);
+									if ($isLocal)
 										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("You're now on support mode.")));
-									}
-									$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("Message from support") . ":\n" . $text)); // send message to customer TODO
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent."))); // send message to admin group TODO
+									else //if ($isForeign)
+										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("You're now on support mode."));
 								}
+								if ($isLocal)
+									$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("Message from support") . ":\n" . $text)); // send message to customer TODO
+								else //if ($isForeign)
+									$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Message from support") . ":\n" . $text);
+								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent."))); // send message to admin group TODO
 							}
 						}
 					}
