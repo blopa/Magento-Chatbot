@@ -138,6 +138,7 @@ Conversation
 ## Release Notes
 - **v0.0.11:**
 	- Code improvements
+	- Fix problem when replying a customer on support mode
 	- [Backend] Integration with wit.ai
 - **v0.0.10:**
 	- [Backend] Add option to match a 'default reply' as a command
