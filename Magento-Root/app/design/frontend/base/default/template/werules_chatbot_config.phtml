@@ -1,21 +1,27 @@
 <?php
-	$clientid = Mage::getSingleton('customer/session')->getCustomer()->getId(); // get customer id
-	$chatdata = Mage::getModel('chatbot/chatdata')->load($clientid, 'customer_id'); // load profile info from customer id
+	$clientId = Mage::getSingleton('customer/session')->getCustomer()->getId(); // get customer id
+	$chatdata = Mage::getModel('chatbot/chatdata')->load($clientId, 'customer_id'); // load profile info from customer id
 
 	// TODO please
-	$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-	$getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
-	$response = json_decode(file_get_contents($getMe), true);
 	$tgUsername = null;
-	if ($response["ok"])
-		$tgUsername = $response["result"]["username"];
+	$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+	if (!empty($tgApiKey))
+	{
+		$getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
+		$response = json_decode(file_get_contents($getMe), true);
+		if (isset($response["ok"]))
+			$tgUsername = $response["result"]["username"];
+	}
 
+	$fbUsername = null;
 	$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-	$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
-	$response = json_decode(file_get_contents($getMe), true);
-	$fb_username = null;
-	if (!empty($response))
-		$fb_username = $response["id"];
+	if (!empty($fbApiKey))
+	{
+		$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
+		$response = json_decode(file_get_contents($getMe), true);
+		if (!empty($response))
+			$fbUsername = $response["id"];
+	}
 ?>
 <div class="dashboard">
 	<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
@@ -48,11 +54,11 @@
 						<input <?php if ($chatdata->getEnableFacebook() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Facebook?') ?>" class="checkbox" name="enable_facebook" id="enable_facebook" />
 						<label for="enable_facebook" class="required"><em>*</em><?php echo $this->__('Enable Facebook?') ?></label>
 					</div>
-					<?php if ($fb_username): ?><!-- bot username -->
+					<?php if ($fbUsername): ?><!-- bot username -->
 					<p>
 						<?php
 							echo $this->__("Start a bot conversation on Facebook Messenger") . ": ";
-							$url = $chatdata->_fbUrl . $fb_username;
+							$url = $chatdata->_fbUrl . $fbUsername;
 						?>
 						<a href="<?php echo $url; ?>" target="_blank"><?php echo $this->__('Here') ?></a>
 					</p>
