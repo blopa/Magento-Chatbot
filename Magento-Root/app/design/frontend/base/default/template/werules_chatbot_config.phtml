@@ -3,16 +3,16 @@
 	$chatdata = Mage::getModel('chatbot/chatdata')->load($clientid, 'customer_id'); // load profile info from customer id
 
 	// TODO please
-	$tg_apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-	$getme = "https://api.telegram.org/bot" . $tg_apikey . "/getMe";
-	$response = json_decode(file_get_contents($getme), true);
-	$tg_username = null;
+	$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+	$getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
+	$response = json_decode(file_get_contents($getMe), true);
+	$tgUsername = null;
 	if ($response["ok"])
-		$tg_username = $response["result"]["username"];
+		$tgUsername = $response["result"]["username"];
 
-	$fb_apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-	$getme = "https://graph.facebook.com/v2.8/me?access_token=" . $fb_apikey;
-	$response = json_decode(file_get_contents($getme), true);
+	$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+	$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
+	$response = json_decode(file_get_contents($getMe), true);
 	$fb_username = null;
 	if (!empty($response))
 		$fb_username = $response["id"];
@@ -31,11 +31,11 @@
 						<input <?php if ($chatdata->getEnableTelegram() == "1") echo "checked"; ?> type="checkbox" title="<?php echo $this->__('Enable Telegram?') ?>" class="checkbox" name="enable_telegram" id="enable_telegram" />
 						<label for="enable_telegram" class="required"><em>*</em><?php echo $this->__('Enable Telegram?') ?></label>
 					</div>
-					<?php if ($tg_username): ?><!-- bot username -->
+					<?php if ($tgUsername): ?><!-- bot username -->
 						<p>
 							<?php
 								echo $this->__("Start a bot conversation on Telegram") . ": ";
-								$url = $chatdata->_tgUrl . $tg_username;
+								$url = $chatdata->_tgUrl . $tgUsername;
 								if (empty($chatdata->getTelegramChatId()))
 									$url .= "?start=" . $chatdata->getHashKey();
 							?>

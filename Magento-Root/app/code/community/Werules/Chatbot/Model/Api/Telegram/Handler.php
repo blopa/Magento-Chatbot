@@ -373,7 +373,7 @@
 								foreach($chatbotcollection as $chatbot)
 								{
 									$tgChatId = $chatbot->getTelegramChatId();
-									if ($tgChatId)
+									if (!empty($tgChatId) && ($chatbot->enablePromotionalMessages() == "1"))
 										$telegram->sendMessage(array('chat_id' => $tgChatId, 'text' => $message)); // $magehelper->__("Message from support") . ":\n" .
 								}
 								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent.")));
