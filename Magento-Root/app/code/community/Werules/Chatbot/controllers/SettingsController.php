@@ -32,10 +32,17 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			{
 				$data = array(
 					"enable_telegram" => ((isset($postData['enable_telegram'])) ? 1 : 0),
+					"enable_promotional_messages" => ((isset($postData['enable_promotional_messages'])) ? 1 : 0),
 					"enable_facebook" => ((isset($postData['enable_facebook'])) ? 1 : 0)
 					//"enable_whatsapp" => ((isset($postData['enable_whatsapp'])) ? 1 : 0),
 					//"enable_wechat" => ((isset($postData['enable_wechat'])) ? 1 : 0)
 				);
+				// setting data if is the first time
+				if (!isset($data["created_at"]))
+				{
+					$data["created_at"] = date('Y-m-d H:i:s');
+				}
+
 				if (!$chatdata->getCustomerId()) // attach class to customer id
 				{
 					$data["hash_key"] = substr(md5(uniqid(str_shuffle($rand), true)), 0, 150); // TODO
@@ -108,6 +115,9 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 						}
 						if (!isset($data["created_at"]))
 							$data["created_at"] = $chatdata->getCreatedAt();
+						if (!isset($data["enable_promotional_messages"]))
+							$data["enable_promotional_messages"] = $chatdata->getEnablePromotionalMessages();
+
 						$chatdata->delete();
 						$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id'); // reload
 					}

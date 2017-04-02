@@ -137,9 +137,11 @@ Conversation
 
 ## Release Notes
 - **v0.0.11:**
+	- Fix some small glitches
 	- Code improvements
 	- Fix problem when replying a customer on support mode
 	- [Backend] Integration with wit.ai
+	- [Customer] Add option do enable/disable receiving promotional messages
 - **v0.0.10:**
 	- [Backend] Add option to match a 'default reply' as a command
 	- [Backend] Add default fallback message
