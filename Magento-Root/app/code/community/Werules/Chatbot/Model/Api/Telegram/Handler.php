@@ -370,13 +370,28 @@
 							if (!empty($message))
 							{
 								$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
+								$i = 0;
 								foreach($chatbotcollection as $chatbot)
 								{
 									$tgChatId = $chatbot->getTelegramChatId();
-									if (!empty($tgChatId) && ($chatbot->enablePromotionalMessages() == "1"))
+									$enabled = // if backend promotional messages are disabled or if the customer wants to receive promotional messages
+										(Mage::getStoreConfig('chatbot_enable/general_config/disable_promotional_messages') != "1") ||
+										($chatbot->getEnablePromotionalMessages() == "1");
+									if (!empty($tgChatId) && ($enabled))
+									{
+										$i++;
 										$telegram->sendMessage(array('chat_id' => $tgChatId, 'text' => $message)); // $magehelper->__("Message from support") . ":\n" .
+									}
 								}
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent.")));
+								if ($i > 0)
+								{
+									if ($i == 1)
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("One message sent.")));
+									else
+										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("%s messages sent.", $i)));
+								}
+								else
+									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("No customer available to receive this message.")));
 							}
 							else
 								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Please use") . ' "' . $admSend2All . " " . $mageHelper->__("your message here.") . '"'));
