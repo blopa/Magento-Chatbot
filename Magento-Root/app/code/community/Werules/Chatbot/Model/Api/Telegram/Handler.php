@@ -1155,7 +1155,7 @@
 							'chat_id' => $chatId, 'text' => $mageHelper->__("To login to your account, click this link") . ": " .
 								$hashUrl . " . " .
 								$mageHelper->__("If you want to logout from your account, just send") . " " .
-								$chatdata->_logoutCmd
+								$chatdata->_logoutCmd['command']
 						));
 					}
 				}

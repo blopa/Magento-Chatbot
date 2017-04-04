@@ -1119,7 +1119,7 @@
 					{
 						$facebook->sendButtonTemplate(
 							$chatId, $mageHelper->__("To login to your account, access the link below") . ". " .
-							$mageHelper->__("If you want to logout from your account, just send") . " " . $chatdata->_logoutCmd, $buttons
+							$mageHelper->__("If you want to logout from your account, just send") . ' "' . $chatdata->_logoutCmd['command'] . '"', $buttons
 						);
 					}
 				}
