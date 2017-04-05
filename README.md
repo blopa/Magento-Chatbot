@@ -137,7 +137,8 @@ Conversation
 
 ## Release Notes
 - **v0.0.11:**
-	- Fix some small glitches
+	- Fix logout command glitch
+	- Fix some other small glitches
 	- Code improvements
 	- Fix problem when replying a customer on support mode
 	- [Backend] Integration with wit.ai
