@@ -14,7 +14,8 @@ class Werules_Chatbot_Model_MatchMode
 			array('value'=>2, 'label'=>'Ends With'),
 			array('value'=>3, 'label'=>'Contains'),
 			array('value'=>4, 'label'=>'Match Regular Expression'),
-			array('value'=>5, 'label'=>'Equals to')
+			array('value'=>5, 'label'=>'Equals to'),
+			array('value'=>6, 'label'=>'wit.ai')
 		);
 	}
 }

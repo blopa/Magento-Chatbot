@@ -328,6 +328,7 @@
 //								3 =>'Contains'
 //								4 =>'Match Regular Expression'
 //								5 =>'Equals to'
+//								6 =>'wit.ai'
 
 							$matched = false;
 							$match = $reply["match_sintax"];
@@ -384,6 +385,11 @@
 							{
 								if ($textToMatch == $match)
 									$matched = true;
+							}
+							else if (($matchMode == "6") && ($this->_isWitAi)) // wit.ai
+							{
+								$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
+
 							}
 
 							if ($matched)
