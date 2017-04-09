@@ -517,6 +517,7 @@
 											continue;
 
 										$matched = true;
+										break;
 									}
 								}
 							}

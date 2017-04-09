@@ -402,6 +402,7 @@
 											continue;
 
 										$matched = true;
+										break;
 									}
 								}
 							}
