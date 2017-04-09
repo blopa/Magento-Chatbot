@@ -444,6 +444,7 @@
 //								3 =>'Contains'
 //								4 =>'Match Regular Expression'
 //								5 =>'Equals to'
+//								6 =>'wit.ai'
 
 							$matched = false;
 							$match = $reply["match_sintax"];
