@@ -104,6 +104,7 @@
 			$supportGroupId = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_support_group');
 			$showMore = 0;
 			$moreOrders = false;
+			$defaultConfidence = 75;
 			$listingLimit = 5;
 			$listMoreCategories = "show_more_list_cat_";
 			$listMoreSearch = "show_more_search_prod_";
@@ -386,10 +387,23 @@
 								if ($textToMatch == $match)
 									$matched = true;
 							}
-							else if (($matchMode == "6") && ($this->_isWitAi)) // wit.ai
+							else if (($matchMode == "6") && (isset($this->_witAi))) // wit.ai and witAi is set
 							{
 								$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
+								if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
+									$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
+								$witResponse = $this->_witAi->getWitAIResponse($text);
+								if (property_exists($witResponse->entities, $match))
+								{
+									foreach ($witResponse->entities->{$match} as $m)
+									{
+										if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+											continue;
+
+										$matched = true;
+									}
+								}
 							}
 
 							if ($matched)
@@ -1377,7 +1391,7 @@
 					{
 						$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
 						if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
-							$witAiConfidence = 85; // default acceptable confidence percentage
+							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
 						$witResponse = $this->_witAi->getWitAIResponse($text);
 
