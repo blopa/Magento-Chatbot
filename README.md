@@ -142,6 +142,7 @@ Conversation
 	- Code improvements
 	- Fix problem when replying a customer on support mode
 	- [Backend] Integration with wit.ai
+	- [Backend] Use wit.ai as match for a default reply
 	- [Customer] Add option do enable/disable receiving promotional messages
 - **v0.0.10:**
 	- [Backend] Add option to match a 'default reply' as a command
@@ -224,7 +225,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Save support history
 	- Support for audio commands
 	- Better uses for wit.ai
-	- Use wit.ai on Default Replies
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D

@@ -188,6 +188,7 @@
 			$showMore = 0;
 			$cat_id = null;
 			$moreOrders = false;
+			$defaultConfidence = 75;
 			$listingLimit = 5;
 			$categoryLimit = 18;
 			$listMoreCategories = "/lmc_";
@@ -443,6 +444,7 @@
 //								3 =>'Contains'
 //								4 =>'Match Regular Expression'
 //								5 =>'Equals to'
+//								6 =>'wit.ai'
 
 							$matched = false;
 							$match = $reply["match_sintax"];
@@ -499,6 +501,25 @@
 							{
 								if ($textToMatch == $match)
 									$matched = true;
+							}
+							else if (($matchMode == "6") && (isset($this->_witAi))) // wit.ai and witAi is set
+							{
+								$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
+								if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
+									$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
+
+								$witResponse = $this->_witAi->getWitAIResponse($text);
+								if (property_exists($witResponse->entities, $match))
+								{
+									foreach ($witResponse->entities->{$match} as $m)
+									{
+										if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+											continue;
+
+										$matched = true;
+										break;
+									}
+								}
 							}
 
 							if ($matched)
@@ -1388,7 +1409,7 @@
 					{
 						$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
 						if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
-							$witAiConfidence = 85; // default acceptable confidence percentage
+							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
 						$witResponse = $this->_witAi->getWitAIResponse($text);
 
