@@ -1406,6 +1406,7 @@
 
 						if ($hasIntent)
 						{
+							$enableConfirmMessage = Mage::getStoreConfig('chatbot_enable/witai_config/confirmation_message');
 							$messages = array(
 								"Okay, so you want me to list the categories for you.",			//_listCategoriesCmd
 								"Okay, so you want to search for a product.",					//_searchCmd
@@ -1504,10 +1505,11 @@
 												}
 											}
 										}
-										if(!$hasKeyword)
+										if (!$hasKeyword)
 										{
 											$facebook->_originalText = $key; // replace text with command
-											$facebook->sendMessage($chatId, $mageHelper->__($message));
+											if ($enableConfirmMessage == "1")
+												$facebook->sendMessage($chatId, $mageHelper->__($message));
 										}
 
 										$this->_isWitAi = true;
