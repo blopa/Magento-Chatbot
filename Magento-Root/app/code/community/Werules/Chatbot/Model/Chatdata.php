@@ -1,6 +1,6 @@
 <?php
-	include("Api/Telegram/Handler.php");
-	include("Api/Facebook/Handler.php");
+	//include("Api/Telegram/Handler.php");
+	//include("Api/Facebook/Handler.php");
 	//include("Api/Whatsapp/Handler.php");
 	//include("Api/WeChat/Handler.php");
 	include("Api/witAI/witAI.php");
