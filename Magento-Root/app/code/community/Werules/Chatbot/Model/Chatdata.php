@@ -1,14 +1,18 @@
 <?php
-	include("Api/Telegram/Handler.php");
-	include("Api/Facebook/Handler.php");
+	//include("Api/Telegram/Handler.php");
+	//include("Api/Facebook/Handler.php");
 	//include("Api/Whatsapp/Handler.php");
 	//include("Api/WeChat/Handler.php");
 	include("Api/witAI/witAI.php");
 
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
+		// WITAI
+		protected $_isWitAi = false;
+
 		// APIs
 		protected $_apiType = "";
+		protected $_apiKey = "";
 		protected $_tgBot = "telegram";
 		protected $_fbBot = "facebook";
 		protected $_wappBot = "whatsapp";
@@ -108,11 +112,11 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		// GENERAL FUNCTIONS
 		public function requestHandler($action, $webhook) // handle request
 		{
-			$apiKey = $this->getApikey($action);
 			// handle webhook configuration
-			if ($webhook && $apiKey && $action == $this->_tgBot) // set telegram webhook
+			if (!empty($webhook) && $action == $this->_tgBot) // set telegram webhook
 			{
 				$mageHelper = Mage::helper('core');
+				$apiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 				$telegram = new Telegram($apiKey);
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
@@ -135,7 +139,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				;
 				return $message;
 			}
-			else if ($webhook && $apiKey && $action == $this->_fbBot) // set facebook webhook
+			else if (!empty($webhook) && $action == $this->_fbBot) // set facebook webhook
 			{
 				$mageHelper = Mage::helper('core');
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
@@ -144,43 +148,25 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 				$message = $mageHelper->__("To configure Facebook webhook access") .
 					" https://developers.facebook.com/apps/(FACEBOOK_APP_ID)/webhooks/ " .
+					$mageHelper->__("use your Custom Key (%s) as your Verify Token", $webhook) . " " .
 					$mageHelper->__("and set the webhook URL as") . " " . $webhookUrl
 				;
 				return $message;
 			} // start to handle conversation
-			else if ($action == $this->_tgBot && $apiKey) // telegram api
+			else if ($action == $this->_tgBot) // telegram api
 			{
 				// all logic goes here
-				return Mage::getModel('chatbot/api_telegram_handler')->telegramHandler($apiKey);
+				$handler = Mage::getModel('chatbot/api_telegram_handler');
+				return $handler->telegramHandler();
 			}
-			else if ($action == $this->_fbBot && $apiKey) // facebook api
+			else if ($action == $this->_fbBot) // facebook api
 			{
 				// all logic goes here
-				return Mage::getModel('chatbot/api_facebook_handler')->facebookHandler($apiKey);
+				$handler = Mage::getModel('chatbot/api_facebook_handler');
+				return $handler->facebookHandler();
 			}
 			else
-				return "Nothing to see here"; // TODO
-		}
-
-		protected function getApikey($apiType) // check if bot integration is enabled
-		{
-			if ($apiType == $this->_tgBot) // telegram api
-			{
-				//$enabled = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_bot');
-				$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-				//if ($enabled == 1 && $apikey) // is enabled and has API
-				if ($apikey) // has API
-					return $apikey;
-			}
-			else if ($apiType == $this->_fbBot)
-			{
-				//$enabled = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_bot');
-				$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-				//if ($enabled == 1 && $apikey) // is enabled and has API
-				if ($apikey) // has API
-					return $apikey;
-			}
-			return null;
+				return json_encode(array("status" => "error")); // TODO
 		}
 
 		protected function sendEmail($text, $username)
@@ -523,6 +509,39 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 			return false;
 		}
+
+//		protected function transcribeAudio()
+//		{
+//			$googleSpeechURL = "https://speech.googleapis.com/v1beta1/speech:syncrecognize?key=xxxxxxxxxxxx";
+//			$upload = file_get_contents("1.wav");
+//			$fileData = base64_encode($upload);
+//
+//			$data = array(
+//				"config" => array(
+//					"encoding" => "LINEAR16",
+//					"sample_rate" => 16000,
+//					"language_code" => "pt-BR"
+//				),
+//				"audio" => array(
+//					"content" => base64_encode($fileData)
+//				)
+//			);
+//
+//			$dataString = json_encode($data);
+//
+//			$ch = curl_init($googleSpeechURL);
+//			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+//			curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+//			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+//					'Content-Type: application/json',
+//					'Content-Length: ' . strlen($dataString))
+//			);
+//
+//			$result = curl_exec($ch);
+//
+//			return json_decode($result, true);
+//		}
 
 		protected function loadImageContent($productID)
 		{

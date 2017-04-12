@@ -10,7 +10,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 	public function _prepareToRender()
 	{
 		$this->addColumn('match_sintax', array(
-			'label' => Mage::helper('core')->__('Match Text or Regular Expression'),
+			'label' => Mage::helper('core')->__('Match Text, Regex or wit.ai entity'),
 			'style' => 'width: 250px'
 		));
 		$this->addColumn('match_case', array(

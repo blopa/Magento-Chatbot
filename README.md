@@ -1,4 +1,4 @@
-# Magento Chatbot Module (Telegram, Messenger, Whatsapp and WeChat)
+# Magento Chatbot Module (Telegram, Messenger, Whatsapp, WeChat and Skype)
 
 **Chatbots!** They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
@@ -20,12 +20,14 @@ To use this module you'll need to have SSL enabled in your store, this is a requ
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
 ## APIs
+- [wit.ai](https://github.com/DrMikeyS/FacebookBotPHP/blob/master/FacebookBotPHP.php)
 - [Telegram API Wrapper](https://github.com/Eleirbag89/TelegramBotPHP)
 - [Facebook API Wrapper](https://github.com/blopa/MessengerBotPHP)
 - *Whatsapp API Wrapper* (soon)
 - *WeChat API Wrapper* (soon)
 
 ## Features
+- wit.ai integration for NLP
 - List store categories
 - List products from category
 - Search for products
@@ -75,6 +77,12 @@ Go to **System > General Settings  > Chatbot Settings**
 - List Empty Categoies: Enable Listing of Categories With No Products or Unallowed Products
 - Enable Log: Enable Log. Log will be at root/var/log/.
 
+**wit.ai Configuration**
+
+- Enable witAI Integration: Enable witAI Integration
+- witAI API Key: witAI API Key
+- witAI Confidence Percentage: witAI Confidence Percentage
+
 **Telegram Configuration**
 
 - Enable Telegram Bot: Enable Telegram Bot
@@ -94,7 +102,7 @@ Go to **System > General Settings  > Chatbot Settings**
 
 - Enable Messenger Bot: Enable Messenger Bot
 - Unavailability Message: Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Telegram API, Otherwise Your Message Might Not Be Sent.
-- Messenger Bot API Key: Your Messenger Bot API Key.
+- Page Access Token: Your Page Access Token.
 - Messenger Support Chat ID: The Chat ID of The Support Admin. This Feature Isn't Very Useful Since You Can Simply Log Into Your Page And Directly Reply Your Customers From There. You Can Forward All Messages to Telegram, Just Write "telegram" in Here to Enable This Feature.
 - Messenger Welcome Message: First Message The Bot Will Send To Your Client.
 - Messenger Help Message: Message Will be Sent When Customer Asks For Help.
@@ -109,21 +117,33 @@ Go to **System > General Settings  > Chatbot Settings**
 ## Screenshot
 General Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_1.png)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/general_configuration.jpg)
+
+wit.ai Configuration
+
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/witai_configuration.jpg)
 
 Telegram Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_2.png)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/telegram_configuration.jpg)
 
 Facebook Messenger Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_3.png)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/facebook_configuration.jpg)
 
 Conversation
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/image_4.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.11:**
+	- Fix logout command glitch
+	- Fix some other small glitches
+	- Code improvements
+	- Fix problem when replying a customer on support mode
+	- [Backend] Integration with wit.ai
+	- [Backend] Use wit.ai as match for a default reply
+	- [Customer] Add option do enable/disable receiving promotional messages
 - **v0.0.10:**
 	- [Backend] Add option to match a 'default reply' as a command
 	- [Backend] Add default fallback message
@@ -189,7 +209,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 - **Integrations:**
 	- Whatsapp
 	- WeChat
-	- wit.ai
 	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
@@ -202,8 +221,10 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos
-	- Store messages on database before sending to make sure it will be sent eventually
+	- Save messages on database before sending to make sure it will be sent eventually
 	- Save support history
+	- Support for audio commands
+	- Better uses for wit.ai
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D

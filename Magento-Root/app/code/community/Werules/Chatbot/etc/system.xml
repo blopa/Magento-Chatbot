@@ -46,14 +46,14 @@
 							<comment>Choose to receive all support messages in one single message app. In Development.</comment>
 						</master_support_group>
 						<enable_support_final_message>
-							<label>Forward Unknown Messages to Support</label>
+							<label>Forward Fallback Messages to Support</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
 							<sort_order>2</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand</comment>
+							<comment>Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand.</comment>
 						</enable_support_final_message>
 						<list_empty_categories>
 							<label>List Empty Categoies</label>
@@ -65,11 +65,21 @@
 							<show_in_store>1</show_in_store>
 							<comment>Enable Listing of Categories With No Products or Unallowed Products (This Module Supports Only Simple Products For Now).</comment>
 						</list_empty_categories>
+						<disable_promotional_messages>
+							<label>Disable Promotional Messages</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>4</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable The Option For The Customer To Choose To Receive Or Not Promotional Messages.</comment>
+						</disable_promotional_messages>
 						<enable_post_log>
 							<label>Enable Log</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>4</sort_order>
+							<sort_order>5</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -84,17 +94,17 @@
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
-					<comment>Still in Development</comment>
+					<comment>***Still in Development***</comment>
 					<fields>
 						<enable_witai>
-							<label>Enable WitAI Integration</label>
+							<label>Enable witAI Integration</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
 							<sort_order>0</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Soon</comment>
+							<comment>Enable witAI Integration</comment>
 						</enable_witai>
 						<witai_api_key>
 							<label>witAI API Key</label>
@@ -103,8 +113,27 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Soon</comment>
+							<comment>witAI API Key</comment>
 						</witai_api_key>
+						<witai_confidence>
+							<label>Acceptable witAI Confidence Percentage</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Acceptable witAI Confidence Percentage</comment>
+						</witai_confidence>
+						<confirmation_message>
+							<label>Enable Confirmation Message</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Confirmation Message When wit.ai Understands a Command, Like "So You Want To Clear Your Cart" For Clearing The Cart.</comment>
+						</confirmation_message>
 					</fields>
 				</witai_config>
 				<telegram_config translate="label">
@@ -289,13 +318,13 @@
 							<comment>Message To Send When Bot Is Disabled. Leave It Empty To Send No Message. Please Check The Maximum Size For Messages On Facebook API, Otherwise Your Message Might Not Be Sent.</comment>
 						</disabled_message>
 						<facebook_api_key>
-							<label>Messenger Bot API Key</label>
+							<label>Page Access Token</label>
 							<frontend_type>text</frontend_type>
 							<sort_order>2</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<comment>Your Messenger Bot API Key.</comment>
+							<comment>Your Page Access Token.</comment>
 						</facebook_api_key>
 						<facebook_support_group>
 							<label>Messenger Support Chat ID</label>
