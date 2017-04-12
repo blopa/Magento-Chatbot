@@ -225,6 +225,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Save support history
 	- Support for audio commands
 	- Better uses for wit.ai
+	- Better panel UI (like showing some inputs only when that config is selected)
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
