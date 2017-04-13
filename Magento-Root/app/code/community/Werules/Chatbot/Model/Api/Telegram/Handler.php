@@ -1423,6 +1423,7 @@
 
 						if ($hasIntent)
 						{
+							$enableConfirmMessage = Mage::getStoreConfig('chatbot_enable/witai_config/confirmation_message');
 							$messages = array(
 								"Okay, so you want me to list the categories for you.",			//_listCategoriesCmd
 								"Okay, so you want to search for a product.",					//_searchCmd
@@ -1519,10 +1520,11 @@
 													break;
 											}
 										}
-										if(!$hasKeyword)
+										if (!$hasKeyword)
 										{
 											$telegram->_text = "/" . $key; // replace text with command
-											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__($message))); // TODO
+											if ($enableConfirmMessage == "1")
+												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__($message))); // TODO
 										}
 
 										$this->_isWitAi = true;
