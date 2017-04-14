@@ -8,6 +8,11 @@
 		public $_text;
 		public $_chatId;
 		public $_messageId;
+
+        public function postMessage($chatId, $message)
+        {
+            return $this->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+        }
 	}
 
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
@@ -51,7 +56,7 @@
 							$customerName = $mageHelper->__("Not informed");
 
 						$message = $mageHelper->__("Message via") . " " . $apiName . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
-						$result = $telegram->sendMessage(array('chat_id' => $supportgroup, 'text' => $message));
+						$result = $telegram->postMessage($supportgroup, $message);
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))
 						{
@@ -229,7 +234,7 @@
 			{
 				$disabledMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/disabled_message');
 				if (!empty($disabledMessage))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $disabledMessage));
+					$telegram->postMessage($chatId, $disabledMessage);
 				return $telegram->respondSuccess();
 			}
 
@@ -313,22 +318,22 @@
 							{
 								// TODO IMPORTANT remember to switch off all other supports
 								if ($isLocal)
-									$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("Support ended."))); // TODO
+									$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
 								else// if ($isForeign) // TODO make this generic
 									$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
 
 								$customerChatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is no longer on support.")));
+								$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
 							}
 							else if ($text == $admBlockSupport) // block user from using support
 							{
 								$customerChatdata->updateChatdata('enable_support', "0"); // disable support
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is no longer able to enter support."))); // TODO
+								$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer able to enter support.")); // TODO
 							}
 							else if ($text == $admEnableSupport) // unblock user from using support
 							{
 								$customerChatdata->updateChatdata('enable_support', "1"); // enable support
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. The customer is now able to enter support."))); // TODO
+								$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is now able to enter support.")); // TODO
 							}
 							else // if no command, then it's replying the user
 							{
@@ -342,8 +347,8 @@
 								if ($isLocal)
 								{
 									if ($switchedToSupport)
-										$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("You're now on support mode.")));
-									$telegram->sendMessage(array('chat_id' => $replyFromUserId, 'text' => $mageHelper->__("Message from support") . ":\n" . $text)); // send message to customer TODO
+										$telegram->postMessage($replyFromUserId, $mageHelper->__("You're now on support mode."));
+									$telegram->postMessage($replyFromUserId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
 								}
 								else //if ($isForeign)
 								{
@@ -352,12 +357,12 @@
 									$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $text);
 								}
 
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Message sent."))); // send message to admin group TODO
+								$telegram->postMessage($chatId, $mageHelper->__("Message sent.")); // send message to admin group TODO
 							}
 						}
 						else
 						{
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Something went wrong, please try again.")));
+							$telegram->postMessage($chatId, $mageHelper->__("Something went wrong, please try again."));
 							return $telegram->respondSuccess();
 						}
 					}
@@ -381,26 +386,26 @@
 									if (!empty($tgChatId) && ($enabled))
 									{
 										$i++;
-										$telegram->sendMessage(array('chat_id' => $tgChatId, 'text' => $message)); // $magehelper->__("Message from support") . ":\n" .
+										$telegram->postMessage($tgChatId, $message); // $magehelper->__("Message from support") . ":\n" .
 									}
 								}
 								if ($i > 0)
 								{
 									if ($i == 1)
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("One message sent.")));
+										$telegram->postMessage($chatId, $mageHelper->__("One message sent."));
 									else
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("%s messages sent.", $i)));
+										$telegram->postMessage($chatId, $mageHelper->__("%s messages sent.", $i));
 								}
 								else
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("No customer available to receive this message.")));
+									$telegram->postMessage($chatId, $mageHelper->__("No customer available to receive this message."));
 							}
 							else
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Please use") . ' "' . $admSend2All . " " . $mageHelper->__("your message here.") . '"'));
+								$telegram->postMessage($chatId, $mageHelper->__("Please use") . ' "' . $admSend2All . " " . $mageHelper->__("your message here.") . '"');
 						}
 					}
 					return $telegram->respondSuccess();
 				}
-				$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("I don't work with groups."))); // TODO
+				$telegram->postMessage($chatId, $mageHelper->__("I don't work with groups.")); // TODO
 				return $telegram->respondSuccess(); // ignore all group messages
 			}
 
@@ -412,7 +417,7 @@
 				{
 					if ($chatdata->getEnableTelegram() != "1")
 					{
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("To talk with me, please enable Telegram on your account chatbot settings.")));
+						$telegram->postMessage($chatId, $mageHelper->__("To talk with me, please enable Telegram on your account chatbot settings."));
 						return $telegram->respondSuccess();
 					}
 				}
@@ -531,13 +536,13 @@
 									if (!empty($cmdId))
 										$text = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
 									if (!empty($message))
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+										$telegram->postMessage($chatId, $message);
 								}
 								else //if ($reply['reply_mode'] == "0")
 								{
 									if (!empty($message))
 									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+										$telegram->postMessage($chatId, $message);
 										if ($reply["stop_processing"] == "1")
 											return $telegram->respondSuccess();
 									}
@@ -556,7 +561,7 @@
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 				if ($message) // TODO
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+					$telegram->postMessage($chatId, $message);
 				try
 				{
 					$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
@@ -567,7 +572,7 @@
 				}
 				catch (Exception $e)
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage)); // TODO
+					$telegram->postMessage($chatId, $chatdata->_errorMessage); // TODO
 				}
 				return $telegram->respondSuccess();
 			}
@@ -612,8 +617,8 @@
 			//				$chatdata->_trackOrderCmd['command'] . " - " .
 			//				$chatdata->_supportCmd['command'] . " - " .
 			//				$chatdata->_sendEmailCmd['command'];
-			//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $temp_var));
-			//				$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $conversationState));
+			//				$telegram->postMessage($chatId, $temp_var);
+			//				$telegram->postMessage($chatId, $conversationState);
 
 			// start command
 			if ($chatdata->startsWith($text, $chatdata->_startCmd['command'])) // ignore alias // old checkCommandWithValue
@@ -632,17 +637,17 @@
 						}catch (Exception $e){}
 						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 						if ($message) // TODO
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+							$telegram->postMessage($chatId, $message);
 					}
 				}
 				else if ($chatdata->getTelegramChatId()) // TODO
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+					$telegram->postMessage($chatId, $message);
 
 					//						$data = array(
 					//							//'customer_id' => $customerId,
-					//							'telegram_chat_id' => $chat_id
+					//							'telegram_chat_id' => $chatId
 					//						); // data to be insert on database
 					//						$model = Mage::getModel('chatbot/chatdata')->load($chatdata->getId())->addData($data); // insert data on database
 					//						$model->setId($chatdata->getId())->save(); // save (duh)
@@ -651,7 +656,7 @@
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 					if ($message) // TODO
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+						$telegram->postMessage($chatId, $message);
 					try
 					{
 						$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
@@ -663,7 +668,7 @@
 					}
 					catch (Exception $e)
 					{
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage)); // TODO
+						$telegram->postMessage($chatId, $chatdata->_errorMessage); // TODO
 					}
 				}
 				return $telegram->respondSuccess();
@@ -679,7 +684,7 @@
 					if ($cmdListing == "1")
 						$message .= $chatdata->listTelegramCommandsMessage();
 
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+					$telegram->postMessage($chatId, $message);
 				}
 
 				return $telegram->respondSuccess();
@@ -690,7 +695,7 @@
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
 				if (!empty($message))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+					$telegram->postMessage($chatId, $message);
 
 				return $telegram->respondSuccess();
 			}
@@ -706,7 +711,7 @@
 				else if ($conversationState == $chatdata->_supportState)
 				{
 					$content = array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("exiting support mode."));
-					//$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $magehelper->__("Done.")));
+					//$telegram->postMessage($chatId, $magehelper->__("Done."));
 				}
 				else if ($conversationState == $chatdata->_searchState)
 				{
@@ -728,7 +733,7 @@
 					$content = array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage);
 
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				else
 					$telegram->sendMessage($content);
 				return $telegram->respondSuccess();
@@ -751,10 +756,10 @@
 							$productName = $product->getName();
 							if (empty($productName))
 								$productName = $mageHelper->__("this product");
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("adding %s to your cart.", $productName)));
+							$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("adding %s to your cart.", $productName));
 							$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 							if ($chatdata->addProd2Cart($cmdvalue))
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Added. To checkout send") . " " . $chatdata->_checkoutCmd['command']));
+								$telegram->postMessage($chatId, $mageHelper->__("Added. To checkout send") . " " . $chatdata->_checkoutCmd['command']);
 							else
 								$errorFlag = true;
 						}
@@ -768,9 +773,9 @@
 					$errorFlag = true;
 
 				if ($errorFlag)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				else if ($notInStock)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("This product is not in stock.")));
+					$telegram->postMessage($chatId, $mageHelper->__("This product is not in stock."));
 
 				return $telegram->respondSuccess();
 			}
@@ -787,7 +792,7 @@
 				if ($showMore == 0) // show only in the first time
 					$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $_category->getName())));
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more.")));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 				$errorFlag = false;
@@ -813,9 +818,9 @@
 								if ($showMore == 0)
 								{
 									if ($total == 1)
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. This category has only one product.")));
+										$telegram->postMessage($chatId, $mageHelper->__("Done. This category has only one product."));
 									else
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. This category has %s products.", $total)));
+										$telegram->postMessage($chatId, $mageHelper->__("Done. This category has %s products.", $total));
 								}
 
 								foreach ($productIDs as $productID)
@@ -829,22 +834,22 @@
 											if ($image)
 												$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
 											else
-												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+												$telegram->postMessage($chatId, $message);
 
 											if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 											{
 												// TODO add option to list more products
-												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("To show more, send") . " " . $listMoreCategories . $_category->getId() . "_" . (string)($i + 1)));
+												$telegram->postMessage($chatId, $mageHelper->__("To show more, send") . " " . $listMoreCategories . $_category->getId() . "_" . (string)($i + 1));
 												if ($chatdata->getTelegramConvState() != $chatdata->_listProductsState)
 													if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_listProductsState))
-														$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+														$telegram->postMessage($chatId, $chatdata->_errorMessage);
 												break;
 											}
 											else if (($i + 1) == $total) // if it's the last one, back to _startState
 											{
-												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("And that was the last one.")));
+												$telegram->postMessage($chatId, $mageHelper->__("And that was the last one."));
 												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-													$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+													$telegram->postMessage($chatId, $chatdata->_errorMessage);
 											}
 										}
 										$i++;
@@ -879,9 +884,9 @@
 			else if ($conversationState == $chatdata->_searchState) // TODO
 			{
 				if ($showMore == 0) // show only in the first time
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I search for '%s' for you.", $text)));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I search for '%s' for you.", $text));
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more.")));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 				$errorFlag = false;
@@ -889,7 +894,7 @@
 				$productIDs = $chatdata->getProductIdsBySearch($text);
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					return $telegram->respondSuccess();
 				}
 				else if ($productIDs)
@@ -902,9 +907,9 @@
 						if ($showMore == 0)
 						{
 							if ($total == 1)
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. I've found only one product for your criteria.")));
+								$telegram->postMessage($chatId, $mageHelper->__("Done. I've found only one product for your criteria."));
 							else
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. I've found %s products for your criteria.", $total)));
+								$telegram->postMessage($chatId, $mageHelper->__("Done. I've found %s products for your criteria.", $total));
 						}
 
 						foreach ($productIDs as $productID)
@@ -918,22 +923,22 @@
 									if ($image)
 										$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
 									else
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+										$telegram->postMessage($chatId, $message);
 
 									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 									{
 										// TODO add option to list more products
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("To show more, send") . " " . $listMoreSearch . str_replace(" ", "_", $text) . "_" . (string)($i + 1)));
+										$telegram->postMessage($chatId, $mageHelper->__("To show more, send") . " " . $listMoreSearch . str_replace(" ", "_", $text) . "_" . (string)($i + 1));
 										if ($chatdata->getTelegramConvState() != $chatdata->_listProductsState)
 											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_listProductsState))
-												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+												$telegram->postMessage($chatId, $chatdata->_errorMessage);
 										break;
 									}
 									else if (($i + 1) == $total) // if it's the last one, back to _startState
 									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("And that was the last one.")));
+										$telegram->postMessage($chatId, $mageHelper->__("And that was the last one."));
 										if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+											$telegram->postMessage($chatId, $chatdata->_errorMessage);
 									}
 								}
 								$i++;
@@ -949,11 +954,11 @@
 					$noProductFlag = true;
 
 				if ($noProductFlag)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, no products found for this criteria.")));
+					$telegram->postMessage($chatId, $mageHelper->__("Sorry, no products found for this criteria."));
 
 				if ($errorFlag)
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState);
 				}
 
@@ -964,23 +969,23 @@
 				if (!empty($supportGroupId))
 				{
 					$telegram->forwardMessage(array('chat_id' => $supportGroupId, 'from_chat_id' => $chatId, 'message_id' => $telegram->MessageID())); // Reply to this message to reply to the customer
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support.")));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support."));
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($conversationState == $chatdata->_sendEmailState)
 			{
-				$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Trying to send the email...")));
+				$telegram->postMessage($chatId, $mageHelper->__("Trying to send the email..."));
 				if ($chatdata->sendEmail($text, $username))
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done.")));
+					$telegram->postMessage($chatId, $mageHelper->__("Done."));
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, I wasn't able to send an email this time. Please try again later.")));
+					$telegram->postMessage($chatId, $mageHelper->__("Sorry, I wasn't able to send an email this time. Please try again later."));
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($conversationState == $chatdata->_trackOrderState)
@@ -988,14 +993,14 @@
 				$errorFlag = false;
 				if ($chatdata->getIsLogged() == "1")
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I check the status for order %s.", $text)));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I check the status for order %s.", $text));
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$order = Mage::getModel('sales/order')->loadByIncrementId($text);
 					if ($order->getId())
 					{
 						if ($order->getCustomerId() == $chatdata->getCustomerId()) // not a problem if customer dosen't exist
 						{
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Your order status is") . " " . $order->getStatus()));
+							$telegram->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $order->getStatus());
 						}
 						else
 							$errorFlag = true;
@@ -1004,25 +1009,25 @@
 						$errorFlag = true;
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+					$telegram->postMessage($chatId, $chatdata->_loginFirstMessage);
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				else if ($errorFlag)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Sorry, we couldn't find any order with this information.")));
+					$telegram->postMessage($chatId, $mageHelper->__("Sorry, we couldn't find any order with this information."));
 				return $telegram->respondSuccess();
 			}
 
 			// general commands
 			if ($chatdata->checkCommand($text, $chatdata->_listCategoriesCmd))
 			{
-				$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all categories for you.")));
+				$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all categories for you."));
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 
 				$categoryHelper = Mage::helper('catalog/category');
 				$categories = $categoryHelper->getStoreCategories(); // TODO test with a store without categories
 				$i = 0;
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_listCategoriesState))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				else if ($categories)
 				{
 					$option = array();
@@ -1066,12 +1071,12 @@
 				}
 				else if ($i == 0)
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("No categories available at the moment, please try again later.")));
+					$telegram->postMessage($chatId, $mageHelper->__("No categories available at the moment, please try again later."));
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 
 				return $telegram->respondSuccess();
 			}
@@ -1079,7 +1084,7 @@
 			{
 				$sessionId = null;
 				$quoteId = null;
-				$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I prepare the checkout for you.")));
+				$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I prepare the checkout for you."));
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 				if ($chatdata->getIsLogged() == "1")
 				{
@@ -1125,20 +1130,20 @@
 							"[" . $mageHelper->__("Checkout Here") . "](" . $cartUrl . ")";
 
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_checkoutState))
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+							$telegram->postMessage($chatId, $chatdata->_errorMessage);
 						else
 							$telegram->sendMessage(array('chat_id' => $chatId, 'parse_mode' => 'Markdown', 'text' => $message));
 					}
 					else if (!$chatdata->clearCart()) // try to clear cart
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				}
 				if ($emptyCart)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Your cart is empty.")));
+					$telegram->postMessage($chatId, $mageHelper->__("Your cart is empty."));
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_clearCartCmd))
 			{
-				$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I clear your cart.")));
+				$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I clear your cart."));
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 				$errorFlag = false;
 				if ($chatdata->clearCart())
@@ -1146,20 +1151,20 @@
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_clearCartState))
 						$errorFlag = true;
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Cart cleared.")));
+						$telegram->postMessage($chatId, $mageHelper->__("Cart cleared."));
 				}
 				else
 					$errorFlag = true;
 				if ($errorFlag)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_searchCmd))
 			{
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("what do you want to search for?") . " " . $chatdata->_cancelMessage));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("what do you want to search for?") . " " . $chatdata->_cancelMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_loginCmd)) // TODO
@@ -1169,26 +1174,26 @@
 					$hashUrl = Mage::getUrl('chatbot/settings/index/'); // get base module URL
 					$hashUrl = strtok($hashUrl, '?') . "hash" . DS . $chatdata->getHashKey(); // remove magento parameters
 					if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_loginState))
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					else
 					{
-						$telegram->sendMessage(array(
-							'chat_id' => $chatId, 'text' => $mageHelper->__("To login to your account, click this link") . ": " .
+						$telegram->postMessage($chatId,
+								$mageHelper->__("To login to your account, click this link") . ": " .
 								$hashUrl . " . " .
 								$mageHelper->__("If you want to logout from your account, just send") . " " .
 								$chatdata->_logoutCmd['command']
-						));
+						);
 					}
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("You're already logged.")));
+					$telegram->postMessage($chatId, $mageHelper->__("You're already logged."));
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_logoutCmd)) // TODO
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Ok, logging out.")));
+					$telegram->postMessage($chatId, $mageHelper->__("Ok, logging out."));
 					$errorFlag = false;
 					try
 					{
@@ -1203,12 +1208,12 @@
 					}
 
 					if ($errorFlag)
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done.")));
+						$telegram->postMessage($chatId, $mageHelper->__("Done."));
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("You're not logged.")));
+					$telegram->postMessage($chatId, $mageHelper->__("You're not logged."));
 
 				return $telegram->respondSuccess();
 			}
@@ -1216,9 +1221,9 @@
 			{
 				$registerUrl = strtok(Mage::getUrl('customer/account/create'), '?');
 				if (!empty($registerUrl))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl)));
+					$telegram->postMessage($chatId, $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl));
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders) // TODO
@@ -1226,9 +1231,9 @@
 				if ($chatdata->getIsLogged() == "1")
 				{
 					if ($showMore == 0) // show only in the first time
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather your orders for listing.")));
+						$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather your orders for listing."));
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more.")));
+						$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
@@ -1241,9 +1246,9 @@
 							if ($showMore == 0)
 							{
 								if ($total == 1)
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. You've only one order.")));
+									$telegram->postMessage($chatId, $mageHelper->__("Done. You've only one order."));
 								else
-									$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Done. I've found %s orders.", $total)));
+									$telegram->postMessage($chatId, $mageHelper->__("Done. I've found %s orders.", $total));
 							}
 
 							foreach($ordersIDs as $orderID)
@@ -1253,47 +1258,47 @@
 								{
 									if ($i >= $showMore)
 									{
-										$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+										$telegram->postMessage($chatId, $message);
 										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 										{
 											// TODO add option to list more orders
-											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("To show more, send") . " " . $listMoreOrders . (string)($i + 1)));
+											$telegram->postMessage($chatId, $mageHelper->__("To show more, send") . " " . $listMoreOrders . (string)($i + 1));
 											if ($chatdata->getTelegramConvState() != $chatdata->_listOrdersState)
 												if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_listOrdersState))
-													$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+													$telegram->postMessage($chatId, $chatdata->_errorMessage);
 											break;
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
 										{
-											$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("And that was the last one.")));
+											$telegram->postMessage($chatId, $mageHelper->__("And that was the last one."));
 											if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
-												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+												$telegram->postMessage($chatId, $chatdata->_errorMessage);
 										}
 									}
 									$i++;
 								}
 							}
 							if ($i == 0)
-								$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+								$telegram->postMessage($chatId, $chatdata->_errorMessage);
 //							else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_listOrdersState))
-//								$telegram->sendMessage(array('chat_id' => $chat_id, 'text' => $chatdata->_errorMessage));
+//								$telegram->postMessage($chatId, $chatdata->_errorMessage);
 						}
 					}
 					else
 					{
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("This account has no orders.")));
+						$telegram->postMessage($chatId, $mageHelper->__("This account has no orders."));
 						return $telegram->respondSuccess();
 					}
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+					$telegram->postMessage($chatId, $chatdata->_loginFirstMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->startsWith($text, $chatdata->_reorderCmd['command'])) // ignore alias TODO // old checkCommandWithValue
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I add the products from this order to your cart.")));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I add the products from this order to your cart."));
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$errorFlag = false;
 					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_reorderCmd['command']);
@@ -1319,14 +1324,14 @@
 						$errorFlag = true;
 
 					if ($errorFlag)
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					else if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_reorderState))
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					else // success!!
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("to checkout send") . " " . $chatdata->_checkoutCmd['command']));
+						$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("to checkout send") . " " . $chatdata->_checkoutCmd['command']);
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+					$telegram->postMessage($chatId, $chatdata->_loginFirstMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_trackOrderCmd)) // TODO
@@ -1337,15 +1342,15 @@
 					if ($ordersIDs)
 					{
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_trackOrderState))
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+							$telegram->postMessage($chatId, $chatdata->_errorMessage);
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("send the order number.")));
+							$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("send the order number."));
 					}
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("Your account dosen't have any orders.")));
+						$telegram->postMessage($chatId, $mageHelper->__("Your account dosen't have any orders."));
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+					$telegram->postMessage($chatId, $chatdata->_loginFirstMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_supportCmd)) // TODO
@@ -1359,26 +1364,26 @@
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_supportState))
 							$errorFlag = true;
 						else
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("what do you need support for?") . " " . $chatdata->_cancelMessage));
+							$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("what do you need support for?") . " " . $chatdata->_cancelMessage);
 					}
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("You're already on support in other chat application, please close it before opening a new one.")));
+						$telegram->postMessage($chatId, $mageHelper->__("You're already on support in other chat application, please close it before opening a new one."));
 				}
 				else
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("I'm sorry, you can't ask for support now. Please try again later.")));
+					$telegram->postMessage($chatId, $mageHelper->__("I'm sorry, you can't ask for support now. Please try again later."));
 
 				if ($errorFlag)
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				return $telegram->respondSuccess();
 			}
 			else if ($chatdata->checkCommand($text, $chatdata->_sendEmailCmd)) // TODO
 			{
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_sendEmailState))
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+					$telegram->postMessage($chatId, $chatdata->_errorMessage);
 				else
 				{
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("write the email content.")));
-					$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $chatdata->_cancelMessage));
+					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("write the email content."));
+					$telegram->postMessage($chatId, $mageHelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $chatdata->_cancelMessage);
 				}
 				return $telegram->respondSuccess();
 			}
@@ -1392,14 +1397,14 @@
 //							if ($chatdata->getFacebookConvState() != $chatdata->_supportState) // TODO
 //								$chatdata->updateChatdata('telegram_conv_state', $chatdata->_supportState);
 						$telegram->forwardMessage(array('chat_id' => $supportGroupId, 'from_chat_id' => $chatId, 'message_id' => $telegram->MessageID()));
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' =>
+						$telegram->postMessage($chatId,
 							$mageHelper->__("Sorry, I didn't understand that.") . " " .
 							$mageHelper->__("Please wait while our support check your message so you can talk to a real person.")// . " " .
 							//$chatdata->_cancelMessage
-						)); // TODO
+						); // TODO
 					}
 					else
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_errorMessage));
+						$telegram->postMessage($chatId, $chatdata->_errorMessage);
 					return $telegram->respondSuccess();
 				}
 				else // process cases where the customer message wasn't understandable
@@ -1495,7 +1500,7 @@
 														}
 														else
 														{
-															$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+															$telegram->postMessage($chatId, $chatdata->_loginFirstMessage);
 															$break = true;
 															return $telegram->respondSuccess();
 														}
@@ -1524,7 +1529,7 @@
 										{
 											$telegram->_text = "/" . $key; // replace text with command
 											if ($enableConfirmMessage == "1")
-												$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $mageHelper->__($message))); // TODO
+												$telegram->postMessage($chatId, $mageHelper->__($message)); // TODO
 										}
 
 										$this->_isWitAi = true;
@@ -1560,14 +1565,14 @@
 						}
 
 						$chatdata->updateChatdata("telegram_fallback_qty", (string)$fallbackQty);
-						$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
+						$telegram->postMessage($chatId, $message); // TODO
 
 						$cmdListingOnError = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_error_command_list');
 						if ($cmdListingOnError == "1")
 						{
 							$message = $mageHelper->__("Please try one of the following commands.");
 							$message .= $chatdata->listTelegramCommandsMessage();
-							$telegram->sendMessage(array('chat_id' => $chatId, 'text' => $message)); // TODO
+							$telegram->postMessage($chatId, $message); // TODO
 						}
 					}
 				}
