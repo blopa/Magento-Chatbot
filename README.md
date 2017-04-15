@@ -136,6 +136,10 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.12:**
+	- Fix list categories command glitch
+	- Fix some other small glitches
+	- Code improvements
 - **v0.0.11:**
 	- Fix logout command glitch
 	- Fix some other small glitches
