@@ -318,129 +318,6 @@
 				$conversationState == $chatbotHelper->_trackOrderState
 			);
 
-			// handle default replies
-			if ($enableReplies == "1" && !$blockerStates)
-			{
-				$defaultReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/default_replies');
-				if ($defaultReplies)
-				{
-					$replies = unserialize($defaultReplies);
-					if (is_array($replies))
-					{
-						foreach($replies as $reply)
-						{
-//								MODES
-//								0 =>'Similarity'
-//								1 =>'Starts With'
-//								2 =>'Ends With'
-//								3 =>'Contains'
-//								4 =>'Match Regular Expression'
-//								5 =>'Equals to'
-//								6 =>'wit.ai'
-
-							$matched = false;
-							$match = $reply["match_sintax"];
-							$matchMode = $reply["match_mode"];
-
-							if ($reply["match_case"] == "0")
-							{
-								$match = strtolower($match);
-								$textToMatch = strtolower($text);
-							}
-							else
-								$textToMatch = $text;
-
-							if ($matchMode == "0") // Similarity
-							{
-								$similarity = $reply["similarity"];
-								if (is_numeric($similarity))
-								{
-									if (!($similarity >= 1 && $similarity <= 100))
-										$similarity = 100;
-								}
-								else
-									$similarity = 100;
-
-								similar_text($textToMatch, $match, $percent);
-								if ($percent >= $similarity)
-									$matched = true;
-							}
-							else if ($matchMode == "1") // Starts With
-							{
-								if ($chatbotHelper->startsWith($textToMatch, $match))
-									$matched = true;
-							}
-							else if ($matchMode == "2") // Ends With
-							{
-								if ($chatbotHelper->endsWith($textToMatch, $match))
-									$matched = true;
-							}
-							else if ($matchMode == "3") // Contains
-							{
-								if (strpos($textToMatch, $match) !== false)
-									$matched = true;
-							}
-							else if ($matchMode == "4") // Match Regular Expression
-							{
-//									if ($match[0] != "/")
-//										$match = "/" . $match;
-//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
-//										$match .= "/";
-								if (preg_match($match, $textToMatch))
-									$matched = true;
-							}
-							else if ($matchMode == "5") // Equals to
-							{
-								if ($textToMatch == $match)
-									$matched = true;
-							}
-							else if (($matchMode == "6") && (isset($this->_witAi))) // wit.ai and witAi is set
-							{
-								$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
-								if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
-									$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
-
-								$witResponse = $this->_witAi->getWitAIResponse($text);
-								if (property_exists($witResponse->entities, $match))
-								{
-									foreach ($witResponse->entities->{$match} as $m)
-									{
-										if (((float)$m->confidence * 100) < (float)$witAiConfidence)
-											continue;
-
-										$matched = true;
-										break;
-									}
-								}
-							}
-
-							if ($matched)
-							{
-								$message = $reply["reply_phrase"];
-								if ($reply['reply_mode'] == "1")
-								{
-									$cmdId = $reply['command_id'];
-									if (!empty($cmdId))
-										$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
-									if (!empty($message))
-										$facebook->postMessage($chatId, $message);
-								}
-								else //if ($reply['reply_mode'] == "0")
-								{
-									if (!empty($message))
-									{
-										$facebook->postMessage($chatId, $message);
-										if ($reply["stop_processing"] == "1")
-											return $facebook->respondSuccess();
-									}
-								}
-								break;
-							}
-						}
-					}
-				}
-			}
-
 			// user isnt registred HERE
 			if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
 			{
@@ -1375,8 +1252,131 @@
 				}
 				return $facebook->respondSuccess();
 			}
-			else
+			else // fallback
 			{
+				// handle default replies
+				if ($enableReplies == "1" && !$blockerStates)
+				{
+					$defaultReplies = Mage::getStoreConfig('chatbot_enable/facebook_config/default_replies');
+					if ($defaultReplies)
+					{
+						$replies = unserialize($defaultReplies);
+						if (is_array($replies))
+						{
+							foreach($replies as $reply)
+							{
+//								MODES
+//								0 =>'Similarity'
+//								1 =>'Starts With'
+//								2 =>'Ends With'
+//								3 =>'Contains'
+//								4 =>'Match Regular Expression'
+//								5 =>'Equals to'
+//								6 =>'wit.ai'
+
+								$matched = false;
+								$match = $reply["match_sintax"];
+								$matchMode = $reply["match_mode"];
+
+								if ($reply["match_case"] == "0")
+								{
+									$match = strtolower($match);
+									$textToMatch = strtolower($text);
+								}
+								else
+									$textToMatch = $text;
+
+								if ($matchMode == "0") // Similarity
+								{
+									$similarity = $reply["similarity"];
+									if (is_numeric($similarity))
+									{
+										if (!($similarity >= 1 && $similarity <= 100))
+											$similarity = 100;
+									}
+									else
+										$similarity = 100;
+
+									similar_text($textToMatch, $match, $percent);
+									if ($percent >= $similarity)
+										$matched = true;
+								}
+								else if ($matchMode == "1") // Starts With
+								{
+									if ($chatbotHelper->startsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($matchMode == "2") // Ends With
+								{
+									if ($chatbotHelper->endsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($matchMode == "3") // Contains
+								{
+									if (strpos($textToMatch, $match) !== false)
+										$matched = true;
+								}
+								else if ($matchMode == "4") // Match Regular Expression
+								{
+//									if ($match[0] != "/")
+//										$match = "/" . $match;
+//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
+//										$match .= "/";
+									if (preg_match($match, $textToMatch))
+										$matched = true;
+								}
+								else if ($matchMode == "5") // Equals to
+								{
+									if ($textToMatch == $match)
+										$matched = true;
+								}
+								else if (($matchMode == "6") && (isset($this->_witAi))) // wit.ai and witAi is set
+								{
+									$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
+									if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
+										$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
+
+									$witResponse = $this->_witAi->getTextResponse($text);
+									if (property_exists($witResponse->entities, $match))
+									{
+										foreach ($witResponse->entities->{$match} as $m)
+										{
+											if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+												continue;
+
+											$matched = true;
+											break;
+										}
+									}
+								}
+
+								if ($matched)
+								{
+									$message = $reply["reply_phrase"];
+									if ($reply['reply_mode'] == "1")
+									{
+										$cmdId = $reply['command_id'];
+										if (!empty($cmdId))
+											$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
+										if (!empty($message))
+											$facebook->postMessage($chatId, $message);
+									}
+									else //if ($reply['reply_mode'] == "0")
+									{
+										if (!empty($message))
+										{
+											$facebook->postMessage($chatId, $message);
+											if ($reply["stop_processing"] == "1")
+												return $facebook->respondSuccess();
+										}
+									}
+									break;
+								}
+							}
+						}
+					}
+				}
+
 				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // back to start state
 				if ($enableFinalMessage2Support == "1")
 				{
@@ -1407,7 +1407,7 @@
 						if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
 							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
-						$witResponse = $this->_witAi->getWitAIResponse($text);
+						$witResponse = $this->_witAi->getTextResponse($text);
 
 						$hasIntent = true;
 						if (property_exists($witResponse->entities, "facebook_intent"))

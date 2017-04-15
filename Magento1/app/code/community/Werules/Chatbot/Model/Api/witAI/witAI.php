@@ -10,19 +10,25 @@
 			$this->_token = $token;
 		}
 
-		function getWitAIResponse($query)
+		function getTextResponse($query)
+		{
+			$content = "&q=" . urlencode($query);
+			return $this->getWitAIResponse("message", $content);
+		}
+
+		function getWitAIResponse($endpoint, $content)
 		{
 			if (!isset($this->_data))
 			{
-				$access_token = $this->_token;
+				$accessToken = $this->_token;
 				$options = array(
 					'http' => array(
 						'method' => 'GET',
-						'header' => "Authorization: Bearer " . $access_token . "\r\n"
+						'header' => "Authorization: Bearer " . $accessToken . "\r\n"
 					)
 				);
 				$context = stream_context_create($options);
-				$url = 'https://api.wit.ai/message?v=' . $this->_version . '&q=' . urlencode($query);
+				$url = 'https://api.wit.ai/' . $endpoint . '?v=' . $this->_version . $content;
 				$result = file_get_contents($url, false, $context);
 				$result = json_decode($result);
 				$this->_data = $result;
