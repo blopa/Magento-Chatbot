@@ -51,7 +51,7 @@
 						<p>
 							<?php
 								echo $this->__("Start a bot conversation on Telegram") . ": ";
-								$url = $chatdata->_tgUrl . $tgUsername;
+								$url = $chatbotHelper->_tgUrl . $tgUsername;
 								if (empty($chatdata->getTelegramChatId()))
 									$url .= "?start=" . $chatdata->getHashKey();
 							?>
@@ -68,7 +68,7 @@
 					<p>
 						<?php
 							echo $this->__("Start a bot conversation on Facebook Messenger") . ": ";
-							$url = $chatdata->_fbUrl . $fbUsername;
+							$url = $chatbotHelper->_fbUrl . $fbUsername;
 						?>
 						<a href="<?php echo $url; ?>" target="_blank"><?php echo $this->__('Here') ?></a>
 					</p>

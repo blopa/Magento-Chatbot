@@ -27,26 +27,24 @@
 			//$this->_init('chatbot/api_facebook_handler'); // this is location of the resource file.
 			$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
 			$this->_facebook = new MessengerBot($apikey);
-			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
 		public function foreignMessageFromSupport($chatId, $text)
 		{
+			// helpers
+			$mageHelper = Mage::helper('core');
+			$chatbotHelper = $this->_chatbotHelper;
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata');
 			$chatdata->load($chatId, 'facebook_chat_id');
-			$chatdata->_apiType = $chatdata->_fbBot;
+			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
 			if (is_null($chatdata->getFacebookChatId()))
 			{ // should't happen
 				return false;
 			}
 
-			// helpers
-			$mageHelper = Mage::helper('core');
-			//$chatbotHelper = $this->_chatbotHelper;
-
-			//$chatdata->_apiType = $chatdata->_fbBot;
+			//$chatdata->_apiType = $chatbotHelper->_fbBot;
 			$facebook = $this->_facebook;
 			if (isset($facebook))
 			{
@@ -144,18 +142,18 @@
 
 			$text = strtolower($originalText);
 
+			// helpers
+			$mageHelper = Mage::helper('core');
+			$chatbotHelper = $this->_chatbotHelper;
+
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
-			$chatdata->_apiType = $chatdata->_fbBot;
+			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
 			if ($messageId == $chatdata->getFacebookMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
 				return $facebook->respondSuccess();
 			else if ($chatdata->getFacebookChatId())
 				$chatdata->updateChatdata('facebook_message_id', $messageId); // if this fails, it may send the same message twice
-
-			// helpers
-			$mageHelper = Mage::helper('core');
-			$chatbotHelper = $this->_chatbotHelper;
 
 			// bot enabled/disabled
 			if ($enabledBot != "1")
@@ -170,11 +168,11 @@
 			$facebook->sendChatAction($chatId, "typing_on");
 
 			// payload handler, may change the conversation state
-			if ($chatdata->getFacebookConvState() == $chatdata->_listProductsState || $chatdata->getFacebookConvState() == $chatdata->_listOrdersState) // listing products
+			if ($chatdata->getFacebookConvState() == $chatbotHelper->_listProductsState || $chatdata->getFacebookConvState() == $chatbotHelper->_listOrdersState) // listing products
 			{
 				if ($chatbotHelper->startsWith($text, $listMoreCategories)) // old checkCommandWithValue
 				{
-					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_listCategoriesState))
+					if ($chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listCategoriesState))
 					{
 						$value = $chatbotHelper->getCommandValue($text, $listMoreCategories);
 						$arr = explode(",", $value);
@@ -184,7 +182,7 @@
 				}
 				else if ($chatbotHelper->startsWith($text, $listMoreSearch)) // old checkCommandWithValue
 				{
-					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState))
+					if ($chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_searchState))
 					{
 						$value = $chatbotHelper->getCommandValue($text, $listMoreSearch);
 						$arr = explode(",", $value);
@@ -194,7 +192,7 @@
 				}
 				else if ($chatbotHelper->startsWith($text, $listMoreOrders)) // old checkCommandWithValue
 				{
-					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_listOrdersState))
+					if ($chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listOrdersState))
 					{
 						$value = $chatbotHelper->getCommandValue($text, $listMoreOrders);
 						$showMore = (int)$value; // get where listing stopped
@@ -202,7 +200,7 @@
 					}
 				}
 //					else
-//						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
+//						$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
 			}
 
 			// instances conversation state
@@ -216,18 +214,18 @@
 //					if ($isAdmin == "0") // set user as admin
 //						$chatdata->updateChatdata('is_admin', "1");
 
-				if ($conversationState == $chatdata->_replyToSupportMessageState) // check if admin is replying to a customer
+				if ($conversationState == $chatbotHelper->_replyToSupportMessageState) // check if admin is replying to a customer
 				{
 					$customerChatId = $chatdata->getFacebookSupportReplyChatId(); // get customer chat id
 					if (!empty($customerChatId))
 					{
-						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState); // set admin to _startState
+						$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // set admin to _startState
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
 
-						if ($customerData->getFacebookConvState() != $chatdata->_supportState) // if user isn't on support, switch to support
+						if ($customerData->getFacebookConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
 						{
 							// TODO IMPORTANT remember to switch off all other supports
-							$customerData->updateChatdata('facebook_conv_state', $chatdata->_supportState);
+							$customerData->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
 							$facebook->postMessage($customerChatId, $mageHelper->__("You're now on support mode."));
 						}
 						$facebook->postMessage($customerChatId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
@@ -235,9 +233,9 @@
 					}
 					return $facebook->respondSuccess();
 				}
-				else if ($chatbotHelper->startsWith($text, $chatdata->_admSendMessage2AllCmd)) // old checkCommandWithValue
+				else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admSendMessage2AllCmd)) // old checkCommandWithValue
 				{
-					$message = trim($chatbotHelper->getCommandValue($text, $chatdata->_admSendMessage2AllCmd));
+					$message = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admSendMessage2AllCmd));
 					if (!empty($message))
 					{
 						$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
@@ -250,22 +248,22 @@
 						$facebook->postMessage($chatId, $mageHelper->__("Message sent."));
 					}
 					else
-						$facebook->postMessage($chatId, $mageHelper->__("Please use") . ' "' . $chatdata->_admSendMessage2AllCmd . " " . $mageHelper->__("your message here.") . '"');
+						$facebook->postMessage($chatId, $mageHelper->__("Please use") . ' "' . $chatbotHelper->_admSendMessage2AllCmd . " " . $mageHelper->__("your message here.") . '"');
 				}
 				else if ($isPayload)
 				{
-					if ($chatbotHelper->startsWith($text, $chatdata->_admEndSupportCmd)) // finish customer support  // old checkCommandWithValue
+					if ($chatbotHelper->startsWith($text, $chatbotHelper->_admEndSupportCmd)) // finish customer support  // old checkCommandWithValue
 					{
-						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatdata->_admEndSupportCmd)); // get customer chatId from payload
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admEndSupportCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
-						$customerData->updateChatdata('facebook_conv_state', $chatdata->_startState); // update conversation state
+						$customerData->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // update conversation state
 
 						$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
 						$facebook->postMessage($customerChatId, $mageHelper->__("Support ended."));
 					}
-					else if ($chatbotHelper->startsWith($text, $chatdata->_admBlockSupportCmd)) // block user from using support // old checkCommandWithValue
+					else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admBlockSupportCmd)) // block user from using support // old checkCommandWithValue
 					{
-						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admBlockSupportCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
 						if ($customerData->getEnableSupport() == "1")
 						{
@@ -283,11 +281,11 @@
 					{
 						$customerChatId = trim($chatbotHelper->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
 						$chatdata->updateChatdata('facebook_support_reply_chat_id', $customerChatId);
-						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_replyToSupportMessageState);
+						$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_replyToSupportMessageState);
 
 						$facebook->postMessage($chatId, $mageHelper->__("Ok, send me the message and I'll forward it to the customer."));
 					}
-					else if ($chatbotHelper->checkCommand($text, $chatdata->_admSendMessage2AllCmd)) // TODO
+					else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_admSendMessage2AllCmd)) // TODO
 					{
 
 					}
@@ -312,11 +310,11 @@
 			}
 
 			$blockerStates = (
-				$conversationState == $chatdata->_listCategoriesState ||
-				$conversationState == $chatdata->_searchState ||
-				$conversationState == $chatdata->_supportState ||
-				$conversationState == $chatdata->_sendEmailState ||
-				$conversationState == $chatdata->_trackOrderState
+				$conversationState == $chatbotHelper->_listCategoriesState ||
+				$conversationState == $chatbotHelper->_searchState ||
+				$conversationState == $chatbotHelper->_supportState ||
+				$conversationState == $chatbotHelper->_sendEmailState ||
+				$conversationState == $chatbotHelper->_trackOrderState
 			);
 
 			// handle default replies
@@ -461,62 +459,62 @@
 				}
 				catch (Exception $e)
 				{
-					$facebook->postMessage($chatId, $chatdata->_errorMessage); // TODO
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage); // TODO
 				}
 				//$facebook->sendChatAction($chatId, "typing_off");
 				//return $facebook->respondSuccess(); // commented to keep processing the message
 			}
 
 			// init commands
-			//$chatdata->_startCmd['command'] = "Start";
-			$chatdata->_listCategoriesCmd = $chatdata->getCommandString(1);
-			$chatdata->_searchCmd = $chatdata->getCommandString(2);
-			$chatdata->_loginCmd = $chatdata->getCommandString(3);
-			$chatdata->_listOrdersCmd = $chatdata->getCommandString(4);
-			$chatdata->_reorderCmd = $chatdata->getCommandString(5);
-			$chatdata->_add2CartCmd = $chatdata->getCommandString(6);
-			$chatdata->_checkoutCmd = $chatdata->getCommandString(7);
-			$chatdata->_clearCartCmd = $chatdata->getCommandString(8);
-			$chatdata->_trackOrderCmd = $chatdata->getCommandString(9);
-			$chatdata->_supportCmd = $chatdata->getCommandString(10);
-			$chatdata->_sendEmailCmd = $chatdata->getCommandString(11);
-			$chatdata->_cancelCmd = $chatdata->getCommandString(12);
-			$chatdata->_helpCmd = $chatdata->getCommandString(13);
-			$chatdata->_aboutCmd = $chatdata->getCommandString(14);
-			$chatdata->_logoutCmd = $chatdata->getCommandString(15);
-			$chatdata->_registerCmd = $chatdata->getCommandString(16);
-			if (!$chatdata->_cancelCmd['command']) $chatdata->_cancelCmd['command'] = "cancel"; // it must always have a cancel command
+			//$chatbotHelper->_startCmd['command'] = "Start";
+			$chatbotHelper->_listCategoriesCmd = $chatdata->getCommandString(1);
+			$chatbotHelper->_searchCmd = $chatdata->getCommandString(2);
+			$chatbotHelper->_loginCmd = $chatdata->getCommandString(3);
+			$chatbotHelper->_listOrdersCmd = $chatdata->getCommandString(4);
+			$chatbotHelper->_reorderCmd = $chatdata->getCommandString(5);
+			$chatbotHelper->_add2CartCmd = $chatdata->getCommandString(6);
+			$chatbotHelper->_checkoutCmd = $chatdata->getCommandString(7);
+			$chatbotHelper->_clearCartCmd = $chatdata->getCommandString(8);
+			$chatbotHelper->_trackOrderCmd = $chatdata->getCommandString(9);
+			$chatbotHelper->_supportCmd = $chatdata->getCommandString(10);
+			$chatbotHelper->_sendEmailCmd = $chatdata->getCommandString(11);
+			$chatbotHelper->_cancelCmd = $chatdata->getCommandString(12);
+			$chatbotHelper->_helpCmd = $chatdata->getCommandString(13);
+			$chatbotHelper->_aboutCmd = $chatdata->getCommandString(14);
+			$chatbotHelper->_logoutCmd = $chatdata->getCommandString(15);
+			$chatbotHelper->_registerCmd = $chatdata->getCommandString(16);
+			if (!$chatbotHelper->_cancelCmd['command']) $chatbotHelper->_cancelCmd['command'] = "cancel"; // it must always have a cancel command
 
 			// init messages
-			$chatdata->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
-			$chatdata->_cancelMessage = $mageHelper->__("To cancel, send") . ' "' . $chatdata->_cancelCmd['command'] . '"';
-			$chatdata->_canceledMessage = $mageHelper->__("Ok, canceled.");
-			$chatdata->_loginFirstMessage = $mageHelper->__("Please login first.");
-			array_push($chatdata->_positiveMessages, $mageHelper->__("Ok"), $mageHelper->__("Okay"), $mageHelper->__("Cool"), $mageHelper->__("Awesome"));
-			// $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)]
+			$chatbotHelper->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
+			$chatbotHelper->_cancelMessage = $mageHelper->__("To cancel, send") . ' "' . $chatbotHelper->_cancelCmd['command'] . '"';
+			$chatbotHelper->_canceledMessage = $mageHelper->__("Ok, canceled.");
+			$chatbotHelper->_loginFirstMessage = $mageHelper->__("Please login first.");
+			array_push($chatbotHelper->_positiveMessages, $mageHelper->__("Ok"), $mageHelper->__("Okay"), $mageHelper->__("Cool"), $mageHelper->__("Awesome"));
+			// $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)]
 
 			if ($enablePredict == "1" && !$isPayload) // prediction is enabled and itsn't payload
 			{
-				if ($conversationState == $chatdata->_startState)
+				if ($conversationState == $chatbotHelper->_startState)
 				{
 					$cmdarray = array(
-						$chatdata->_startCmd['command'],
-						$chatdata->_listCategoriesCmd['command'],
-						$chatdata->_searchCmd['command'],
-						$chatdata->_loginCmd['command'],
-						$chatdata->_listOrdersCmd['command'],
-						$chatdata->_reorderCmd['command'],
-						$chatdata->_add2CartCmd['command'],
-						$chatdata->_checkoutCmd['command'],
-						$chatdata->_clearCartCmd['command'],
-						$chatdata->_trackOrderCmd['command'],
-						$chatdata->_supportCmd['command'],
-						$chatdata->_sendEmailCmd['command'],
-						$chatdata->_cancelCmd['command'],
-						$chatdata->_helpCmd['command'],
-						$chatdata->_aboutCmd['command'],
-						$chatdata->_logoutCmd['command'],
-						$chatdata->_registerCmd['command']
+						$chatbotHelper->_startCmd['command'],
+						$chatbotHelper->_listCategoriesCmd['command'],
+						$chatbotHelper->_searchCmd['command'],
+						$chatbotHelper->_loginCmd['command'],
+						$chatbotHelper->_listOrdersCmd['command'],
+						$chatbotHelper->_reorderCmd['command'],
+						$chatbotHelper->_add2CartCmd['command'],
+						$chatbotHelper->_checkoutCmd['command'],
+						$chatbotHelper->_clearCartCmd['command'],
+						$chatbotHelper->_trackOrderCmd['command'],
+						$chatbotHelper->_supportCmd['command'],
+						$chatbotHelper->_sendEmailCmd['command'],
+						$chatbotHelper->_cancelCmd['command'],
+						$chatbotHelper->_helpCmd['command'],
+						$chatbotHelper->_aboutCmd['command'],
+						$chatbotHelper->_logoutCmd['command'],
+						$chatbotHelper->_registerCmd['command']
 					);
 
 					foreach ($cmdarray as $cmd)
@@ -531,37 +529,37 @@
 			}
 
 			// cancel command
-			if ($chatbotHelper->checkCommand($text, $chatdata->_cancelCmd))
+			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_cancelCmd))
 			{
-				if ($conversationState == $chatdata->_listCategoriesState)
+				if ($conversationState == $chatbotHelper->_listCategoriesState)
 				{
-					$message = $chatdata->_canceledMessage;
+					$message = $chatbotHelper->_canceledMessage;
 				}
-				else if ($conversationState == $chatdata->_supportState)
+				else if ($conversationState == $chatbotHelper->_supportState)
 				{
-					$message = $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("exiting support mode.");
+					$message = $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("exiting support mode.");
 				}
-				else if ($conversationState == $chatdata->_searchState)
+				else if ($conversationState == $chatbotHelper->_searchState)
 				{
-					$message = $chatdata->_canceledMessage;
+					$message = $chatbotHelper->_canceledMessage;
 				}
-				else if ($conversationState == $chatdata->_sendEmailState)
+				else if ($conversationState == $chatbotHelper->_sendEmailState)
 				{
-					$message = $chatdata->_canceledMessage;
+					$message = $chatbotHelper->_canceledMessage;
 				}
-				else if ($conversationState == $chatdata->_listProductsState)
+				else if ($conversationState == $chatbotHelper->_listProductsState)
 				{
-					$message = $chatdata->_canceledMessage;
+					$message = $chatbotHelper->_canceledMessage;
 				}
-				else if ($conversationState == $chatdata->_listOrdersState)
+				else if ($conversationState == $chatbotHelper->_listOrdersState)
 				{
-					$message = $chatdata->_canceledMessage;
+					$message = $chatbotHelper->_canceledMessage;
 				}
 				else
-					$message = $chatdata->_errorMessage;
+					$message = $chatbotHelper->_errorMessage;
 
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
 					$facebook->postMessage($chatId, $message);
 				$facebook->sendChatAction($chatId, "typing_off");
@@ -569,11 +567,11 @@
 			}
 
 			// add2cart commands
-			if ($chatbotHelper->startsWith($text, $chatdata->_add2CartCmd['command'])) // ignore alias // old checkCommandWithValue
+			if ($chatbotHelper->startsWith($text, $chatbotHelper->_add2CartCmd['command'])) // ignore alias // old checkCommandWithValue
 			{
 				$errorFlag = false;
 				$notInStock = false;
-				$cmdvalue = $chatbotHelper->getCommandValue($text, $chatdata->_add2CartCmd['command']);
+				$cmdvalue = $chatbotHelper->getCommandValue($text, $chatbotHelper->_add2CartCmd['command']);
 				if ($cmdvalue) // TODO
 				{
 					$product = Mage::getModel('catalog/product')->load($cmdvalue);
@@ -585,10 +583,10 @@
 							$productName = $product->getName();
 							if (empty($productName))
 								$productName = $mageHelper->__("this product");
-							$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("adding %s to your cart.", $productName));
+							$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("adding %s to your cart.", $productName));
 							$facebook->sendChatAction($chatId, "typing_on");
 							if ($chatdata->addProd2Cart($cmdvalue))
-								$facebook->postMessage($chatId, $mageHelper->__("Added. To checkout send") . ' "' . $chatdata->_checkoutCmd['command'] . '"');
+								$facebook->postMessage($chatId, $mageHelper->__("Added. To checkout send") . ' "' . $chatbotHelper->_checkoutCmd['command'] . '"');
 							else
 								$errorFlag = true;
 						}
@@ -602,7 +600,7 @@
 					$errorFlag = true;
 
 				if ($errorFlag)
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else if ($notInStock)
 					$facebook->postMessage($chatId, $mageHelper->__("This product is not in stock."));
 
@@ -610,7 +608,7 @@
 			}
 
 			// help command
-			if ($chatbotHelper->checkCommand($text, $chatdata->_helpCmd))
+			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_helpCmd))
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
 				if (!empty($message)) // TODO
@@ -629,7 +627,7 @@
 			}
 
 			// about command
-			if ($chatbotHelper->checkCommand($text, $chatdata->_aboutCmd))
+			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_aboutCmd))
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
 				if (!empty($message))
@@ -640,7 +638,7 @@
 			}
 
 			// states
-			if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
+			if ($conversationState == $chatbotHelper->_listCategoriesState) // TODO show only in stock products
 			{
 				$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 
@@ -650,9 +648,9 @@
 					$categoryName = $mageHelper->__("this caytegory");
 
 				if ($showMore == 0) // show only in the first time
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $categoryName));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $categoryName));
 				else
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 				$facebook->sendChatAction($chatId, "typing_on");
 				$errorFlag = false;
@@ -699,7 +697,7 @@
 											array(
 												'type' => 'postback',
 												'title' => $mageHelper->__("Add to cart"),
-												'payload' => $chatdata->_add2CartCmd['command'] . $productID
+												'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
 											),
 											array(
 												'type' => 'web_url',
@@ -734,16 +732,16 @@
 												'buttons' => $button
 											);
 											array_push($elements, $element);
-											if ($chatdata->getFacebookConvState() != $chatdata->_listProductsState)
-												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listProductsState))
-													$facebook->postMessage($chatId, $chatdata->_errorMessage);
+											if ($chatdata->getFacebookConvState() != $chatbotHelper->_listProductsState)
+												if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listProductsState))
+													$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 											break;
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
 										{
 											//$facebook->postMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
-											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-												$facebook->postMessage($chatId, $chatdata->_errorMessage);
+											if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+												$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 										}
 									}
 									$i++;
@@ -770,26 +768,26 @@
 
 				if ($errorFlag)
 				{
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
-					$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
+					$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
 				}
 				return $facebook->respondSuccess();
 			}
-			else if ($conversationState == $chatdata->_searchState)
+			else if ($conversationState == $chatbotHelper->_searchState)
 			{
 				if ($showMore == 0) // show only in the first time
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I search for '%s' for you.", $text));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I search for '%s' for you.", $text));
 				else
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 				$facebook->sendChatAction($chatId, "typing_on");
 				$errorFlag = false;
 				$noProductFlag = false;
 				$productIDs = $chatbotHelper->getProductIdsBySearch($text);
 				$elements = array();
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
 				{
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					return $facebook->respondSuccess();
 				}
 				else if ($productIDs)
@@ -825,7 +823,7 @@
 										array(
 											'type' => 'postback',
 											'title' => $mageHelper->__("Add to cart"),
-											'payload' => $chatdata->_add2CartCmd['command'] . $productID
+											'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
 										),
 										array(
 											'type' => 'web_url',
@@ -860,16 +858,16 @@
 											'buttons' => $button
 										);
 										array_push($elements, $element);
-										if ($chatdata->getFacebookConvState() != $chatdata->_listProductsState)
-											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listProductsState))
-												$facebook->postMessage($chatId, $chatdata->_errorMessage);
+										if ($chatdata->getFacebookConvState() != $chatbotHelper->_listProductsState)
+											if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listProductsState))
+												$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 										break;
 									}
 									else if (($i + 1) == $total) // if it's the last one, back to _startState
 									{
 										//$facebook->postMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
-										if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-											$facebook->postMessage($chatId, $chatdata->_errorMessage);
+										if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+											$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 									}
 								}
 								$i++;
@@ -887,20 +885,20 @@
 				if ($noProductFlag)
 					$facebook->postMessage($chatId, $mageHelper->__("Sorry, no products found for this criteria."));
 				else if ($errorFlag)
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
-				else if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listProductsState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
+				else if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listProductsState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
 					$facebook->sendGenericTemplate($chatId, $elements);
 
 				return $facebook->respondSuccess();
 			}
-			else if ($conversationState == $chatdata->_supportState)
+			else if ($conversationState == $chatbotHelper->_supportState)
 			{
 				$errorFlag = true;
 				if (!empty($supportGroupId))
 				{
-					if ($supportGroupId == $chatdata->_tgBot)
+					if ($supportGroupId == $chatbotHelper->_tgBot)
 					{
 						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 							$errorFlag = false;
@@ -911,13 +909,13 @@
 							array(
 								'type' => 'postback',
 								'title' => $mageHelper->__("End support"),
-								'payload' => $chatdata->_admEndSupportCmd . $chatId
+								'payload' => $chatbotHelper->_admEndSupportCmd . $chatId
 
 							),
 							array(
 								'type' => 'postback',
 								'title' => $mageHelper->__("Enable/Disable support"),
-								'payload' => $chatdata->_admBlockSupportCmd . $chatId
+								'payload' => $chatbotHelper->_admBlockSupportCmd . $chatId
 
 							),
 							array(
@@ -935,12 +933,12 @@
 				}
 
 				if ($errorFlag)
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support."));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support."));
 				return $facebook->respondSuccess();
 			}
-			else if ($conversationState == $chatdata->_sendEmailState)
+			else if ($conversationState == $chatbotHelper->_sendEmailState)
 			{
 				$facebook->postMessage($chatId, $mageHelper->__("Trying to send the email..."));
 				if ($chatdata->sendEmail($text, $username))
@@ -949,16 +947,16 @@
 				}
 				else
 					$facebook->postMessage($chatId, $mageHelper->__("Sorry, I wasn't able to send an email this time. Please try again later."));
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($conversationState == $chatdata->_trackOrderState)
+			else if ($conversationState == $chatbotHelper->_trackOrderState)
 			{
 				$errorFlag = false;
 				if ($chatdata->getIsLogged() == "1")
 				{
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I check the status for order %s.", $text));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I check the status for order %s.", $text));
 					$facebook->sendChatAction($chatId, "typing_on");
 					$order = Mage::getModel('sales/order')->loadByIncrementId($text);
 					if ($order->getId())
@@ -974,25 +972,25 @@
 						$errorFlag = true;
 				}
 				else
-					$facebook->postMessage($chatId, $chatdata->_loginFirstMessage);
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else if ($errorFlag)
 					$facebook->postMessage($chatId, $mageHelper->__("Sorry, we couldn't find any order with this information."));
 				return $facebook->respondSuccess();
 			}
 
 			//general commands
-			if ($chatbotHelper->checkCommand($text, $chatdata->_listCategoriesCmd))
+			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_listCategoriesCmd))
 			{
-				$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all categories for you."));
+				$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all categories for you."));
 				$facebook->sendChatAction($chatId, "typing_on");
 
 				$categoryHelper = Mage::helper('catalog/category');
 				$categories = $categoryHelper->getStoreCategories(); // TODO test with a store without categories
 				$i = 0;
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listCategoriesState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listCategoriesState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else if ($categories)
 				{
 					$replies = array();
@@ -1028,26 +1026,26 @@
 					}
 					if (!empty($replies))
 					{
-						$message = $mageHelper->__("Select a category") . ". " . $chatdata->_cancelMessage;
+						$message = $mageHelper->__("Select a category") . ". " . $chatbotHelper->_cancelMessage;
 						$facebook->sendQuickReply($chatId, $message, $replies);
 					}
 				}
 				else if ($i == 0)
 				{
 					$facebook->postMessage($chatId, $mageHelper->__("No categories available at the moment, please try again later."));
-					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				}
 				else
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_checkoutCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_checkoutCmd))
 			{
 				$sessionId = null;
 				$quoteId = null;
-				$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I prepare the checkout for you."));
+				$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I prepare the checkout for you."));
 				$facebook->sendChatAction($chatId, "typing_on");
 				if ($chatdata->getIsLogged() == "1")
 				{
@@ -1097,26 +1095,26 @@
 						}
 						$message .= $mageHelper->__("Total") . ": " . Mage::helper('core')->currency($ordersubtotal, true, false);
 
-						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_checkoutState))
-							$facebook->postMessage($chatId, $chatdata->_errorMessage);
+						if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_checkoutState))
+							$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 						else
 							$facebook->sendButtonTemplate($chatId, $message, $buttons);
 					}
 					else if (!$chatdata->clearCart()) // try to clear cart
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				}
 				if ($emptyCart)
 					$facebook->postMessage($chatId, $mageHelper->__("Your cart is empty."));
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_clearCartCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_clearCartCmd))
 			{
-				$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I clear your cart."));
+				$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I clear your cart."));
 				$facebook->sendChatAction($chatId, "typing_on");
 				$errorFlag = false;
 				if ($chatdata->clearCart())
 				{
-					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_clearCartState))
+					if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_clearCartState))
 						$errorFlag = true;
 					else
 						$facebook->postMessage($chatId, $mageHelper->__("Cart cleared."));
@@ -1124,18 +1122,18 @@
 				else
 					$errorFlag = true;
 				if ($errorFlag)
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_searchCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_searchCmd))
 			{
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_searchState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("what do you want to search for?") . " " . $chatdata->_cancelMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("what do you want to search for?") . " " . $chatbotHelper->_cancelMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_loginCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_loginCmd))
 			{
 				if ($chatdata->getIsLogged() != "1") // customer not logged
 				{
@@ -1148,13 +1146,13 @@
 							'title' => $mageHelper->__("Login")
 						)
 					);
-					if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_loginState))
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_loginState))
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					else
 					{
 						$facebook->sendButtonTemplate(
 							$chatId, $mageHelper->__("To login to your account, access the link below") . ". " .
-							$mageHelper->__("If you want to logout from your account, just send") . ' "' . $chatdata->_logoutCmd['command'] . '"', $buttons
+							$mageHelper->__("If you want to logout from your account, just send") . ' "' . $chatbotHelper->_logoutCmd['command'] . '"', $buttons
 						);
 					}
 				}
@@ -1162,7 +1160,7 @@
 					$facebook->postMessage($chatId, $mageHelper->__("You're already logged."));
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_logoutCmd)) // TODO
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_logoutCmd)) // TODO
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
@@ -1170,7 +1168,7 @@
 					$errorFlag = false;
 					try
 					{
-						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState);
+						$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
 						$chatdata->updateChatdata('is_logged', "0");
 						$chatdata->updateChatdata('customer_id', ""); // TODO null?
 						$chatdata->clearCart();
@@ -1181,7 +1179,7 @@
 					}
 
 					if ($errorFlag)
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					else
 						$facebook->postMessage($chatId, $mageHelper->__("Done."));
 				}
@@ -1190,23 +1188,23 @@
 
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_registerCmd)) // TODO
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_registerCmd)) // TODO
 			{
 				$registerUrl = strtok(Mage::getUrl('customer/account/create'), '?');
 				if (!empty($registerUrl))
 					$facebook->postMessage($chatId, $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl));
 				else
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_listOrdersCmd) || $moreOrders)
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_listOrdersCmd) || $moreOrders)
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
 					if ($showMore == 0) // show only in the first time
-						$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather your orders for listing."));
+						$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather your orders for listing."));
 					else
-						$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
+						$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 					$facebook->sendChatAction($chatId, "typing_on");
 					$ordersIDs = $chatbotHelper->getOrdersIdsFromCustomer($chatdata->getCustomerId());
@@ -1234,7 +1232,7 @@
 									$button = array(
 										'type' => 'postback',
 										'title' => $mageHelper->__("Reorder"),
-										'payload' => $chatdata->_reorderCmd['command'] . $orderID
+										'payload' => $chatbotHelper->_reorderCmd['command'] . $orderID
 									);
 									array_push($buttons, $button);
 									if ($i >= $showMore)
@@ -1248,16 +1246,16 @@
 												'payload' => $listMoreOrders . (string)($i + 1)
 											);
 											array_push($buttons, $button);
-											if ($chatdata->getFacebookConvState() != $chatdata->_listOrdersState)
-												if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listOrdersState))
-													$facebook->postMessage($chatId, $chatdata->_errorMessage);
+											if ($chatdata->getFacebookConvState() != $chatbotHelper->_listOrdersState)
+												if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listOrdersState))
+													$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 											$flagBreak = true;
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
 										{
 											//$facebook->postMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
-											if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
-												$facebook->postMessage($chatId, $chatdata->_errorMessage);
+											if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
+												$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 										}
 
 										$facebook->sendButtonTemplate($chatId, $message, $buttons);
@@ -1268,9 +1266,9 @@
 								}
 							}
 							if ($i == 0)
-								$facebook->postMessage($chatId, $chatdata->_errorMessage);
-//							else if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listOrdersState))
-//								$facebook->postMessage($chatId, $chatdata->_errorMessage);
+								$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
+//							else if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listOrdersState))
+//								$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 						}
 					}
 					else
@@ -1280,17 +1278,17 @@
 					}
 				}
 				else
-					$facebook->postMessage($chatId, $chatdata->_loginFirstMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->startsWith($text, $chatdata->_reorderCmd['command'])) // ignore alias // old checkCommandWithValue
+			else if ($chatbotHelper->startsWith($text, $chatbotHelper->_reorderCmd['command'])) // ignore alias // old checkCommandWithValue
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I add the products from this order to your cart."));
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("please wait while I add the products from this order to your cart."));
 					$facebook->sendChatAction($chatId, "typing_on");
 					$errorFlag = false;
-					$cmdvalue = $chatbotHelper->getCommandValue($text, $chatdata->_reorderCmd['command']);
+					$cmdvalue = $chatbotHelper->getCommandValue($text, $chatbotHelper->_reorderCmd['command']);
 					if ($cmdvalue)
 					{
 						if ($chatdata->clearCart())
@@ -1313,47 +1311,47 @@
 						$errorFlag = true;
 
 					if ($errorFlag)
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
-					else if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_reorderState))
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
+					else if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_reorderState))
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					else // success!!
-						$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("to checkout send") . ' "' . $chatdata->_checkoutCmd['command'] . '"');
+						$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("to checkout send") . ' "' . $chatbotHelper->_checkoutCmd['command'] . '"');
 				}
 				else
-					$facebook->postMessage($chatId, $chatdata->_loginFirstMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_trackOrderCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_trackOrderCmd))
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
 					$ordersIDs = $chatbotHelper->getOrdersIdsFromCustomer($chatdata->getCustomerId());
 					if ($ordersIDs)
 					{
-						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_trackOrderState))
-							$facebook->postMessage($chatId, $chatdata->_errorMessage);
+						if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_trackOrderState))
+							$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 						else
-							$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("send the order number."));
+							$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("send the order number."));
 					}
 					else
 						$facebook->postMessage($chatId, $mageHelper->__("Your account dosen't have any orders."));
 				}
 				else
-					$facebook->postMessage($chatId, $chatdata->_loginFirstMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_supportCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_supportCmd))
 			{
 				$supportEnabled = $chatdata->getEnableSupport();
 				$errorFlag = false;
 				if ($supportEnabled == "1")
 				{
-					if ($chatdata->getTelegramConvState() != $chatdata->_supportState) // TODO
+					if ($chatdata->getTelegramConvState() != $chatbotHelper->_supportState) // TODO
 					{
-						if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState))
+						if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState))
 							$errorFlag = true;
 						else
-							$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("what do you need support for?") . " " . $chatdata->_cancelMessage);
+							$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("what do you need support for?") . " " . $chatbotHelper->_cancelMessage);
 					}
 					else
 						$facebook->postMessage($chatId, $mageHelper->__("You're already on support in other chat application, please close it before opening a new one."));
@@ -1362,41 +1360,41 @@
 					$facebook->postMessage($chatId, $mageHelper->__("I'm sorry, you can't ask for support now. Please try again later."));
 
 				if ($errorFlag)
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				return $facebook->respondSuccess();
 			}
-			else if ($chatbotHelper->checkCommand($text, $chatdata->_sendEmailCmd))
+			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_sendEmailCmd))
 			{
-				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_sendEmailState))
-					$facebook->postMessage($chatId, $chatdata->_errorMessage);
+				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_sendEmailState))
+					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
 				{
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("write the email content."));
-					$facebook->postMessage($chatId, $mageHelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $chatdata->_cancelMessage);
+					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("write the email content."));
+					$facebook->postMessage($chatId, $mageHelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $chatbotHelper->_cancelMessage);
 				}
 				return $facebook->respondSuccess();
 			}
 			else
 			{
-				$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState); // back to start state
+				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // back to start state
 				if ($enableFinalMessage2Support == "1")
 				{
 					$errorFlag = true;
-					if ($supportGroupId == $chatdata->_tgBot)
+					if ($supportGroupId == $chatbotHelper->_tgBot)
 						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 						{
-//								if ($chatdata->getTelegramConvState() != $chatdata->_supportState) // TODO
-//									$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState);
+//								if ($chatdata->getTelegramConvState() != $chatbotHelper->_supportState) // TODO
+//									$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
 							$errorFlag = false;
 						}
 
 					if ($errorFlag)
-						$facebook->postMessage($chatId, $chatdata->_errorMessage);
+						$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					else
 						$facebook->postMessage($chatId,
 							$mageHelper->__("Sorry, I didn't understand that.") . " " .
 							$mageHelper->__("Please wait while our support check your message so you can talk to a real person.") . " " .
-							$chatdata->_cancelMessage
+							$chatbotHelper->_cancelMessage
 						); // TODO
 					return $facebook->respondSuccess();
 				}
@@ -1460,22 +1458,22 @@
 													{
 														if (((float)$keyword->confidence * 100) < (float)$witAiConfidence)
 															continue;
-														if ($intent->value == $chatdata->_searchCmd['command'])
+														if ($intent->value == $chatbotHelper->_searchCmd['command'])
 														{
-															$chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState);
+															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_searchState);
 															//$facebook->_originalText = $listMoreSearch . $witResponse->entities->keyword . ",1";
 															$facebook->_originalText = $keyword->value;
 															$hasKeyword = true;
 															break;
 														}
-														else if ($intent->value == $chatdata->_listCategoriesCmd['command'])
+														else if ($intent->value == $chatbotHelper->_listCategoriesCmd['command'])
 														{
 															$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $keyword->value);
 															if ($_category) // check if variable isn't false/empty
 															{
 																if ($_category->getId()) // check if is a valid category
 																{
-																	$chatdata->updateChatdata('facebook_conv_state', $chatdata->_listCategoriesState);
+																	$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listCategoriesState);
 																	//$facebook->_originalText = $listMoreCategories . $witResponse->entities->keyword . ",1";
 																	$facebook->_originalText = $keyword->value;
 																	$hasKeyword = true;
@@ -1483,32 +1481,32 @@
 															}
 															break;
 														}
-														else if ($intent->value == $chatdata->_trackOrderCmd['command'])
+														else if ($intent->value == $chatbotHelper->_trackOrderCmd['command'])
 														{
 															if ($chatdata->getIsLogged() == "1")
 															{
-																$chatdata->updateChatdata('facebook_conv_state', $chatdata->_trackOrderState);
+																$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_trackOrderState);
 																$facebook->_originalText = $keyword->value;
 																$hasKeyword = true;
 															}
 															else
 															{
-																$facebook->postMessage(array('chat_id' => $chatId, 'text' => $chatdata->_loginFirstMessage));
+																$facebook->postMessage(array('chat_id' => $chatId, 'text' => $chatbotHelper->_loginFirstMessage));
 																$break = true;
 																return $facebook->respondSuccess();
 															}
 															break;
 														}
-														else if ($intent->value == $chatdata->_supportCmd['command'])
+														else if ($intent->value == $chatbotHelper->_supportCmd['command'])
 														{
-															$chatdata->updateChatdata('facebook_conv_state', $chatdata->_supportState);
+															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
 															$facebook->_originalText = $keyword->value;
 															$hasKeyword = true;
 															break;
 														}
-														else if ($intent->value == $chatdata->_sendEmailCmd['command'])
+														else if ($intent->value == $chatbotHelper->_sendEmailCmd['command'])
 														{
-															$chatdata->updateChatdata('facebook_conv_state', $chatdata->_sendEmailState);
+															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_sendEmailState);
 															$facebook->_originalText = $keyword->value;
 															$hasKeyword = true;
 															break;

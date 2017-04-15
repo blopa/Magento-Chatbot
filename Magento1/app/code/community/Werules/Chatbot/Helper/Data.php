@@ -1,6 +1,99 @@
 <?php
 class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 {
+	// ----- CONSTANTS ----------
+
+	// STRINGS
+	public $_tgBot = "telegram";
+	public $_fbBot = "facebook";
+	public $_wappBot = "whatsapp";
+	public $_wechatBot = "wechat";
+
+	// CONVERSATION STATES
+	public $_startState = 0;
+	public $_listCategoriesState = 1;
+	public $_listProductsState = 2;
+	public $_searchState = 3;
+	public $_loginState = 4;
+	public $_listOrdersState = 5;
+	public $_reorderState = 6;
+	public $_add2CartState = 7;
+	public $_checkoutState = 9;
+	public $_trackOrderState = 10;
+	public $_supportState = 11;
+	public $_sendEmailState = 12;
+	public $_clearCartState = 13;
+
+	// ADMIN STATES
+	public $_replyToSupportMessageState = 14;
+
+	// COMMANDS
+	public $_cmdList =
+		"
+			start,
+			list_categories,
+			search,
+			login,
+			list_orders,
+			reorder,
+			add2cart,
+			checkout,
+			clear_cart,
+			track_order,
+			support,
+			send_email,
+			cancel,
+			help,
+			about,
+			logout,
+			register
+		";
+	public $_startCmd = array();
+	public $_listCategoriesCmd = array();
+	public $_searchCmd = array();
+	public $_loginCmd = array();
+	public $_listOrdersCmd = array();
+	public $_reorderCmd = array();
+	public $_add2CartCmd = array();
+	public $_checkoutCmd = array();
+	public $_clearCartCmd = array();
+	public $_trackOrderCmd = array();
+	public $_supportCmd = array();
+	public $_sendEmailCmd = array();
+	public $_cancelCmd = array();
+	public $_helpCmd = array();
+	public $_aboutCmd = array();
+	public $_logoutCmd = array();
+	public $_registerCmd = array();
+
+	// admin cmds
+//		protected $adminCmdList =
+//		"
+//			messagetoall,
+//			endsupport,
+//			blocksupport
+//		";
+	public $_admSendMessage2AllCmd = "messagetoall";
+	public $_admEndSupportCmd = "endsupport";
+	public $_admBlockSupportCmd = "blocksupport";
+	public $_admEnableSupportCmd = "enablesupport";
+
+	// REGEX
+	public $_unallowedCharacters = "/[^A-Za-z0-9 _]/";
+
+	// DEFAULT MESSAGES
+	public $_errorMessage = "";
+	public $_cancelMessage = "";
+	public $_canceledMessage = "";
+	public $_loginFirstMessage = "";
+	public $_positiveMessages = array();
+
+	// URLS
+	public $_tgUrl = "https://t.me/";
+	public $_fbUrl = "https://m.me/";
+//		protected $_wappUrl = "";
+//		protected $_wechatUrl = "";
+
 //	public function transcribeAudio()
 //	{
 //		$googleSpeechURL = "https://speech.googleapis.com/v1beta1/speech:syncrecognize?key=xxxxxxxxxxxx";
