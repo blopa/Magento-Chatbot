@@ -54,4 +54,27 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 
 		return (substr($haystack, -$length) === $needle);
 	}
+
+	public function getProductIdsBySearch($searchString)
+	{
+		// Code to Search Product by $searchstring and get Product IDs
+		$productCollection = Mage::getResourceModel('catalog/product_collection')
+			->addAttributeToSelect('*')
+			->addAttributeToFilter('visibility', 4)
+			->addAttributeToFilter('type_id', 'simple')
+			->addAttributeToFilter(
+				array(
+					array('attribute' => 'sku', 'like' => '%' . $searchString .'%'),
+					array('attribute' => 'name', 'like' => '%' . $searchString .'%')
+				)
+			);
+		//->getAllIds();
+		Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
+		$productIDs = $productCollection->getAllIds();
+
+		if (!empty($productIDs))
+			return $productIDs;
+
+		return false;
+	}
 }

@@ -104,19 +104,19 @@
 			// handle inline search
 			if (!empty($inlineQuery))
 			{
+				$chatbotHelper = $this->_chatbotHelper;
 				if ($enableInlineBot == "1")
 				{
 					$query = $inlineQuery['query'];
 					$queryId = $inlineQuery['id'];
 					$results = array();
-					$chatdataInline = Mage::getModel('chatbot/chatdata');
+					//$chatdataInline = Mage::getModel('chatbot/chatdata');
 					if (!empty($query))
 					{
-						$productIDs = $chatdataInline->getProductIdsBySearch($query);
+						$productIDs = $chatbotHelper->getProductIdsBySearch($query);
 						$mageHelperInline = Mage::helper('core');
 						if (!empty($productIDs))
 						{
-							$chatbotHelper = $this->_chatbotHelper;
 							//$total = count($productIDs);
 							$i = 0;
 							foreach($productIDs as $productID)
@@ -904,7 +904,7 @@
 				$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 				$errorFlag = false;
 				$noProductFlag = false;
-				$productIDs = $chatdata->getProductIdsBySearch($text);
+				$productIDs = $chatbotHelper->getProductIdsBySearch($text);
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_startState))
 				{
 					$telegram->postMessage($chatId, $chatdata->_errorMessage);

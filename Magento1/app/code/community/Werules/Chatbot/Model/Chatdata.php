@@ -438,29 +438,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return false;
 		}
 
-		protected function getProductIdsBySearch($searchString)
-		{
-			// Code to Search Product by $searchstring and get Product IDs
-			$productCollection = Mage::getResourceModel('catalog/product_collection')
-				->addAttributeToSelect('*')
-				->addAttributeToFilter('visibility', 4)
-				->addAttributeToFilter('type_id', 'simple')
-				->addAttributeToFilter(
-					array(
-						array('attribute' => 'sku', 'like' => '%' . $searchString .'%'),
-						array('attribute' => 'name', 'like' => '%' . $searchString .'%')
-					)
-				);
-				//->getAllIds();
-			Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
-			$productIDs = $productCollection->getAllIds();
-
-			if (!empty($productIDs))
-				return $productIDs;
-
-			return false;
-		}
-
 //		protected function transcribeAudio()
 //		{
 //			$googleSpeechURL = "https://speech.googleapis.com/v1beta1/speech:syncrecognize?key=xxxxxxxxxxxx";

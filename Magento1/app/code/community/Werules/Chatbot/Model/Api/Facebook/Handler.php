@@ -784,7 +784,7 @@
 				$facebook->sendChatAction($chatId, "typing_on");
 				$errorFlag = false;
 				$noProductFlag = false;
-				$productIDs = $chatdata->getProductIdsBySearch($text);
+				$productIDs = $chatbotHelper->getProductIdsBySearch($text);
 				$elements = array();
 				if (!$chatdata->updateChatdata('facebook_conv_state', $chatdata->_startState))
 				{
