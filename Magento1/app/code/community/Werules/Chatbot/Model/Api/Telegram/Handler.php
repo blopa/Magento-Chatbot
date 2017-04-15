@@ -9,10 +9,10 @@
 		public $_chatId;
 		public $_messageId;
 
-        public function postMessage($chatId, $message)
-        {
-            return $this->sendMessage(array('chat_id' => $chatId, 'text' => $message));
-        }
+		public function postMessage($chatId, $message)
+		{
+			return $this->sendMessage(array('chat_id' => $chatId, 'text' => $message));
+		}
 	}
 
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
@@ -26,6 +26,12 @@
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
 			$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 			$this->_telegram = new TelegramBot($apikey);
+		}
+
+		public function setWebhook($webhookUrl)
+		{
+			$telegram = $this->_telegram;
+			return $telegram->setWebhook($webhookUrl);
 		}
 
 		public function foreignMessageToSupport($chatId, $text, $apiName, $customerName)

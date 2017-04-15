@@ -117,7 +117,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			{
 				$mageHelper = Mage::helper('core');
 				$apiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-				$telegram = new Telegram($apiKey);
+				//$telegram = new Telegram($apiKey);
+				$telegram = Mage::getModel('chatbot/api_telegram_handler');
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
 				// replace http by https, and remove all url parameters with strok

@@ -11,10 +11,10 @@
 		public $_isPayload = false;
 
 		public function postMessage($chatId, $message)
-        {
-            return $this->sendMessage($chatId, $message);
-        }
-    }
+		{
+			return $this->sendMessage($chatId, $message);
+		}
+	}
 
 	class Werules_Chatbot_Model_Api_Facebook_Handler extends Werules_Chatbot_Model_Chatdata
 	{
