@@ -34,6 +34,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 //		return json_decode($result, true);
 //	}
 
+	// excerpt text
 	public function excerpt($text, $size)
 	{
 		if (strlen($text) > $size)
@@ -46,6 +47,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return $text;
 	}
 
+	// get a value from a command, eg.: /add_product123 -> 123 is the ID of the product
 	public function getCommandValue($text, $cmd)
 	{
 		if (strlen($text) > strlen($cmd))
@@ -53,6 +55,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
+	// check if the message sent by the customer is a valid/enabled command
 	public function checkCommand($text, $cmd)
 	{
 		if ($cmd['command'])
@@ -79,6 +82,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return false;
 	}
 
+	// check if a message starts with something
 	public function startsWith($haystack, $needle)
 	{
 		if ($needle)
@@ -86,6 +90,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return false;
 	}
 
+	// check if a message ends with something
 	public function endsWith($haystack, $needle)
 	{
 		$length = strlen($needle);
@@ -95,6 +100,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return (substr($haystack, -$length) === $needle);
 	}
 
+	// return all orders id from a customer id
 	public function getOrdersIdsFromCustomer($customerId)
 	{
 		$ids = array();
@@ -111,6 +117,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return false;
 	}
 
+	// return all ids from a product search by text
 	public function getProductIdsBySearch($searchString)
 	{
 		// Code to Search Product by $searchstring and get Product IDs
@@ -134,6 +141,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return false;
 	}
 
+	// return image content to be sent as message
 	public function loadImageContent($productID)
 	{
 		$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
@@ -188,6 +196,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
+	// check if it's a valid Telegram command
 	public function validateTelegramCmd($cmd)
 	{
 		if ($cmd == "/")

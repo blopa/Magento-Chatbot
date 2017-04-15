@@ -1,15 +1,16 @@
 <?php
+	// this is the post view, where the module receives the posts from the chat APIs
 	$action = $this->getRequest()->getActionName();
 
-	if (!empty($action))
+	if (!empty($action)) // the view must have a action
 	{
 		$webhook = Mage::app()->getRequest()->getParam('webhook');
 		$key = Mage::app()->getRequest()->getParam('key');
 		$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 
-		if ($webhook == $customKey) // set webhook
+		if ($webhook == $customKey) // set webhook eg.: https://store.com/chatbot/chatdata/telegram/webhook/custom_key_here/ -> set webhook
 			echo Mage::getModel('chatbot/chatdata')->requestHandler($action, $webhook);
-		else if ($key == $customKey) // process request
+		else if ($key == $customKey) // process request eg.: https://store.com/chatbot/chatdata/telegram/key/custom_key_here/ -> process post requests
 			echo Mage::getModel('chatbot/chatdata')->requestHandler($action, null);
 		else // error
 		{

@@ -1,4 +1,5 @@
 <?php
+	// class that handles all Telegram requests.
 	require_once("Telegram.php");
 	//$api_path = Mage::getModuleDir('', 'Werules_Chatbot') . DS . "Model" . DS . "Api" . DS . "witAI" . DS;
 	//require_once($api_path . "witAI.php");

@@ -1,4 +1,6 @@
 <?php
+// settings controller, used to save all data from customer configurations
+// and also "links" a chatbot to the customer in the function loginFromChatbot
 class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Action {
 	public function preDispatch() // function that makes the settings page only available when the user is logged in
 	{
@@ -25,7 +27,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$postData = $this->getRequest()->getPost(); // get all post data
 		if ($postData)
 		{
-			$rand = str_shuffle("11e09rg009UUu89FSwe9yGRE4h");
+			$rand = str_shuffle("11e09rg009UUu89FSwe9yGRE4h"); // TODO
 			$clientid = Mage::getSingleton('customer/session')->getCustomer()->getId(); // get customer id
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($clientid, 'customer_id'); // load profile info from customer id
 			try
@@ -64,10 +66,11 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 	private function requestHandler()
 	{
 		$hash = Mage::app()->getRequest()->getParam('hash');
-		if ($hash)
+		if ($hash) // if is receiving a hash as URL parameter, we need to link the customer to a chatbot
 			$this->loginFromChatbot($hash);
 	}
 
+	// function that links/login a customer to a chatbot
 	private function loginFromChatbot($hash)
 	{
 		$success = false;
@@ -85,6 +88,8 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			{
 				try
 				{
+					// we'll get all chatdata information from the database and check if this customer is already logged in a chatbot
+					// then we merge all his data to a single chatdata data on the database
 					while ($chatdata->getCustomerId()) // gather all data from all chatdata models
 					{
 						if ($chatdata->getTelegramChatId() && $chatdata->getFacebookChatId() && $chatdata->getWhatsappChatId() && $chatdata->getWechatChatId())

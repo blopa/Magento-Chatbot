@@ -1,4 +1,5 @@
 <?php
+	// this is the main module, which contains all the data from the customer and make calls to the APIs handlers
 	//require_once("Api/Telegram/Handler.php");
 	//require_once("Api/Facebook/Handler.php");
 	//require_once("Api/Whatsapp/Handler.php");
@@ -524,16 +525,4 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			array_push($content, $replies); // $content[1] -> $replies
 			return $content;
 		}
-
-//		// WHATSAPP FUNCTIONS
-//		public function whatsappHandler($apiKey)
-//		{
-//
-//		}
-
-		// WECHAT FUNCTIONS (maybe)
-//		public function wechatHandler($apiKey)
-//		{
-//
-//		}
 	}
