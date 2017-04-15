@@ -2,7 +2,7 @@
 	class witAI
 	{
 		protected $_token;
-		protected $_version = '20170325';
+		protected $_version = '20170415';
 		protected $_data;
 
 		/// Class constructor
