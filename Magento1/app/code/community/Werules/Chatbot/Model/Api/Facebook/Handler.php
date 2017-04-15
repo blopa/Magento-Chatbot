@@ -641,13 +641,19 @@
 			// states
 			if ($conversationState == $chatdata->_listCategoriesState) // TODO show only in stock products
 			{
+				$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
+
+				if ($_category)
+					$categoryName = $_category->getName();
+				else
+					$categoryName = $mageHelper->__("this caytegory");
+
 				if ($showMore == 0) // show only in the first time
-					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $text));
+					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $categoryName));
 				else
 					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 				$facebook->sendChatAction($chatId, "typing_on");
-				$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 				$errorFlag = false;
 				if ($_category) // check if variable isn't false/empty
 				{

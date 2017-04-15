@@ -796,9 +796,14 @@
 				else
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 
+				if ($_category)
+					$categoryName = $_category->getName();
+				else
+					$categoryName = $mageHelper->__("this caytegory");
+
 				$keyb = $telegram->buildKeyBoardHide(true); // hide keyboard built on listing categories
 				if ($showMore == 0) // show only in the first time
-					$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $_category->getName())));
+					$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I gather all products from %s for you.", $categoryName)));
 				else
 					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
