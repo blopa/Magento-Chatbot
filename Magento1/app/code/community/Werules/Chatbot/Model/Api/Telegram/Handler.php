@@ -843,7 +843,7 @@
 									{
 										if ($i >= $showMore)
 										{
-											$image = $chatdata->loadImageContent($productID);
+											$image = $chatbotHelper->loadImageContent($productID);
 											if ($image)
 												$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
 											else
@@ -932,7 +932,7 @@
 							{
 								if ($i >= $showMore)
 								{
-									$image = $chatdata->loadImageContent($productID);
+									$image = $chatbotHelper->loadImageContent($productID);
 									if ($image)
 										$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
 									else

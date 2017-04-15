@@ -471,21 +471,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 //			return json_decode($result, true);
 //		}
 
-		protected function loadImageContent($productID)
-		{
-			$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
-			if ($imagepath && $imagepath != "no_selection")
-			{
-				$absolutePath =
-					Mage::getBaseDir('media') .
-					DS . "catalog" . DS . "product" .
-					$imagepath;
-
-				return curl_file_create($absolutePath, 'image/jpg');
-			}
-			return null;
-		}
-
 		// TELEGRAM FUNCTIONS
 		protected function validateTelegramCmd($cmd)
 		{

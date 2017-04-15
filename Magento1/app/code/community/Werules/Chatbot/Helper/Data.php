@@ -77,4 +77,19 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 
 		return false;
 	}
+
+	public function loadImageContent($productID)
+	{
+		$imagepath = Mage::getModel('catalog/product')->load($productID)->getSmallImage();
+		if ($imagepath && $imagepath != "no_selection")
+		{
+			$absolutePath =
+				Mage::getBaseDir('media') .
+				DS . "catalog" . DS . "product" .
+				$imagepath;
+
+			return curl_file_create($absolutePath, 'image/jpg');
+		}
+		return null;
+	}
 }
