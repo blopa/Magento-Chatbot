@@ -472,13 +472,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 //		}
 
 		// TELEGRAM FUNCTIONS
-		protected function validateTelegramCmd($cmd)
-		{
-			if ($cmd == "/")
-				return null;
-			return $cmd;
-		}
-
 		protected function listTelegramCommandsMessage()
 		{
 			$mageHelper = Mage::helper('core');

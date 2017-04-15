@@ -132,6 +132,13 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
+	public function validateTelegramCmd($cmd)
+	{
+		if ($cmd == "/")
+			return null;
+		return $cmd;
+	}
+
 	// FACEBOOK FUNCTIONS
 	public function prepareFacebookProdMessages($productID) // TODO add link to product name
 	{

@@ -542,7 +542,7 @@
 								{
 									$cmdId = $reply['command_id'];
 									if (!empty($cmdId))
-										$text = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
+										$text = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
 									if (!empty($message))
 										$telegram->postMessage($chatId, $message);
 								}
@@ -586,22 +586,22 @@
 			}
 
 			// init other commands (for now, no alias for telegram)
-			$chatdata->_listCategoriesCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(1)['command']);
-			$chatdata->_searchCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(2)['command']);
-			$chatdata->_loginCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(3)['command']);
-			$chatdata->_listOrdersCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(4)['command']);
-			$chatdata->_reorderCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(5)['command']);
-			$chatdata->_add2CartCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(6)['command']);
-			$chatdata->_checkoutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(7)['command']);
-			$chatdata->_clearCartCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(8)['command']);
-			$chatdata->_trackOrderCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(9)['command']);
-			$chatdata->_supportCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(10)['command']);
-			$chatdata->_sendEmailCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(11)['command']);
-			$chatdata->_cancelCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(12)['command']);
-			$chatdata->_helpCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(13)['command']);
-			$chatdata->_aboutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(14)['command']);
-			$chatdata->_logoutCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(15)['command']);
-			$chatdata->_registerCmd['command'] = $chatdata->validateTelegramCmd("/" . $chatdata->getCommandString(16)['command']);
+			$chatdata->_listCategoriesCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(1)['command']);
+			$chatdata->_searchCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(2)['command']);
+			$chatdata->_loginCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(3)['command']);
+			$chatdata->_listOrdersCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(4)['command']);
+			$chatdata->_reorderCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(5)['command']);
+			$chatdata->_add2CartCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(6)['command']);
+			$chatdata->_checkoutCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(7)['command']);
+			$chatdata->_clearCartCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(8)['command']);
+			$chatdata->_trackOrderCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(9)['command']);
+			$chatdata->_supportCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(10)['command']);
+			$chatdata->_sendEmailCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(11)['command']);
+			$chatdata->_cancelCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(12)['command']);
+			$chatdata->_helpCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(13)['command']);
+			$chatdata->_aboutCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(14)['command']);
+			$chatdata->_logoutCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(15)['command']);
+			$chatdata->_registerCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(16)['command']);
 			if (!$chatdata->_cancelCmd['command']) $chatdata->_cancelCmd['command'] = "/cancel"; // it must always have a cancel command
 
 			// init messages
