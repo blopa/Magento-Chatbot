@@ -127,6 +127,23 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 //		return json_decode($result, true);
 //	}
 
+	public function convertOggToMp3($audioFile)
+	{
+		// install ffmpeg by typoing sudo apt-get install ffmpeg
+		$output = "output.mp3";
+		if (!file_exists($audioFile))
+			return null;
+
+		$ffmpeg = exec('which ffmpeg');
+		$ffmpegcmd = $ffmpeg . " -i " . $audioFile . " -acodec libmp3lame " . $output;
+		exec($ffmpegcmd);
+
+		if (!file_exists($output))
+			return null;
+
+		return $output;
+	}
+
 	// excerpt text
 	public function excerpt($text, $size)
 	{

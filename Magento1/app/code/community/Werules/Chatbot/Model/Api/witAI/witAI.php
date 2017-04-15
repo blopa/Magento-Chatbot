@@ -28,7 +28,7 @@
 				'http' => array(
 					'method' => 'POST',
 					'header' => "Authorization: Bearer " . $this->_token . "\n" .
-							"Content-Type: audio/wav" . "\r\n",
+						"Content-Type: audio/mpeg3" . "\r\n",
 					'content' => file_get_contents($audioFile)
 				)
 			);
