@@ -1,7 +1,7 @@
 <?php
-	include("Messenger.php");
+	require_once("Messenger.php");
 	//$api_path = Mage::getModuleDir('', 'Werules_Chatbot') . DS . "Model" . DS . "Api" . DS . "witAI" . DS;
-	//include($api_path . "witAI.php");
+	//require_once($api_path . "witAI.php");
 
 	class MessengerBot extends Messenger
 	{

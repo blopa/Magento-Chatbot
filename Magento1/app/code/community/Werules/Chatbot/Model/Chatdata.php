@@ -1,9 +1,9 @@
 <?php
-	//include("Api/Telegram/Handler.php");
-	//include("Api/Facebook/Handler.php");
-	//include("Api/Whatsapp/Handler.php");
-	//include("Api/WeChat/Handler.php");
-	include("Api/witAI/witAI.php");
+	//require_once("Api/Telegram/Handler.php");
+	//require_once("Api/Facebook/Handler.php");
+	//require_once("Api/Whatsapp/Handler.php");
+	//require_once("Api/WeChat/Handler.php");
+	require_once("Api/witAI/witAI.php");
 
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
