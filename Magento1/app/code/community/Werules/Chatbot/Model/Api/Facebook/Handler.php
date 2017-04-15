@@ -27,6 +27,7 @@
 			//$this->_init('chatbot/api_facebook_handler'); // this is location of the resource file.
 			$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
 			$this->_facebook = new MessengerBot($apikey);
+			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
 		public function foreignMessageFromSupport($chatId, $text)

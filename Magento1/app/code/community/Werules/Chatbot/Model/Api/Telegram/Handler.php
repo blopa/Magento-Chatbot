@@ -26,6 +26,7 @@
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
 			$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 			$this->_telegram = new TelegramBot($apikey);
+			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
 		public function setWebhook($webhookUrl)
