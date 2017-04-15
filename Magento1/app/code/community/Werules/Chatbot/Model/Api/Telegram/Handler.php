@@ -259,7 +259,7 @@
 				{
 					if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_listCategoriesState))
 					{
-						$value = $this->getCommandValue($text, $listMoreCategories);
+						$value = $chatbotHelper->getCommandValue($text, $listMoreCategories);
 						$arr = explode("_", $value);
 						$cat_id = (int)$arr[0]; // get category id
 						$showMore = (int)$arr[1]; // get where listing stopped
@@ -269,7 +269,7 @@
 				{
 					if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState))
 					{
-						$value = $this->getCommandValue($text, $listMoreSearch);
+						$value = $chatbotHelper->getCommandValue($text, $listMoreSearch);
 						$arr = explode("_", $value);
 						$showMore = (int)end($arr); // get where listing stopped
 						$value = str_replace("_" . (string)$showMore, "", $value);
@@ -280,7 +280,7 @@
 				{
 					if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_listOrdersState))
 					{
-						$value = $this->getCommandValue($text, $listMoreOrders);
+						$value = $chatbotHelper->getCommandValue($text, $listMoreOrders);
 						$showMore = (int)$value; // get where listing stopped
 						$moreOrders = true;
 					}
@@ -380,7 +380,7 @@
 
 						if ($chatdata->startsWith($text, $admSend2All)) // old checkCommandWithValue
 						{
-							$message = trim($chatdata->getCommandValue($text, $admSend2All));
+							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
 							if (!empty($message))
 							{
 								$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
@@ -752,7 +752,7 @@
 			{
 				$errorFlag = false;
 				$notInStock = false;
-				$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_add2CartCmd['command']);
+				$cmdvalue = $chatbotHelper->getCommandValue($text, $chatdata->_add2CartCmd['command']);
 				if ($cmdvalue) // TODO
 				{
 					$product = Mage::getModel('catalog/product')->load($cmdvalue);
@@ -1309,7 +1309,7 @@
 					$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I add the products from this order to your cart."));
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
 					$errorFlag = false;
-					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_reorderCmd['command']);
+					$cmdvalue = $chatbotHelper->getCommandValue($text, $chatdata->_reorderCmd['command']);
 					if ($cmdvalue)
 					{
 						if ($chatdata->clearCart())

@@ -364,13 +364,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return array('command' => null, 'alias' => null);
 		}
 
-		protected function getCommandValue($text, $cmd)
-		{
-			if (strlen($text) > strlen($cmd))
-				return substr($text, strlen($cmd), strlen($text));
-			return null;
-		}
-
 		protected function checkCommand($text, $cmd)
 		{
 			if ($cmd['command'])

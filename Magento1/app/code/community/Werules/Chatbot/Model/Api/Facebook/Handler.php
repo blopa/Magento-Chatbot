@@ -175,7 +175,7 @@
 				{
 					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_listCategoriesState))
 					{
-						$value = $this->getCommandValue($text, $listMoreCategories);
+						$value = $chatbotHelper->getCommandValue($text, $listMoreCategories);
 						$arr = explode(",", $value);
 						$text = $arr[0];
 						$showMore = (int)$arr[1];
@@ -185,7 +185,7 @@
 				{
 					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_searchState))
 					{
-						$value = $this->getCommandValue($text, $listMoreSearch);
+						$value = $chatbotHelper->getCommandValue($text, $listMoreSearch);
 						$arr = explode(",", $value);
 						$text = $arr[0];
 						$showMore = (int)$arr[1];
@@ -195,7 +195,7 @@
 				{
 					if ($chatdata->updateChatdata('facebook_conv_state', $chatdata->_listOrdersState))
 					{
-						$value = $this->getCommandValue($text, $listMoreOrders);
+						$value = $chatbotHelper->getCommandValue($text, $listMoreOrders);
 						$showMore = (int)$value; // get where listing stopped
 						$moreOrders = true;
 					}
@@ -236,7 +236,7 @@
 				}
 				else if ($chatdata->startsWith($text, $chatdata->_admSendMessage2AllCmd)) // old checkCommandWithValue
 				{
-					$message = trim($chatdata->getCommandValue($text, $chatdata->_admSendMessage2AllCmd));
+					$message = trim($chatbotHelper->getCommandValue($text, $chatdata->_admSendMessage2AllCmd));
 					if (!empty($message))
 					{
 						$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
@@ -255,7 +255,7 @@
 				{
 					if ($chatdata->startsWith($text, $chatdata->_admEndSupportCmd)) // finish customer support  // old checkCommandWithValue
 					{
-						$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admEndSupportCmd)); // get customer chatId from payload
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatdata->_admEndSupportCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
 						$customerData->updateChatdata('facebook_conv_state', $chatdata->_startState); // update conversation state
 
@@ -264,7 +264,7 @@
 					}
 					else if ($chatdata->startsWith($text, $chatdata->_admBlockSupportCmd)) // block user from using support // old checkCommandWithValue
 					{
-						$customerChatId = trim($chatdata->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatdata->_admBlockSupportCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
 						if ($customerData->getEnableSupport() == "1")
 						{
@@ -280,7 +280,7 @@
 					}
 					else if ($chatdata->startsWith($text, $replyToCustomerMessage)) // old checkCommandWithValue
 					{
-						$customerChatId = trim($chatdata->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
 						$chatdata->updateChatdata('facebook_support_reply_chat_id', $customerChatId);
 						$chatdata->updateChatdata('facebook_conv_state', $chatdata->_replyToSupportMessageState);
 
@@ -572,7 +572,7 @@
 			{
 				$errorFlag = false;
 				$notInStock = false;
-				$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_add2CartCmd['command']);
+				$cmdvalue = $chatbotHelper->getCommandValue($text, $chatdata->_add2CartCmd['command']);
 				if ($cmdvalue) // TODO
 				{
 					$product = Mage::getModel('catalog/product')->load($cmdvalue);
@@ -1283,7 +1283,7 @@
 					$facebook->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("please wait while I add the products from this order to your cart."));
 					$facebook->sendChatAction($chatId, "typing_on");
 					$errorFlag = false;
-					$cmdvalue = $chatdata->getCommandValue($text, $chatdata->_reorderCmd['command']);
+					$cmdvalue = $chatbotHelper->getCommandValue($text, $chatdata->_reorderCmd['command']);
 					if ($cmdvalue)
 					{
 						if ($chatdata->clearCart())
