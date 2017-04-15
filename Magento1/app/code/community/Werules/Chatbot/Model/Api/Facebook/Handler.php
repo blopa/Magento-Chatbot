@@ -808,7 +808,7 @@
 						$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
 						foreach ($productIDs as $productID)
 						{
-							$message = $chatdata->prepareFacebookProdMessages($productID);
+							$message = $chatbotHelper->prepareFacebookProdMessages($productID);
 							//Mage::helper('core')->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
 							if ($message) // TODO
 							{
@@ -1227,7 +1227,7 @@
 							foreach($ordersIDs as $orderID)
 							{
 								$buttons = array();
-								$message = $chatdata->prepareFacebookOrderMessages($orderID);
+								$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
 								if ($message) // TODO
 								{
 									$button = array(

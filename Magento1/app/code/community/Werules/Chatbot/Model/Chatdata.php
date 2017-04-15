@@ -629,43 +629,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return $content;
 		}
 
-		protected function prepareFacebookProdMessages($productID) // TODO add link to product name
-		{
-			$product = Mage::getModel('catalog/product')->load($productID);
-			if ($product->getId())
-			{
-				if ($product->getStockItem()->getIsInStock() > 0)
-				{
-					$chatbotHelper = Mage::helper('werules_chatbot');
-					$message = $product->getName() . "\n" .
-						$chatbotHelper->excerpt($product->getShortDescription(), 60);
-					return $message;
-				}
-			}
-			return null;
-		}
-
-	protected function prepareFacebookOrderMessages($orderID) // TODO add link to product name
-	{
-		$order = Mage::getModel('sales/order')->load($orderID);
-		if ($order->getId())
-		{
-			$message = Mage::helper('core')->__("Order") . " # " . $order->getIncrementId() . "\n\n";
-			$items = $order->getAllVisibleItems();
-			foreach($items as $item)
-			{
-				$message .= (int)$item->getQtyOrdered() . "x " .
-					$item->getName() . "\n" .
-					Mage::helper('core')->__("Price") . ": " . Mage::helper('core')->currency($item->getPrice(), true, false) . "\n\n";
-			}
-			$message .= Mage::helper('core')->__("Total") . ": " . Mage::helper('core')->currency($order->getGrandTotal(), true, false) . "\n" .
-				Mage::helper('core')->__("Zipcode") . ": " . $order->getShippingAddress()->getPostcode();
-
-			return $message;
-		}
-		return null;
-	}
-
 //		// WHATSAPP FUNCTIONS
 //		public function whatsappHandler($apiKey)
 //		{
