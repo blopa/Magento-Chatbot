@@ -504,47 +504,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return $message;
 		}
 
-		protected function prepareTelegramOrderMessages($orderID) // TODO add link to product name
-		{
-			$order = Mage::getModel('sales/order')->load($orderID);
-			if ($order->getId())
-			{
-				$message = Mage::helper('core')->__("Order") . " # " . $order->getIncrementId() . "\n\n";
-				$items = $order->getAllVisibleItems();
-				foreach($items as $item)
-				{
-					$message .= (int)$item->getQtyOrdered() . "x " .
-						$item->getName() . "\n" .
-						Mage::helper('core')->__("Price") . ": " . Mage::helper('core')->currency($item->getPrice(), true, false) . "\n\n";
-				}
-				$message .= Mage::helper('core')->__("Total") . ": " . Mage::helper('core')->currency($order->getGrandTotal(), true, false) . "\n" .
-					Mage::helper('core')->__("Zipcode") . ": " . $order->getShippingAddress()->getPostcode();
-				if ($this->_reorderCmd['command'])
-					$message .= "\n\n" . Mage::helper('core')->__("Reorder") . ": " . $this->_reorderCmd['command'] . $orderID;
-				return $message;
-			}
-			return null;
-		}
-
-		protected function prepareTelegramProdMessages($productID) // TODO add link to product name
-		{
-			$product = Mage::getModel('catalog/product')->load($productID);
-			if ($product->getId())
-			{
-				if ($product->getStockItem()->getIsInStock() > 0)
-				{
-					$mageHelper = Mage::helper('core');
-					$chatbotHelper = Mage::helper('werules_chatbot');
-					$message = $product->getName() . "\n" .
-						$mageHelper->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
-						$chatbotHelper->excerpt($product->getShortDescription(), 60) . "\n" .
-						$mageHelper->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
-					return $message;
-				}
-			}
-			return null;
-		}
-
 		// FACEBOOK FUNCTIONS
 		protected function listFacebookCommandsMessage()
 		{

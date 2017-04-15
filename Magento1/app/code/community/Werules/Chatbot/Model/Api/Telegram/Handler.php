@@ -838,9 +838,10 @@
 
 								foreach ($productIDs as $productID)
 								{
-									$message = $chatdata->prepareTelegramProdMessages($productID);
+									$message = $chatbotHelper->prepareTelegramProdMessages($productID);
 									if ($message) // TODO
 									{
+										$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatdata->_add2CartCmd['command'] . $productID;
 										if ($i >= $showMore)
 										{
 											$image = $chatbotHelper->loadImageContent($productID);
@@ -927,9 +928,10 @@
 
 						foreach ($productIDs as $productID)
 						{
-							$message = $chatdata->prepareTelegramProdMessages($productID);
+							$message = $chatbotHelper->prepareTelegramProdMessages($productID);
 							if ($message) // TODO
 							{
+								$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatdata->_add2CartCmd['command'] . $productID;
 								if ($i >= $showMore)
 								{
 									$image = $chatbotHelper->loadImageContent($productID);
@@ -1266,9 +1268,11 @@
 
 							foreach($ordersIDs as $orderID)
 							{
-								$message = $chatdata->prepareTelegramOrderMessages($orderID);
+								$message = $chatbotHelper->prepareTelegramOrderMessages($orderID);
 								if ($message) // TODO
 								{
+									if ($chatdata->_reorderCmd['command'])
+										$message .= "\n\n" . $mageHelper->__("Reorder") . ": " . $chatdata->_reorderCmd['command'] . $orderID;
 									if ($i >= $showMore)
 									{
 										$telegram->postMessage($chatId, $message);
