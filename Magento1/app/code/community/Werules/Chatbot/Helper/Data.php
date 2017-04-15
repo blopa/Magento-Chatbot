@@ -1,6 +1,39 @@
 <?php
 class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 {
+//	public function transcribeAudio()
+//	{
+//		$googleSpeechURL = "https://speech.googleapis.com/v1beta1/speech:syncrecognize?key=xxxxxxxxxxxx";
+//		$upload = file_get_contents("1.wav");
+//		$fileData = base64_encode($upload);
+//
+//		$data = array(
+//			"config" => array(
+//				"encoding" => "LINEAR16",
+//				"sample_rate" => 16000,
+//				"language_code" => "pt-BR"
+//			),
+//			"audio" => array(
+//				"content" => base64_encode($fileData)
+//			)
+//		);
+//
+//		$dataString = json_encode($data);
+//
+//		$ch = curl_init($googleSpeechURL);
+//		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+//		curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+//		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//		curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+//				'Content-Type: application/json',
+//				'Content-Length: ' . strlen($dataString))
+//		);
+//
+//		$result = curl_exec($ch);
+//
+//		return json_decode($result, true);
+//	}
+
 	public function excerpt($text, $size)
 	{
 		if (strlen($text) > $size)
@@ -53,6 +86,22 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 			return true;
 
 		return (substr($haystack, -$length) === $needle);
+	}
+
+	public function getOrdersIdsFromCustomer($customerId)
+	{
+		$ids = array();
+		$orders = Mage::getResourceModel('sales/order_collection')
+			->addFieldToSelect('*')
+			->addFieldToFilter('customer_id', $customerId) // not a problem if customer dosen't exist
+			->setOrder('created_at', 'desc');
+		foreach ($orders as $_order)
+		{
+			array_push($ids, $_order->getId());
+		}
+		if ($ids)
+			return $ids;
+		return false;
 	}
 
 	public function getProductIdsBySearch($searchString)

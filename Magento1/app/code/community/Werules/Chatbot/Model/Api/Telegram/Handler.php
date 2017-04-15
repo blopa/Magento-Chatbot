@@ -1251,7 +1251,7 @@
 						$telegram->postMessage($chatId, $chatdata->_positiveMessages[array_rand($chatdata->_positiveMessages)] . ", " . $mageHelper->__("listing more."));
 
 					$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
-					$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
+					$ordersIDs = $chatbotHelper->getOrdersIdsFromCustomer($chatdata->getCustomerId());
 					if ($ordersIDs)
 					{
 						$i = 0;
@@ -1355,7 +1355,7 @@
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
-					$ordersIDs = $chatdata->getOrdersIdsFromCustomer();
+					$ordersIDs = $chatbotHelper->getOrdersIdsFromCustomer($chatdata->getCustomerId());
 					if ($ordersIDs)
 					{
 						if (!$chatdata->updateChatdata('telegram_conv_state', $chatdata->_trackOrderState))
