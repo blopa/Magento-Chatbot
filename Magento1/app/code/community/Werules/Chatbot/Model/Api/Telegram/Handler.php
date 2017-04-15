@@ -418,7 +418,6 @@
 			}
 
 			// ALL CUSTOMER HANDLERS GOES AFTER HERE
-
 			if ($chatdata->getIsLogged() == "1") // check if customer is logged
 			{
 				if (Mage::getModel('customer/customer')->load((int)$chatdata->getCustomerId())->getId()) // if is a valid customer id
@@ -629,23 +628,28 @@
 			//				$telegram->postMessage($chatId, $conversationState);
 
 			// start command
+			//if ($text == $chatdata->_startCmd['command'])
 			if ($chatbotHelper->startsWith($text, $chatdata->_startCmd['command'])) // ignore alias // old checkCommandWithValue
-				//if ($text == $chatdata->_startCmd['command'])
 			{
 				$startdata = explode(" ", $text);
 				if (is_array($startdata) && count($startdata) > 1) // has hash parameter
 				{
-					$chat_hash = $chatdata->load(trim($startdata[1]), 'hash_key');
-					if ($chat_hash->getHashKey())
+					$chatHash = $chatdata->load(trim($startdata[1]), 'hash_key');
+					if ($chatHash->getHashKey())
 					{
 						try
 						{
-							$chat_hash->addData(array("telegram_chat_id" => $chatId));
-							$chat_hash->save();
-						}catch (Exception $e){}
-						$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-						if ($message) // TODO
-							$telegram->postMessage($chatId, $message);
+							$chatHash->addData(array("telegram_chat_id" => $chatId));
+							$chatHash->save();
+
+							$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
+							if ($message) // TODO
+								$telegram->postMessage($chatId, $message);
+						}
+						catch (Exception $e)
+						{
+							$telegram->postMessage($chatId, $chatdata->_errorMessage); // TODO
+						}
 					}
 				}
 				else if ($chatdata->getTelegramChatId()) // TODO
@@ -653,12 +657,12 @@
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
 					$telegram->postMessage($chatId, $message);
 
-					//						$data = array(
-					//							//'customer_id' => $customerId,
-					//							'telegram_chat_id' => $chatId
-					//						); // data to be insert on database
-					//						$model = Mage::getModel('chatbot/chatdata')->load($chatdata->getId())->addData($data); // insert data on database
-					//						$model->setId($chatdata->getId())->save(); // save (duh)
+//					$data = array(
+//						//'customer_id' => $customerId,
+//						'telegram_chat_id' => $chatId
+//					); // data to be insert on database
+//					$model = Mage::getModel('chatbot/chatdata')->load($chatdata->getId())->addData($data); // insert data on database
+//					$model->setId($chatdata->getId())->save(); // save (duh)
 				}
 				else // if customer id isnt on our database, means that we need to insert his data
 				{
