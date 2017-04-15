@@ -18,7 +18,6 @@
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
 	{
 		protected $_telegram;
-		protected $_witAi;
 
 		public function _construct()
 		{
@@ -26,6 +25,7 @@
 			//$this->_init('chatbot/api_telegram_handler'); // this is location of the resource file.
 			$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 			$this->_telegram = new TelegramBot($apikey);
+			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
 		public function setWebhook($webhookUrl)
@@ -116,6 +116,7 @@
 						$mageHelperInline = Mage::helper('core');
 						if (!empty($productIDs))
 						{
+							$chatbotHelper = $this->_chatbotHelper;
 							//$total = count($productIDs);
 							$i = 0;
 							foreach($productIDs as $productID)
@@ -130,7 +131,7 @@
 										$productUrl = $product->getProductUrl();
 										$productImage = $product->getImageUrl();
 										$productName = $product->getName();
-										$productDescription = $chatdataInline->excerpt($product->getShortDescription(), 60);
+										$productDescription = $chatbotHelper->excerpt($product->getShortDescription(), 60);
 										$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
 										if (empty($productImage))
 											$productImage = $placeholder;
@@ -235,6 +236,10 @@
 			else if ($chatdata->getTelegramChatId())
 				$chatdata->updateChatdata('telegram_message_id', $messageId); // if this fails, it may send the same message twice
 
+			// helpers
+			$mageHelper = Mage::helper('core');
+			$chatbotHelper = $this->_chatbotHelper;
+
 			// bot enabled/disabled
 			if ($enabledBot != "1")
 			{
@@ -286,9 +291,6 @@
 
 			// instances conversation state
 			$conversationState = $chatdata->getTelegramConvState();
-
-			// mage helper
-			$mageHelper = Mage::helper('core');
 
 			if ($supportGroupId[0] == "g") // remove the 'g' from groupd id, and add '-'
 				$supportGroupId = "-" . ltrim($supportGroupId, "g");

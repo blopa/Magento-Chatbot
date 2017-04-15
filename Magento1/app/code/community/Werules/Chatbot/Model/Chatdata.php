@@ -9,14 +9,18 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
 		// WITAI
 		protected $_isWitAi = false;
+		protected $_witAi;
 
-		// APIs
-		protected $_apiType = "";
-		protected $_apiKey = "";
+		// STRINGS
 		protected $_tgBot = "telegram";
 		protected $_fbBot = "facebook";
 		protected $_wappBot = "whatsapp";
 		protected $_wechatBot = "wechat";
+
+		//APIs
+		protected $_apiType;
+		protected $_apiKey;
+		protected $_chatbotHelper;
 
 		// CONVERSATION STATES
 		protected $_startState = 0;
@@ -460,18 +464,6 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return true;
 		}
 
-		protected function excerpt($text, $size)
-		{
-			if (strlen($text) > $size)
-			{
-				$text = substr($text, 0, $size);
-				$text = substr($text, 0, strrpos($text, " "));
-				$etc = " ...";
-				$text = $text . $etc;
-			}
-			return $text;
-		}
-
 		protected function getOrdersIdsFromCustomer()
 		{
 			$ids = array();
@@ -622,9 +614,10 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				if ($product->getStockItem()->getIsInStock() > 0)
 				{
 					$mageHelper = Mage::helper('core');
+					$chatbotHelper = Mage::helper('werules_chatbot');
 					$message = $product->getName() . "\n" .
 						$mageHelper->__("Price") . ": " . Mage::helper('core')->currency($product->getPrice(), true, false) . "\n" .
-						$this->excerpt($product->getShortDescription(), 60) . "\n" .
+						$chatbotHelper->excerpt($product->getShortDescription(), 60) . "\n" .
 						$mageHelper->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
 					return $message;
 				}
@@ -723,8 +716,9 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			{
 				if ($product->getStockItem()->getIsInStock() > 0)
 				{
+					$chatbotHelper = Mage::helper('werules_chatbot');
 					$message = $product->getName() . "\n" .
-						$this->excerpt($product->getShortDescription(), 60);
+						$chatbotHelper->excerpt($product->getShortDescription(), 60);
 					return $message;
 				}
 			}

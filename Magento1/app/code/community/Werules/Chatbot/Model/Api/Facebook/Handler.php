@@ -19,7 +19,6 @@
 	class Werules_Chatbot_Model_Api_Facebook_Handler extends Werules_Chatbot_Model_Chatdata
 	{
 		protected $_facebook;
-		protected $_witAi;
 
 		public function _construct()
 		{
@@ -27,6 +26,7 @@
 			//$this->_init('chatbot/api_facebook_handler'); // this is location of the resource file.
 			$apikey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
 			$this->_facebook = new MessengerBot($apikey);
+			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
 		public function foreignMessageFromSupport($chatId, $text)
@@ -41,8 +41,9 @@
 				return false;
 			}
 
-			// mage helper
+			// helpers
 			$mageHelper = Mage::helper('core');
+			//$chatbotHelper = $this->_chatbotHelper;
 
 			//$chatdata->_apiType = $chatdata->_fbBot;
 			$facebook = $this->_facebook;
@@ -151,6 +152,10 @@
 			else if ($chatdata->getFacebookChatId())
 				$chatdata->updateChatdata('facebook_message_id', $messageId); // if this fails, it may send the same message twice
 
+			// helpers
+			$mageHelper = Mage::helper('core');
+			$chatbotHelper = $this->_chatbotHelper;
+
 			// bot enabled/disabled
 			if ($enabledBot != "1")
 			{
@@ -201,9 +206,6 @@
 
 			// instances conversation state
 			$conversationState = $chatdata->getFacebookConvState();
-
-			// mage helper
-			$mageHelper = Mage::helper('core');
 
 			// handle admin stuff
 			//$isAdmin = $chatdata->getIsAdmin();
@@ -702,7 +704,7 @@
 											'title' => $product->getName(),
 											'item_url' => $productUrl,
 											'image_url' => $productImage,
-											'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
+											'subtitle' => $chatbotHelper->excerpt($product->getShortDescription(), 60),
 											'buttons' => $button
 										);
 										array_push($elements, $element);
@@ -721,7 +723,7 @@
 												'title' => Mage::app()->getStore()->getName(),
 												'item_url' => Mage::getBaseUrl(),
 												'image_url' => $placeholder,
-												'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+												'subtitle' => $chatbotHelper->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
 												'buttons' => $button
 											);
 											array_push($elements, $element);
@@ -828,7 +830,7 @@
 										'title' => $product->getName(),
 										'item_url' => $productUrl,
 										'image_url' => $productImage,
-										'subtitle' => $chatdata->excerpt($product->getShortDescription(), 60),
+										'subtitle' => $chatbotHelper->excerpt($product->getShortDescription(), 60),
 										'buttons' => $button
 									);
 									array_push($elements, $element);
@@ -847,7 +849,7 @@
 											'title' => Mage::app()->getStore()->getName(),
 											'item_url' => Mage::getBaseUrl(),
 											'image_url' => $placeholder,
-											'subtitle' => $chatdata->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
+											'subtitle' => $chatbotHelper->excerpt(Mage::getStoreConfig('design/head/default_description'), 60),
 											'buttons' => $button
 										);
 										array_push($elements, $element);
