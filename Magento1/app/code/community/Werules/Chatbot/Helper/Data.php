@@ -94,7 +94,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	// TELEGRAM FUNCTIONS
-	protected function prepareTelegramOrderMessages($orderID) // TODO add link to product name
+	public function prepareTelegramOrderMessages($orderID) // TODO add link to product name
 	{
 		$order = Mage::getModel('sales/order')->load($orderID);
 		if ($order->getId())
@@ -114,7 +114,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
-	protected function prepareTelegramProdMessages($productID) // TODO add link to product name
+	public function prepareTelegramProdMessages($productID) // TODO add link to product name
 	{
 		$product = Mage::getModel('catalog/product')->load($productID);
 		if ($product->getId())
@@ -133,7 +133,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	// FACEBOOK FUNCTIONS
-	protected function prepareFacebookProdMessages($productID) // TODO add link to product name
+	public function prepareFacebookProdMessages($productID) // TODO add link to product name
 	{
 		$product = Mage::getModel('catalog/product')->load($productID);
 		if ($product->getId())
@@ -149,7 +149,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
-	protected function prepareFacebookOrderMessages($orderID) // TODO add link to product name
+	public function prepareFacebookOrderMessages($orderID) // TODO add link to product name
 	{
 		$order = Mage::getModel('sales/order')->load($orderID);
 		if ($order->getId())
