@@ -372,7 +372,7 @@
 							}
 							else if ($matchMode == "2") // Ends With
 							{
-								if ($chatdata->endsWith($textToMatch, $match))
+								if ($chatbotHelper->endsWith($textToMatch, $match))
 									$matched = true;
 							}
 							else if ($matchMode == "3") // Contains
