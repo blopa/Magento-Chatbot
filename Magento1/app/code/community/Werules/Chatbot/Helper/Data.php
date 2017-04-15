@@ -79,6 +79,13 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return false;
 	}
 
+	public function startsWith($haystack, $needle)
+	{
+		if ($needle)
+			return substr($haystack, 0, strlen($needle)) == $needle;
+		return false;
+	}
+
 	public function endsWith($haystack, $needle)
 	{
 		$length = strlen($needle);

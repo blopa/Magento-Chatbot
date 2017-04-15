@@ -255,7 +255,7 @@
 			// show more handler, may change the conversation state
 			if ($chatdata->getTelegramConvState() == $chatdata->_listProductsState || $chatdata->getTelegramConvState() == $chatdata->_listOrdersState) // listing products
 			{
-				if ($chatdata->startsWith($text, $listMoreCategories)) // old checkCommandWithValue
+				if ($chatbotHelper->startsWith($text, $listMoreCategories)) // old checkCommandWithValue
 				{
 					if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_listCategoriesState))
 					{
@@ -265,7 +265,7 @@
 						$showMore = (int)$arr[1]; // get where listing stopped
 					}
 				}
-				else if ($chatdata->startsWith($text, $listMoreSearch)) // old checkCommandWithValue
+				else if ($chatbotHelper->startsWith($text, $listMoreSearch)) // old checkCommandWithValue
 				{
 					if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_searchState))
 					{
@@ -276,7 +276,7 @@
 						$text = str_replace("_", " ", $value); // get search criteria
 					}
 				}
-				else if ($chatdata->startsWith($text, $listMoreOrders)) // old checkCommandWithValue
+				else if ($chatbotHelper->startsWith($text, $listMoreOrders)) // old checkCommandWithValue
 				{
 					if ($chatdata->updateChatdata('telegram_conv_state', $chatdata->_listOrdersState))
 					{
@@ -378,7 +378,7 @@
 					{
 						$admSend2All = "/" . $chatdata->_admSendMessage2AllCmd;
 
-						if ($chatdata->startsWith($text, $admSend2All)) // old checkCommandWithValue
+						if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
 						{
 							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
 							if (!empty($message))
@@ -488,7 +488,7 @@
 							}
 							else if ($matchMode == "1") // Starts With
 							{
-								if ($chatdata->startsWith($textToMatch, $match))
+								if ($chatbotHelper->startsWith($textToMatch, $match))
 									$matched = true;
 							}
 							else if ($matchMode == "2") // Ends With
@@ -565,7 +565,7 @@
 			// init start command
 			$chatdata->_startCmd['command'] = "/start";
 
-			if (is_null($chatdata->getTelegramChatId()) && !$chatdata->startsWith($text, $chatdata->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
+			if (is_null($chatdata->getTelegramChatId()) && !$chatbotHelper->startsWith($text, $chatdata->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 				if ($message) // TODO
@@ -629,7 +629,7 @@
 			//				$telegram->postMessage($chatId, $conversationState);
 
 			// start command
-			if ($chatdata->startsWith($text, $chatdata->_startCmd['command'])) // ignore alias // old checkCommandWithValue
+			if ($chatbotHelper->startsWith($text, $chatdata->_startCmd['command'])) // ignore alias // old checkCommandWithValue
 				//if ($text == $chatdata->_startCmd['command'])
 			{
 				$startdata = explode(" ", $text);
@@ -748,7 +748,7 @@
 			}
 
 			// add2cart commands
-			if ($chatdata->startsWith($text, $chatdata->_add2CartCmd['command'])) // ignore alias // old checkCommandWithValue
+			if ($chatbotHelper->startsWith($text, $chatdata->_add2CartCmd['command'])) // ignore alias // old checkCommandWithValue
 			{
 				$errorFlag = false;
 				$notInStock = false;
@@ -1311,7 +1311,7 @@
 					$telegram->postMessage($chatId, $chatdata->_loginFirstMessage);
 				return $telegram->respondSuccess();
 			}
-			else if ($chatdata->startsWith($text, $chatdata->_reorderCmd['command'])) // ignore alias TODO // old checkCommandWithValue
+			else if ($chatbotHelper->startsWith($text, $chatdata->_reorderCmd['command'])) // ignore alias TODO // old checkCommandWithValue
 			{
 				if ($chatdata->getIsLogged() == "1")
 				{
