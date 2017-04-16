@@ -188,7 +188,8 @@
 
 			// handle received audio
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
-			if ((isset($audio["message"]["voice"])) && ($enableWitai == "1"))
+			$enableSpeech = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_speech_recognition');
+			if ((isset($audio["message"]["voice"])) && ($enableWitai == "1") && ($enableSpeech == "1"))
 			{
 				$fileUrl = $telegram->getFile($audio["message"]["voice"]["file_id"]);
 				$apiFilePath = $fileUrl["result"]["file_path"];
