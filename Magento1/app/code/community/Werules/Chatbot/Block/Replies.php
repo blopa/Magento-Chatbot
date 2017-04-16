@@ -9,6 +9,10 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 
 	public function _prepareToRender()
 	{
+		$this->addColumn('match_mode', array(
+			'label' => Mage::helper('core')->__('Match Mode'),
+			'renderer' => $this->_getRendererMatchMode()
+		));
 		$this->addColumn('match_sintax', array(
 			'label' => Mage::helper('core')->__('Match Text, Regex or wit.ai entity'),
 			'style' => 'width: 250px'
@@ -20,10 +24,6 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 		$this->addColumn('stop_processing', array(
 			'label' => Mage::helper('core')->__('Stop Processing'),
 			'renderer' => $this->_getRendererEnableProcessing()
-		));
-		$this->addColumn('match_mode', array(
-			'label' => Mage::helper('core')->__('Match Mode'),
-			'renderer' => $this->_getRendererMatchMode()
 		));
 		$this->addColumn('similarity', array(
 			'label' => Mage::helper('core')->__('Similarity (%)'),
