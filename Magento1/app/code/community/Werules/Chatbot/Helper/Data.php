@@ -127,16 +127,29 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 //		return json_decode($result, true);
 //	}
 
-	public function convertOggToMp3($audioFile)
+	public function getContent($url)
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		$data = curl_exec($ch);
+		curl_close($ch);
+		if ($data)
+			return $data;
+
+		return null;
+	}
+
+	public function convertOggToMp3($filePath, $fileName)
 	{
 		// install ffmpeg by typoing sudo apt-get install ffmpeg
-		$output = "output.mp3";
-		if (!file_exists($audioFile))
+		$output = $filePath . "output.mp3";
+		if (!file_exists($filePath . $fileName))
 			return null;
 
 		$ffmpeg = exec('which ffmpeg');
-		$ffmpegcmd = $ffmpeg . " -i " . $audioFile . " -acodec libmp3lame " . $output;
-		exec($ffmpegcmd);
+		$ffmpegCmd = $ffmpeg . " -i " . $filePath . $fileName . " -acodec libmp3lame " . $output;
+		exec($ffmpegCmd);
 
 		if (!file_exists($output))
 			return null;

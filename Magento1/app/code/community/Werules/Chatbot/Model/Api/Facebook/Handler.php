@@ -9,6 +9,7 @@
 		public $_originalText;
 		public $_chatId;
 		public $_messageId;
+		public $_audioPath;
 		public $_isPayload = false;
 
 		public function postMessage($chatId, $message)
@@ -117,18 +118,8 @@
 			$listMoreOrders = "show_more_order_";
 			$replyToCustomerMessage = "reply_to_message";
 
-			// Take text and chat_id from the message
+			// instance Facebook API
 			$facebook = $this->_facebook;
-			$originalText = $facebook->_originalText;
-			$chatId = $facebook->_chatId;
-			$messageId = $facebook->_messageId;
-			$isPayload = $facebook->_isPayload;
-
-			// Instances facebook user details
-			$userData = $facebook->UserData($chatId);
-			$username = null;
-			if (!empty($userData))
-				$username = $userData['first_name'];
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
@@ -139,9 +130,29 @@
 					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
 					$this->_witAi = new witAI($witApi);
 				}
+
+				if (!is_null($facebook->_audioPath))
+				{
+					$witResponse = $this->_witAi->getAudioResponse($facebook->_audioPath);
+					if (isset($witResponse->_text))
+						$facebook->_originalText = $witResponse->_text;
+					else
+						return $facebook->respondSuccess();
+				}
 			}
 
+			// Take text and chat_id from the message
+			$originalText = $facebook->_originalText;
+			$chatId = $facebook->_chatId;
+			$messageId = $facebook->_messageId;
+			$isPayload = $facebook->_isPayload;
 			$text = strtolower($originalText);
+
+			// Instances facebook user details
+			$userData = $facebook->UserData($chatId);
+			$username = null;
+			if (!empty($userData))
+				$username = $userData['first_name'];
 
 			// helpers
 			$mageHelper = Mage::helper('core');

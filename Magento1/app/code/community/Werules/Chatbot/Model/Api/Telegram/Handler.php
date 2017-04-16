@@ -9,6 +9,7 @@
 		public $_text;
 		public $_chatId;
 		public $_messageId;
+		public $_audioPath;
 
 		public function postMessage($chatId, $message)
 		{
@@ -27,6 +28,7 @@
 			$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 			$this->_telegram = new TelegramBot($apikey);
 			$this->_chatbotHelper = Mage::helper('werules_chatbot');
+			$this->_apiKey = $apikey;
 		}
 
 		public function setWebhook($webhookUrl)
@@ -97,6 +99,7 @@
 			$telegram->_chatId = $telegram->ChatID();
 			$telegram->_messageId = $telegram->MessageID();
 			$inlineQuery = $telegram->Inline_Query();
+			$audio = $telegram->getData();
 
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			if ($enableLog == "1") // log all posts
@@ -183,7 +186,32 @@
 				$telegram->respondSuccess();
 			}
 
-			if (!is_null($telegram->_text) && !is_null($telegram->_chatId))
+			// handle received audio
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ((isset($audio["message"]["voice"])) && ($enableWitai == "1"))
+			{
+				$fileUrl = $telegram->getFile($audio["message"]["voice"]["file_id"]);
+				$apiFilePath = $fileUrl["result"]["file_path"];
+				$telegramFileUrl = "https://api.telegram.org/file/bot" . $this->_apiKey . "/" . $apiFilePath;
+				$fileContent = $this->_chatbotHelper->getContent($telegramFileUrl);
+
+				$folderPath = Mage::getBaseDir('tmp') . DS . "werules/";
+				$fileName = "audio." . explode('.', $apiFilePath)[1];
+				$filePath = $folderPath . $fileName;
+
+				if (!file_exists($folderPath))
+					mkdir($folderPath, 0777, true);
+				if (!file_exists($filePath))
+					unlink($filePath);
+
+				file_put_contents($filePath, $fileContent);
+				$convertedFilePath = $this->_chatbotHelper->convertOggToMp3($folderPath, $fileName);
+
+				if ($convertedFilePath)
+					$telegram->_audioPath = $convertedFilePath;
+			}
+
+			if ((!is_null($telegram->_chatId)) && (!is_null($telegram->_text) || !is_null($telegram->_audioPath)))
 			{
 				return $this->processText();
 			}
@@ -209,8 +237,30 @@
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
 
-			// Take text and chat_id from the message
+			// instance Telegram API
 			$telegram = $this->_telegram;
+
+			// Instances the witAI class
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ($enableWitai == "1")
+			{
+				if (!isset($this->_witAi))
+				{
+					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+					$this->_witAi = new witAI($witApi);
+				}
+
+				if (!is_null($telegram->_audioPath))
+				{
+					$witResponse = $this->_witAi->getAudioResponse($telegram->_audioPath);
+					if (isset($witResponse->_text))
+						$telegram->_text = $witResponse->_text;
+					else
+						return $telegram->respondSuccess();
+				}
+			}
+
+			// Take text and chat_id from the message
 			$text = $telegram->_text;
 			$chatId = $telegram->_chatId;
 			$messageId = $telegram->_messageId;
@@ -225,17 +275,6 @@
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
-
-			// Instances the witAI class
-			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
-			if ($enableWitai == "1")
-			{
-				if (!isset($this->_witAi))
-				{
-					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
-					$this->_witAi = new witAI($witApi);
-				}
-			}
 
 			if ($messageId == $chatdata->getTelegramMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
 				return $telegram->respondSuccess();
