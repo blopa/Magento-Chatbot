@@ -140,7 +140,7 @@ Conversation
 	- Fix list categories command glitch
 	- Fix some other small glitches
 	- Code improvements
-	- Speech recognition for Telegram
+	- [Customer] Speech recognition for Telegram
 	- [Backend] Option to enable/disable speech recognition
 - **v0.0.11:**
 	- Fix logout command glitch
