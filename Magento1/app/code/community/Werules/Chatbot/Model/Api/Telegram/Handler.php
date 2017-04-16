@@ -1327,7 +1327,7 @@
 				}
 				return $telegram->respondSuccess();
 			}
-			else // facllback
+			else // fallback
 			{
 				// handle default replies
 				if ($enableReplies == "1" && !$blockerStates)
