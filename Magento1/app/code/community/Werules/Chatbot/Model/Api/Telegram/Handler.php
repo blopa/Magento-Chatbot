@@ -9,6 +9,7 @@
 		public $_text;
 		public $_chatId;
 		public $_messageId;
+		public $_audioPath;
 
 		public function postMessage($chatId, $message)
 		{
@@ -27,6 +28,7 @@
 			$apikey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 			$this->_telegram = new TelegramBot($apikey);
 			$this->_chatbotHelper = Mage::helper('werules_chatbot');
+			$this->_apiKey = $apikey;
 		}
 
 		public function setWebhook($webhookUrl)
@@ -97,6 +99,7 @@
 			$telegram->_chatId = $telegram->ChatID();
 			$telegram->_messageId = $telegram->MessageID();
 			$inlineQuery = $telegram->Inline_Query();
+			$audio = $telegram->getData();
 
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			if ($enableLog == "1") // log all posts
@@ -183,7 +186,33 @@
 				$telegram->respondSuccess();
 			}
 
-			if (!is_null($telegram->_text) && !is_null($telegram->_chatId))
+			// handle received audio
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			$enableSpeech = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_speech_recognition');
+			if ((isset($audio["message"]["voice"])) && ($enableWitai == "1") && ($enableSpeech == "1"))
+			{
+				$fileUrl = $telegram->getFile($audio["message"]["voice"]["file_id"]);
+				$apiFilePath = $fileUrl["result"]["file_path"];
+				$telegramFileUrl = "https://api.telegram.org/file/bot" . $this->_apiKey . "/" . $apiFilePath;
+				$fileContent = $this->_chatbotHelper->getContent($telegramFileUrl);
+
+				$folderPath = Mage::getBaseDir('tmp') . DS . "werules/";
+				$fileName = "audio." . explode('.', $apiFilePath)[1];
+				$filePath = $folderPath . $fileName;
+
+				if (!file_exists($folderPath))
+					mkdir($folderPath, 0777, true);
+				if (!file_exists($filePath))
+					unlink($filePath);
+
+				file_put_contents($filePath, $fileContent);
+				$convertedFilePath = $this->_chatbotHelper->convertOggToMp3($folderPath, $fileName);
+
+				if ($convertedFilePath)
+					$telegram->_audioPath = $convertedFilePath;
+			}
+
+			if ((!is_null($telegram->_chatId)) && (!is_null($telegram->_text) || !is_null($telegram->_audioPath)))
 			{
 				return $this->processText();
 			}
@@ -209,8 +238,30 @@
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
 
-			// Take text and chat_id from the message
+			// instance Telegram API
 			$telegram = $this->_telegram;
+
+			// Instances the witAI class
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ($enableWitai == "1")
+			{
+				if (!isset($this->_witAi))
+				{
+					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+					$this->_witAi = new witAI($witApi);
+				}
+
+				if (!is_null($telegram->_audioPath))
+				{
+					$witResponse = $this->_witAi->getAudioResponse($telegram->_audioPath);
+					if (isset($witResponse->_text))
+						$telegram->_text = $witResponse->_text;
+					else
+						return $telegram->respondSuccess();
+				}
+			}
+
+			// Take text and chat_id from the message
 			$text = $telegram->_text;
 			$chatId = $telegram->_chatId;
 			$messageId = $telegram->_messageId;
@@ -225,17 +276,6 @@
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
-
-			// Instances the witAI class
-			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
-			if ($enableWitai == "1")
-			{
-				if (!isset($this->_witAi))
-				{
-					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
-					$this->_witAi = new witAI($witApi);
-				}
-			}
 
 			if ($messageId == $chatdata->getTelegramMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
 				return $telegram->respondSuccess();
@@ -439,129 +479,6 @@
 				$conversationState == $chatbotHelper->_sendEmailState ||
 				$conversationState == $chatbotHelper->_trackOrderState
 			);
-
-			// handle default replies
-			if ($enableReplies == "1" && !$blockerStates)
-			{
-				$defaultReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/default_replies');
-				if ($defaultReplies)
-				{
-					$replies = unserialize($defaultReplies);
-					if (is_array($replies))
-					{
-						foreach($replies as $reply)
-						{
-//								MODES
-//								0 =>'Similarity'
-//								1 =>'Starts With'
-//								2 =>'Ends With'
-//								3 =>'Contains'
-//								4 =>'Match Regular Expression'
-//								5 =>'Equals to'
-//								6 =>'wit.ai'
-
-							$matched = false;
-							$match = $reply["match_sintax"];
-							$matchMode = $reply["match_mode"];
-
-							if ($reply["match_case"] == "0")
-							{
-								$match = strtolower($match);
-								$textToMatch = strtolower($text);
-							}
-							else
-								$textToMatch = $text;
-
-							if ($matchMode == "0") // Similarity
-							{
-								$similarity = $reply["similarity"];
-								if (is_numeric($similarity))
-								{
-									if (!($similarity >= 1 && $similarity <= 100))
-										$similarity = 100;
-								}
-								else
-									$similarity = 100;
-
-								similar_text($textToMatch, $match, $percent);
-								if ($percent >= $similarity)
-									$matched = true;
-							}
-							else if ($matchMode == "1") // Starts With
-							{
-								if ($chatbotHelper->startsWith($textToMatch, $match))
-									$matched = true;
-							}
-							else if ($matchMode == "2") // Ends With
-							{
-								if ($chatbotHelper->endsWith($textToMatch, $match))
-									$matched = true;
-							}
-							else if ($matchMode == "3") // Contains
-							{
-								if (strpos($textToMatch, $match) !== false)
-									$matched = true;
-							}
-							else if ($matchMode == "4") // Match Regular Expression
-							{
-//									if ($match[0] != "/")
-//										$match = "/" . $match;
-//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
-//										$match .= "/";
-								if (preg_match($match, $textToMatch))
-									$matched = true;
-							}
-							else if ($matchMode == "5") // Equals to
-							{
-								if ($textToMatch == $match)
-									$matched = true;
-							}
-							else if (($matchMode == "6") && (isset($this->_witAi))) // wit.ai and witAi is set
-							{
-								$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
-								if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
-									$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
-
-								$witResponse = $this->_witAi->getWitAIResponse($text);
-								if (property_exists($witResponse->entities, $match))
-								{
-									foreach ($witResponse->entities->{$match} as $m)
-									{
-										if (((float)$m->confidence * 100) < (float)$witAiConfidence)
-											continue;
-
-										$matched = true;
-										break;
-									}
-								}
-							}
-
-							if ($matched)
-							{
-								$message = $reply["reply_phrase"];
-								if ($reply['reply_mode'] == "1")
-								{
-									$cmdId = $reply['command_id'];
-									if (!empty($cmdId))
-										$text = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
-									if (!empty($message))
-										$telegram->postMessage($chatId, $message);
-								}
-								else //if ($reply['reply_mode'] == "0")
-								{
-									if (!empty($message))
-									{
-										$telegram->postMessage($chatId, $message);
-										if ($reply["stop_processing"] == "1")
-											return $telegram->respondSuccess();
-									}
-								}
-								break;
-							}
-						}
-					}
-				}
-			}
 
 			// init start command
 			$chatbotHelper->_startCmd['command'] = "/start";
@@ -1410,8 +1327,131 @@
 				}
 				return $telegram->respondSuccess();
 			}
-			else
+			else // fallback
 			{
+				// handle default replies
+				if ($enableReplies == "1" && !$blockerStates)
+				{
+					$defaultReplies = Mage::getStoreConfig('chatbot_enable/telegram_config/default_replies');
+					if ($defaultReplies)
+					{
+						$replies = unserialize($defaultReplies);
+						if (is_array($replies))
+						{
+							foreach($replies as $reply)
+							{
+//								MODES
+//								0 =>'Similarity'
+//								1 =>'Starts With'
+//								2 =>'Ends With'
+//								3 =>'Contains'
+//								4 =>'Match Regular Expression'
+//								5 =>'Equals to'
+//								6 =>'wit.ai'
+
+								$matched = false;
+								$match = $reply["match_sintax"];
+								$matchMode = $reply["match_mode"];
+
+								if ($reply["match_case"] == "0")
+								{
+									$match = strtolower($match);
+									$textToMatch = strtolower($text);
+								}
+								else
+									$textToMatch = $text;
+
+								if ($matchMode == "0") // Similarity
+								{
+									$similarity = $reply["similarity"];
+									if (is_numeric($similarity))
+									{
+										if (!($similarity >= 1 && $similarity <= 100))
+											$similarity = 100;
+									}
+									else
+										$similarity = 100;
+
+									similar_text($textToMatch, $match, $percent);
+									if ($percent >= $similarity)
+										$matched = true;
+								}
+								else if ($matchMode == "1") // Starts With
+								{
+									if ($chatbotHelper->startsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($matchMode == "2") // Ends With
+								{
+									if ($chatbotHelper->endsWith($textToMatch, $match))
+										$matched = true;
+								}
+								else if ($matchMode == "3") // Contains
+								{
+									if (strpos($textToMatch, $match) !== false)
+										$matched = true;
+								}
+								else if ($matchMode == "4") // Match Regular Expression
+								{
+//									if ($match[0] != "/")
+//										$match = "/" . $match;
+//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
+//										$match .= "/";
+									if (preg_match($match, $textToMatch))
+										$matched = true;
+								}
+								else if ($matchMode == "5") // Equals to
+								{
+									if ($textToMatch == $match)
+										$matched = true;
+								}
+								else if (($matchMode == "6") && (isset($this->_witAi))) // wit.ai and witAi is set
+								{
+									$witAiConfidence = Mage::getStoreConfig('chatbot_enable/witai_config/witai_confidence');
+									if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
+										$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
+
+									$witResponse = $this->_witAi->getTextResponse($text);
+									if (property_exists($witResponse->entities, $match))
+									{
+										foreach ($witResponse->entities->{$match} as $m)
+										{
+											if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+												continue;
+
+											$matched = true;
+											break;
+										}
+									}
+								}
+
+								if ($matched)
+								{
+									$message = $reply["reply_phrase"];
+									if ($reply['reply_mode'] == "1")
+									{
+										$cmdId = $reply['command_id'];
+										if (!empty($cmdId))
+											$text = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
+										if (!empty($message))
+											$telegram->postMessage($chatId, $message);
+									}
+									else //if ($reply['reply_mode'] == "0")
+									{
+										if (!empty($message))
+										{
+											$telegram->postMessage($chatId, $message);
+											if ($reply["stop_processing"] == "1")
+												return $telegram->respondSuccess();
+										}
+									}
+									break;
+								}
+							}
+						}
+					}
+				}
+
 				$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState); // back to start state
 				if ($enableFinalMessage2Support == "1")
 				{
@@ -1439,7 +1479,7 @@
 						if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
 							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
-						$witResponse = $this->_witAi->getWitAIResponse($text);
+						$witResponse = $this->_witAi->getTextResponse($text);
 
 						$hasIntent = true;
 						if (property_exists($witResponse->entities, "telegram_intent"))
