@@ -86,6 +86,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 				'',
 				array('is_render_to_js_template' => true)
 			)->setExtraParams("style='width: 140px;'");
+			$this->_itemRendererReplyMode->setExtraParams("onChange='werulesTogleReplyMode(this)'");
 		}
 		return $this->_itemRendererReplyMode;
 	}
@@ -98,7 +99,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 				'werules_chatbot/commandsSelect',
 				'',
 				array('is_render_to_js_template' => true)
-			);//->setExtraParams("style='width: 100%;'");
+			)->setExtraParams("style='pointer-events: none;background-color: #FFFFFF;color: #808080;'");
 		}
 		return $this->_itemRendererCommandCode;
 	}
@@ -113,6 +114,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 				'',
 				array('is_render_to_js_template' => true)
 			)->setExtraParams("style='width: auto;'");
+			$this->_itemRendererMatchMode->setExtraParams("onChange='werulesTogleMatchMode(this)'");
 		}
 		return $this->_itemRendererMatchMode;
 	}
