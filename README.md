@@ -236,6 +236,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Better panel UI (like showing some inputs only when that config is selected)
 	- Add condition to disable/enable backend inputs
 	- Force a command for a customer
+	- Add Facebook Chat box on store frontend
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
