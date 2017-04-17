@@ -1,56 +1,64 @@
-<layout>
-	<customer_account>
-		<reference name="customer_account_navigation">
-			<action method="addLink">
-				<name>chatbot_settings</name>
-				<path>chatbot/settings/index</path>
-				<label>Chatbot Settings</label>
-			</action>
-		</reference>
-	</customer_account>
-	<chatbot_settings_index>
-		<update handle="customer_account" />
-		<reference name="my.account.wrapper">
-			<block type="core/template" name="chatbot_content" template="werules_chatbot_config.phtml"/>
-		</reference>
-	</chatbot_settings_index>
-	<chatbot_chatdata_index>
-		<remove name="head" />
-		<remove name="right" />
-		<remove name="left" />
-		<remove name="header" />
-		<remove name="footer" />
-		<remove name="customer_form_login" />
-		<remove name="customer_form_register" />
-		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
-		<reference name="content">
-			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
-		</reference>
-	</chatbot_chatdata_index>
-	<chatbot_chatdata_telegram>
-		<remove name="head" />
-		<remove name="right" />
-		<remove name="left" />
-		<remove name="header" />
-		<remove name="footer" />
-		<remove name="customer_form_login" />
-		<remove name="customer_form_register" />
-		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
-		<reference name="content">
-			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
-		</reference>
-	</chatbot_chatdata_telegram>
-	<chatbot_chatdata_facebook>
-		<remove name="head" />
-		<remove name="right" />
-		<remove name="left" />
-		<remove name="header" />
-		<remove name="footer" />
-		<remove name="customer_form_login" />
-		<remove name="customer_form_register" />
-		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
-		<reference name="content">
-			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
-		</reference>
-	</chatbot_chatdata_facebook>
-</layout>
+<?xml version="1.0" ?>
+<frontend>
+	<layout>
+		<customer_account>
+			<reference name="customer_account_navigation">
+				<action method="addLink">
+					<name>chatbot_settings</name>
+					<path>chatbot/settings/index</path>
+					<label>Chatbot Settings</label>
+				</action>
+			</reference>
+		</customer_account>
+		<chatbot_settings_index>
+			<update handle="customer_account" />
+			<reference name="my.account.wrapper">
+				<block type="core/template" name="chatbot_content" template="werules_chatbot_config.phtml"/>
+			</reference>
+		</chatbot_settings_index>
+		<chatbot_chatdata_index>
+			<remove name="head" />
+			<remove name="right" />
+			<remove name="left" />
+			<remove name="header" />
+			<remove name="footer" />
+			<remove name="customer_form_login" />
+			<remove name="customer_form_register" />
+			<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
+			<reference name="content">
+				<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
+			</reference>
+		</chatbot_chatdata_index>
+		<chatbot_chatdata_telegram>
+			<remove name="head" />
+			<remove name="right" />
+			<remove name="left" />
+			<remove name="header" />
+			<remove name="footer" />
+			<remove name="customer_form_login" />
+			<remove name="customer_form_register" />
+			<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
+			<reference name="content">
+				<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
+			</reference>
+		</chatbot_chatdata_telegram>
+		<chatbot_chatdata_facebook>
+			<remove name="head" />
+			<remove name="right" />
+			<remove name="left" />
+			<remove name="header" />
+			<remove name="footer" />
+			<remove name="customer_form_login" />
+			<remove name="customer_form_register" />
+			<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
+			<reference name="content">
+				<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
+			</reference>
+		</chatbot_chatdata_facebook>
+		<default>
+			<reference name="right"> <!-- this is the name of the right column block -->
+				<block type="werules_chatbot/messenger_box" name="messenger_box" template="werules_chatbot_messenger_box.phtml"/>
+			</reference>
+		</default>
+	</layout>
+</frontend>
