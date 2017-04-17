@@ -81,6 +81,13 @@
 		</resources>
 	</global>
 	<adminhtml>
+		<layout>
+			<updates>
+				<chatbot_enable>
+					<file>werules_chatbot.xml</file>
+				</chatbot_enable>
+			</updates>
+		</layout>
 		<acl>
 			<resources>
 				<admin>

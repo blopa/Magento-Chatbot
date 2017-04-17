@@ -137,11 +137,13 @@ Conversation
 
 ## Release Notes
 - **v0.0.12:**
+	- Fix command alias
 	- Fix list categories command glitch
 	- Fix some other small glitches
 	- Code improvements
 	- [Customer] Speech recognition for Telegram
 	- [Backend] Option to enable/disable speech recognition
+	- [Backend] Layout improvements
 - **v0.0.11:**
 	- Fix logout command glitch
 	- Fix some other small glitches
@@ -232,6 +234,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Support for audio commands
 	- Better uses for wit.ai
 	- Better panel UI (like showing some inputs only when that config is selected)
+	- Add condition to disable/enable backend inputs
+	- Force a command for a customer
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D

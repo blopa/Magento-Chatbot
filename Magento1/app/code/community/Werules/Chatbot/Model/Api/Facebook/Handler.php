@@ -1364,7 +1364,7 @@
 								if ($matched)
 								{
 									$message = $reply["reply_phrase"];
-									if ($reply['reply_mode'] == "1")
+									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];
 										if (!empty($cmdId))
@@ -1372,7 +1372,7 @@
 										if (!empty($message))
 											$facebook->postMessage($chatId, $message);
 									}
-									else //if ($reply['reply_mode'] == "0")
+									else //if ($reply['reply_mode'] == "0") // Text Only
 									{
 										if (!empty($message))
 										{
