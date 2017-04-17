@@ -143,6 +143,7 @@ Conversation
 	- Code improvements
 	- [Customer] Speech recognition for Telegram
 	- [Backend] Option to enable/disable speech recognition
+	- [Backend] Layout improvements
 - **v0.0.11:**
 	- Fix logout command glitch
 	- Fix some other small glitches
