@@ -18,6 +18,10 @@ class Werules_Chatbot_Block_Commands extends Mage_Adminhtml_Block_System_Config_
 			'label' => Mage::helper('core')->__('Command Code'),
 			'style' => 'width: 100%'
 		));
+		$this->addColumn('command_alias_list', array(
+			'label' => Mage::helper('core')->__('Command Alias (Separated by Comma)'),
+			'style' => 'width: 100%'
+		));
 
 		$this->_addAfter = false;
 		$this->_addButtonLabel = Mage::helper('core')->__('Add');

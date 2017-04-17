@@ -35,16 +35,16 @@
 							<show_in_store>1</show_in_store>
 							<comment>This is Your Custom Secret Key Used For The Webhook URL, to Activate/Deactivate The API Webhook For Telegram, And to Use as Your Challenge Hub For Facebook. Alphanumeric Only! Access http://(YOUR_STORE_URL)/chatbot/chatdata/(API)/webhook/(YOUR_CUSTOM_KEY) to Set The Webhook, change API to "telegram" or "facebook".</comment>
 						</your_custom_key>
-						<master_support_group>
-							<label>Master Support Group</label>
-							<frontend_type>select</frontend_type>
-							<source_model>chatbot/chats</source_model>
-							<sort_order>1</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-							<comment>Choose to receive all support messages in one single message app. In Development.</comment>
-						</master_support_group>
+						<!--<master_support_group>-->
+							<!--<label>Master Support Group</label>-->
+							<!--<frontend_type>select</frontend_type>-->
+							<!--<source_model>chatbot/chats</source_model>-->
+							<!--<sort_order>1</sort_order>-->
+							<!--<show_in_default>1</show_in_default>-->
+							<!--<show_in_website>1</show_in_website>-->
+							<!--<show_in_store>1</show_in_store>-->
+							<!--<comment>Choose to receive all support messages in one single message app. In Development.</comment>-->
+						<!--</master_support_group>-->
 						<enable_support_final_message>
 							<label>Forward Fallback Messages to Support</label>
 							<frontend_type>select</frontend_type>
@@ -278,6 +278,7 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 							<comment>Replies to be Send to The Customer Whenever Matches One of The Requirements.</comment>
+							<!--<depends><enable_default_replies>1</enable_default_replies></depends>-->
 						</default_replies>
 						<fallback_message>
 							<label>Fallback Message</label>
@@ -431,6 +432,7 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 							<comment>Replies to be Send to The Customer Whenever Matches One of The Requirements.</comment>
+							<!--<depends><enable_default_replies>1</enable_default_replies></depends>-->
 						</default_replies>
 						<fallback_message>
 							<label>Fallback Message</label>

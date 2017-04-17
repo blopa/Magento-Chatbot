@@ -99,7 +99,7 @@ class Werules_Chatbot_Block_Replies extends Mage_Adminhtml_Block_System_Config_F
 				'werules_chatbot/commandsSelect',
 				'',
 				array('is_render_to_js_template' => true)
-			)->setExtraParams("style='pointer-events: none;background-color: #FFFFFF;color: #808080;'");
+			)->setExtraParams("disabled='true'");
 		}
 		return $this->_itemRendererCommandCode;
 	}

@@ -1,6 +1,6 @@
 function werulesTogleMatchMode(element)
 {
-	debugger;
+	//debugger;
 	var val = element.value;
 	var name = element.name;
 	if (val == 0)
@@ -19,7 +19,7 @@ function werulesTogleMatchMode(element)
 
 function werulesTogleReplyMode(element)
 {
-	debugger;
+	//debugger;
 	var val = element.value;
 	var name = element.name;
 	if (val == 0)
@@ -33,7 +33,7 @@ function werulesTogleReplyMode(element)
 		name = name.substr(0, name.lastIndexOf("[")) + "[command_id]";
 		var target = document.getElementsByName(name);
 		//target[0].classList.remove("werules-disabled");
-		target[0].style = "";
+		//target[0].style = "";
 		target[0].disabled = false;
 	}
 }

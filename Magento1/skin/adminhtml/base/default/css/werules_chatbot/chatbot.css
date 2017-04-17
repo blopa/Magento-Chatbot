@@ -1,6 +1,11 @@
-.werules-disabled
-{
+.werules-disabled-input{
 	pointer-events: none;
 	background-color: #ebebe4;
 	color: #545454;
+}
+
+.werules-disabled-select{
+	pointer-events: none;
+	background-color: #FFFFFF;
+	color: #808080;
 }

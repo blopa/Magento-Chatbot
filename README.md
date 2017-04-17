@@ -137,6 +137,7 @@ Conversation
 
 ## Release Notes
 - **v0.0.12:**
+	- Fix command alias
 	- Fix list categories command glitch
 	- Fix some other small glitches
 	- Code improvements
