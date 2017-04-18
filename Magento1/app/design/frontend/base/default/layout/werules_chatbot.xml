@@ -54,9 +54,9 @@
 			<block type="core/template" name="chatbot_content" template="werules_chatbot_view.phtml"/>
 		</reference>
 	</chatbot_chatdata_facebook>
-	<cms_index_index> <!-- module/controller/action -->
+	<default> <!-- module/controller/action -->
 		<reference name="content">
 			<block type="werules_chatbot/messenger" name="messenger" template="werules_chatbot_messenger_box.phtml"/>
 		</reference>
-	</cms_index_index>
+	</default>
 </layout>
