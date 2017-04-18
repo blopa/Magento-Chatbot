@@ -20,7 +20,7 @@ To use this module you'll need to have SSL enabled in your store, this is a requ
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
 
 ## APIs
-- [wit.ai](https://github.com/DrMikeyS/FacebookBotPHP/blob/master/FacebookBotPHP.php)
+- [wit.ai](https://github.com/DrMikeyS/FacebookBotPHP/blob/master/FacebookBotPHP.php#L85)
 - [Telegram API Wrapper](https://github.com/Eleirbag89/TelegramBotPHP)
 - [Facebook API Wrapper](https://github.com/blopa/MessengerBotPHP)
 - *Whatsapp API Wrapper* (soon)
