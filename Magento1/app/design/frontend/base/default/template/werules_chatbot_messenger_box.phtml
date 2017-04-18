@@ -3,6 +3,8 @@
 	if ($enableMessengerBox == "1"): // { OPEN IF
 ?>
 	<?php
+		$chatbotHelper = Mage::helper('werules_chatbot');
+		$mageHelper = Mage::helper('core');
 		$imgWidth = (int)Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_messenger_box_width');
 		if (empty($imgWidth))
 			$imgWidth = 60;
@@ -26,15 +28,10 @@
 		}
 	</style>
 	<?php
+		$fbUsername = $chatbotHelper->getFacebookPageChatID();
 		$fbChatUrl = null;
-		$mageHelper = Mage::helper('core');
-		$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-		if (!empty($fbApiKey)) {
-			$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
-			$response = json_decode(file_get_contents($getMe), true);
-			if (!empty($response))
-				$fbChatUrl = "http://m.me/" . $response["id"];
-		}
+		if (!empty($fbUsername))
+			$fbChatUrl = $chatbotHelper->_fbUrl . $fbUsername;
 	?>
 
 	<div id="werules-messenger-box">

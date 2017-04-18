@@ -328,6 +328,19 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	// FACEBOOK FUNCTIONS
+    public function getFacebookPageChatID()
+    {
+        $fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+        if (!empty($fbApiKey))
+        {
+            $getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
+            $response = json_decode(file_get_contents($getMe), true);
+            if (!empty($response))
+                return $response["id"];
+        }
+
+        return null;
+    }
 	public function prepareFacebookProdMessages($productID) // TODO add link to product name
 	{
 		$product = Mage::getModel('catalog/product')->load($productID);
