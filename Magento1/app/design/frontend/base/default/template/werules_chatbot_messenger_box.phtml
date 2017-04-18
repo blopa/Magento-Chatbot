@@ -1,0 +1,59 @@
+<?php
+	$enableMessengerBox = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_messenger_box');
+	if ($enableMessengerBox == "1"): // { OPEN IF
+?>
+	<?php
+		$imgWidth = (int)Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_messenger_box_width');
+		if (empty($imgWidth))
+			$imgWidth = 60;
+	?>
+	<style>
+		#werules-messenger-box {
+			position: fixed;
+			display: block;
+			z-index: 999;
+			bottom: 20px;
+			right: 30px;
+			cursor: pointer;
+		}
+
+		#werules-messenger-icon img:hover {
+			width: <?php echo $imgWidth + ($imgWidth * 0.1);?>px;
+		}
+
+		#werules-messenger-icon img {
+			width: <?php echo $imgWidth;?>px;
+		}
+	</style>
+	<?php
+		$fbChatUrl = null;
+		$mageHelper = Mage::helper('core');
+		$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+		if (!empty($fbApiKey)) {
+			$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
+			$response = json_decode(file_get_contents($getMe), true);
+			if (!empty($response))
+				$fbChatUrl = "http://m.me/" . $response["id"];
+		}
+	?>
+
+	<div id="werules-messenger-box">
+		<a href="<?php echo $fbChatUrl; ?>" target="_blank" onclick="OpenChatInNewTab();">
+			<!-- m.me/facebookpage works for any facebook page -->
+			<div id="werules-messenger-icon">
+				<img src="<?php echo $this->getSkinUrl('images/werules_chatbot/messenger-icon.png'); ?>"/>
+				<span class="tooltiptext mobilehidden"><?php $mageHelper->__("Message us"); ?></span>
+			</div>
+		</a>
+	</div>
+	<script>
+		function OpenChatInNewTab() {
+			var screenwidth = screen.width;
+			var screenheight = window.innerHeight;
+			window.open("<?php echo $fbChatUrl; ?>", '_blank', "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=500,height=" + screenheight + ",left=" + (screenwidth - 500));
+		}
+	</script>
+<?php
+	//} // CLOSE IF
+	endif;
+?>
