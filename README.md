@@ -141,6 +141,7 @@ Conversation
 	- Fix list categories command glitch
 	- Fix some other small glitches
 	- Code improvements
+	- Add Facebook Live Chat on store frontend
 	- [Customer] Speech recognition for Telegram
 	- [Backend] Option to enable/disable speech recognition
 	- [Backend] Layout improvements
@@ -236,7 +237,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Better panel UI (like showing some inputs only when that config is selected)
 	- Add condition to disable/enable backend inputs
 	- Force a command for a customer
-	- Add Facebook Chat box on store frontend
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
