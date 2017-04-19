@@ -5,17 +5,7 @@
 	$chatdata = Mage::getModel('chatbot/chatdata')->load($clientId, 'customer_id'); // load profile info from customer id
 	$chatbotHelper = Mage::helper('werules_chatbot');
 
-	// TODO please
-	$tgUsername = null;
-	$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-	if (!empty($tgApiKey))
-	{
-		$getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
-		$response = json_decode(file_get_contents($getMe), true);
-		if (isset($response["ok"]))
-			$tgUsername = $response["result"]["username"];
-	}
-
+	$tgUsername = $chatbotHelper->getTelegramBotUsername();
 	$fbUsername = $chatbotHelper->getFacebookPageChatID();
 ?>
 <div class="dashboard">

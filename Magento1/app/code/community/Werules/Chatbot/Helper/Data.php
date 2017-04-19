@@ -281,6 +281,23 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	// TELEGRAM FUNCTIONS
+    public function getTelegramBotUsername()
+    {
+        $tgUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
+        if (!empty($tgUsername))
+            return $tgUsername;
+        $tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+        if (!empty($tgApiKey))
+        {
+            $getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
+            $response = json_decode(file_get_contents($getMe), true);
+            if (isset($response["ok"]))
+                return $response["result"]["username"];
+        }
+
+        return null;
+    }
+
 	public function prepareTelegramOrderMessages($orderID) // TODO add link to product name
 	{
 		$order = Mage::getModel('sales/order')->load($orderID);
@@ -330,6 +347,9 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	// FACEBOOK FUNCTIONS
     public function getFacebookPageChatID()
     {
+        $fbUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
+        if (!empty($fbUsername))
+            return $fbUsername;
         $fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
         if (!empty($fbApiKey))
         {
@@ -341,6 +361,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 
         return null;
     }
+
 	public function prepareFacebookProdMessages($productID) // TODO add link to product name
 	{
 		$product = Mage::getModel('catalog/product')->load($productID);
