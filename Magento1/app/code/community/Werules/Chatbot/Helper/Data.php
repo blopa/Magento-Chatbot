@@ -347,7 +347,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	// FACEBOOK FUNCTIONS
     public function getFacebookPageChatID()
     {
-        $fbUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
+        $fbUsername = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_page_username');
         if (!empty($fbUsername))
             return $fbUsername;
         $fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
