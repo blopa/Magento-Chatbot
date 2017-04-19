@@ -3,6 +3,8 @@
 	if ($enableMessengerBox == "1"): // { OPEN IF
 ?>
 	<?php
+		$chatbotHelper = Mage::helper('werules_chatbot');
+		$mageHelper = Mage::helper('core');
 		$imgWidth = (int)Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_messenger_box_width');
 		if (empty($imgWidth))
 			$imgWidth = 60;
@@ -17,32 +19,65 @@
 			cursor: pointer;
 		}
 
-		#werules-messenger-icon img:hover {
-			width: <?php echo $imgWidth + ($imgWidth * 0.1);?>px;
+        #werules-messenger-box:hover .werules-messenger-icon img{
+            transform:scale(1.1, 1.1);
+            -webkit-transform:scale(1.1, 1.1);
+            -moz-transform:scale(1.1, 1.1);
+        }
+
+		.werules-messenger-icon img {
+			width: <?php echo $imgWidth;?>px;
+            filter: drop-shadow(2px 6px 4px rgba(0,0,0,.3));
+            -webkit-filter: drop-shadow(2px 6px 4px rgba(0,0,0,.3));
 		}
 
-		#werules-messenger-icon img {
-			width: <?php echo $imgWidth;?>px;
-		}
+        .werules-tiptext{
+            width: 120px;
+            background-color: white;
+            color: #2c2c2c; ;
+            text-align: center;
+            padding: 5px 0;
+            border: 1px solid #eeeeee;
+            border-radius: 6px;
+            position: fixed;
+            bottom: 30px;
+            right: <?php echo (int)$imgWidth + 40;?>px;
+            text-transform: uppercase;
+            filter: drop-shadow(2px 6px 4px rgba(0,0,0,.3));
+            -webkit-filter: drop-shadow(2px 6px 4px rgba(0,0,0,.3));
+        }
+
+        .werules-tiptext:after{
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            margin-top: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent transparent #eeeeee;
+        }
+
+        @media (max-width: 480px)
+        {
+            .werules-mobilehidden{
+                display: none;
+            }
+        }
 	</style>
 	<?php
+		$fbUsername = $chatbotHelper->getFacebookPageChatID();
 		$fbChatUrl = null;
-		$mageHelper = Mage::helper('core');
-		$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-		if (!empty($fbApiKey)) {
-			$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
-			$response = json_decode(file_get_contents($getMe), true);
-			if (!empty($response))
-				$fbChatUrl = "http://m.me/" . $response["id"];
-		}
+		if (!empty($fbUsername))
+			$fbChatUrl = $chatbotHelper->_fbUrl . $fbUsername;
 	?>
 
 	<div id="werules-messenger-box">
-		<a href="<?php echo $fbChatUrl; ?>" target="_blank" onclick="OpenChatInNewTab();">
-			<!-- m.me/facebookpage works for any facebook page -->
-			<div id="werules-messenger-icon">
+        <!-- code from https://gist.github.com/tomcritchlow/493774b09b02e31d1184d7cda926c659 -->
+        <a href="<?php echo $fbChatUrl; ?>" target="_blank" onclick="OpenChatInNewTab();">
+			<div class="werules-messenger-icon">
 				<img src="<?php echo $this->getSkinUrl('images/werules_chatbot/messenger-icon.png'); ?>"/>
-				<span class="tooltiptext mobilehidden"><?php $mageHelper->__("Message us"); ?></span>
+				<span class="werules-tiptext werules-mobilehidden"><?php echo $mageHelper->__("Message us"); ?></span>
 			</div>
 		</a>
 	</div>
