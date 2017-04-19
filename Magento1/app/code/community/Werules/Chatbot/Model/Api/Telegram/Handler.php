@@ -149,7 +149,7 @@
 
 										$result = array(
 											'type' => 'article',
-											'id' => $queryId . $commandPrefix . (string)$i,
+											'id' => $queryId . "/" . (string)$i,
 											'title' => $productName,
 											'description' => $productDescription,
 											'thumb_url' => $productImage,
