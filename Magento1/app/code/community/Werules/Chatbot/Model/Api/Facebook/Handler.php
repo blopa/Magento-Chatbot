@@ -416,6 +416,36 @@
 					}
 				}
 			}
+			
+			// help command
+			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_helpCmd))
+			{
+				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
+				if (!empty($message)) // TODO
+				{
+					$facebook->postMessage($chatId, $message);
+					$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_help_command_list');
+					if ($cmdListing == "1")
+					{
+						$content = $chatdata->listFacebookCommandsMessage();
+						$facebook->sendQuickReply($chatId, $content[0], $content[1]);
+					}
+				}
+
+				$facebook->sendChatAction($chatId, "typing_off");
+				return $facebook->respondSuccess();
+			}
+
+			// about command
+			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_aboutCmd))
+			{
+				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
+				if (!empty($message))
+					$facebook->postMessage($chatId, $message);
+
+				$facebook->sendChatAction($chatId, "typing_off");
+				return $facebook->respondSuccess();
+			}
 
 			// cancel command
 			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_cancelCmd))
@@ -493,36 +523,6 @@
 				else if ($notInStock)
 					$facebook->postMessage($chatId, $mageHelper->__("This product is not in stock."));
 
-				return $facebook->respondSuccess();
-			}
-
-			// help command
-			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_helpCmd))
-			{
-				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
-				if (!empty($message)) // TODO
-				{
-					$facebook->postMessage($chatId, $message);
-					$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_help_command_list');
-					if ($cmdListing == "1")
-					{
-						$content = $chatdata->listFacebookCommandsMessage();
-						$facebook->sendQuickReply($chatId, $content[0], $content[1]);
-					}
-				}
-
-				$facebook->sendChatAction($chatId, "typing_off");
-				return $facebook->respondSuccess();
-			}
-
-			// about command
-			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_aboutCmd))
-			{
-				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
-				if (!empty($message))
-					$facebook->postMessage($chatId, $message);
-
-				$facebook->sendChatAction($chatId, "typing_off");
 				return $facebook->respondSuccess();
 			}
 
@@ -900,12 +900,12 @@
 							$productIDs = true;
 						if (!empty($productIDs)) // category with no products
 						{
-							$cat_name = $_category->getName();
-							if (!empty($cat_name))
+							$catName = $_category->getName();
+							if (!empty($catName))
 							{
 								$reply = array(
 									'content_type' => 'text',
-									'title' => $cat_name,
+									'title' => $catName,
 									'payload' => 'list_category_' . $_category->getId() // TODO
 								);
 								array_push($replies, $reply);
@@ -1453,6 +1453,7 @@
 							$i = 1;
 							$hasKeyword = false;
 							$break = false;
+
 							foreach ($messages as $message)
 							{
 								$key = $chatdata->getCommandString($i)['command'];
@@ -1464,69 +1465,66 @@
 										{
 											if (isset($witResponse->entities->keyword))
 											{
-												if (isset($witResponse->entities->keyword))
+												foreach ($witResponse->entities->keyword as $keyword)
 												{
-													foreach ($witResponse->entities->keyword as $keyword)
+													if (((float)$keyword->confidence * 100) < (float)$witAiConfidence)
+														continue;
+													if ($intent->value == $chatbotHelper->_searchCmd['command'])
 													{
-														if (((float)$keyword->confidence * 100) < (float)$witAiConfidence)
-															continue;
-														if ($intent->value == $chatbotHelper->_searchCmd['command'])
+														$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_searchState);
+														//$facebook->_originalText = $listMoreSearch . $witResponse->entities->keyword . ",1";
+														$facebook->_originalText = $keyword->value;
+														$hasKeyword = true;
+														break;
+													}
+													else if ($intent->value == $chatbotHelper->_listCategoriesCmd['command'])
+													{
+														$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $keyword->value);
+														if ($_category) // check if variable isn't false/empty
 														{
-															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_searchState);
-															//$facebook->_originalText = $listMoreSearch . $witResponse->entities->keyword . ",1";
-															$facebook->_originalText = $keyword->value;
-															$hasKeyword = true;
-															break;
-														}
-														else if ($intent->value == $chatbotHelper->_listCategoriesCmd['command'])
-														{
-															$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $keyword->value);
-															if ($_category) // check if variable isn't false/empty
+															if ($_category->getId()) // check if is a valid category
 															{
-																if ($_category->getId()) // check if is a valid category
-																{
-																	$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listCategoriesState);
-																	//$facebook->_originalText = $listMoreCategories . $witResponse->entities->keyword . ",1";
-																	$facebook->_originalText = $keyword->value;
-																	$hasKeyword = true;
-																}
-															}
-															break;
-														}
-														else if ($intent->value == $chatbotHelper->_trackOrderCmd['command'])
-														{
-															if ($chatdata->getIsLogged() == "1")
-															{
-																$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_trackOrderState);
+																$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listCategoriesState);
+																//$facebook->_originalText = $listMoreCategories . $witResponse->entities->keyword . ",1";
 																$facebook->_originalText = $keyword->value;
 																$hasKeyword = true;
 															}
-															else
-															{
-																$facebook->postMessage(array('chat_id' => $chatId, 'text' => $chatbotHelper->_loginFirstMessage));
-																$break = true;
-																return $facebook->respondSuccess();
-															}
-															break;
 														}
-														else if ($intent->value == $chatbotHelper->_supportCmd['command'])
-														{
-															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
-															$facebook->_originalText = $keyword->value;
-															$hasKeyword = true;
-															break;
-														}
-														else if ($intent->value == $chatbotHelper->_sendEmailCmd['command'])
-														{
-															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_sendEmailState);
-															$facebook->_originalText = $keyword->value;
-															$hasKeyword = true;
-															break;
-														}
-													}
-													if ($break)
 														break;
+													}
+													else if ($intent->value == $chatbotHelper->_trackOrderCmd['command'])
+													{
+														if ($chatdata->getIsLogged() == "1")
+														{
+															$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_trackOrderState);
+															$facebook->_originalText = $keyword->value;
+															$hasKeyword = true;
+														}
+														else
+														{
+															$facebook->postMessage(array('chat_id' => $chatId, 'text' => $chatbotHelper->_loginFirstMessage));
+															$break = true;
+															return $facebook->respondSuccess();
+														}
+														break;
+													}
+													else if ($intent->value == $chatbotHelper->_supportCmd['command'])
+													{
+														$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
+														$facebook->_originalText = $keyword->value;
+														$hasKeyword = true;
+														break;
+													}
+													else if ($intent->value == $chatbotHelper->_sendEmailCmd['command'])
+													{
+														$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_sendEmailState);
+														$facebook->_originalText = $keyword->value;
+														$hasKeyword = true;
+														break;
+													}
 												}
+												if ($break)
+													break;
 											}
 										}
 										if (!$hasKeyword)

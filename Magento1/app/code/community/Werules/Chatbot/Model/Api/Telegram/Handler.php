@@ -193,7 +193,7 @@
 			{
 				$fileUrl = $telegram->getFile($audio["message"]["voice"]["file_id"]);
 				$apiFilePath = $fileUrl["result"]["file_path"];
-				$telegramFileUrl = "https://api.telegram.org/file/bot" . $this->_apiKey . "/" . $apiFilePath;
+				$telegramFileUrl = "https://api.telegram.org/file/bot" . $this->_apiKey . "/" . $apiFilePath; // DS
 				$fileContent = $this->_chatbotHelper->getContent($telegramFileUrl);
 
 				$folderPath = Mage::getBaseDir('tmp') . DS . "werules/";
@@ -229,7 +229,7 @@
 			$enableFinalMessage2Support = Mage::getStoreConfig('chatbot_enable/general_config/enable_support_final_message');
 			$supportGroupId = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
 			$showMore = 0;
-			$cat_id = null;
+			$catId = null;
 			$moreOrders = false;
 			$defaultConfidence = 75;
 			$listingLimit = 5;
@@ -237,6 +237,7 @@
 			$listMoreCategories = "/lmc_";
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
+			$commandPrefix = "/";
 
 			// instance Telegram API
 			$telegram = $this->_telegram;
@@ -303,7 +304,7 @@
 					{
 						$value = $chatbotHelper->getCommandValue($text, $listMoreCategories);
 						$arr = explode("_", $value);
-						$cat_id = (int)$arr[0]; // get category id
+						$catId = (int)$arr[0]; // get category id
 						$showMore = (int)$arr[1]; // get where listing stopped
 					}
 				}
@@ -354,9 +355,9 @@
 						$isLocal = !is_null($replyFromUserId);
 						if ($isLocal != $isForeign) // XOR
 						{
-							$admEndSupport = "/" . $chatbotHelper->_admEndSupportCmd;
-							$admBlockSupport = "/" . $chatbotHelper->_admBlockSupportCmd;
-							$admEnableSupport = "/" . $chatbotHelper->_admEnableSupportCmd;
+							$admEndSupport = $commandPrefix . $chatbotHelper->_admEndSupportCmd;
+							$admBlockSupport = $commandPrefix . $chatbotHelper->_admBlockSupportCmd;
+							$admEnableSupport = $commandPrefix . $chatbotHelper->_admEnableSupportCmd;
 
 							if ($isLocal)
 								$customerChatdata = Mage::getModel('chatbot/chatdata')->load($replyFromUserId, 'telegram_chat_id');
@@ -418,7 +419,7 @@
 					}
 					else // proccess other admin commands (that aren't replying messages)
 					{
-						$admSend2All = "/" . $chatbotHelper->_admSendMessage2AllCmd;
+						$admSend2All = $commandPrefix . $chatbotHelper->_admSendMessage2AllCmd;
 
 						if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
 						{
@@ -481,7 +482,7 @@
 			);
 
 			// init start command
-			$chatbotHelper->_startCmd['command'] = "/start";
+			$chatbotHelper->_startCmd['command'] = "/start"; // $commandPrefix
 
 			if (is_null($chatdata->getTelegramChatId()) && !$chatbotHelper->startsWith($text, $chatbotHelper->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 			{
@@ -500,27 +501,27 @@
 				{
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage); // TODO
 				}
-				return $telegram->respondSuccess();
+				//return $telegram->respondSuccess(); // commented to keep processing the message
 			}
 
 			// init other commands (for now, no alias for telegram)
-			$chatbotHelper->_listCategoriesCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(1)['command']);
-			$chatbotHelper->_searchCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(2)['command']);
-			$chatbotHelper->_loginCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(3)['command']);
-			$chatbotHelper->_listOrdersCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(4)['command']);
-			$chatbotHelper->_reorderCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(5)['command']);
-			$chatbotHelper->_add2CartCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(6)['command']);
-			$chatbotHelper->_checkoutCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(7)['command']);
-			$chatbotHelper->_clearCartCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(8)['command']);
-			$chatbotHelper->_trackOrderCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(9)['command']);
-			$chatbotHelper->_supportCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(10)['command']);
-			$chatbotHelper->_sendEmailCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(11)['command']);
-			$chatbotHelper->_cancelCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(12)['command']);
-			$chatbotHelper->_helpCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(13)['command']);
-			$chatbotHelper->_aboutCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(14)['command']);
-			$chatbotHelper->_logoutCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(15)['command']);
-			$chatbotHelper->_registerCmd['command'] = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString(16)['command']);
-			if (!$chatbotHelper->_cancelCmd['command']) $chatbotHelper->_cancelCmd['command'] = "/cancel"; // it must always have a cancel command
+			$chatbotHelper->_listCategoriesCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(1)['command']);
+			$chatbotHelper->_searchCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(2)['command']);
+			$chatbotHelper->_loginCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(3)['command']);
+			$chatbotHelper->_listOrdersCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(4)['command']);
+			$chatbotHelper->_reorderCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(5)['command']);
+			$chatbotHelper->_add2CartCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(6)['command']);
+			$chatbotHelper->_checkoutCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(7)['command']);
+			$chatbotHelper->_clearCartCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(8)['command']);
+			$chatbotHelper->_trackOrderCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(9)['command']);
+			$chatbotHelper->_supportCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(10)['command']);
+			$chatbotHelper->_sendEmailCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(11)['command']);
+			$chatbotHelper->_cancelCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(12)['command']);
+			$chatbotHelper->_helpCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(13)['command']);
+			$chatbotHelper->_aboutCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(14)['command']);
+			$chatbotHelper->_logoutCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(15)['command']);
+			$chatbotHelper->_registerCmd['command'] = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString(16)['command']);
+			if (!$chatbotHelper->_cancelCmd['command']) $chatbotHelper->_cancelCmd['command'] = "/cancel"; // it must always have a cancel command // $commandPrefix
 
 			// init messages
 			$chatbotHelper->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
@@ -714,8 +715,8 @@
 			// states
 			if ($conversationState == $chatbotHelper->_listCategoriesState) // TODO show only in stock products
 			{
-				if ($cat_id)
-					$_category = Mage::getModel('catalog/category')->load($cat_id);
+				if ($catId)
+					$_category = Mage::getModel('catalog/category')->load($catId);
 				else
 					$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $text);
 
@@ -767,9 +768,9 @@
 										$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 										if ($i >= $showMore)
 										{
-											$image = $chatbotHelper->loadImageContent($productID);
-											if ($image)
-												$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
+											$productImage = $chatbotHelper->loadImageContent($productID);
+											if (!empty($productImage))
+												$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $productImage, 'caption' => $message));
 											else
 												$telegram->postMessage($chatId, $message);
 
@@ -857,9 +858,9 @@
 								$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 								if ($i >= $showMore)
 								{
-									$image = $chatbotHelper->loadImageContent($productID);
-									if ($image)
-										$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $image, 'caption' => $message));
+									$productImage = $chatbotHelper->loadImageContent($productID);
+									if (!empty($productImage))
+										$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $productImage, 'caption' => $message));
 									else
 										$telegram->postMessage($chatId, $message);
 
@@ -1393,10 +1394,10 @@
 								}
 								else if ($matchMode == "4") // Match Regular Expression
 								{
-//									if ($match[0] != "/")
-//										$match = "/" . $match;
-//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
-//										$match .= "/";
+//									if ($match[0] != $commandPrefix)
+//										$match = $commandPrefix . $match;
+//									if ((substr($match, -1) != $commandPrefix) && ($match[strlen($match) - 2] != $commandPrefix))
+//										$match .= $commandPrefix;
 									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
@@ -1432,7 +1433,7 @@
 									{
 										$cmdId = $reply['command_id'];
 										if (!empty($cmdId))
-											$text = $chatbotHelper->validateTelegramCmd("/" . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
+											$text = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
 										if (!empty($message))
 											$telegram->postMessage($chatId, $message);
 									}
@@ -1497,14 +1498,14 @@
 								"Okay, so you want to search for a product.",					//_searchCmd
 								"Okay, so you want to login.",									//_loginCmd
 								"Okay, so you want to list orders.",							//_listOrdersCmd
-								"Okay, so you want to reorder.",								//_reorderCmd
-								"Okay, so you want to add a product to the cart.",				//_add2CartCmd
+								"Okay, so you want to reorder.",								//_reorderCmd shouldn't be used
+								"Okay, so you want to add a product to the cart.",				//_add2CartCmd shouldn't be used
 								"Okay, so you want to checkout.",								//_checkoutCmd
 								"Okay, so you want to clear your cart.",						//_clearCartCmd
 								"Okay, so you want to track your order.",						//_trackOrderCmd
 								"Okay, so you want support.",									//_supportCmd
 								"Okay, so you want to send us an email.",						//_sendEmailCmd
-								"Okay, so you want to cancel.",									//_cancelCmd
+								"Okay, so you want to cancel.",									//_cancelCmd shouldn't be used
 								"Okay, so you want to help.",									//_helpCmd
 								"Okay, so you want to know more about us.",						//_aboutCmd
 								"Okay, so you want to logout.",									//_logoutCmd
@@ -1530,7 +1531,7 @@
 												{
 													if (((float)$keyword->confidence * 100) < (float)$witAiConfidence)
 														continue;
-													if ("/" . $intent->value == $chatbotHelper->_searchCmd['command'])
+													if ($commandPrefix . $intent->value == $chatbotHelper->_searchCmd['command'])
 													{
 														$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_searchState);
 														//$telegram->_text = $listMoreSearch . str_replace(" ", "_", $keyword->value) . "_1";
@@ -1538,7 +1539,7 @@
 														$hasKeyword = true;
 														break;
 													}
-													else if ("/" . $intent->value == $chatbotHelper->_listCategoriesCmd['command'])
+													else if ($commandPrefix . $intent->value == $chatbotHelper->_listCategoriesCmd['command'])
 													{
 														$_category = Mage::getModel('catalog/category')->loadByAttribute('name', $keyword->value);
 														if ($_category) // check if variable isn't false/empty
@@ -1553,7 +1554,7 @@
 														}
 														break;
 													}
-													else if ("/" . $intent->value == $chatbotHelper->_trackOrderCmd['command'])
+													else if ($commandPrefix . $intent->value == $chatbotHelper->_trackOrderCmd['command'])
 													{
 														if ($chatdata->getIsLogged() == "1")
 														{
@@ -1569,14 +1570,14 @@
 														}
 														break;
 													}
-													else if ("/" . $intent->value == $chatbotHelper->_supportCmd['command'])
+													else if ($commandPrefix . $intent->value == $chatbotHelper->_supportCmd['command'])
 													{
 														$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
 														$telegram->_text = $keyword->value;
 														$hasKeyword = true;
 														break;
 													}
-													else if ("/" . $intent->value == $chatbotHelper->_sendEmailCmd['command'])
+													else if ($commandPrefix . $intent->value == $chatbotHelper->_sendEmailCmd['command'])
 													{
 														$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_sendEmailState);
 														$telegram->_text = $keyword->value;
@@ -1590,7 +1591,7 @@
 										}
 										if (!$hasKeyword)
 										{
-											$telegram->_text = "/" . $key; // replace text with command
+											$telegram->_text = $commandPrefix . $key; // replace text with command
 											if ($enableConfirmMessage == "1")
 												$telegram->postMessage($chatId, $mageHelper->__($message)); // TODO
 										}
@@ -1643,4 +1644,5 @@
 			return null;
 		}
 	}
+
 ?>
