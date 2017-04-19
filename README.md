@@ -136,6 +136,8 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.13:**
+	- Code improvements
 - **v0.0.12:**
 	- Fix command alias
 	- Fix list categories command glitch
