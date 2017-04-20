@@ -1339,6 +1339,7 @@
 						$replies = unserialize($defaultReplies);
 						if (is_array($replies))
 						{
+							$hasWitaiReplies = false;
 							foreach($replies as $reply)
 							{
 //								MODES
@@ -1412,7 +1413,11 @@
 									if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
 										$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
-									$witResponse = $this->_witAi->getTextResponse($text);
+									if (!$hasWitaiReplies) // avoid multiple posts to witai with the same $text
+									{
+										$witResponse = $this->_witAi->getTextResponse($text);
+										$hasWitaiReplies = true;
+									}
 									if (property_exists($witResponse->entities, $match))
 									{
 										foreach ($witResponse->entities->{$match} as $m)

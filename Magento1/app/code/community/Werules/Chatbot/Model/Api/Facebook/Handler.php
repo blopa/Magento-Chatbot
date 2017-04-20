@@ -1274,6 +1274,7 @@
 						$replies = unserialize($defaultReplies);
 						if (is_array($replies))
 						{
+							$hasWitaiReplies = false;
 							foreach($replies as $reply)
 							{
 //								MODES
@@ -1329,10 +1330,6 @@
 								}
 								else if ($matchMode == "4") // Match Regular Expression
 								{
-//									if ($match[0] != "/")
-//										$match = "/" . $match;
-//									if ((substr($match, -1) != "/") && ($match[strlen($match) - 2] != "/"))
-//										$match .= "/";
 									if (preg_match($match, $textToMatch))
 										$matched = true;
 								}
@@ -1347,7 +1344,11 @@
 									if (!is_numeric($witAiConfidence) || (int)$witAiConfidence > 100)
 										$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
-									$witResponse = $this->_witAi->getTextResponse($text);
+									if (!$hasWitaiReplies) // avoid multiple posts to witai with the same $text
+									{
+										$witResponse = $this->_witAi->getTextResponse($text);
+										$hasWitaiReplies = true;
+									}
 									if (property_exists($witResponse->entities, $match))
 									{
 										foreach ($witResponse->entities->{$match} as $m)
