@@ -281,22 +281,22 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	// TELEGRAM FUNCTIONS
-    public function getTelegramBotUsername()
-    {
-        $tgUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
-        if (!empty($tgUsername))
-            return $tgUsername;
-        $tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-        if (!empty($tgApiKey))
-        {
-            $getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
-            $response = json_decode(file_get_contents($getMe), true);
-            if (isset($response["ok"]))
-                return $response["result"]["username"];
-        }
+	public function getTelegramBotUsername()
+	{
+		$tgUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
+		if (!empty($tgUsername))
+			return $tgUsername;
+		$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
+		if (!empty($tgApiKey))
+		{
+			$getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
+			$response = json_decode(file_get_contents($getMe), true);
+			if (isset($response["ok"]))
+				return $response["result"]["username"];
+		}
 
-        return null;
-    }
+		return null;
+	}
 
 	public function prepareTelegramOrderMessages($orderID) // TODO add link to product name
 	{
@@ -345,22 +345,22 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	// FACEBOOK FUNCTIONS
-    public function getFacebookPageChatID()
-    {
-        $fbUsername = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_page_username');
-        if (!empty($fbUsername))
-            return $fbUsername;
-        $fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-        if (!empty($fbApiKey))
-        {
-            $getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
-            $response = json_decode(file_get_contents($getMe), true);
-            if (!empty($response))
-                return $response["id"];
-        }
+	public function getFacebookPageChatID()
+	{
+		$fbUsername = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_page_username');
+		if (!empty($fbUsername))
+			return $fbUsername;
+		$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
+		if (!empty($fbApiKey))
+		{
+			$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
+			$response = json_decode(file_get_contents($getMe), true);
+			if (!empty($response))
+				return $response["id"];
+		}
 
-        return null;
-    }
+		return null;
+	}
 
 	public function prepareFacebookProdMessages($productID) // TODO add link to product name
 	{
