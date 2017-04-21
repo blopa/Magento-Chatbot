@@ -1478,15 +1478,21 @@
 											$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
 										if (!empty($message))
 										{
-											$count = count($message);
+											$count = strlen($message);
 											if ($count > $messageLimit)
 											{
-												$total = $count / $messageLimit;
+												$total = ceil($count / $messageLimit);
 												$start = 0;
-												for ($i = 1; $i <= $total; $i++)
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
 												{
-													$facebook->postMessage($chatId, substr($message, $start, strpos($message, ' ', ($count/$total) * $i)));
-													$start = ($count/$total) * $i;
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$facebook->postMessage($chatId, $tempMessage);
+													$start = $end;
 												}
 											}
 											else
@@ -1497,7 +1503,26 @@
 									{
 										if (!empty($message))
 										{
-											$facebook->postMessage($chatId, $message);
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$facebook->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$facebook->postMessage($chatId, $message);
+
 											if ($reply["stop_processing"] == "1")
 												return $facebook->respondSuccess();
 										}

@@ -1505,13 +1505,52 @@
 										if (!empty($cmdId))
 											$text = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
 										if (!empty($message))
-											$telegram->postMessage($chatId, $message);
+										{
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$telegram->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$telegram->postMessage($chatId, $message);
+										}
 									}
 									else //if ($reply['reply_mode'] == "0") // Text Only
 									{
 										if (!empty($message))
 										{
-											$telegram->postMessage($chatId, $message);
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$telegram->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$telegram->postMessage($chatId, $message);
+
 											if ($reply["stop_processing"] == "1")
 												return $telegram->respondSuccess();
 										}
