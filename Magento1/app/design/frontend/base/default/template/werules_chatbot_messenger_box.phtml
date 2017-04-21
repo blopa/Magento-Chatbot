@@ -67,9 +67,18 @@
 	</style>
 	<?php
 		$fbUsername = $chatbotHelper->getFacebookPageChatID();
+		$enableReferral = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_referral');
+		$ref = "";
+		if ($enableReferral == "1")
+		{
+			$refData = array(
+				"page" => Mage::helper('core/url')->getCurrentUrl() // TODO
+			);
+			$ref = "?ref=" . serialize($refData);
+		}
 		$fbChatUrl = null;
 		if (!empty($fbUsername))
-			$fbChatUrl = $chatbotHelper->_fbUrl . $fbUsername;
+			$fbChatUrl = $chatbotHelper->_fbUrl . $fbUsername . $ref;
 	?>
 
 	<div id="werules-messenger-box">
@@ -85,7 +94,7 @@
 		function OpenChatInNewTab() {
 			var screenwidth = screen.width;
 			var screenheight = window.innerHeight;
-			window.open("<?php echo $fbChatUrl; ?>", '_blank', "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=500,height=" + screenheight + ",left=" + (screenwidth - 500));
+			window.open('<?php echo $fbChatUrl; ?>', '_blank', "directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=no,width=500,height=" + screenheight + ",left=" + (screenwidth - 500));
 		}
 	</script>
 <?php

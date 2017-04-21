@@ -238,6 +238,8 @@
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
 			$commandPrefix = "/";
+			$message = "";
+			$messageLimit = 4096;
 
 			// instance Telegram API
 			$telegram = $this->_telegram;
@@ -537,11 +539,16 @@
 			// init start command
 			$chatbotHelper->_startCmd['command'] = "/start"; // $commandPrefix
 
+			// user isnt registred HERE
 			if (is_null($chatdata->getTelegramChatId()) && !$chatbotHelper->startsWith($text, $chatbotHelper->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-				if ($message) // TODO
+				if (!empty($message)) // TODO
+				{
+					if ($username)
+						$message = str_replace("{customername}", $username, $message);
 					$telegram->postMessage($chatId, $message);
+				}
 				try
 				{
 					$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
@@ -615,7 +622,7 @@
 							$chatHash->save();
 
 							$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-							if ($message) // TODO
+							if (!empty($message)) // TODO
 								$telegram->postMessage($chatId, $message);
 						}
 						catch (Exception $e)
@@ -639,7 +646,7 @@
 				else // if customer id isnt on our database, means that we need to insert his data
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-					if ($message) // TODO
+					if (!empty($message)) // TODO
 						$telegram->postMessage($chatId, $message);
 					try
 					{
@@ -815,7 +822,7 @@
 								foreach ($productIDs as $productID)
 								{
 									$message = $chatbotHelper->prepareTelegramProdMessages($productID);
-									if ($message) // TODO
+									if (!empty($message)) // TODO
 									{
 										$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 										if ($i >= $showMore)
@@ -905,7 +912,7 @@
 						foreach ($productIDs as $productID)
 						{
 							$message = $chatbotHelper->prepareTelegramProdMessages($productID);
-							if ($message) // TODO
+							if (!empty($message)) // TODO
 							{
 								$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 								if ($i >= $showMore)
@@ -1245,7 +1252,7 @@
 							foreach($ordersIDs as $orderID)
 							{
 								$message = $chatbotHelper->prepareTelegramOrderMessages($orderID);
-								if ($message) // TODO
+								if (!empty($message)) // TODO
 								{
 									if ($chatbotHelper->_reorderCmd['command'])
 										$message .= "\n\n" . $mageHelper->__("Reorder") . ": " . $chatbotHelper->_reorderCmd['command'] . $orderID;
@@ -1490,19 +1497,60 @@
 								if ($matched)
 								{
 									$message = $reply["reply_phrase"];
+									if ($username)
+										$message = str_replace("{customername}", $username, $message);
 									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];
 										if (!empty($cmdId))
 											$text = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
 										if (!empty($message))
-											$telegram->postMessage($chatId, $message);
+										{
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$telegram->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$telegram->postMessage($chatId, $message);
+										}
 									}
 									else //if ($reply['reply_mode'] == "0") // Text Only
 									{
 										if (!empty($message))
 										{
-											$telegram->postMessage($chatId, $message);
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$telegram->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$telegram->postMessage($chatId, $message);
+
 											if ($reply["stop_processing"] == "1")
 												return $telegram->respondSuccess();
 										}

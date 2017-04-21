@@ -7,6 +7,7 @@
 	class MessengerBot extends Messenger
 	{
 		public $_originalText;
+		public $_referral;
 		public $_recipientId;
 		public $_chatId;
 		public $_messageId;
@@ -97,6 +98,13 @@
 				}
 			}
 
+			$referral = $facebook->getReferralRef();
+			if (!empty($referral)) // opened m.me with referral
+			{
+				$facebook->_referral = $referral;
+				$facebook->_originalText = $mageHelper->__("Hi");
+			}
+
 			// checking for payload
 			$payloadContent = $facebook->getPayload();
 			if (!empty($payloadContent) && empty($facebook->_originalText))
@@ -106,7 +114,7 @@
 				$facebook->_messageId = $facebook->getMessageTimestamp();
 			}
 
-			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId)))
+			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId) || isset($facebook->_referral)))
 			{
 				return $this->processText();
 			}
@@ -132,6 +140,8 @@
 			$listMoreSearch = "show_more_search_prod_";
 			$listMoreOrders = "show_more_order_";
 			$replyToCustomerMessage = "reply_to_message";
+			$message = "";
+			$messageLimit = 640;
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -180,6 +190,7 @@
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
+
 
 			if ($chatdata->getEnableFacebookAdmin() == "0") // disabled by admin
 				return $facebook->respondSuccess();
@@ -392,8 +403,12 @@
 			if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
-				if ($message) // TODO
+				if (!empty($message)) // TODO
+				{
+					if ($username)
+						$message = str_replace("{customername}", $username, $message);
 					$facebook->postMessage($chatId, $message);
+				}
 				try
 				{
 					$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
@@ -411,6 +426,19 @@
 				}
 				//$facebook->sendChatAction($chatId, "typing_off");
 				//return $facebook->respondSuccess(); // commented to keep processing the message
+			}
+
+			// referral handler
+			if (isset($facebook->_referral))
+			{
+				$refMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_referral_message');
+				if (!empty($refMessage) && empty($message)) // only if haven't sent the welcome message
+				{
+					if ($username)
+						$refMessage = str_replace("{customername}", $username, $refMessage);
+					$facebook->postMessage($chatId, $refMessage);
+				}
+				return $facebook->respondSuccess();
 			}
 
 			// init commands
@@ -756,7 +784,7 @@
 						{
 							$message = $chatbotHelper->prepareFacebookProdMessages($productID);
 							//Mage::helper('core')->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
-							if ($message) // TODO
+							if (!empty($message)) // TODO
 							{
 								if ($i >= $showMore)
 								{
@@ -1188,7 +1216,7 @@
 							{
 								$buttons = array();
 								$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
-								if ($message) // TODO
+								if (!empty($message)) // TODO
 								{
 									$button = array(
 										'type' => 'postback',
@@ -1441,19 +1469,60 @@
 								if ($matched)
 								{
 									$message = $reply["reply_phrase"];
+									if ($username)
+										$message = str_replace("{customername}", $username, $message);
 									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];
 										if (!empty($cmdId))
 											$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
 										if (!empty($message))
-											$facebook->postMessage($chatId, $message);
+										{
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$facebook->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$facebook->postMessage($chatId, $message);
+										}
 									}
 									else //if ($reply['reply_mode'] == "0") // Text Only
 									{
 										if (!empty($message))
 										{
-											$facebook->postMessage($chatId, $message);
+											$count = strlen($message);
+											if ($count > $messageLimit)
+											{
+												$total = ceil($count / $messageLimit);
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++) // loop to send big messages
+												{
+													$cut = ($count/$total) * $i;
+													if ($cut >= $count) // if cut is equal or bigger to message itself
+														$end = $count;
+													else
+														$end = strpos($message, ' ', $cut);
+													$tempMessage = substr($message, $start, $end);
+													$facebook->postMessage($chatId, $tempMessage);
+													$start = $end;
+												}
+											}
+											else
+												$facebook->postMessage($chatId, $message);
+
 											if ($reply["stop_processing"] == "1")
 												return $facebook->respondSuccess();
 										}
