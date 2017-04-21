@@ -335,6 +335,9 @@
 			// instances conversation state
 			$conversationState = $chatdata->getTelegramConvState();
 
+			// init error message
+			$chatbotHelper->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
+
 			if ($supportGroupId[0] == "g") // remove the 'g' from groupd id, and add '-'
 				$supportGroupId = "-" . ltrim($supportGroupId, "g");
 
@@ -345,9 +348,23 @@
 			{
 				if ($chatId == $supportGroupId) // if the group sending the message is the support group
 				{
+					// admin commands
+					$admEndSupport = $commandPrefix . $chatbotHelper->_admEndSupportCmd;
+					$admBlockSupport = $commandPrefix . $chatbotHelper->_admBlockSupportCmd;
+					$admEnableSupport = $commandPrefix . $chatbotHelper->_admEnableSupportCmd;
+					$admDisableBotCmd = $commandPrefix . $chatbotHelper->_admDisableBotCmd;
+					$admEnableBotCmd = $commandPrefix . $chatbotHelper->_admEnableBotCmd;
+
+					// check if the command is /command@MyBot
+					$botUsername = "@" . $chatbotHelper->getTelegramBotUsername();
+					if (strpos($text, $botUsername) !== false)
+						$text = explode($botUsername, $text)[0];
+
 					$replyMessageId = $telegram->ReplyToMessageID();
+
 					if (!empty($replyMessageId)) // if the message is replying another message
 					{
+						$errorFlag = false;
 						$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
 						$replyFromUserId = $telegram->ReplyToMessageFromUserID();
 
@@ -355,73 +372,109 @@
 						$isLocal = !is_null($replyFromUserId);
 						if ($isLocal != $isForeign) // XOR
 						{
-							$admEndSupport = $commandPrefix . $chatbotHelper->_admEndSupportCmd;
-							$admBlockSupport = $commandPrefix . $chatbotHelper->_admBlockSupportCmd;
-							$admEnableSupport = $commandPrefix . $chatbotHelper->_admEnableSupportCmd;
-
 							if ($isLocal)
 								$customerChatdata = Mage::getModel('chatbot/chatdata')->load($replyFromUserId, 'telegram_chat_id');
 							else //if ($isForeign)
 								$customerChatdata = $foreignChatdata;
 
-							$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
-							if ($text == $admEndSupport) // finish customer support
+							if (!is_null($customerChatdata->getTelegramChatId()))
 							{
-								// TODO IMPORTANT remember to switch off all other supports
-								if ($isLocal)
-									$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
-								else// if ($isForeign) // TODO make this generic
-									$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
-
-								$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
-								$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
-							}
-							else if ($text == $admBlockSupport) // block user from using support
-							{
-								$customerChatdata->updateChatdata('enable_support', "0"); // disable support
-								$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer able to enter support.")); // TODO
-							}
-							else if ($text == $admEnableSupport) // unblock user from using support
-							{
-								$customerChatdata->updateChatdata('enable_support', "1"); // enable support
-								$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is now able to enter support.")); // TODO
-							}
-							else // if no command, then it's replying the user
-							{
-								$switchedToSupport = false;
-								if ($customerChatdata->getTelegramConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
+								$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
+								if ($text == $admEndSupport) // finish customer support
 								{
-									$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
-									$switchedToSupport = true;
-								}
+									// TODO IMPORTANT remember to switch off all other supports
+									if ($isLocal)
+										$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
+									else// if ($isForeign) // TODO make this generic
+										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
 
-								if ($isLocal)
-								{
-									if ($switchedToSupport)
-										$telegram->postMessage($replyFromUserId, $mageHelper->__("You're now on support mode."));
-									$telegram->postMessage($replyFromUserId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
+									$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
 								}
-								else //if ($isForeign)
+								else if ($text == $admBlockSupport) // block user from using support
 								{
-									if ($switchedToSupport)
-										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("You're now on support mode."));
-									$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $text);
+									$customerChatdata->updateChatdata('enable_support', "0"); // disable support
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer able to enter support.")); // TODO
 								}
+								else if ($text == $admEnableSupport) // unblock user from using support
+								{
+									$customerChatdata->updateChatdata('enable_support', "1"); // enable support
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is now able to enter support.")); // TODO
+								}
+								else if ($text == $admDisableBotCmd) // disable bot response
+								{
+									if ($isLocal)
+										$customerChatdata->updateChatdata('enable_telegram_admin', "0"); // disable support
+									else// if ($isForeign) // TODO make this generic
+										$customerChatdata->updateChatdata('enable_facebook_admin', "0"); // disable support
 
-								$telegram->postMessage($chatId, $mageHelper->__("Message sent.")); // send message to admin group TODO
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The bot will no longer send messages to this customer.")); // TODO
+								}
+								else if ($text == $admEnableBotCmd) // enable bot response
+								{
+									if ($isLocal)
+										$customerChatdata->updateChatdata('enable_telegram_admin', "1"); // enable support
+									else// if ($isForeign) // TODO make this generic
+										$customerChatdata->updateChatdata('enable_facebook_admin', "1"); // enable support
+
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The bot will now start sending messages to this customer.")); // TODO
+								}
+								else // if no command, then it's replying the user
+								{
+									$switchedToSupport = false;
+									if ($customerChatdata->getTelegramConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
+									{
+										$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
+										$switchedToSupport = true;
+									}
+
+									if ($isLocal)
+									{
+										if ($switchedToSupport)
+											$telegram->postMessage($replyFromUserId, $mageHelper->__("You're now on support mode."));
+										$telegram->postMessage($replyFromUserId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
+									}
+									else //if ($isForeign)
+									{
+										if ($switchedToSupport)
+											$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("You're now on support mode."));
+										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $text);
+									}
+
+									$telegram->postMessage($chatId, $mageHelper->__("Message sent.")); // send message to admin group TODO
+								}
 							}
+							else
+								$errorFlag = true;
 						}
 						else
+							$errorFlag = true;
+
+						if ($errorFlag)
 						{
-							$telegram->postMessage($chatId, $mageHelper->__("Something went wrong, please try again."));
+							$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
 							return $telegram->respondSuccess();
 						}
 					}
 					else // proccess other admin commands (that aren't replying messages)
 					{
 						$admSend2All = $commandPrefix . $chatbotHelper->_admSendMessage2AllCmd;
+						$admListCmds = $commandPrefix . $chatbotHelper->_admListCmds;
 
-						if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
+						if ($text == $admListCmds)
+						{
+							$message = $mageHelper->__("List of all admin commands") . ":\n" .
+								$admListCmds . " - " . $mageHelper->__("List all admin commands") . "\n" .
+								$admSend2All . " - " . $mageHelper->__("Send message to all customers") . "\n" .
+								$admEndSupport . " - " . $mageHelper->__("End support for customer") . "\n" .
+								$admBlockSupport . " - " . $mageHelper->__("Block customer for entering support mode") . "\n" .
+								$admEnableSupport . " - " . $mageHelper->__("Enable customer for entering support mode") . "\n" .
+								$admDisableBotCmd . " - " . $mageHelper->__("Disable bot responses") . "\n" .
+								$admEnableBotCmd . " - " . $mageHelper->__("Enable bot responses")
+							;
+							$telegram->postMessage($chatId, $message);
+						}
+						else if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
 						{
 							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
 							if (!empty($message))
@@ -524,7 +577,6 @@
 			if (!$chatbotHelper->_cancelCmd['command']) $chatbotHelper->_cancelCmd['command'] = "/cancel"; // it must always have a cancel command // $commandPrefix
 
 			// init messages
-			$chatbotHelper->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
 			$chatbotHelper->_cancelMessage = $mageHelper->__("To cancel, send") . " " . $chatbotHelper->_cancelCmd['command'];
 			$chatbotHelper->_canceledMessage = $mageHelper->__("Ok, canceled.");
 			$chatbotHelper->_loginFirstMessage = $mageHelper->__("Please login first.");
@@ -939,7 +991,7 @@
 					{
 						if ($order->getCustomerId() == $chatdata->getCustomerId()) // not a problem if customer dosen't exist
 						{
-							$telegram->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $order->getStatus());
+							$telegram->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $mageHelper->__($order->getStatus()));
 						}
 						else
 							$errorFlag = true;
@@ -1418,15 +1470,19 @@
 										$witResponse = $this->_witAi->getTextResponse($text);
 										$hasWitaiReplies = true;
 									}
-									if (property_exists($witResponse->entities, $match))
-									{
-										foreach ($witResponse->entities->{$match} as $m)
-										{
-											if (((float)$m->confidence * 100) < (float)$witAiConfidence)
-												continue;
 
-											$matched = true;
-											break;
+									if (!empty($witResponse))
+									{
+										if (property_exists($witResponse->entities, $match))
+										{
+											foreach ($witResponse->entities->{$match} as $m)
+											{
+												if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+													continue;
+
+												$matched = true;
+												break;
+											}
 										}
 									}
 								}
@@ -1486,14 +1542,21 @@
 							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
 						$witResponse = $this->_witAi->getTextResponse($text);
+						$hasIntent = false;
 
-						$hasIntent = true;
-						if (property_exists($witResponse->entities, "telegram_intent"))
-							$intents = $witResponse->entities->telegram_intent;
-						else if (property_exists($witResponse->entities, "intent"))
-							$intents = $witResponse->entities->intent;
-						else
-							$hasIntent = false;
+						if (!empty($witResponse))
+						{
+							if (property_exists($witResponse->entities, "telegram_intent"))
+							{
+								$intents = $witResponse->entities->telegram_intent;
+								$hasIntent = true;
+							}
+							else if (property_exists($witResponse->entities, "intent"))
+							{
+								$intents = $witResponse->entities->intent;
+								$hasIntent = true;
+							}
+						}
 
 						if ($hasIntent)
 						{

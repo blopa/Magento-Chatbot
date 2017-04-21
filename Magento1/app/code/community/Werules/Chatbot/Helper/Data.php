@@ -77,6 +77,9 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	public $_admEndSupportCmd = "endsupport";
 	public $_admBlockSupportCmd = "blocksupport";
 	public $_admEnableSupportCmd = "enablesupport";
+	public $_admEnableBotCmd = "enablebot";
+	public $_admDisableBotCmd = "disablebot";
+	public $_admListCmds = "admincommands";
 
 	// REGEX
 	public $_unallowedCharacters = "/[^A-Za-z0-9 _]/";
@@ -286,6 +289,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		$tgUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
 		if (!empty($tgUsername))
 			return $tgUsername;
+
 		$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 		if (!empty($tgApiKey))
 		{
@@ -350,6 +354,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		$fbUsername = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_page_username');
 		if (!empty($fbUsername))
 			return $fbUsername;
+
 		$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
 		if (!empty($fbApiKey))
 		{

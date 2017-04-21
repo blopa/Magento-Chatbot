@@ -13,7 +13,7 @@
 	class Messenger {
 
 		private $bot_id = "";
-		private $api_version = "v2.8";
+		private $api_version = "v2.9";
 		private $data = array();
 		private $updates = array();
 
@@ -196,6 +196,11 @@
 			return $this->data['entry'][0]['messaging'][0]['sender']['id'];
 		}
 
+		/// Get the recipient_id of the current message
+		public function RecipientID() {
+			return $this->data['entry'][0]['messaging'][0]['recipient']['id'];
+		}
+
 		/// Get raw data
 		public function RawData() {
 			return $this->data;
@@ -216,9 +221,14 @@
 			return $this->data["entry"][0]["messaging"][0]["message"]["mid"];
 		}
 
-		/// Get the message_id of the current message
+		/// Get the is_echo of the current message
 		public function getEcho() {
 			return $this->data["entry"][0]["messaging"][0]["message"]["is_echo"];
+		}
+
+		/// Get the app_id of the current message
+		public function getAppId() {
+			return $this->data["entry"][0]["messaging"][0]["message"]["app_id"];
 		}
 
 		private function sendAPIRequest($url, array $content, $post = true, $response = true) {
