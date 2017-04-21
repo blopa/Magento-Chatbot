@@ -7,6 +7,7 @@
 	class MessengerBot extends Messenger
 	{
 		public $_originalText;
+		public $_recipientId;
 		public $_chatId;
 		public $_messageId;
 		public $_audioPath;
@@ -82,6 +83,20 @@
 			if ($enableLog == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
 
+			$appId = $facebook->getAppId();
+			if ($isEcho == "true")
+			{
+				if (empty($appId)) // dosen't have an app id, so it's a human reply using the page
+				{
+					$facebook->_recipientId = $facebook->RecipientID();
+				}
+			}
+
+			Mage::log("appId -> " . $appId, null, 'chatbot_facebook.log');
+			Mage::log("isEcho ->" . $isEcho, null, 'chatbot_facebook.log');
+			Mage::log("_chatId ->" . $facebook->_chatId, null, 'chatbot_facebook.log');
+			Mage::log("_originalText ->" . $facebook->_originalText, null, 'chatbot_facebook.log');
+
 			// checking for payload
 			$payloadContent = $facebook->getPayload();
 			if (!empty($payloadContent) && empty($facebook->_originalText))
@@ -91,7 +106,7 @@
 				$facebook->_messageId = $facebook->getMessageTimestamp();
 			}
 
-			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && $isEcho != "true")
+			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId)))
 			{
 				return $this->processText();
 			}
@@ -147,6 +162,10 @@
 			$messageId = $facebook->_messageId;
 			$isPayload = $facebook->_isPayload;
 			$text = strtolower($originalText);
+			$recipientId = $facebook->_recipientId;
+
+			if (isset($recipientId)) // it's only set when a human respond on the facebook page
+				$chatId = $recipientId;
 
 			// Instances facebook user details
 			$userData = $facebook->UserData($chatId);
@@ -161,6 +180,19 @@
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
+
+			if ($chatdata->getEnableFacebookAdmin() != "1") // disabled by admin
+			{
+				return $facebook->respondSuccess();
+			}
+
+			if (isset($recipientId)) // it's only set when a human respond on the facebook page
+			{
+				$chatdata->updateChatdata('enable_facebook_admin', "0");
+				$text = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
+				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState); // force update state to support mode
+				//return $facebook->respondSuccess();
+			}
 
 			if ($messageId == $chatdata->getFacebookMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
 				return $facebook->respondSuccess();
@@ -296,6 +328,21 @@
 						$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_replyToSupportMessageState);
 
 						$facebook->postMessage($chatId, $mageHelper->__("Ok, send me the message and I'll forward it to the customer."));
+					}
+					else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admEnableBotCmd)) // old checkCommandWithValue
+					{
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
+						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
+						if ($customerData->getEnableFacebookAdmin() == "1")
+						{
+							$customerData->updateChatdata('enable_facebook_admin', "0"); // disable bot response
+							$facebook->postMessage($chatId, $mageHelper->__("Done. The bot will no longer send messages to this customer."));
+						}
+						else //if ($customerData->getEnableFacebookAdmin() == "0")
+						{
+							$customerData->updateChatdata('enable_facebook_admin', "1"); // enable bot response
+							$facebook->postMessage($chatId, $mageHelper->__("Done. The bot will now start sending messages to this customer."));
+						}
 					}
 					else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_admSendMessage2AllCmd)) // TODO
 					{
@@ -794,28 +841,42 @@
 					}
 					else // probably have the admin chat id set
 					{
-						$buttons = array(
-							array(
-								'type' => 'postback',
-								'title' => $mageHelper->__("End support"),
-								'payload' => $chatbotHelper->_admEndSupportCmd . $chatId
+						if (!isset($recipientId)) // it's only set when a human respond on the facebook page
+						{
+							$buttons = array(
+								array(
+									'type' => 'postback',
+									'title' => $mageHelper->__("End support"),
+									'payload' => $chatbotHelper->_admEndSupportCmd . $chatId
 
-							),
-							array(
-								'type' => 'postback',
-								'title' => $mageHelper->__("Enable/Disable support"),
-								'payload' => $chatbotHelper->_admBlockSupportCmd . $chatId
+								),
+								array(
+									'type' => 'postback',
+									'title' => $mageHelper->__("Enable/Disable support"),
+									'payload' => $chatbotHelper->_admBlockSupportCmd . $chatId
 
-							),
-							array(
-								'type' => 'postback',
-								'title' => $mageHelper->__("Reply this message"),
-								'payload' => $replyToCustomerMessage . $chatId
+								),
+								array(
+									'type' => 'postback',
+									'title' => $mageHelper->__("Reply this message"),
+									'payload' => $replyToCustomerMessage . $chatId
 
-							)
-						);
+								)
+							);
+							$message = $mageHelper->__("From") . ": " . $username . "\n" . $mageHelper->__("ID") . ": " . $chatId . "\n" . $text;
+						}
+						else // if a human is responding
+						{
+							$buttons = array(
+								array(
+									'type' => 'postback',
+									'title' => $mageHelper->__("Enable/Disable Bot Replies"),
+									'payload' => $chatbotHelper->_admEnableBotCmd . $chatId
+								)
+							);
+							$message = $text;
+						}
 
-						$message = $mageHelper->__("From") . ": " . $username . "\n" . $mageHelper->__("ID") . ": " . $chatId . "\n" . $text;
 						$facebook->sendButtonTemplate($supportGroupId, $message, $buttons);
 						$errorFlag = false;
 					}
@@ -823,7 +884,7 @@
 
 				if ($errorFlag)
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
-				else
+				else if (!isset($recipientId)) // it's only set when a human respond on the facebook page
 					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support."));
 				return $facebook->respondSuccess();
 			}
@@ -852,7 +913,7 @@
 					{
 						if ($order->getCustomerId() == $chatdata->getCustomerId()) // not a problem if customer dosen't exist
 						{
-							$facebook->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $order->getStatus());
+							$facebook->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $mageHelper->__($order->getStatus()));
 						}
 						else
 							$errorFlag = true;

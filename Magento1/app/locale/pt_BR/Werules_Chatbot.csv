@@ -248,3 +248,8 @@
 "Facebook Messenger Box Size","Tamanho da Caixa de Chat do Messenger"
 "Telegram Bot Username","Username do Bot do Telegram"
 "Facebook Page Username","Username da Página do Facebook"
+"Your order status is","O status do seu pedido é"
+"Done. The bot will no longer send messages to this customer.","Pronto. O bot não enviará mais mensagens para esse usuário."
+"Done. The bot will now start sending messages to this customer.","Pronto. O bot está ativado para enviar mensagens para esse usuário."
+"Bot respond is disabled for now because the customer is being replied by a human.","Bot respond is disabled for now because the customer is being replied by a human."
+"Enable/Disable Bot Replies","Habilita/desabilita Respostas do Bot"

@@ -939,7 +939,7 @@
 					{
 						if ($order->getCustomerId() == $chatdata->getCustomerId()) // not a problem if customer dosen't exist
 						{
-							$telegram->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $order->getStatus());
+							$telegram->postMessage($chatId, $mageHelper->__("Your order status is") . " " . $mageHelper->__($order->getStatus()));
 						}
 						else
 							$errorFlag = true;

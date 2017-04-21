@@ -248,3 +248,8 @@
 "Facebook Messenger Box Size","Facebook Messenger Box Size"
 "Telegram Bot Username","Telegram Bot Username"
 "Facebook Page Username","Facebook Page Username"
+"Your order status is","Your order status is"
+"Done. The bot will no longer send messages to this customer.","Done. The bot will no longer send messages to this customer."
+"Done. The bot will now start sending messages to this customer.","Done. The bot will now start sending messages to this customer."
+"Bot respond is disabled for now because the customer is being replied by a human.","Bot respond is disabled for now because the customer is being replied by a human."
+"Enable/Disable Bot Replies","Enable/Disable Bot Replies"
