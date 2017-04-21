@@ -239,6 +239,7 @@
 			$listMoreOrders = "/lmo_";
 			$commandPrefix = "/";
 			$message = "";
+			$messageLimit = 4096;
 
 			// instance Telegram API
 			$telegram = $this->_telegram;

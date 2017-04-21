@@ -141,6 +141,7 @@
 			$listMoreOrders = "show_more_order_";
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
+			$messageLimit = 640;
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -1476,7 +1477,21 @@
 										if (!empty($cmdId))
 											$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
 										if (!empty($message))
-											$facebook->postMessage($chatId, $message);
+										{
+											$count = count($message);
+											if ($count > $messageLimit)
+											{
+												$total = $count / $messageLimit;
+												$start = 0;
+												for ($i = 1; $i <= $total; $i++)
+												{
+													$facebook->postMessage($chatId, substr($message, $start, strpos($message, ' ', ($count/$total) * $i)));
+													$start = ($count/$total) * $i;
+												}
+											}
+											else
+												$facebook->postMessage($chatId, $message);
+										}
 									}
 									else //if ($reply['reply_mode'] == "0") // Text Only
 									{
