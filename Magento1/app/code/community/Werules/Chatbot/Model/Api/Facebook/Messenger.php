@@ -206,6 +206,16 @@
 			return $this->data;
 		}
 
+		/// Get m.me ref type
+		public function getReferralType() {
+			return $this->data["referral"]["type"];
+		}
+
+		/// Get m.me ref data
+		public function getReferralRef() {
+			return $this->data["referral"]["ref"];
+		}
+
 		/// Get payload
 		public function getPayload() {
 			return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];

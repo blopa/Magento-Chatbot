@@ -87,7 +87,8 @@
 				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
 
 			$appId = $facebook->getAppId();
-			if ($isEcho == "true")
+			$canDisableBot = Mage::getStoreConfig('chatbot_enable/facebook_config/option_disable_bot');
+			if (($isEcho == "true") && ($canDisableBot == "1"))
 			{
 				if (empty($appId)) // dosen't have an app id, so it's a human reply using the page
 				{
