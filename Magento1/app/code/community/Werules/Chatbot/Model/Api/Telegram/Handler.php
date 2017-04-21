@@ -537,11 +537,16 @@
 			// init start command
 			$chatbotHelper->_startCmd['command'] = "/start"; // $commandPrefix
 
+			// user isnt registred HERE
 			if (is_null($chatdata->getTelegramChatId()) && !$chatbotHelper->startsWith($text, $chatbotHelper->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
 				if ($message) // TODO
+				{
+					if ($username)
+						$message = str_replace("{customername}", $username, $message);
 					$telegram->postMessage($chatId, $message);
+				}
 				try
 				{
 					$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO

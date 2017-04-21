@@ -211,6 +211,11 @@
 			return $this->data["referral"]["type"];
 		}
 
+		/// Get m.me ref type
+		public function getReferralChatId() {
+			return $this->data["sender"]["id"];
+		}
+
 		/// Get m.me ref data
 		public function getReferralRef() {
 			return $this->data["referral"]["ref"];

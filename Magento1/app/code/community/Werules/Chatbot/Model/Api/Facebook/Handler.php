@@ -7,6 +7,7 @@
 	class MessengerBot extends Messenger
 	{
 		public $_originalText;
+		public $_referral;
 		public $_recipientId;
 		public $_chatId;
 		public $_messageId;
@@ -97,6 +98,14 @@
 				}
 			}
 
+			$referal = $facebook->getReferralRef();
+			if (!empty($referal)) // opened m.me with referal
+			{
+				$facebook->_chatId = $facebook->getReferralChatId();
+				$facebook->_referral = $referal;
+				$facebook->_originalText = $mageHelper->__("Hi");
+			}
+
 			// checking for payload
 			$payloadContent = $facebook->getPayload();
 			if (!empty($payloadContent) && empty($facebook->_originalText))
@@ -106,7 +115,7 @@
 				$facebook->_messageId = $facebook->getMessageTimestamp();
 			}
 
-			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId)))
+			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId) || isset($facebook->_referral)))
 			{
 				return $this->processText();
 			}
@@ -393,7 +402,11 @@
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
 				if ($message) // TODO
+				{
+					if ($username)
+						$message = str_replace("{customername}", $username, $message);
 					$facebook->postMessage($chatId, $message);
+				}
 				try
 				{
 					$hash = substr(md5(uniqid($chatId, true)), 0, 150); // TODO
@@ -411,6 +424,19 @@
 				}
 				//$facebook->sendChatAction($chatId, "typing_off");
 				//return $facebook->respondSuccess(); // commented to keep processing the message
+			}
+
+			// referal handler
+			if (isset($facebook->_referral))
+			{
+				$refMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_referral_message');
+				if (!empty($refMessage) && empty($message)) // only if haven't sent the welcome message
+				{
+					if ($username)
+						$refMessage = str_replace("{customername}", $username, $refMessage);
+					$facebook->postMessage($chatId, $refMessage);
+				}
+				return $facebook->respondSuccess();
 			}
 
 			// init commands
