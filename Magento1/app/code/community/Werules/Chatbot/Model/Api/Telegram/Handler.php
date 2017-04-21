@@ -355,6 +355,11 @@
 					$admDisableBotCmd = $commandPrefix . $chatbotHelper->_admDisableBotCmd;
 					$admEnableBotCmd = $commandPrefix . $chatbotHelper->_admEnableBotCmd;
 
+					// check if the command is /command@MyBot
+					$botUsername = "@" . $chatbotHelper->getTelegramBotUsername();
+					if (strpos($text, $botUsername) !== false)
+						$text = explode($botUsername, $text)[0];
+
 					$replyMessageId = $telegram->ReplyToMessageID();
 
 					if (!empty($replyMessageId)) // if the message is replying another message
