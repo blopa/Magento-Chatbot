@@ -98,11 +98,10 @@
 				}
 			}
 
-			$referal = $facebook->getReferralRef();
-			if (!empty($referal)) // opened m.me with referal
+			$referral = $facebook->getReferralRef();
+			if (!empty($referral)) // opened m.me with referral
 			{
-				$facebook->_chatId = $facebook->getReferralChatId();
-				$facebook->_referral = $referal;
+				$facebook->_referral = $referral;
 				$facebook->_originalText = $mageHelper->__("Hi");
 			}
 
@@ -141,6 +140,7 @@
 			$listMoreSearch = "show_more_search_prod_";
 			$listMoreOrders = "show_more_order_";
 			$replyToCustomerMessage = "reply_to_message";
+			$message = "";
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -189,6 +189,7 @@
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
+
 
 			if ($chatdata->getEnableFacebookAdmin() == "0") // disabled by admin
 				return $facebook->respondSuccess();
@@ -401,7 +402,7 @@
 			if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
-				if ($message) // TODO
+				if (!empty($message)) // TODO
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
@@ -426,7 +427,7 @@
 				//return $facebook->respondSuccess(); // commented to keep processing the message
 			}
 
-			// referal handler
+			// referral handler
 			if (isset($facebook->_referral))
 			{
 				$refMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_referral_message');
@@ -782,7 +783,7 @@
 						{
 							$message = $chatbotHelper->prepareFacebookProdMessages($productID);
 							//Mage::helper('core')->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
-							if ($message) // TODO
+							if (!empty($message)) // TODO
 							{
 								if ($i >= $showMore)
 								{
@@ -1214,7 +1215,7 @@
 							{
 								$buttons = array();
 								$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
-								if ($message) // TODO
+								if (!empty($message)) // TODO
 								{
 									$button = array(
 										'type' => 'postback',
@@ -1467,6 +1468,8 @@
 								if ($matched)
 								{
 									$message = $reply["reply_phrase"];
+									if ($username)
+										$message = str_replace("{customername}", $username, $message);
 									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];

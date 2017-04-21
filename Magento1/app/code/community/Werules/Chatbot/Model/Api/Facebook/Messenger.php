@@ -208,17 +208,12 @@
 
 		/// Get m.me ref type
 		public function getReferralType() {
-			return $this->data["referral"]["type"];
-		}
-
-		/// Get m.me ref type
-		public function getReferralChatId() {
-			return $this->data["sender"]["id"];
+			return $this->data["entry"][0]["messaging"][0]["referral"]["type"];
 		}
 
 		/// Get m.me ref data
 		public function getReferralRef() {
-			return $this->data["referral"]["ref"];
+			return $this->data["entry"][0]["messaging"][0]["referral"]["ref"];
 		}
 
 		/// Get payload

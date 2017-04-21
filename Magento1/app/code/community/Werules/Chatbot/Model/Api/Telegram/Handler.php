@@ -238,6 +238,7 @@
 			$listMoreSearch = "/lms_";
 			$listMoreOrders = "/lmo_";
 			$commandPrefix = "/";
+			$message = "";
 
 			// instance Telegram API
 			$telegram = $this->_telegram;
@@ -541,7 +542,7 @@
 			if (is_null($chatdata->getTelegramChatId()) && !$chatbotHelper->startsWith($text, $chatbotHelper->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-				if ($message) // TODO
+				if (!empty($message)) // TODO
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
@@ -620,7 +621,7 @@
 							$chatHash->save();
 
 							$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-							if ($message) // TODO
+							if (!empty($message)) // TODO
 								$telegram->postMessage($chatId, $message);
 						}
 						catch (Exception $e)
@@ -644,7 +645,7 @@
 				else // if customer id isnt on our database, means that we need to insert his data
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-					if ($message) // TODO
+					if (!empty($message)) // TODO
 						$telegram->postMessage($chatId, $message);
 					try
 					{
@@ -820,7 +821,7 @@
 								foreach ($productIDs as $productID)
 								{
 									$message = $chatbotHelper->prepareTelegramProdMessages($productID);
-									if ($message) // TODO
+									if (!empty($message)) // TODO
 									{
 										$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 										if ($i >= $showMore)
@@ -910,7 +911,7 @@
 						foreach ($productIDs as $productID)
 						{
 							$message = $chatbotHelper->prepareTelegramProdMessages($productID);
-							if ($message) // TODO
+							if (!empty($message)) // TODO
 							{
 								$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 								if ($i >= $showMore)
@@ -1250,7 +1251,7 @@
 							foreach($ordersIDs as $orderID)
 							{
 								$message = $chatbotHelper->prepareTelegramOrderMessages($orderID);
-								if ($message) // TODO
+								if (!empty($message)) // TODO
 								{
 									if ($chatbotHelper->_reorderCmd['command'])
 										$message .= "\n\n" . $mageHelper->__("Reorder") . ": " . $chatbotHelper->_reorderCmd['command'] . $orderID;
@@ -1495,6 +1496,8 @@
 								if ($matched)
 								{
 									$message = $reply["reply_phrase"];
+									if ($username)
+										$message = str_replace("{customername}", $username, $message);
 									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];
