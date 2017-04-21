@@ -1418,15 +1418,19 @@
 										$witResponse = $this->_witAi->getTextResponse($text);
 										$hasWitaiReplies = true;
 									}
-									if (property_exists($witResponse->entities, $match))
-									{
-										foreach ($witResponse->entities->{$match} as $m)
-										{
-											if (((float)$m->confidence * 100) < (float)$witAiConfidence)
-												continue;
 
-											$matched = true;
-											break;
+									if (!empty($witResponse))
+									{
+										if (property_exists($witResponse->entities, $match))
+										{
+											foreach ($witResponse->entities->{$match} as $m)
+											{
+												if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+													continue;
+
+												$matched = true;
+												break;
+											}
 										}
 									}
 								}
@@ -1486,14 +1490,21 @@
 							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
 						$witResponse = $this->_witAi->getTextResponse($text);
+						$hasIntent = false;
 
-						$hasIntent = true;
-						if (property_exists($witResponse->entities, "telegram_intent"))
-							$intents = $witResponse->entities->telegram_intent;
-						else if (property_exists($witResponse->entities, "intent"))
-							$intents = $witResponse->entities->intent;
-						else
-							$hasIntent = false;
+						if (!empty($witResponse))
+						{
+							if (property_exists($witResponse->entities, "telegram_intent"))
+							{
+								$intents = $witResponse->entities->telegram_intent;
+								$hasIntent = true;
+							}
+							else if (property_exists($witResponse->entities, "intent"))
+							{
+								$intents = $witResponse->entities->intent;
+								$hasIntent = true;
+							}
+						}
 
 						if ($hasIntent)
 						{

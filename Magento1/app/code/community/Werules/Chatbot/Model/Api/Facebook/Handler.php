@@ -79,6 +79,9 @@
 			$facebook->_messageId = $facebook->MessageID();
 			$isEcho = $facebook->getEcho();
 
+			// helper
+			$mageHelper = Mage::helper('core');
+
 			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
 			if ($enableLog == "1") // log all posts
 				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
@@ -89,6 +92,7 @@
 				if (empty($appId)) // dosen't have an app id, so it's a human reply using the page
 				{
 					$facebook->_recipientId = $facebook->RecipientID();
+					$facebook->_originalText = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
 				}
 			}
 
@@ -181,7 +185,7 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
-			if ($chatdata->getEnableFacebookAdmin() != "1") // disabled by admin
+			if ($chatdata->getEnableFacebookAdmin() == "0") // disabled by admin
 			{
 				return $facebook->respondSuccess();
 			}
@@ -189,7 +193,7 @@
 			if (isset($recipientId)) // it's only set when a human respond on the facebook page
 			{
 				$chatdata->updateChatdata('enable_facebook_admin', "0");
-				$text = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
+				//$text = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
 				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState); // force update state to support mode
 				//return $facebook->respondSuccess();
 			}
@@ -1410,15 +1414,19 @@
 										$witResponse = $this->_witAi->getTextResponse($text);
 										$hasWitaiReplies = true;
 									}
-									if (property_exists($witResponse->entities, $match))
-									{
-										foreach ($witResponse->entities->{$match} as $m)
-										{
-											if (((float)$m->confidence * 100) < (float)$witAiConfidence)
-												continue;
 
-											$matched = true;
-											break;
+									if (!empty($witResponse))
+									{
+										if (property_exists($witResponse->entities, $match))
+										{
+											foreach ($witResponse->entities->{$match} as $m)
+											{
+												if (((float)$m->confidence * 100) < (float)$witAiConfidence)
+													continue;
+
+												$matched = true;
+												break;
+											}
 										}
 									}
 								}
@@ -1481,14 +1489,21 @@
 							$witAiConfidence = $defaultConfidence; // default acceptable confidence percentage
 
 						$witResponse = $this->_witAi->getTextResponse($text);
+						$hasIntent = false;
 
-						$hasIntent = true;
-						if (property_exists($witResponse->entities, "facebook_intent"))
-							$intents = $witResponse->entities->facebook_intent;
-						else if (property_exists($witResponse->entities, "intent"))
-							$intents = $witResponse->entities->intent;
-						else
-							$hasIntent = false;
+						if (!empty($witResponse))
+						{
+							if (property_exists($witResponse->entities, "facebook_intent"))
+							{
+								$intents = $witResponse->entities->facebook_intent;
+								$hasIntent = true;
+							}
+							else if (property_exists($witResponse->entities, "intent"))
+							{
+								$intents = $witResponse->entities->intent;
+								$hasIntent = true;
+							}
+						}
 
 						if ($hasIntent)
 						{
