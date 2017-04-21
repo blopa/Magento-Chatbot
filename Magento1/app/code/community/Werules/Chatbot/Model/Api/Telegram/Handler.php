@@ -348,7 +348,15 @@
 			{
 				if ($chatId == $supportGroupId) // if the group sending the message is the support group
 				{
+					// admin commands
+					$admEndSupport = $commandPrefix . $chatbotHelper->_admEndSupportCmd;
+					$admBlockSupport = $commandPrefix . $chatbotHelper->_admBlockSupportCmd;
+					$admEnableSupport = $commandPrefix . $chatbotHelper->_admEnableSupportCmd;
+					$admDisableBotCmd = $commandPrefix . $chatbotHelper->_admDisableBotCmd;
+					$admEnableBotCmd = $commandPrefix . $chatbotHelper->_admEnableBotCmd;
+
 					$replyMessageId = $telegram->ReplyToMessageID();
+
 					if (!empty($replyMessageId)) // if the message is replying another message
 					{
 						$errorFlag = false;
@@ -359,10 +367,6 @@
 						$isLocal = !is_null($replyFromUserId);
 						if ($isLocal != $isForeign) // XOR
 						{
-							$admEndSupport = $commandPrefix . $chatbotHelper->_admEndSupportCmd;
-							$admBlockSupport = $commandPrefix . $chatbotHelper->_admBlockSupportCmd;
-							$admEnableSupport = $commandPrefix . $chatbotHelper->_admEnableSupportCmd;
-
 							if ($isLocal)
 								$customerChatdata = Mage::getModel('chatbot/chatdata')->load($replyFromUserId, 'telegram_chat_id');
 							else //if ($isForeign)
@@ -391,6 +395,24 @@
 								{
 									$customerChatdata->updateChatdata('enable_support', "1"); // enable support
 									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is now able to enter support.")); // TODO
+								}
+								else if ($text == $admDisableBotCmd) // disable bot response
+								{
+									if ($isLocal)
+										$customerChatdata->updateChatdata('enable_telegram_admin', "0"); // disable support
+									else// if ($isForeign) // TODO make this generic
+										$customerChatdata->updateChatdata('enable_facebook_admin', "0"); // disable support
+
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The bot will no longer send messages to this customer.")); // TODO
+								}
+								else if ($text == $admEnableBotCmd) // enable bot response
+								{
+									if ($isLocal)
+										$customerChatdata->updateChatdata('enable_telegram_admin', "1"); // enable support
+									else// if ($isForeign) // TODO make this generic
+										$customerChatdata->updateChatdata('enable_facebook_admin', "1"); // enable support
+
+									$telegram->postMessage($chatId, $mageHelper->__("Done. The bot will now start sending messages to this customer.")); // TODO
 								}
 								else // if no command, then it's replying the user
 								{
@@ -432,8 +454,22 @@
 					else // proccess other admin commands (that aren't replying messages)
 					{
 						$admSend2All = $commandPrefix . $chatbotHelper->_admSendMessage2AllCmd;
+						$admListCmds = $commandPrefix . $chatbotHelper->_admListCmds;
 
-						if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
+						if ($text == $admListCmds)
+						{
+							$message = $mageHelper->__("List of all admin commands") . ":\n" .
+								$admListCmds . " - " . $mageHelper->__("List all admin commands") . "\n" .
+								$admSend2All . " - " . $mageHelper->__("Send message to all customers") . "\n" .
+								$admEndSupport . " - " . $mageHelper->__("End support for customer") . "\n" .
+								$admBlockSupport . " - " . $mageHelper->__("Block customer for entering support mode") . "\n" .
+								$admEnableSupport . " - " . $mageHelper->__("Enable customer for entering support mode") . "\n" .
+								$admDisableBotCmd . " - " . $mageHelper->__("Disable bot responses") . "\n" .
+								$admEnableBotCmd . " - " . $mageHelper->__("Enable bot responses")
+							;
+							$telegram->postMessage($chatId, $message);
+						}
+						else if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
 						{
 							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
 							if (!empty($message))

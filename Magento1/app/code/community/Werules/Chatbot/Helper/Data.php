@@ -78,6 +78,8 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	public $_admBlockSupportCmd = "blocksupport";
 	public $_admEnableSupportCmd = "enablesupport";
 	public $_admEnableBotCmd = "enablebot";
+	public $_admDisableBotCmd = "disablebot";
+	public $_admListCmds = "admincommands";
 
 	// REGEX
 	public $_unallowedCharacters = "/[^A-Za-z0-9 _]/";
