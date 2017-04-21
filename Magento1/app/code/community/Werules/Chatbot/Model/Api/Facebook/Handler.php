@@ -146,26 +146,6 @@
 			// instance Facebook API
 			$facebook = $this->_facebook;
 
-			// Instances the witAI class
-			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
-			if ($enableWitai == "1")
-			{
-				if (!isset($this->_witAi))
-				{
-					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
-					$this->_witAi = new witAI($witApi);
-				}
-
-				if (!is_null($facebook->_audioPath))
-				{
-					$witResponse = $this->_witAi->getAudioResponse($facebook->_audioPath);
-					if (isset($witResponse->_text))
-						$facebook->_originalText = $witResponse->_text;
-					else
-						return $facebook->respondSuccess();
-				}
-			}
-
 			// Take text and chat_id from the message
 			$originalText = $facebook->_originalText;
 			$chatId = $facebook->_chatId;
@@ -191,20 +171,44 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
+			if ($chatdata->getFacebookProcessingRequest() == "1")
+				return $facebook->respondSuccess();
+			if ($chatdata->getFacebookChatId())
+				$chatdata->updateChatdata("facebook_processing_request", "1");
+
+			// Instances the witAI class
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ($enableWitai == "1")
+			{
+				if (!isset($this->_witAi))
+				{
+					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+					$this->_witAi = new witAI($witApi);
+				}
+
+				if (!is_null($facebook->_audioPath))
+				{
+					$witResponse = $this->_witAi->getAudioResponse($facebook->_audioPath);
+					if (isset($witResponse->_text))
+						$facebook->_originalText = $witResponse->_text;
+					else
+						return $chatdata->respondSuccess();
+				}
+			}
 
 			if ($chatdata->getEnableFacebookAdmin() == "0") // disabled by admin
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 
 			if (isset($recipientId)) // it's only set when a human respond on the facebook page
 			{
 				$chatdata->updateChatdata('enable_facebook_admin', "0");
 				//$text = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
 				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState); // force update state to support mode
-				//return $facebook->respondSuccess();
+				//return $chatdata->respondSuccess();
 			}
 
 			if ($messageId == $chatdata->getFacebookMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			else if ($chatdata->getFacebookChatId())
 				$chatdata->updateChatdata('facebook_message_id', $messageId); // if this fails, it may send the same message twice
 
@@ -214,7 +218,7 @@
 				$disabledMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/disabled_message');
 				if (!empty($disabledMessage))
 					$facebook->postMessage($chatId, $disabledMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// send feedback to user
@@ -287,7 +291,7 @@
 						$facebook->postMessage($customerChatId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
 						$facebook->postMessage($chatId, $mageHelper->__("Message sent."));
 					}
-					return $facebook->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 				else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admSendMessage2AllCmd)) // old checkCommandWithValue
 				{
@@ -372,7 +376,7 @@
 
 					}
 
-					return $facebook->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 			}
 
@@ -386,7 +390,7 @@
 					{
 						$facebook->postMessage($chatId, $mageHelper->__("To talk with me, please enable Facebook Messenger on your account chatbot settings."));
 						$facebook->sendChatAction($chatId, "typing_off");
-						return $facebook->respondSuccess();
+						return $chatdata->respondSuccess();
 					}
 				}
 			}
@@ -425,7 +429,7 @@
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage); // TODO
 				}
 				//$facebook->sendChatAction($chatId, "typing_off");
-				//return $facebook->respondSuccess(); // commented to keep processing the message
+				//return $chatdata->respondSuccess(); // commented to keep processing the message
 			}
 
 			// referral handler
@@ -438,7 +442,7 @@
 						$refMessage = str_replace("{customername}", $username, $refMessage);
 					$facebook->postMessage($chatId, $refMessage);
 				}
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// init commands
@@ -519,7 +523,7 @@
 				}
 
 				$facebook->sendChatAction($chatId, "typing_off");
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// about command
@@ -530,7 +534,7 @@
 					$facebook->postMessage($chatId, $message);
 
 				$facebook->sendChatAction($chatId, "typing_off");
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// cancel command
@@ -568,7 +572,7 @@
 				else
 					$facebook->postMessage($chatId, $message);
 				$facebook->sendChatAction($chatId, "typing_off");
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// add2cart commands
@@ -609,7 +613,7 @@
 				else if ($notInStock)
 					$facebook->postMessage($chatId, $mageHelper->__("This product is not in stock."));
 
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// states
@@ -746,7 +750,7 @@
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
 				}
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_searchState)
 			{
@@ -763,7 +767,7 @@
 				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
 				{
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
-					return $facebook->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 				else if ($productIDs)
 				{
@@ -866,7 +870,7 @@
 				else
 					$facebook->sendGenericTemplate($chatId, $elements);
 
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_supportState)
 			{
@@ -925,7 +929,7 @@
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else if (!isset($recipientId)) // it's only set when a human respond on the facebook page
 					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support."));
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_sendEmailState)
 			{
@@ -938,7 +942,7 @@
 					$facebook->postMessage($chatId, $mageHelper->__("Sorry, I wasn't able to send an email this time. Please try again later."));
 				if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_trackOrderState)
 			{
@@ -966,7 +970,7 @@
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else if ($errorFlag)
 					$facebook->postMessage($chatId, $mageHelper->__("Sorry, we couldn't find any order with this information."));
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			//general commands
@@ -1028,7 +1032,7 @@
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_checkoutCmd))
 			{
@@ -1094,7 +1098,7 @@
 				}
 				if ($emptyCart)
 					$facebook->postMessage($chatId, $mageHelper->__("Your cart is empty."));
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_clearCartCmd))
 			{
@@ -1112,7 +1116,7 @@
 					$errorFlag = true;
 				if ($errorFlag)
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_searchCmd))
 			{
@@ -1120,7 +1124,7 @@
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("what do you want to search for?") . " " . $chatbotHelper->_cancelMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_loginCmd))
 			{
@@ -1147,7 +1151,7 @@
 				}
 				else
 					$facebook->postMessage($chatId, $mageHelper->__("You're already logged."));
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_logoutCmd)) // TODO
 			{
@@ -1175,7 +1179,7 @@
 				else
 					$facebook->postMessage($chatId, $mageHelper->__("You're not logged."));
 
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_registerCmd)) // TODO
 			{
@@ -1184,7 +1188,7 @@
 					$facebook->postMessage($chatId, $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl));
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_listOrdersCmd) || $moreOrders)
 			{
@@ -1263,12 +1267,12 @@
 					else
 					{
 						$facebook->postMessage($chatId, $mageHelper->__("This account has no orders."));
-						return $facebook->respondSuccess();
+						return $chatdata->respondSuccess();
 					}
 				}
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->startsWith($text, $chatbotHelper->_reorderCmd['command'])) // ignore alias // old checkCommandWithValue
 			{
@@ -1308,7 +1312,7 @@
 				}
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_trackOrderCmd))
 			{
@@ -1327,7 +1331,7 @@
 				}
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_supportCmd))
 			{
@@ -1350,7 +1354,7 @@
 
 				if ($errorFlag)
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_sendEmailCmd))
 			{
@@ -1361,7 +1365,7 @@
 					$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("write the email content."));
 					$facebook->postMessage($chatId, $mageHelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $chatbotHelper->_cancelMessage);
 				}
-				return $facebook->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else // fallback
 			{
@@ -1485,7 +1489,7 @@
 												$start = 0;
 												for ($i = 1; $i <= $total; $i++) // loop to send big messages
 												{
-													$cut = ($count/$total) * $i;
+													$cut = ($count / $total) * $i;
 													if ($cut >= $count) // if cut is equal or bigger to message itself
 														$end = $count;
 													else
@@ -1510,7 +1514,7 @@
 												$start = 0;
 												for ($i = 1; $i <= $total; $i++) // loop to send big messages
 												{
-													$cut = ($count/$total) * $i;
+													$cut = ($count / $total) * $i;
 													if ($cut >= $count) // if cut is equal or bigger to message itself
 														$end = $count;
 													else
@@ -1524,7 +1528,7 @@
 												$facebook->postMessage($chatId, $message);
 
 											if ($reply["stop_processing"] == "1")
-												return $facebook->respondSuccess();
+												return $chatdata->respondSuccess();
 										}
 									}
 									break;
@@ -1554,7 +1558,7 @@
 							$mageHelper->__("Please wait while our support check your message so you can talk to a real person.") . " " .
 							$chatbotHelper->_cancelMessage
 						); // TODO
-					return $facebook->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 				else // process cases where the customer message wasn't understandable
 				{
@@ -1657,7 +1661,7 @@
 														{
 															$facebook->postMessage(array('chat_id' => $chatId, 'text' => $chatbotHelper->_loginFirstMessage));
 															$break = true;
-															return $facebook->respondSuccess();
+															return $chatdata->respondSuccess();
 														}
 														break;
 													}
