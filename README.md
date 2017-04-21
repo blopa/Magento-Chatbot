@@ -138,6 +138,9 @@ Conversation
 ## Release Notes
 - **v0.0.13:**
 	- Code improvements
+	- Add admin commands listing on Telegram
+	- Fix problem when receiving 503 from wit.ai
+	- Add option to disable Bot replies on Facebook (good for when a you need to reply on Page Messages)
 - **v0.0.12:**
 	- Fix command alias
 	- Fix list categories command glitch
