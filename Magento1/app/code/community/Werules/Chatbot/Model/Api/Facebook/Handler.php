@@ -96,11 +96,6 @@
 				}
 			}
 
-			Mage::log("appId -> " . $appId, null, 'chatbot_facebook.log');
-			Mage::log("isEcho ->" . $isEcho, null, 'chatbot_facebook.log');
-			Mage::log("_chatId ->" . $facebook->_chatId, null, 'chatbot_facebook.log');
-			Mage::log("_originalText ->" . $facebook->_originalText, null, 'chatbot_facebook.log');
-
 			// checking for payload
 			$payloadContent = $facebook->getPayload();
 			if (!empty($payloadContent) && empty($facebook->_originalText))
@@ -186,9 +181,7 @@
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
 			if ($chatdata->getEnableFacebookAdmin() == "0") // disabled by admin
-			{
 				return $facebook->respondSuccess();
-			}
 
 			if (isset($recipientId)) // it's only set when a human respond on the facebook page
 			{
@@ -254,6 +247,9 @@
 			// instances conversation state
 			$conversationState = $chatdata->getFacebookConvState();
 
+			// init error message
+			$chatbotHelper->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
+
 			// handle admin stuff
 			//$isAdmin = $chatdata->getIsAdmin();
 			// if it's the admin chat id
@@ -313,16 +309,21 @@
 					{
 						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admBlockSupportCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
-						if ($customerData->getEnableSupport() == "1")
+						if (!is_null($customerData->getFacebookChatId()))
 						{
-							$customerData->updateChatdata('enable_support', "0"); // disable support
-							$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is no longer able to enter support."));
+							if ($customerData->getEnableSupport() == "1")
+							{
+								$customerData->updateChatdata('enable_support', "0"); // disable support
+								$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is no longer able to enter support."));
+							}
+							else //if ($customerData->getEnableSupport() == "0")
+							{
+								$customerData->updateChatdata('enable_support', "1"); // enable support
+								$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is now able to enter support."));
+							}
 						}
-						else //if ($customerData->getEnableSupport() == "0")
-						{
-							$customerData->updateChatdata('enable_support', "1"); // enable support
-							$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is now able to enter support."));
-						}
+						else
+							$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 
 					}
 					else if ($chatbotHelper->startsWith($text, $replyToCustomerMessage)) // old checkCommandWithValue
@@ -335,18 +336,24 @@
 					}
 					else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admEnableBotCmd)) // old checkCommandWithValue
 					{
-						$customerChatId = trim($chatbotHelper->getCommandValue($text, $replyToCustomerMessage)); // get customer chatId from payload
+						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admEnableBotCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
-						if ($customerData->getEnableFacebookAdmin() == "1")
+
+						if (!is_null($customerData->getFacebookChatId()))
 						{
-							$customerData->updateChatdata('enable_facebook_admin', "0"); // disable bot response
-							$facebook->postMessage($chatId, $mageHelper->__("Done. The bot will no longer send messages to this customer."));
+							if ($customerData->getEnableFacebookAdmin() == "1")
+							{
+								$customerData->updateChatdata('enable_facebook_admin', "0"); // disable bot response
+								$facebook->postMessage($chatId, $mageHelper->__("Done. The bot will no longer send messages to this customer."));
+							}
+							else //if ($customerData->getEnableFacebookAdmin() == "0")
+							{
+								$customerData->updateChatdata('enable_facebook_admin', "1"); // enable bot response
+								$facebook->postMessage($chatId, $mageHelper->__("Done. The bot will now start sending messages to this customer."));
+							}
 						}
-						else //if ($customerData->getEnableFacebookAdmin() == "0")
-						{
-							$customerData->updateChatdata('enable_facebook_admin', "1"); // enable bot response
-							$facebook->postMessage($chatId, $mageHelper->__("Done. The bot will now start sending messages to this customer."));
-						}
+						else
+							$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 					}
 					else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_admSendMessage2AllCmd)) // TODO
 					{
@@ -426,7 +433,6 @@
 			if (!$chatbotHelper->_cancelCmd['command']) $chatbotHelper->_cancelCmd['command'] = "cancel"; // it must always have a cancel command
 
 			// init messages
-			$chatbotHelper->_errorMessage = $mageHelper->__("Something went wrong, please try again.");
 			$chatbotHelper->_cancelMessage = $mageHelper->__("To cancel, send") . ' "' . $chatbotHelper->_cancelCmd['command'] . '"';
 			$chatbotHelper->_canceledMessage = $mageHelper->__("Ok, canceled.");
 			$chatbotHelper->_loginFirstMessage = $mageHelper->__("Please login first.");
