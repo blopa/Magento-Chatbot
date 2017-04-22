@@ -154,7 +154,7 @@
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
 			$messageLimit = 640; // Messenger API limit
-			$minutes = 1 * 60 * 1000; // 1 minute
+			$minutes = 1 * 60;// * 1000; // 1 minute
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
