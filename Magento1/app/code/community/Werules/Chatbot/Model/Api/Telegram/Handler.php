@@ -240,29 +240,10 @@
 			$commandPrefix = "/";
 			$message = "";
 			$messageLimit = 4096;
+			$minutes = 5 * 60 * 1000; // 5 minutes
 
 			// instance Telegram API
 			$telegram = $this->_telegram;
-
-			// Instances the witAI class
-			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
-			if ($enableWitai == "1")
-			{
-				if (!isset($this->_witAi))
-				{
-					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
-					$this->_witAi = new witAI($witApi);
-				}
-
-				if (!is_null($telegram->_audioPath))
-				{
-					$witResponse = $this->_witAi->getAudioResponse($telegram->_audioPath);
-					if (isset($witResponse->_text))
-						$telegram->_text = $witResponse->_text;
-					else
-						return $telegram->respondSuccess();
-				}
-			}
 
 			// Take text and chat_id from the message
 			$text = $telegram->_text;
@@ -280,8 +261,41 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
 
+			if ($chatdata->getTelegramProcessingRequest() == "1") // avoid responding to multiple messages in a row
+			{
+				$updatedAt = strtotime($chatdata->getUpdatedAt());
+				$timeNow = time();
+				if (($timeNow - $updatedAt) < $minutes)
+					return $telegram->respondSuccess();
+				else
+					$chatdata->updateChatdata("telegram_processing_request", "0");
+			}
+
+			if ($chatdata->getTelegramChatId()) // flag that is processing a request
+				$chatdata->updateChatdata("telegram_processing_request", "1");
+
+			// Instances the witAI class
+			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
+			if ($enableWitai == "1")
+			{
+				if (!isset($this->_witAi))
+				{
+					$witApi = Mage::getStoreConfig('chatbot_enable/witai_config/witai_api_key');
+					$this->_witAi = new witAI($witApi);
+				}
+
+				if (!is_null($telegram->_audioPath))
+				{
+					$witResponse = $this->_witAi->getAudioResponse($telegram->_audioPath);
+					if (isset($witResponse->_text))
+						$telegram->_text = $witResponse->_text;
+					else
+						return $chatdata->respondSuccess();
+				}
+			}
+
 			if ($messageId == $chatdata->getTelegramMessageId() && !($this->_isWitAi)) // prevents to reply the same request twice
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			else if ($chatdata->getTelegramChatId())
 				$chatdata->updateChatdata('telegram_message_id', $messageId); // if this fails, it may send the same message twice
 
@@ -291,7 +305,7 @@
 				$disabledMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/disabled_message');
 				if (!empty($disabledMessage))
 					$telegram->postMessage($chatId, $disabledMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// send feedback to user
@@ -455,7 +469,7 @@
 						if ($errorFlag)
 						{
 							$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-							return $telegram->respondSuccess();
+							return $chatdata->respondSuccess();
 						}
 					}
 					else // proccess other admin commands (that aren't replying messages)
@@ -509,10 +523,10 @@
 								$telegram->postMessage($chatId, $mageHelper->__("Please use") . ' "' . $admSend2All . " " . $mageHelper->__("your message here.") . '"');
 						}
 					}
-					return $telegram->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 				$telegram->postMessage($chatId, $mageHelper->__("I don't work with groups.")); // TODO
-				return $telegram->respondSuccess(); // ignore all group messages
+				return $chatdata->respondSuccess(); // ignore all group messages
 			}
 
 			// ALL CUSTOMER HANDLERS GOES AFTER HERE
@@ -523,7 +537,7 @@
 					if ($chatdata->getEnableTelegram() != "1")
 					{
 						$telegram->postMessage($chatId, $mageHelper->__("To talk with me, please enable Telegram on your account chatbot settings."));
-						return $telegram->respondSuccess();
+						return $chatdata->respondSuccess();
 					}
 				}
 			}
@@ -561,7 +575,7 @@
 				{
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage); // TODO
 				}
-				//return $telegram->respondSuccess(); // commented to keep processing the message
+				//return $chatdata->respondSuccess(); // commented to keep processing the message
 			}
 
 			// init other commands (for now, no alias for telegram)
@@ -662,7 +676,7 @@
 						$telegram->postMessage($chatId, $chatbotHelper->_errorMessage); // TODO
 					}
 				}
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// help command
@@ -678,7 +692,7 @@
 					$telegram->postMessage($chatId, $message);
 				}
 
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// about command
@@ -688,7 +702,7 @@
 				if (!empty($message))
 					$telegram->postMessage($chatId, $message);
 
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// cancel command
@@ -727,7 +741,7 @@
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
 					$telegram->sendMessage($content);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// add2cart commands
@@ -768,7 +782,7 @@
 				else if ($notInStock)
 					$telegram->postMessage($chatId, $mageHelper->__("This product is not in stock."));
 
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// states
@@ -876,7 +890,7 @@
 					$telegram->sendMessage(array('chat_id' => $chatId, 'reply_markup' => $keyb, 'text' => $chatbotHelper->_errorMessage));
 					$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
 				}
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_searchState) // TODO
 			{
@@ -892,7 +906,7 @@
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState))
 				{
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-					return $telegram->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 				else if ($productIDs)
 				{
@@ -960,7 +974,7 @@
 					$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
 				}
 
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_supportState)
 			{
@@ -971,7 +985,7 @@
 				}
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_sendEmailState)
 			{
@@ -984,7 +998,7 @@
 					$telegram->postMessage($chatId, $mageHelper->__("Sorry, I wasn't able to send an email this time. Please try again later."));
 				if (!$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState))
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($conversationState == $chatbotHelper->_trackOrderState)
 			{
@@ -1012,7 +1026,7 @@
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else if ($errorFlag)
 					$telegram->postMessage($chatId, $mageHelper->__("Sorry, we couldn't find any order with this information."));
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 
 			// general commands
@@ -1076,7 +1090,7 @@
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
 
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_checkoutCmd)) // TODO
 			{
@@ -1137,7 +1151,7 @@
 				}
 				if ($emptyCart)
 					$telegram->postMessage($chatId, $mageHelper->__("Your cart is empty."));
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_clearCartCmd))
 			{
@@ -1155,7 +1169,7 @@
 					$errorFlag = true;
 				if ($errorFlag)
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_searchCmd))
 			{
@@ -1163,7 +1177,7 @@
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("what do you want to search for?") . " " . $chatbotHelper->_cancelMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_loginCmd)) // TODO
 			{
@@ -1185,7 +1199,7 @@
 				}
 				else
 					$telegram->postMessage($chatId, $mageHelper->__("You're already logged."));
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_logoutCmd)) // TODO
 			{
@@ -1213,7 +1227,7 @@
 				else
 					$telegram->postMessage($chatId, $mageHelper->__("You're not logged."));
 
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_registerCmd)) // TODO
 			{
@@ -1222,7 +1236,7 @@
 					$telegram->postMessage($chatId, $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl));
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_listOrdersCmd) || $moreOrders) // TODO
 			{
@@ -1287,12 +1301,12 @@
 					else
 					{
 						$telegram->postMessage($chatId, $mageHelper->__("This account has no orders."));
-						return $telegram->respondSuccess();
+						return $chatdata->respondSuccess();
 					}
 				}
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->startsWith($text, $chatbotHelper->_reorderCmd['command'])) // ignore alias TODO // old checkCommandWithValue
 			{
@@ -1332,7 +1346,7 @@
 				}
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_trackOrderCmd)) // TODO
 			{
@@ -1351,7 +1365,7 @@
 				}
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_supportCmd)) // TODO
 			{
@@ -1374,7 +1388,7 @@
 
 				if ($errorFlag)
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_sendEmailCmd)) // TODO
 			{
@@ -1385,7 +1399,7 @@
 					$telegram->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("write the email content."));
 					$telegram->postMessage($chatId, $mageHelper->__("By doing this you agree that we may contact you directly via chat message.") . " " . $chatbotHelper->_cancelMessage);
 				}
-				return $telegram->respondSuccess();
+				return $chatdata->respondSuccess();
 			}
 			else // fallback
 			{
@@ -1513,7 +1527,7 @@
 												$start = 0;
 												for ($i = 1; $i <= $total; $i++) // loop to send big messages
 												{
-													$cut = ($count/$total) * $i;
+													$cut = ($count / $total) * $i;
 													if ($cut >= $count) // if cut is equal or bigger to message itself
 														$end = $count;
 													else
@@ -1538,7 +1552,7 @@
 												$start = 0;
 												for ($i = 1; $i <= $total; $i++) // loop to send big messages
 												{
-													$cut = ($count/$total) * $i;
+													$cut = ($count / $total) * $i;
 													if ($cut >= $count) // if cut is equal or bigger to message itself
 														$end = $count;
 													else
@@ -1552,7 +1566,7 @@
 												$telegram->postMessage($chatId, $message);
 
 											if ($reply["stop_processing"] == "1")
-												return $telegram->respondSuccess();
+												return $chatdata->respondSuccess();
 										}
 									}
 									break;
@@ -1578,7 +1592,7 @@
 					}
 					else
 						$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
-					return $telegram->respondSuccess();
+					return $chatdata->respondSuccess();
 				}
 				else // process cases where the customer message wasn't understandable
 				{
@@ -1682,7 +1696,7 @@
 														{
 															$telegram->postMessage($chatId, $chatbotHelper->_loginFirstMessage);
 															$break = true;
-															return $telegram->respondSuccess();
+															return $chatdata->respondSuccess();
 														}
 														break;
 													}
@@ -1757,7 +1771,7 @@
 					}
 				}
 			}
-			return null;
+			$chatdata->respondSuccess();
 		}
 	}
 
