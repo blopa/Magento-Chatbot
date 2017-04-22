@@ -1282,7 +1282,7 @@
 										{
 											if (!empty($replies))
 											{
-												$message = $mageHelper->__("If you want to reorder one of these orders, choose it below, or choose 'Show more orders' to list more orders.");
+												$message = $mageHelper->__("If you want to reorder one of these orders, choose it below, or choose '%s' to list more orders.", $mageHelper->__("Show more orders"));
 												$facebook->sendQuickReply($chatId, $message, $replies);
 											}
 											break;
