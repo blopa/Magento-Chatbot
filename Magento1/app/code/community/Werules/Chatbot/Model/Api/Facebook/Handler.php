@@ -114,6 +114,18 @@
 				$facebook->_messageId = $facebook->getMessageTimestamp();
 			}
 
+			// quickreply payload
+			if (empty($payloadContent))
+			{
+				$payloadContent = $facebook->getQuickReplyPayload();
+				if (!empty($payloadContent))
+				{
+					//$facebook->_isPayload = true; // just replace original text as payload and it will work
+					$facebook->_originalText = $payloadContent;
+					$facebook->_messageId = $facebook->getMessageTimestamp();
+				}
+			}
+
 			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId) || isset($facebook->_referral)))
 			{
 				return $this->processText();
@@ -142,7 +154,7 @@
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
 			$messageLimit = 640; // Messenger API limit
-			$minutes = 5 * 60 * 1000; // 5 minutes
+			$minutes = 1 * 60;// * 1000; // 1 minute
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -172,6 +184,7 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
+			//$chatdata->updateChatdata("facebook_processing_request", "0"); // DEBUG
 			if ($chatdata->getFacebookProcessingRequest() == "1") // avoid responding to multiple messages in a row
 			{
 				$updatedAt = strtotime($chatdata->getUpdatedAt());
@@ -1021,7 +1034,7 @@
 								$reply = array(
 									'content_type' => 'text',
 									'title' => $catName,
-									'payload' => 'list_category_' . $_category->getId() // TODO
+									'payload' => $catName// 'list_category_' . $_category->getId() // TODO
 								);
 								array_push($replies, $reply);
 								$i++;
@@ -1227,29 +1240,31 @@
 									$facebook->postMessage($chatId, $mageHelper->__("Done. I've found %s orders.", $total));
 							}
 
+							$replies = array();
 							foreach($ordersIDs as $orderID)
 							{
-								$buttons = array();
-								$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
-								if (!empty($message)) // TODO
+								//$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
+								$payload = $chatbotHelper->prepareFacebookOrderPayload($orderID);
+								if (!empty($payload)) // TODO
 								{
-									$button = array(
-										'type' => 'postback',
-										'title' => $mageHelper->__("Reorder"),
+									$order = Mage::getModel('sales/order')->load($orderID);
+									$orderNumber = $order->getIncrementId();
+									$reply = array(
+										'content_type' => 'text',
+										'title' => $orderNumber,
 										'payload' => $chatbotHelper->_reorderCmd['command'] . $orderID
 									);
-									array_push($buttons, $button);
+									array_push($replies, $reply);
 									if ($i >= $showMore)
 									{
 										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 										{
-											// TODO add option to list more orders
-											$button = array(
-												'type' => 'postback',
+											$reply = array(
+												'content_type' => 'text',
 												'title' => $mageHelper->__("Show more orders"),
 												'payload' => $listMoreOrders . (string)($i + 1)
 											);
-											array_push($buttons, $button);
+											array_push($replies, $reply);
 											if ($chatdata->getFacebookConvState() != $chatbotHelper->_listOrdersState)
 												if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listOrdersState))
 													$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
@@ -1257,14 +1272,21 @@
 										}
 										else if (($i + 1) == $total) // if it's the last one, back to _startState
 										{
-											//$facebook->postMessage($chatId, $mageHelper->__("And that was the last one.")); // uneeded message for facebook
+											$facebook->postMessage($chatId, $mageHelper->__("And that was the last one."));
 											if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState))
 												$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 										}
 
-										$facebook->sendButtonTemplate($chatId, $message, $buttons);
+										$facebook->sendReceiptTemplate($chatId, $payload);
 										if ($flagBreak)
+										{
+											if (!empty($replies))
+											{
+												$message = $mageHelper->__("If you want to reorder one of these orders, choose it below, or choose '%s' to list more orders.", $mageHelper->__("Show more orders"));
+												$facebook->sendQuickReply($chatId, $message, $replies);
+											}
 											break;
+										}
 									}
 									$i++;
 								}

@@ -383,24 +383,91 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
-	public function prepareFacebookOrderMessages($orderID) // TODO add link to product name
+//	public function prepareFacebookOrderMessages($orderID) // TODO add link to product name
+//	{
+//		$order = Mage::getModel('sales/order')->load($orderID);
+//		if ($order->getId())
+//		{
+//			$message = Mage::helper('core')->__("Order") . " # " . $order->getIncrementId() . "\n\n";
+//			$items = $order->getAllVisibleItems();
+//			foreach($items as $item)
+//			{
+//				$message .= (int)$item->getQtyOrdered() . "x " .
+//					$item->getName() . "\n" .
+//					Mage::helper('core')->__("Price") . ": " . Mage::helper('core')->currency($item->getPrice(), true, false) . "\n\n";
+//			}
+//			$message .= Mage::helper('core')->__("Total") . ": " . Mage::helper('core')->currency($order->getGrandTotal(), true, false) . "\n" .
+//				Mage::helper('core')->__("Zipcode") . ": " . $order->getShippingAddress()->getPostcode();
+//
+//			return $message;
+//		}
+//		return null;
+//	}
+
+	public function prepareFacebookOrderPayload($orderID) // TODO add link to product name
 	{
 		$order = Mage::getModel('sales/order')->load($orderID);
 		if ($order->getId())
 		{
-			$message = Mage::helper('core')->__("Order") . " # " . $order->getIncrementId() . "\n\n";
+			$chatbotHelper = Mage::helper('werules_chatbot');
+			$orderNumber = $order->getIncrementId();
+			$customerName = $order->getCustomerName();
+			$orderUrl = Mage::getUrl('sales/order/view', array('order_id' => $orderNumber));
+			$currency = $order->getOrderCurrencyCode();
+			$createdAt = strtotime($order->getCreatedAt());
+			$elements = array();
 			$items = $order->getAllVisibleItems();
 			foreach($items as $item)
 			{
-				$message .= (int)$item->getQtyOrdered() . "x " .
-					$item->getName() . "\n" .
-					Mage::helper('core')->__("Price") . ": " . Mage::helper('core')->currency($item->getPrice(), true, false) . "\n\n";
+				$product = Mage::getModel('catalog/product')->load($item->getProductId());
+				$element = array(
+					'title' => $item->getName(),
+					'subtitle' => $chatbotHelper->excerpt($item->getShortDescription(), 30),
+					'quantity' => (int)$item->getQtyOrdered(),
+					'price' => $item->getPrice(),
+					'currency' => $currency,
+					'image_url' => $product->getSmallImageUrl()
+				);
+				array_push($elements, $element);
 			}
-			$message .= Mage::helper('core')->__("Total") . ": " . Mage::helper('core')->currency($order->getGrandTotal(), true, false) . "\n" .
-				Mage::helper('core')->__("Zipcode") . ": " . $order->getShippingAddress()->getPostcode();
 
-			return $message;
+			$shippingAddress = $order->getShippingAddress();
+			$streetOne = $shippingAddress->getStreet()[0];
+			$streetTwo = "";
+			if (count($shippingAddress->getStreet()) > 1)
+				$streetTwo = $shippingAddress->getStreet()[1];
+			$address = array(
+				'street_1' => $streetOne,
+				'street_2' => $streetTwo,
+				'city' => $shippingAddress->getCity(),
+				'postal_code' => $shippingAddress->getPostcode(),
+				'state' => $shippingAddress->getRegion(),
+				'country' => $shippingAddress->getCountryId()
+			);
+
+			$summary = array(
+				'subtotal' => $order->getSubtotal(),
+				'shipping_cost' => $order->getShippingAmount(),
+				'total_tax' => $order->getTaxAmount(),
+				'total_cost' => $order->getGrandTotal()
+			);
+
+			$payload = array(
+				'template_type' => 'receipt',
+				'recipient_name' => $customerName,
+				'order_number' => $orderNumber,
+				'currency' => $currency,
+				'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
+				'order_url' => $orderUrl,
+				'timestamp' => $createdAt,
+				'elements' => $elements,
+				'address' => $address,
+				'summary' => $summary,
+			);
+
+			return $payload;
 		}
+
 		return null;
 	}
 }
