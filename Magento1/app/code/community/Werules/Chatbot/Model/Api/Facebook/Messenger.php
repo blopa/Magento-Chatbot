@@ -181,6 +181,33 @@
 			);
 		}
 
+		// send elements
+//		$elements = array(
+//			array(
+//			'title' => 'TITLE_TEXT_HERE',
+//			'item_url' => 'ITEM_URL_HERE',
+//			'image_url' => 'IMAGE_URL_HERE',
+//			'subtitle' => 'SUBTITLE_HERE',
+//			'buttons' => $buttons
+//			)
+//		);
+//		https://developers.facebook.com/docs/messenger-platform/send-api-reference/receipt-template
+		public function sendReceiptTemplate($chat_id, array $payload) {
+			return $this->endpoint("me/messages",
+				array(
+					'recipient' => array(
+						'id' => $chat_id
+					),
+					'message' => array(
+						'attachment' => array(
+							'type' => 'template',
+							'payload' => $payload
+						)
+					)
+				)
+			);
+		}
+
 		/// Get the text of the current message
 		public function Text() {
 			return $this->data["entry"][0]["messaging"][0]["message"]["text"];

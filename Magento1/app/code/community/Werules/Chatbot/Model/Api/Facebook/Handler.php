@@ -1229,27 +1229,27 @@
 
 							foreach($ordersIDs as $orderID)
 							{
-								$buttons = array();
-								$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
-								if (!empty($message)) // TODO
+								//$buttons = array();
+								//$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
+								$payload = $chatbotHelper->prepareFacebookOrderPayload($orderID);
+								if (!empty($payload)) // TODO
 								{
-									$button = array(
-										'type' => 'postback',
-										'title' => $mageHelper->__("Reorder"),
-										'payload' => $chatbotHelper->_reorderCmd['command'] . $orderID
-									);
-									array_push($buttons, $button);
+//									$button = array(
+//										'type' => 'postback',
+//										'title' => $mageHelper->__("Reorder"),
+//										'payload' => $chatbotHelper->_reorderCmd['command'] . $orderID
+//									);
+//									array_push($buttons, $button);
 									if ($i >= $showMore)
 									{
 										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
 										{
-											// TODO add option to list more orders
-											$button = array(
-												'type' => 'postback',
-												'title' => $mageHelper->__("Show more orders"),
-												'payload' => $listMoreOrders . (string)($i + 1)
-											);
-											array_push($buttons, $button);
+//											$button = array(
+//												'type' => 'postback',
+//												'title' => $mageHelper->__("Show more orders"),
+//												'payload' => $listMoreOrders . (string)($i + 1)
+//											);
+//											array_push($buttons, $button);
 											if ($chatdata->getFacebookConvState() != $chatbotHelper->_listOrdersState)
 												if (!$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_listOrdersState))
 													$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
@@ -1262,7 +1262,7 @@
 												$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
 										}
 
-										$facebook->sendButtonTemplate($chatId, $message, $buttons);
+										$facebook->sendReceiptTemplate($chatId, $payload);
 										if ($flagBreak)
 											break;
 									}
