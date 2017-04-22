@@ -142,7 +142,7 @@
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
 			$messageLimit = 640; // Messenger API limit
-			$minutes = 1 * 60 * 1000; // 5 minutes
+			$minutes = 1 * 60 * 1000; // 1 minute
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -172,7 +172,7 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
-			$chatdata->updateChatdata("facebook_processing_request", "0"); // DEBUG
+			//$chatdata->updateChatdata("facebook_processing_request", "0"); // DEBUG
 			if ($chatdata->getFacebookProcessingRequest() == "1") // avoid responding to multiple messages in a row
 			{
 				$updatedAt = strtotime($chatdata->getUpdatedAt());
