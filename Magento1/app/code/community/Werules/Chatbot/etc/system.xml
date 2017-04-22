@@ -277,7 +277,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
-							<comment>Code of the commands and it's alias.</comment>
+							<comment>Code of the commands and it's alias. Alias must be split by comma. Eg.: "support,chat,talk,sac".</comment>
 						</commands_list>
 						<enable_default_replies>
 							<label>Enable Default Replies</label>
@@ -518,7 +518,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
-							<comment>Code of the commands and it's alias.</comment>
+							<comment>Code of the commands and it's alias. Alias must be split by comma. Eg.: "support,chat,talk,sac".</comment>
 						</commands_list>
 						<enable_default_replies>
 							<label>Enable Default Replies</label>
