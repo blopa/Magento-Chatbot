@@ -172,11 +172,8 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
-			//$chatdata->updateChatdata("facebook_processing_request", "0");
-			$facebook->postMessage($chatId, "getFacebookProcessingRequest -> ".$chatdata->getFacebookProcessingRequest());
-			if ($chatdata->getFacebookProcessingRequest() == "1")
+			if ($chatdata->getFacebookProcessingRequest() == "1") // avoid responding to multiple messages in a row
 			{
-				$facebook->postMessage($chatId, "debug");
 				$updatedAt = strtotime($chatdata->getUpdatedAt());
 				$timeNow = time();
 				if (($timeNow - $updatedAt) < $minutes)
@@ -185,10 +182,9 @@
 					$chatdata->updateChatdata("facebook_processing_request", "0");
 			}
 
-			if ($chatdata->getFacebookChatId()) // flat that is processing a request
+			if ($chatdata->getFacebookChatId()) // flag that is processing a request
 				$chatdata->updateChatdata("facebook_processing_request", "1");
 
-			$facebook->postMessage($chatId, "getFacebookProcessingRequest2 -> ".$chatdata->getFacebookProcessingRequest());
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');

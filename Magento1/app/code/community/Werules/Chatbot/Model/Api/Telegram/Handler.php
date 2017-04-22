@@ -261,7 +261,7 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
 
-			if ($chatdata->getTelegramProcessingRequest() == "1")
+			if ($chatdata->getTelegramProcessingRequest() == "1") // avoid responding to multiple messages in a row
 			{
 				$updatedAt = strtotime($chatdata->getUpdatedAt());
 				$timeNow = time();
