@@ -172,6 +172,7 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
+
 			if ($chatdata->getFacebookProcessingRequest() == "1") // avoid responding to multiple messages in a row
 			{
 				$updatedAt = strtotime($chatdata->getUpdatedAt());
@@ -1234,7 +1235,6 @@
 								$payload = $chatbotHelper->prepareFacebookOrderPayload($orderID);
 								if (!empty($payload)) // TODO
 								{
-									Mage::log("Debug 2", null, 'chatbot_facebook.log');
 //									$button = array(
 //										'type' => 'postback',
 //										'title' => $mageHelper->__("Reorder"),
