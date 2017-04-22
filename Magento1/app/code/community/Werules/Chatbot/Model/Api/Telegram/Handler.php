@@ -240,6 +240,7 @@
 			$commandPrefix = "/";
 			$message = "";
 			$messageLimit = 4096;
+			$minutes = 5 * 60 * 1000; // 5 minutes
 
 			// instance Telegram API
 			$telegram = $this->_telegram;
@@ -261,8 +262,16 @@
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
 
 			if ($chatdata->getTelegramProcessingRequest() == "1")
-				return $telegram->respondSuccess();
-			if ($chatdata->getTelegramChatId())
+			{
+				$updatedAt = strtotime($chatdata->getUpdatedAt());
+				$timeNow = time();
+				if (($timeNow - $updatedAt) < $minutes)
+					return $telegram->respondSuccess();
+				else
+					$chatdata->updateChatdata("telegram_processing_request", "0");
+			}
+
+			if ($chatdata->getTelegramChatId()) // flag that is processing a request
 				$chatdata->updateChatdata("telegram_processing_request", "1");
 
 			// Instances the witAI class
@@ -1762,7 +1771,7 @@
 					}
 				}
 			}
-			return null;
+			$chatdata->respondSuccess();
 		}
 	}
 

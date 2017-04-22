@@ -142,6 +142,7 @@
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
 			$messageLimit = 640;
+			$minutes = 5 * 60 * 1000; // 5 minutes
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -171,10 +172,23 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'facebook_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
+			//$chatdata->updateChatdata("facebook_processing_request", "0");
+			$facebook->postMessage($chatId, "getFacebookProcessingRequest -> ".$chatdata->getFacebookProcessingRequest());
 			if ($chatdata->getFacebookProcessingRequest() == "1")
-				return $facebook->respondSuccess();
-			if ($chatdata->getFacebookChatId())
+			{
+				$facebook->postMessage($chatId, "debug");
+				$updatedAt = strtotime($chatdata->getUpdatedAt());
+				$timeNow = time();
+				if (($timeNow - $updatedAt) < $minutes)
+					return $facebook->respondSuccess();
+				else
+					$chatdata->updateChatdata("facebook_processing_request", "0");
+			}
+
+			if ($chatdata->getFacebookChatId()) // flat that is processing a request
 				$chatdata->updateChatdata("facebook_processing_request", "1");
+
+			$facebook->postMessage($chatId, "getFacebookProcessingRequest2 -> ".$chatdata->getFacebookProcessingRequest());
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
@@ -1736,7 +1750,7 @@
 					}
 				}
 			}
-			return null;
+			$chatdata->respondSuccess();
 		}
 	}
 
