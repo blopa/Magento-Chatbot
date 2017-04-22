@@ -114,6 +114,18 @@
 				$facebook->_messageId = $facebook->getMessageTimestamp();
 			}
 
+			// quickreply payload
+			if (empty($payloadContent))
+			{
+				$payloadContent = $facebook->getQuickReplyPayload();
+				if (!empty($payloadContent))
+				{
+					//$facebook->_isPayload = true; // just replace original text as payload and it will work
+					$facebook->_originalText = $payloadContent;
+					$facebook->_messageId = $facebook->getMessageTimestamp();
+				}
+			}
+
 			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId) || isset($facebook->_referral)))
 			{
 				return $this->processText();
@@ -135,7 +147,7 @@
 			$showMore = 0;
 			$moreOrders = false;
 			$defaultConfidence = 75;
-			$listingLimit = 2;
+			$listingLimit = 5;
 			$listMoreCategories = "show_more_list_cat_";
 			$listMoreSearch = "show_more_search_prod_";
 			$listMoreOrders = "show_more_order_";
@@ -1022,7 +1034,7 @@
 								$reply = array(
 									'content_type' => 'text',
 									'title' => $catName,
-									'payload' => 'list_category_' . $_category->getId() // TODO
+									'payload' => $catName// 'list_category_' . $_category->getId() // TODO
 								);
 								array_push($replies, $reply);
 								$i++;
@@ -1270,7 +1282,7 @@
 										{
 											if (!empty($replies))
 											{
-												$message = $mageHelper->__("If you want to reorder one of those order, choose it below, or choose 'list more' to list more orders.");
+												$message = $mageHelper->__("If you want to reorder one of these orders, choose it below, or choose 'Show more orders' to list more orders.");
 												$facebook->sendQuickReply($chatId, $message, $replies);
 											}
 											break;

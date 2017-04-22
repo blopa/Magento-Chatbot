@@ -248,6 +248,11 @@
 			return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
 		}
 
+		/// Get quickreply payload
+		public function getQuickReplyPayload() {
+			return $this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"];
+		}
+
 		/// Get message timestamp
 		public function getMessageTimestamp() {
 			return $this->data["entry"][0]["time"];
