@@ -239,7 +239,7 @@
 			$listMoreOrders = "/lmo_";
 			$commandPrefix = "/";
 			$message = "";
-			$messageLimit = 4096;
+			$messageLimit = 4096; // Telegram API limit
 			$minutes = 5 * 60 * 1000; // 5 minutes
 
 			// instance Telegram API

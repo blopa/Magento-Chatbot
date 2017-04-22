@@ -143,6 +143,7 @@ Conversation
 	- [Backend] Add option to disable Bot replies on Facebook (good for when a you need to reply on Page Messages)
 	- [Backend] Add option to open Messenger Box with referral
 	- [Backend] Add option to write the customer name in a message using "{customername}"
+	- Default Replies are now able to send big texts
 - **v0.0.12:**
 	- Fix command alias
 	- Fix list categories command glitch

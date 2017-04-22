@@ -141,7 +141,7 @@
 			$listMoreOrders = "show_more_order_";
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
-			$messageLimit = 640;
+			$messageLimit = 640; // Messenger API limit
 			$minutes = 5 * 60 * 1000; // 5 minutes
 
 			// instance Facebook API
@@ -452,6 +452,7 @@
 						$refMessage = str_replace("{customername}", $username, $refMessage);
 					$facebook->postMessage($chatId, $refMessage);
 				}
+				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // back to start state
 				return $chatdata->respondSuccess();
 			}
 
