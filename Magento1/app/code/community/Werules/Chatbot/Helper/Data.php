@@ -423,17 +423,22 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 				$element = array(
 					'title' => $item->getName(),
 					'subtitle' => $chatbotHelper->excerpt($item->getShortDescription(), 30),
-					'quantity' => $item->getQtyOrdered(),
+					'quantity' => (int)$item->getQtyOrdered(),
 					'price' => $item->getPrice(),
 					'currency' => $currency,
 					'image_url' => $product->getSmallImageUrl()
 				);
 				array_push($elements, $element);
 			}
+
 			$shippingAddress = $order->getShippingAddress();
+			$streetOne = $shippingAddress->getStreet()[0];
+			$streetTwo = "";
+			if (count($shippingAddress->getStreet()) > 1)
+				$streetTwo = $shippingAddress->getStreet()[1];
 			$address = array(
-				'street_1' => $shippingAddress->getStreet(),
-				'street_2' => '',
+				'street_1' => $streetOne,
+				'street_2' => $streetTwo,
 				'city' => $shippingAddress->getCity(),
 				'postal_code' => $shippingAddress->getPostcode(),
 				'state' => $shippingAddress->getRegion(),
@@ -452,7 +457,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 				'recipient_name' => $customerName,
 				'order_number' => $orderNumber,
 				'currency' => $currency,
-				'payment_method' => $order->getPayment(),
+				'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
 				'order_url' => $orderUrl,
 				'timestamp' => $createdAt,
 				'elements' => $elements,
@@ -462,6 +467,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 
 			return $payload;
 		}
+
 		return null;
 	}
 }

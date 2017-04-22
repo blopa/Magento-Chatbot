@@ -142,7 +142,7 @@
 			$replyToCustomerMessage = "reply_to_message";
 			$message = "";
 			$messageLimit = 640; // Messenger API limit
-			$minutes = 5 * 60 * 1000; // 5 minutes
+			$minutes = 1 * 60 * 1000; // 5 minutes
 
 			// instance Facebook API
 			$facebook = $this->_facebook;
@@ -1234,6 +1234,7 @@
 								$payload = $chatbotHelper->prepareFacebookOrderPayload($orderID);
 								if (!empty($payload)) // TODO
 								{
+									Mage::log("Debug 2", null, 'chatbot_facebook.log');
 //									$button = array(
 //										'type' => 'postback',
 //										'title' => $mageHelper->__("Reorder"),
