@@ -26,6 +26,8 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - *Whatsapp API Wrapper* (soon)
 - *WeChat API Wrapper* (soon)
 
+**PLEASE REPORT ALL BUGS that you find. It's hard to do QA only by myself**
+
 ## Features
 - wit.ai integration for NLP
 - List store categories
