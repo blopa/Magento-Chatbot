@@ -406,7 +406,9 @@
 									{
 										if ($switchedToSupport)
 											$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("You're now on support mode."));
-										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $text);
+
+										$message = $mageHelper->__("Message from support") . ":\n" . $text;
+										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $message);
 									}
 
 									$telegram->postMessage($chatId, $mageHelper->__("Message sent.")); // send message to admin group TODO

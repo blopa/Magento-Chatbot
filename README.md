@@ -141,6 +141,8 @@ Conversation
 - **v0.0.14:**
 	- Fix problem when setting Telegram Webhook
 	- Fix problem when sending message between different chat plataforms
+	- Fix small translation problems
+	- Code improvements
 - **v0.0.13:**
 	- Code improvements
 	- Add admin commands listing on Telegram

@@ -52,8 +52,8 @@
 			$facebook = $this->_facebook;
 			if (isset($facebook))
 			{
-				$message = $mageHelper->__("Message from support") . ":\n" . $text;
-				$facebook->postMessage($chatId, $message);
+				//$message = $mageHelper->__("Message from support") . ":\n" . $text;
+				$facebook->postMessage($chatId, $text);
 				return true;
 			}
 
