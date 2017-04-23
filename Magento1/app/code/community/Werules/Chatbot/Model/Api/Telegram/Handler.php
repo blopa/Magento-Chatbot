@@ -345,7 +345,7 @@
 							else //if ($isForeign)
 								$customerChatdata = $foreignChatdata;
 
-							if (!is_null($customerChatdata->getTelegramChatId()))
+							if ((!is_null($customerChatdata->getTelegramChatId())) || (!is_null($customerChatdata->getFacebookChatId()))) // TODO make this generic
 							{
 								$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
 								if ($text == $admEndSupport) // finish customer support
