@@ -36,7 +36,7 @@
 		public function foreignMessageFromSupport($chatId, $text)
 		{
 			// helpers
-			$mageHelper = Mage::helper('core');
+			//$mageHelper = Mage::helper('core');
 			$chatbotHelper = $this->_chatbotHelper;
 			// Instances the model class
 			$chatdata = Mage::getModel('chatbot/chatdata');
