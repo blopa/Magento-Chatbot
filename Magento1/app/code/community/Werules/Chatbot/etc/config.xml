@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Werules_Chatbot>
-			<version>0.0.12</version>
+			<version>0.0.13</version>
 		</Werules_Chatbot>
 	</modules>
 	<frontend>

@@ -136,6 +136,15 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.13:**
+	- Code improvements
+	- Add admin commands listing on Telegram
+	- Fix problem when receiving 503 from wit.ai
+	- [Backend] Add option to disable Bot replies on Facebook (good for when a you need to reply on Page Messages)
+	- [Backend] Add option to open Messenger Box with referral
+	- [Backend] Add option to write the customer name in a message using "{customername}"
+	- Default Replies are now able to send big texts
+	- Order listing now uses Facebook Receipt layout
 - **v0.0.12:**
 	- Fix command alias
 	- Fix list categories command glitch
@@ -226,7 +235,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Add compatibility with products with custom options
 	- Add better usage of command alias
 	- Integrate checkout to Facebook Payment API
-	- Use Facebook receipt layout to display orders
 	- Add natural language configuration (wit.ai?)
 	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos

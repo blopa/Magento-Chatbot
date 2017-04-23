@@ -13,7 +13,7 @@
 	class Messenger {
 
 		private $bot_id = "";
-		private $api_version = "v2.8";
+		private $api_version = "v2.9";
 		private $data = array();
 		private $updates = array();
 
@@ -181,6 +181,33 @@
 			);
 		}
 
+		// send elements
+//		$elements = array(
+//			array(
+//			'title' => 'TITLE_TEXT_HERE',
+//			'item_url' => 'ITEM_URL_HERE',
+//			'image_url' => 'IMAGE_URL_HERE',
+//			'subtitle' => 'SUBTITLE_HERE',
+//			'buttons' => $buttons
+//			)
+//		);
+//		https://developers.facebook.com/docs/messenger-platform/send-api-reference/receipt-template
+		public function sendReceiptTemplate($chat_id, array $payload) {
+			return $this->endpoint("me/messages",
+				array(
+					'recipient' => array(
+						'id' => $chat_id
+					),
+					'message' => array(
+						'attachment' => array(
+							'type' => 'template',
+							'payload' => $payload
+						)
+					)
+				)
+			);
+		}
+
 		/// Get the text of the current message
 		public function Text() {
 			return $this->data["entry"][0]["messaging"][0]["message"]["text"];
@@ -196,14 +223,34 @@
 			return $this->data['entry'][0]['messaging'][0]['sender']['id'];
 		}
 
+		/// Get the recipient_id of the current message
+		public function RecipientID() {
+			return $this->data['entry'][0]['messaging'][0]['recipient']['id'];
+		}
+
 		/// Get raw data
 		public function RawData() {
 			return $this->data;
 		}
 
+		/// Get m.me ref type
+		public function getReferralType() {
+			return $this->data["entry"][0]["messaging"][0]["referral"]["type"];
+		}
+
+		/// Get m.me ref data
+		public function getReferralRef() {
+			return $this->data["entry"][0]["messaging"][0]["referral"]["ref"];
+		}
+
 		/// Get payload
 		public function getPayload() {
 			return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
+		}
+
+		/// Get quickreply payload
+		public function getQuickReplyPayload() {
+			return $this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"];
 		}
 
 		/// Get message timestamp
@@ -216,9 +263,14 @@
 			return $this->data["entry"][0]["messaging"][0]["message"]["mid"];
 		}
 
-		/// Get the message_id of the current message
+		/// Get the is_echo of the current message
 		public function getEcho() {
 			return $this->data["entry"][0]["messaging"][0]["message"]["is_echo"];
+		}
+
+		/// Get the app_id of the current message
+		public function getAppId() {
+			return $this->data["entry"][0]["messaging"][0]["message"]["app_id"];
 		}
 
 		private function sendAPIRequest($url, array $content, $post = true, $response = true) {
