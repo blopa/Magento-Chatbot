@@ -213,18 +213,18 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
 
-			if ($chatdata->getTelegramProcessingRequest() == "1") // avoid responding to multiple messages in a row
-			{
-				$updatedAt = strtotime($chatdata->getUpdatedAt());
-				$timeNow = time();
-				if (($timeNow - $updatedAt) < $minutes)
-					return $telegram->respondSuccess();
-				else
-					$chatdata->updateChatdata("telegram_processing_request", "0");
-			}
-
-			if ($chatdata->getTelegramChatId()) // flag that is processing a request
-				$chatdata->updateChatdata("telegram_processing_request", "1");
+//			if ($chatdata->getTelegramProcessingRequest() == "1") // avoid responding to multiple messages in a row
+//			{
+//				$updatedAt = strtotime($chatdata->getUpdatedAt());
+//				$timeNow = time();
+//				if (($timeNow - $updatedAt) < $minutes)
+//					return $telegram->respondSuccess();
+//				else
+//					$chatdata->updateChatdata("telegram_processing_request", "0");
+//			}
+//
+//			if ($chatdata->getTelegramChatId()) // flag that is processing a request
+//				$chatdata->updateChatdata("telegram_processing_request", "1");
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');

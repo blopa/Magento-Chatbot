@@ -185,18 +185,18 @@
 			$chatdata->_apiType = $chatbotHelper->_fbBot;
 
 			//$chatdata->updateChatdata("facebook_processing_request", "0"); // DEBUG
-			if ($chatdata->getFacebookProcessingRequest() == "1") // avoid responding to multiple messages in a row
-			{
-				$updatedAt = strtotime($chatdata->getUpdatedAt());
-				$timeNow = time();
-				if (($timeNow - $updatedAt) < $minutes)
-					return $facebook->respondSuccess();
-				else
-					$chatdata->updateChatdata("facebook_processing_request", "0");
-			}
-
-			if ($chatdata->getFacebookChatId()) // flag that is processing a request
-				$chatdata->updateChatdata("facebook_processing_request", "1");
+//			if ($chatdata->getFacebookProcessingRequest() == "1") // avoid responding to multiple messages in a row
+//			{
+//				$updatedAt = strtotime($chatdata->getUpdatedAt());
+//				$timeNow = time();
+//				if (($timeNow - $updatedAt) < $minutes)
+//					return $facebook->respondSuccess();
+//				else
+//					$chatdata->updateChatdata("facebook_processing_request", "0");
+//			}
+//
+//			if ($chatdata->getFacebookChatId()) // flag that is processing a request
+//				$chatdata->updateChatdata("facebook_processing_request", "1");
 
 
 			// Instances the witAI class
