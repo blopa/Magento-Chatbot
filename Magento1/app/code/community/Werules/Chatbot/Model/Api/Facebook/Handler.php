@@ -903,7 +903,7 @@
 				{
 					if ($supportGroupId == $chatbotHelper->_tgBot)
 					{
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
+						if ($chatdata->foreignMessageToTelegramSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 							$errorFlag = false;
 					}
 					else // probably have the admin chat id set
@@ -1576,7 +1576,7 @@
 				{
 					$errorFlag = true;
 					if ($supportGroupId == $chatbotHelper->_tgBot)
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
+						if ($chatdata->foreignMessageToTelegramSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 						{
 //								if ($chatdata->getTelegramConvState() != $chatbotHelper->_supportState) // TODO
 //									$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
