@@ -22,7 +22,7 @@
 
 	class Werules_Chatbot_Model_Api_Facebook_Handler extends Werules_Chatbot_Model_Chatdata
 	{
-		protected $_facebook;
+		public $_facebook;
 
 		public function _construct()
 		{
@@ -321,8 +321,8 @@
 					$message = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admSendMessage2AllCmd));
 					if (!empty($message))
 					{
-						$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
-						foreach($chatbotcollection as $chatbot)
+						$chatbotCollection = Mage::getModel('chatbot/chatdata')->getCollection();
+						foreach($chatbotCollection as $chatbot)
 						{
 							$fbChatId = $chatbot->getFacebookChatId();
 							if ($fbChatId)
@@ -903,7 +903,7 @@
 				{
 					if ($supportGroupId == $chatbotHelper->_tgBot)
 					{
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
+						if ($chatdata->foreignMessageToTelegramSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 							$errorFlag = false;
 					}
 					else // probably have the admin chat id set
@@ -1576,7 +1576,7 @@
 				{
 					$errorFlag = true;
 					if ($supportGroupId == $chatbotHelper->_tgBot)
-						if (Mage::getModel('chatbot/api_telegram_handler')->foreignMessageToSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
+						if ($chatdata->foreignMessageToTelegramSupport($chatId, $originalText, $chatdata->_apiType, $username)) // send chat id, original text, "facebook" and username
 						{
 //								if ($chatdata->getTelegramConvState() != $chatbotHelper->_supportState) // TODO
 //									$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);

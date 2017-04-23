@@ -19,7 +19,7 @@
 
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
 	{
-		protected $_telegram;
+		public $_telegram;
 
 		public function _construct()
 		{
@@ -35,54 +35,6 @@
 		{
 			$telegram = $this->_telegram;
 			return $telegram->setWebhook($webhookUrl);
-		}
-
-		public function foreignMessageToSupport($chatId, $text, $apiName, $customerName)
-		{
-			$chatdata = Mage::getModel('chatbot/chatdata');
-			$chatbotHelper = $this->_chatbotHelper;
-			if ($apiName == $chatbotHelper->_fbBot && $chatId)
-			{
-				$chatdata->load($chatId, 'facebook_chat_id');
-				if (is_null($chatdata->getFacebookChatId()))
-				{ // should't happen
-					$chatdata->updateChatdata("facebook_chat_id", $chatId);
-				}
-			}
-
-			//$chatdata->_apiType = $chatbotHelper->_tgBot;
-			$telegram = $this->_telegram;
-			if (isset($telegram))
-			{
-				$mageHelper = Mage::helper('core');
-				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
-				if (!empty($supportgroup))
-				{
-					try{
-						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
-							$supportgroup = "-" . ltrim($supportgroup, "g");
-
-						if (!$customerName)
-							$customerName = $mageHelper->__("Not informed");
-
-						$message = $mageHelper->__("Message via") . " " . $apiName . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
-						$result = $telegram->postMessage($supportgroup, $message);
-						$mid = $result['result']['message_id'];
-						if (!empty($mid))
-						{
-							$chatdata->updateChatdata("last_support_message_id", $mid);
-							$chatdata->updateChatdata("last_support_chat", $apiName);
-						}
-					}
-					catch (Exception $e){
-						return false;
-					}
-
-					return true;
-				}
-			}
-
-			return false;
 		}
 
 		public function telegramHandler()
@@ -495,9 +447,9 @@
 							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
 							if (!empty($message))
 							{
-								$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
+								$chatbotCollection = Mage::getModel('chatbot/chatdata')->getCollection();
 								$i = 0;
-								foreach($chatbotcollection as $chatbot)
+								foreach($chatbotCollection as $chatbot)
 								{
 									$tgChatId = $chatbot->getTelegramChatId();
 									$enabled = // if backend promotional messages are disabled or if the customer wants to receive promotional messages

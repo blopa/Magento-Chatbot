@@ -1,9 +1,9 @@
 <?php
 	// this is the main module, which contains all the data from the customer and make calls to the APIs handlers
-	//require_once("Api/Telegram/Handler.php");
-	//require_once("Api/Facebook/Handler.php");
-	//require_once("Api/Whatsapp/Handler.php");
-	//require_once("Api/WeChat/Handler.php");
+//	require_once("Api/Telegram/Handler.php");
+//	require_once("Api/Facebook/Handler.php");
+//	require_once("Api/Whatsapp/Handler.php");
+//	require_once("Api/WeChat/Handler.php");
 	require_once("Api/witAI/witAI.php");
 
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
@@ -34,7 +34,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				$mageHelper = Mage::helper('core');
 				$apiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
 				//$telegram = new Telegram($apiKey);
-				$telegram = Mage::getModel('chatbot/api_telegram_handler');
+				$telegram = Mage::getModel('chatbot/api_telegram_handler')->_telegram;
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 				//$webhookUrl = str_replace("http://", "https://", Mage::getUrl('*/*/*', array('_use_rewrite' => true, '_forced_secure' => true)));
 				// replace http by https, and remove all url parameters with strok
@@ -347,6 +347,56 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		}
 
 		// TELEGRAM FUNCTIONS
+		public function foreignMessageToTelegramSupport($chatId, $text, $apiName, $customerName)
+		{
+			//$chatdata = Mage::getModel('chatbot/chatdata');
+			$chatdata = $this;
+			$chatbotHelper = $this->_chatbotHelper;
+//			if ($apiName == $chatbotHelper->_fbBot && $chatId)
+//			{
+//				$chatdata->load($chatId, 'facebook_chat_id');
+//				if (is_null($chatdata->getFacebookChatId()))
+//				{ // should't happen
+//					$chatdata->updateChatdata("facebook_chat_id", $chatId);
+//				}
+//			}
+
+			//$chatdata->_apiType = $chatbotHelper->_tgBot;
+			//$telegram = $this->_telegram;
+			$telegram = Mage::getModel('chatbot/api_telegram_handler')->_telegram; // TODO
+			if (isset($telegram))
+			{
+				$mageHelper = Mage::helper('core');
+				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
+				if (!empty($supportgroup))
+				{
+					try{
+						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
+							$supportgroup = "-" . ltrim($supportgroup, "g");
+
+						if (!$customerName)
+							$customerName = $mageHelper->__("Not informed");
+
+						$message = $mageHelper->__("Message via") . " " . $apiName . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
+						$result = $telegram->postMessage($supportgroup, $message);
+						$mid = $result['result']['message_id'];
+						if (!empty($mid))
+						{
+							$chatdata->updateChatdata("last_support_message_id", $mid);
+							$chatdata->updateChatdata("last_support_chat", $apiName);
+						}
+					}
+					catch (Exception $e){
+						return false;
+					}
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		protected function listTelegramCommandsMessage()
 		{
 			$chatbotHelper = $this->_chatbotHelper;
