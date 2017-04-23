@@ -22,7 +22,7 @@
 
 	class Werules_Chatbot_Model_Api_Facebook_Handler extends Werules_Chatbot_Model_Chatdata
 	{
-		protected $_facebook;
+		public $_facebook;
 
 		public function _construct()
 		{

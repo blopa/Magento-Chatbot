@@ -1,9 +1,9 @@
 <?php
 	// this is the main module, which contains all the data from the customer and make calls to the APIs handlers
-	//require_once("Api/Telegram/Handler.php");
-	//require_once("Api/Facebook/Handler.php");
-	//require_once("Api/Whatsapp/Handler.php");
-	//require_once("Api/WeChat/Handler.php");
+//	require_once("Api/Telegram/Handler.php");
+//	require_once("Api/Facebook/Handler.php");
+//	require_once("Api/Whatsapp/Handler.php");
+//	require_once("Api/WeChat/Handler.php");
 	require_once("Api/witAI/witAI.php");
 
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
@@ -363,7 +363,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 			//$chatdata->_apiType = $chatbotHelper->_tgBot;
 			//$telegram = $this->_telegram;
-			$telegram = Mage::getModel('chatbot/api_telegram_handler'); // TODO
+			$telegram = Mage::getModel('chatbot/api_telegram_handler')->_telegram; // TODO
 			if (isset($telegram))
 			{
 				$mageHelper = Mage::helper('core');

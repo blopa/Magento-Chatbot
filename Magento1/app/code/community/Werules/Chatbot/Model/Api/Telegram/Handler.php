@@ -19,7 +19,7 @@
 
 	class Werules_Chatbot_Model_Api_Telegram_Handler extends Werules_Chatbot_Model_Chatdata
 	{
-		protected $_telegram;
+		public $_telegram;
 
 		public function _construct()
 		{
