@@ -447,9 +447,9 @@
 							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
 							if (!empty($message))
 							{
-								$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
+								$chatbotCollection = Mage::getModel('chatbot/chatdata')->getCollection();
 								$i = 0;
-								foreach($chatbotcollection as $chatbot)
+								foreach($chatbotCollection as $chatbot)
 								{
 									$tgChatId = $chatbot->getTelegramChatId();
 									$enabled = // if backend promotional messages are disabled or if the customer wants to receive promotional messages

@@ -321,8 +321,8 @@
 					$message = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admSendMessage2AllCmd));
 					if (!empty($message))
 					{
-						$chatbotcollection = Mage::getModel('chatbot/chatdata')->getCollection();
-						foreach($chatbotcollection as $chatbot)
+						$chatbotCollection = Mage::getModel('chatbot/chatdata')->getCollection();
+						foreach($chatbotCollection as $chatbot)
 						{
 							$fbChatId = $chatbot->getFacebookChatId();
 							if ($fbChatId)
