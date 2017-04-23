@@ -352,11 +352,16 @@
 								{
 									// TODO IMPORTANT remember to switch off all other supports
 									if ($isLocal)
+									{
+										$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
 										$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
+									}
 									else// if ($isForeign) // TODO make this generic
+									{
+										$customerChatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
 										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
+									}
 
-									$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
 									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
 								}
 								else if ($text == $admBlockSupport) // block user from using support
@@ -389,23 +394,23 @@
 								}
 								else // if no command, then it's replying the user
 								{
-									$switchedToSupport = false;
-									if ($customerChatdata->getTelegramConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
-									{
-										$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
-										$switchedToSupport = true;
-									}
-
 									if ($isLocal)
 									{
-										if ($switchedToSupport)
+										if ($customerChatdata->getTelegramConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
+										{
+											$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
 											$telegram->postMessage($replyFromUserId, $mageHelper->__("You're now on support mode."));
+										}
+
 										$telegram->postMessage($replyFromUserId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
 									}
-									else //if ($isForeign)
+									else //if ($isForeign) // TODO make this generic
 									{
-										if ($switchedToSupport)
+										if ($customerChatdata->getFacebookConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
+										{
+											$customerChatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
 											$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("You're now on support mode."));
+										}
 
 										$message = $mageHelper->__("Message from support") . ":\n" . $text;
 										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $message);
