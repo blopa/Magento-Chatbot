@@ -88,16 +88,16 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 
 		protected function respondSuccess()
 		{
-			$chatbotHelper = $this->_chatbotHelper;
-			if ($this->_apiType == $chatbotHelper->_tgBot)
-			{
-				$this->updateChatdata("telegram_processing_request", "0");
-			}
-			else if ($this->_apiType == $chatbotHelper->_fbBot)
-			{
-				$this->updateChatdata("facebook_processing_request", "0");
-			}
-			// TODO add other apis
+//			$chatbotHelper = $this->_chatbotHelper;
+//			if ($this->_apiType == $chatbotHelper->_tgBot)
+//			{
+//				$this->updateChatdata("telegram_processing_request", "0");
+//			}
+//			else if ($this->_apiType == $chatbotHelper->_fbBot)
+//			{
+//				$this->updateChatdata("facebook_processing_request", "0");
+//			}
+//			// TODO add other apis
 
 			http_response_code(200);
 			return json_encode(array("status" => "success"));
@@ -335,6 +335,9 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 					$dataType => $state,
 					"updated_at" => date('Y-m-d H:i:s')
 				); // data to be insert on database
+
+//				Mage::log("data -> " . var_export($data, true), null, 'updateChatdata.log');
+//				Mage::log("this -> " . var_export($this, true), null, 'updateChatdata.log');
 				$this->addData($data);
 				$this->save();
 			}

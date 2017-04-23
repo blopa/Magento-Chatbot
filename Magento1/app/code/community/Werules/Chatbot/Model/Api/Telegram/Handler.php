@@ -213,18 +213,18 @@
 			$chatdata = Mage::getModel('chatbot/chatdata')->load($chatId, 'telegram_chat_id');
 			$chatdata->_apiType = $chatbotHelper->_tgBot;
 
-			if ($chatdata->getTelegramProcessingRequest() == "1") // avoid responding to multiple messages in a row
-			{
-				$updatedAt = strtotime($chatdata->getUpdatedAt());
-				$timeNow = time();
-				if (($timeNow - $updatedAt) < $minutes)
-					return $telegram->respondSuccess();
-				else
-					$chatdata->updateChatdata("telegram_processing_request", "0");
-			}
-
-			if ($chatdata->getTelegramChatId()) // flag that is processing a request
-				$chatdata->updateChatdata("telegram_processing_request", "1");
+//			if ($chatdata->getTelegramProcessingRequest() == "1") // avoid responding to multiple messages in a row
+//			{
+//				$updatedAt = strtotime($chatdata->getUpdatedAt());
+//				$timeNow = time();
+//				if (($timeNow - $updatedAt) < $minutes)
+//					return $telegram->respondSuccess();
+//				else
+//					$chatdata->updateChatdata("telegram_processing_request", "0");
+//			}
+//
+//			if ($chatdata->getTelegramChatId()) // flag that is processing a request
+//				$chatdata->updateChatdata("telegram_processing_request", "1");
 
 			// Instances the witAI class
 			$enableWitai = Mage::getStoreConfig('chatbot_enable/witai_config/enable_witai');
@@ -345,18 +345,23 @@
 							else //if ($isForeign)
 								$customerChatdata = $foreignChatdata;
 
-							if (!is_null($customerChatdata->getTelegramChatId()))
+							if ((!is_null($customerChatdata->getTelegramChatId())) || (!is_null($customerChatdata->getFacebookChatId()))) // TODO make this generic
 							{
 								$handler = Mage::getModel('chatbot/api_facebook_handler'); // instances new Facebook model
 								if ($text == $admEndSupport) // finish customer support
 								{
 									// TODO IMPORTANT remember to switch off all other supports
 									if ($isLocal)
+									{
+										$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
 										$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
+									}
 									else// if ($isForeign) // TODO make this generic
+									{
+										$customerChatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
 										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
+									}
 
-									$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
 									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
 								}
 								else if ($text == $admBlockSupport) // block user from using support
@@ -389,23 +394,23 @@
 								}
 								else // if no command, then it's replying the user
 								{
-									$switchedToSupport = false;
-									if ($customerChatdata->getTelegramConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
-									{
-										$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
-										$switchedToSupport = true;
-									}
-
 									if ($isLocal)
 									{
-										if ($switchedToSupport)
+										if ($customerChatdata->getTelegramConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
+										{
+											$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
 											$telegram->postMessage($replyFromUserId, $mageHelper->__("You're now on support mode."));
+										}
+
 										$telegram->postMessage($replyFromUserId, $mageHelper->__("Message from support") . ":\n" . $text); // send message to customer TODO
 									}
-									else //if ($isForeign)
+									else //if ($isForeign) // TODO make this generic
 									{
-										if ($switchedToSupport)
+										if ($customerChatdata->getFacebookConvState() != $chatbotHelper->_supportState) // if user isn't on support, switch to support
+										{
+											$customerChatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState);
 											$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("You're now on support mode."));
+										}
 
 										$message = $mageHelper->__("Message from support") . ":\n" . $text;
 										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $message);
