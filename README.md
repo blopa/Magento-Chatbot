@@ -136,6 +136,9 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.14:**
+	- Fix problem when setting Telegram Webhook
+	- Fix problem when sending message between different chat plataforms
 - **v0.0.13:**
 	- Code improvements
 	- Add admin commands listing on Telegram
