@@ -38,7 +38,7 @@ $installer->run("
 	  `facebook_fallback_qty` int(10) NOT NULL default '0',
 	  `enable_whatsapp_admin` smallint(1) NOT NULL default '1',
 	  `enable_whatsapp` smallint(1) NOT NULL default '1',
-	  `whatsaoo_processing_request` smallint(1) NOT NULL default '0',
+	  `whatsapp_processing_request` smallint(1) NOT NULL default '0',
 	  `whatsapp_chat_id` varchar(50) NULL,
 	  `whatsapp_message_id` varchar(50) NULL,
 	  `whatsapp_conv_state` int(10) NOT NULL default '0',
