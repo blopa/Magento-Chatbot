@@ -138,6 +138,8 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.15:**
+	- Add option to ignore certain messages using Default Replies
 - **v0.0.14:**
 	- Fix problem when setting Telegram Webhook
 	- Fix problem when sending message between different chat plataforms
@@ -181,7 +183,7 @@ Conversation
 	- Fix webhook security issue
 	- New webhook URL
 - **v0.0.8:**
-	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to default replies
+	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to Default Replies
 	- [Backend] Better backend layout
 	- [Backend] Better way to enable/disable commands
 - **v0.0.7:**
@@ -194,7 +196,7 @@ Conversation
 - **v0.0.6:**
 	- [Backend] Better admin descriptions and typos
 - **v0.0.5:**
-	- [Backend] Add default replies
+	- [Backend] Add Default Replies
 	- [Backend] Add option to unavailability message
 	- Better feedback messages
 - **v0.0.4:**

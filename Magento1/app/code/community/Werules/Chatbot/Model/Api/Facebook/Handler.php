@@ -1536,7 +1536,7 @@
 												$facebook->postMessage($chatId, $message);
 										}
 									}
-									else //if ($reply['reply_mode'] == "0") // Text Only
+									else if ($reply['reply_mode'] == "0") // Text Only
 									{
 										if (!empty($message))
 										{
@@ -1563,6 +1563,11 @@
 											if ($reply["stop_processing"] == "1")
 												return $chatdata->respondSuccess();
 										}
+									}
+									else //if ($reply['reply_mode'] == "2") // No Reply
+									{
+										return $chatdata->respondSuccess();
+										//break;
 									}
 									break;
 								}
