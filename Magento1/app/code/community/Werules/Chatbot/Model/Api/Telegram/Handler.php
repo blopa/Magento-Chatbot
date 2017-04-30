@@ -333,10 +333,22 @@
 					if (!empty($replyMessageId)) // if the message is replying another message
 					{
 						$errorFlag = false;
-						$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
-						$replyFromUserId = $telegram->ReplyToMessageFromUserID();
+						//$isForeign = false;
 
-						$isForeign = !empty($foreignChatdata->getLastSupportMessageId()); // check if current reply message id is saved on databse
+						preg_match('/(#\w+)/', $telegram->ReplyToMessageText(), $matches);
+						if (isset($matches[0]))
+						{
+							$matchedChatId = ltrim($matches[0], "#");
+							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($matchedChatId, 'facebook_chat_id');
+							$isForeign = !empty($foreignChatdata->getFacebookChatId()); // check if current reply message id is saved on database
+						}
+						else
+						{
+							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
+							$isForeign = !empty($foreignChatdata->getLastSupportMessageId()); // check if current reply message id is saved on database
+						}
+
+						$replyFromUserId = $telegram->ReplyToMessageFromUserID();
 						$isLocal = !is_null($replyFromUserId);
 						if ($isLocal != $isForeign) // XOR
 						{
