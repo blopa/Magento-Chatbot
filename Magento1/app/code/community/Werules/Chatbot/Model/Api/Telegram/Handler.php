@@ -335,14 +335,14 @@
 						$errorFlag = false;
 						//$isForeign = false;
 
-						preg_match('/(#\w+)/', $telegram->ReplyToMessageText(), $matches);
-						if (isset($matches[0]))
+						preg_match('/(#\w+)/', $telegram->ReplyToMessageText(), $matches); // match hashtag which contains the chatid
+						if (!empty($matches[0])) // if matched, load using chatid
 						{
 							$matchedChatId = ltrim($matches[0], "#");
 							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($matchedChatId, 'facebook_chat_id');
 							$isForeign = !empty($foreignChatdata->getFacebookChatId()); // check if current reply message id is saved on database
 						}
-						else
+						else // if not, try to load using last message id for support
 						{
 							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
 							$isForeign = !empty($foreignChatdata->getLastSupportMessageId()); // check if current reply message id is saved on database
