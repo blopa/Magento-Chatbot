@@ -241,21 +241,16 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
-	- Better order searching / listing
-	- Add compatibility with configurable products
-	- Add compatibility with products with custom options
-	- Add better usage of command alias
-	- Integrate checkout to Facebook Payment API
-	- Add natural language configuration (wit.ai?)
-	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos
-	- Save messages on database before sending to make sure it will be sent eventually
+	- Add a custom in-store message chat app
 	- Save support history
 	- Support for audio commands
 	- Better uses for wit.ai
-	- Better panel UI (like showing some inputs only when that config is selected)
-	- Add condition to disable/enable backend inputs
 	- Force a command for a customer
+	- Integrate checkout to Facebook Payment API
+	- Save messages on database before sending to make sure it will be sent eventually
+	- Add compatibility with configurable products
+	- Add compatibility with products with custom options
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
