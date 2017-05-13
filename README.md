@@ -15,6 +15,8 @@ Very easy to use! Try now, it's FREE.
 
 To use this module you'll need to have SSL enabled in your store, this is a requirement from Facebook and Telegram, not by me.
 
+**For a complete documentation on how to use (specially for advanced wit.ai configuration) access [Magento Chatbot Documentation](https://blopa.github.io/docs/magento_chatbot/).**
+
 **For now only Telegram and Facebook Messenger is implemented, try it out Telegram at [@MyChatbotStoreBot](https://telegram.me/MyChatbotStoreBot).**
 
 A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](https://github.com/Eleirbag89/TelegramBotPHP) simple PHP wrapper for Telegram.
