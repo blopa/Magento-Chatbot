@@ -69,7 +69,7 @@ If you find yourself in this situation, exclude the block by adding ```<remove n
 
 ## Usage
 
-For a complete documentation on how to use (specially for advanced wit.ai configuration) access [Magento Chatbot Documentation](https://blopa.github.io/docs/magento_chatbot/).
+**For a complete documentation on how to use (specially for advanced wit.ai configuration) access [Magento Chatbot Documentation](https://blopa.github.io/docs/magento_chatbot/).**
 
 Go to **System > General Settings  > Chatbot Settings**
 
