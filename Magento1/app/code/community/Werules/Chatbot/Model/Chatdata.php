@@ -350,7 +350,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		}
 
 		// TELEGRAM FUNCTIONS
-		public function foreignMessageToTelegramSupport($chatId, $text, $apiName, $customerName)
+		public function foreignMessageToTelegramSupport($foreignChatId, $text, $apiName, $customerName)
 		{
 			//$chatdata = Mage::getModel('chatbot/chatdata');
 			$chatdata = $this;
@@ -380,7 +380,12 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 						if (!$customerName)
 							$customerName = $mageHelper->__("Not informed");
 
-						$message = $mageHelper->__("Message via") . " " . $apiName . ":\n" . $mageHelper->__("From") . ": " . $customerName . "\n" . $text;
+						$message =
+							"#" . $foreignChatId . "\n" .
+							$mageHelper->__("Message via") . " " . $apiName . ":\n" .
+							$mageHelper->__("From") . ": " . $customerName . "\n" .
+							$text
+						;
 						$result = $telegram->postMessage($supportgroup, $message);
 						$mid = $result['result']['message_id'];
 						if (!empty($mid))

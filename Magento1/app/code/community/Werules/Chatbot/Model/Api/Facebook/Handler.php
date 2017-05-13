@@ -339,10 +339,15 @@
 					{
 						$customerChatId = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admEndSupportCmd)); // get customer chatId from payload
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
-						$customerData->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // update conversation state
 
-						$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
-						$facebook->postMessage($customerChatId, $mageHelper->__("Support ended."));
+						if ($customerData->getFacebookConvState() == $chatbotHelper->_supportState)
+						{
+							$customerData->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // update conversation state
+							$facebook->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));
+							$facebook->postMessage($customerChatId, $mageHelper->__("Support ended."));
+						}
+						else
+							$facebook->postMessage($customerChatId, $mageHelper->__("Customer isn't on support."));
 					}
 					else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admBlockSupportCmd)) // block user from using support // old checkCommandWithValue
 					{
@@ -1536,7 +1541,7 @@
 												$facebook->postMessage($chatId, $message);
 										}
 									}
-									else //if ($reply['reply_mode'] == "0") // Text Only
+									else if ($reply['reply_mode'] == "0") // Text Only
 									{
 										if (!empty($message))
 										{
@@ -1563,6 +1568,11 @@
 											if ($reply["stop_processing"] == "1")
 												return $chatdata->respondSuccess();
 										}
+									}
+									else //if ($reply['reply_mode'] == "2") // No Reply
+									{
+										return $chatdata->respondSuccess();
+										//break;
 									}
 									break;
 								}

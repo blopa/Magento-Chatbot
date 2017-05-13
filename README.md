@@ -138,6 +138,10 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.15:**
+	- Add option to ignore certain messages using Default Replies
+	- Add Customer Chat ID to message for support
+	- Add module tables update from previous versions
 - **v0.0.14:**
 	- Fix problem when setting Telegram Webhook
 	- Fix problem when sending message between different chat plataforms
@@ -181,7 +185,7 @@ Conversation
 	- Fix webhook security issue
 	- New webhook URL
 - **v0.0.8:**
-	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to default replies
+	- [Backend] Add "starts with", "ends with", "contains", "equals to" and "regex" options to Default Replies
 	- [Backend] Better backend layout
 	- [Backend] Better way to enable/disable commands
 - **v0.0.7:**
@@ -194,7 +198,7 @@ Conversation
 - **v0.0.6:**
 	- [Backend] Better admin descriptions and typos
 - **v0.0.5:**
-	- [Backend] Add default replies
+	- [Backend] Add Default Replies
 	- [Backend] Add option to unavailability message
 	- Better feedback messages
 - **v0.0.4:**
@@ -237,21 +241,16 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
-	- Better order searching / listing
-	- Add compatibility with configurable products
-	- Add compatibility with products with custom options
-	- Add better usage of command alias
-	- Integrate checkout to Facebook Payment API
-	- Add natural language configuration (wit.ai?)
-	- Add a custom in-store message chat app
 	- Documentation / Tutorials / Videos
-	- Save messages on database before sending to make sure it will be sent eventually
+	- Add a custom in-store message chat app
 	- Save support history
 	- Support for audio commands
 	- Better uses for wit.ai
-	- Better panel UI (like showing some inputs only when that config is selected)
-	- Add condition to disable/enable backend inputs
 	- Force a command for a customer
+	- Integrate checkout to Facebook Payment API
+	- Save messages on database before sending to make sure it will be sent eventually
+	- Add compatibility with configurable products
+	- Add compatibility with products with custom options
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
