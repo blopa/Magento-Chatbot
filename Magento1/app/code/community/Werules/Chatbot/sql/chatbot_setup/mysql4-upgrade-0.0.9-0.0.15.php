@@ -5,7 +5,7 @@ $installer = $this;
 $installer->startSetup(); //db update
 
 $installer->run("
-	-- ALTER TABLE {$this->getTable($table)}
+	ALTER TABLE {$this->getTable($table)}
 	ADD COLUMN `enable_promotional_messages` smallint(1) NOT NULL default '1' AFTER `is_logged`,
 	ADD COLUMN `enable_telegram_admin` smallint(1) NOT NULL default '1' AFTER `last_support_chat`,
 	ADD COLUMN `telegram_processing_request` smallint(1) NOT NULL default '0' AFTER `enable_telegram`,
