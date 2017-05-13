@@ -365,13 +365,23 @@
 									// TODO IMPORTANT remember to switch off all other supports
 									if ($isLocal)
 									{
-										$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
-										$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
+										if ($customerChatdata->getTelegramConvState() == $chatbotHelper->_supportState)
+										{
+											$customerChatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState);
+											$telegram->postMessage($replyFromUserId, $mageHelper->__("Support ended.")); // TODO
+										}
+										else
+											$telegram->postMessage($replyFromUserId, $mageHelper->__("Customer isn't on support.")); // TODO
 									}
 									else// if ($isForeign) // TODO make this generic
 									{
-										$customerChatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
-										$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
+										if ($customerChatdata->getFacebookConvState() == $chatbotHelper->_supportState)
+										{
+											$customerChatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState);
+											$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Support ended."));
+										}
+										else
+											$handler->foreignMessageFromSupport($foreignChatdata->getFacebookChatId(), $mageHelper->__("Customer isn't on support."));
 									}
 
 									$telegram->postMessage($chatId, $mageHelper->__("Done. The customer is no longer on support."));

@@ -141,6 +141,7 @@ Conversation
 - **v0.0.15:**
 	- Add option to ignore certain messages using Default Replies
 	- Add Customer Chat ID to message for support
+	- Add module tables update from previous versions
 - **v0.0.14:**
 	- Fix problem when setting Telegram Webhook
 	- Fix problem when sending message between different chat plataforms
