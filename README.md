@@ -69,6 +69,8 @@ If you find yourself in this situation, exclude the block by adding ```<remove n
 
 ## Usage
 
+For a complete documentation on how to use (specially for advanced wit.ai configuration) access [Magento Chatbot Documentation](https://blopa.github.io/docs/magento_chatbot/).
+
 Go to **System > General Settings  > Chatbot Settings**
 
 **General Configuration**
@@ -139,6 +141,7 @@ Conversation
 
 ## Release Notes
 - **v0.0.15:**
+	- First stable version
 	- Add option to ignore certain messages using Default Replies
 	- Add Customer Chat ID to message for support
 	- Add module tables update from previous versions
