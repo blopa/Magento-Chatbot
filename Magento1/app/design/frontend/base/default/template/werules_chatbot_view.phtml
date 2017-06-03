@@ -2,7 +2,7 @@
 	// this is the post view, where the module receives the posts from the chat APIs
 	$action = $this->getRequest()->getActionName();
 
-	if (!empty($action)) // the view must have a action
+	if ($action) // the view must have a action
 	{
 		$webhook = Mage::app()->getRequest()->getParam('webhook');
 		$key = Mage::app()->getRequest()->getParam('key');
@@ -24,7 +24,7 @@
 					//"Visitor Data: \n" . var_export($visitorData, true) . "\n" .
 					"IP: " . $remoteAddr . "\n" .
 					"API: " . $action . "\n" .
-					"Key: " . (!empty($key) ? $key : $webhook) . "\n", null, 'chatbot_error.log');
+					"Key: " . ($key ? $key : $webhook) . "\n", null, 'chatbot_error.log');
 			}
 		}
 	}
