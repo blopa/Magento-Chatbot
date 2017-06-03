@@ -1760,5 +1760,3 @@
 			$chatdata->respondSuccess();
 		}
 	}
-
-?>

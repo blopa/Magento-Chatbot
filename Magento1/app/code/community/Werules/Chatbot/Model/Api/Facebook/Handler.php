@@ -1782,5 +1782,3 @@
 			$chatdata->respondSuccess();
 		}
 	}
-
-?>

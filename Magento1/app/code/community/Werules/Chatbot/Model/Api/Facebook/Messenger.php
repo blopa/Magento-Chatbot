@@ -308,4 +308,4 @@
 				. ($mimetype ? ";type=$mimetype" : '');
 		}
 	}
-?>
+
