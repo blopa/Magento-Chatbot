@@ -6,7 +6,7 @@
 		$chatbotHelper = Mage::helper('werules_chatbot');
 		$mageHelper = Mage::helper('core');
 		$imgWidth = (int)Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_messenger_box_width');
-		if (empty($imgWidth))
+		if (!($imgWidth))
 			$imgWidth = 60;
 	?>
 	<style>
@@ -77,7 +77,7 @@
 			$ref = "?ref=" . serialize($refData);
 		}
 		$fbChatUrl = null;
-		if (!empty($fbUsername))
+		if ($fbUsername)
 			$fbChatUrl = $chatbotHelper->_fbUrl . $fbUsername . $ref;
 	?>
 

@@ -91,7 +91,7 @@
 			$canDisableBot = Mage::getStoreConfig('chatbot_enable/facebook_config/option_disable_bot');
 			if (($isEcho == "true") && ($canDisableBot == "1"))
 			{
-				if (empty($appId)) // dosen't have an app id, so it's a human reply using the page
+				if (!($appId)) // dosen't have an app id, so it's a human reply using the page
 				{
 					$facebook->_recipientId = $facebook->RecipientID();
 					$facebook->_originalText = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
@@ -99,7 +99,7 @@
 			}
 
 			$referral = $facebook->getReferralRef();
-			if (!empty($referral)) // opened m.me with referral
+			if ($referral) // opened m.me with referral
 			{
 				$facebook->_referral = $referral;
 				$facebook->_originalText = $mageHelper->__("Hi");
@@ -107,7 +107,7 @@
 
 			// checking for payload
 			$payloadContent = $facebook->getPayload();
-			if (!empty($payloadContent) && empty($facebook->_originalText))
+			if ($payloadContent && !($facebook->_originalText))
 			{
 				$facebook->_isPayload = true;
 				$facebook->_originalText = $payloadContent;
@@ -115,10 +115,10 @@
 			}
 
 			// quickreply payload
-			if (empty($payloadContent))
+			if (!($payloadContent))
 			{
 				$payloadContent = $facebook->getQuickReplyPayload();
-				if (!empty($payloadContent))
+				if ($payloadContent)
 				{
 					//$facebook->_isPayload = true; // just replace original text as payload and it will work
 					$facebook->_originalText = $payloadContent;
@@ -126,7 +126,7 @@
 				}
 			}
 
-			if (!empty($facebook->_originalText) && !empty($facebook->_chatId) && ($isEcho != "true" || isset($facebook->_recipientId) || isset($facebook->_referral)))
+			if ($facebook->_originalText && $facebook->_chatId && ($isEcho != "true" || isset($facebook->_recipientId) || isset($facebook->_referral)))
 			{
 				return $this->processText();
 			}
@@ -173,7 +173,7 @@
 			// Instances facebook user details
 			$userData = $facebook->UserData($chatId);
 			$username = null;
-			if (!empty($userData))
+			if ($userData)
 				$username = $userData['first_name'];
 
 			// helpers
@@ -239,7 +239,7 @@
 			if ($enabledBot != "1")
 			{
 				$disabledMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/disabled_message');
-				if (!empty($disabledMessage))
+				if ($disabledMessage)
 					$facebook->postMessage($chatId, $disabledMessage);
 				return $chatdata->respondSuccess();
 			}
@@ -300,7 +300,7 @@
 				if ($conversationState == $chatbotHelper->_replyToSupportMessageState) // check if admin is replying to a customer
 				{
 					$customerChatId = $chatdata->getFacebookSupportReplyChatId(); // get customer chat id
-					if (!empty($customerChatId))
+					if ($customerChatId)
 					{
 						$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_startState); // set admin to _startState
 						$customerData = Mage::getModel('chatbot/chatdata')->load($customerChatId, 'facebook_chat_id'); // load chatdata model
@@ -319,7 +319,7 @@
 				else if ($chatbotHelper->startsWith($text, $chatbotHelper->_admSendMessage2AllCmd)) // old checkCommandWithValue
 				{
 					$message = trim($chatbotHelper->getCommandValue($text, $chatbotHelper->_admSendMessage2AllCmd));
-					if (!empty($message))
+					if ($message)
 					{
 						$chatbotCollection = Mage::getModel('chatbot/chatdata')->getCollection();
 						foreach($chatbotCollection as $chatbot)
@@ -435,7 +435,7 @@
 			if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
-				if (!empty($message)) // TODO
+				if ($message) // TODO
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
@@ -464,7 +464,7 @@
 			if (isset($facebook->_referral))
 			{
 				$refMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_referral_message');
-				if (!empty($refMessage) && empty($message)) // only if haven't sent the welcome message
+				if ($refMessage && !($message)) // only if haven't sent the welcome message
 				{
 					if ($username)
 						$refMessage = str_replace("{customername}", $username, $refMessage);
@@ -540,7 +540,7 @@
 			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_helpCmd))
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_help_msg'); // TODO
-				if (!empty($message)) // TODO
+				if ($message) // TODO
 				{
 					$facebook->postMessage($chatId, $message);
 					$cmdListing = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_help_command_list');
@@ -559,7 +559,7 @@
 			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_aboutCmd))
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_about_msg'); // TODO
-				if (!empty($message))
+				if ($message)
 					$facebook->postMessage($chatId, $message);
 
 				$facebook->sendChatAction($chatId, "typing_off");
@@ -619,7 +619,7 @@
 						if ($stock > 0)
 						{
 							$productName = $product->getName();
-							if (empty($productName))
+							if (!($productName))
 								$productName = $mageHelper->__("this product");
 							$facebook->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("adding %s to your cart.", $productName));
 							$facebook->sendChatAction($chatId, "typing_on");
@@ -698,7 +698,7 @@
 										$product = Mage::getModel('catalog/product')->load($productID);
 										$productUrl = $product->getProductUrl();
 										$productImage = $product->getImageUrl();
-										if (empty($productImage))
+										if (!($productImage))
 											$productImage = $placeholder;
 
 										$button = array(
@@ -817,14 +817,14 @@
 						{
 							$message = $chatbotHelper->prepareFacebookProdMessages($productID);
 							//Mage::helper('core')->__("Add to cart") . ": " . $this->_add2CartCmd['command'] . $product->getId();
-							if (!empty($message)) // TODO
+							if ($message) // TODO
 							{
 								if ($i >= $showMore)
 								{
 									$product = Mage::getModel('catalog/product')->load($productID);
 									$productUrl = $product->getProductUrl();
 									$productImage = $product->getImageUrl();
-									if (empty($productImage))
+									if (!($productImage))
 										$productImage = $placeholder;
 
 									$button = array(
@@ -904,7 +904,7 @@
 			else if ($conversationState == $chatbotHelper->_supportState)
 			{
 				$errorFlag = true;
-				if (!empty($supportGroupId))
+				if ($supportGroupId)
 				{
 					if ($supportGroupId == $chatbotHelper->_tgBot)
 					{
@@ -1031,10 +1031,10 @@
 						}
 						else
 							$productIDs = true;
-						if (!empty($productIDs)) // category with no products
+						if ($productIDs) // category with no products
 						{
 							$catName = $_category->getName();
-							if (!empty($catName))
+							if ($catName)
 							{
 								$reply = array(
 									'content_type' => 'text',
@@ -1046,7 +1046,7 @@
 							}
 						}
 					}
-					if (!empty($replies))
+					if ($replies)
 					{
 						$message = $mageHelper->__("Select a category") . ". " . $chatbotHelper->_cancelMessage;
 						$facebook->sendQuickReply($chatId, $message, $replies);
@@ -1213,7 +1213,7 @@
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_registerCmd)) // TODO
 			{
 				$registerUrl = strtok(Mage::getUrl('customer/account/create'), '?');
-				if (!empty($registerUrl))
+				if ($registerUrl)
 					$facebook->postMessage($chatId, $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl));
 				else
 					$facebook->postMessage($chatId, $chatbotHelper->_errorMessage);
@@ -1250,7 +1250,7 @@
 							{
 								//$message = $chatbotHelper->prepareFacebookOrderMessages($orderID);
 								$payload = $chatbotHelper->prepareFacebookOrderPayload($orderID);
-								if (!empty($payload)) // TODO
+								if ($payload) // TODO
 								{
 									$order = Mage::getModel('sales/order')->load($orderID);
 									$orderNumber = $order->getIncrementId();
@@ -1285,7 +1285,7 @@
 										$facebook->sendReceiptTemplate($chatId, $payload);
 										if ($flagBreak)
 										{
-											if (!empty($replies))
+											if ($replies)
 											{
 												$message = $mageHelper->__("If you want to reorder one of these orders, choose it below, or choose '%s' to list more orders.", $mageHelper->__("Show more orders"));
 												$facebook->sendQuickReply($chatId, $message, $replies);
@@ -1492,7 +1492,7 @@
 										$hasWitaiReplies = true;
 									}
 
-									if (!empty($witResponse))
+									if ($witResponse)
 									{
 										if (property_exists($witResponse->entities, $match))
 										{
@@ -1516,9 +1516,9 @@
 									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];
-										if (!empty($cmdId))
+										if ($cmdId)
 											$text = $chatdata->getCommandString($cmdId)['command']; // 'transform' original text into a known command
-										if (!empty($message))
+										if ($message)
 										{
 											$count = strlen($message);
 											if ($count > $messageLimit)
@@ -1543,7 +1543,7 @@
 									}
 									else if ($reply['reply_mode'] == "0") // Text Only
 									{
-										if (!empty($message))
+										if ($message)
 										{
 											$count = strlen($message);
 											if ($count > $messageLimit)
@@ -1614,7 +1614,7 @@
 						$witResponse = $this->_witAi->getTextResponse($text);
 						$hasIntent = false;
 
-						if (!empty($witResponse))
+						if ($witResponse)
 						{
 							if (property_exists($witResponse->entities, "facebook_intent"))
 							{
@@ -1749,7 +1749,7 @@
 						$fallbackQty = 0;
 
 						$fallbackLimit = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message_quantity');
-						if (!empty($fallbackLimit))
+						if ($fallbackLimit)
 						{
 							$fallbackQty = (int)$chatdata->getFacebookFallbackQty();
 							$fallbackQty++;
@@ -1758,7 +1758,7 @@
 							if ($fallbackQty >= (int)$fallbackLimit)
 							{
 								$fallbackMessage = Mage::getStoreConfig('chatbot_enable/facebook_config/fallback_message');
-								if (!empty($fallbackMessage))
+								if ($fallbackMessage)
 								{
 									$fallbackQty = 0;
 									$message = $fallbackMessage;

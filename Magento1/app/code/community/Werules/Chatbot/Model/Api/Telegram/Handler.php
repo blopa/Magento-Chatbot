@@ -59,7 +59,7 @@
 
 			$enableInlineBot = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_inline_search');
 			// handle inline search
-			if (!empty($inlineQuery))
+			if ($inlineQuery)
 			{
 				$chatbotHelper = $this->_chatbotHelper;
 				if ($enableInlineBot == "1")
@@ -68,11 +68,11 @@
 					$queryId = $inlineQuery['id'];
 					$results = array();
 					//$chatdataInline = Mage::getModel('chatbot/chatdata');
-					if (!empty($query))
+					if ($query)
 					{
 						$productIDs = $chatbotHelper->getProductIdsBySearch($query);
 						$mageHelperInline = Mage::helper('core');
-						if (!empty($productIDs))
+						if ($productIDs)
 						{
 							//$total = count($productIDs);
 							$i = 0;
@@ -90,7 +90,7 @@
 										$productName = $product->getName();
 										$productDescription = $chatbotHelper->excerpt($product->getShortDescription(), 60);
 										$placeholder = Mage::getSingleton("catalog/product_media_config")->getBaseMediaUrl() . DS . "placeholder" . DS . Mage::getStoreConfig("catalog/placeholder/thumbnail_placeholder");
-										if (empty($productImage))
+										if (!($productImage))
 											$productImage = $placeholder;
 
 										$message = $productName . "\n" .
@@ -255,7 +255,7 @@
 			if ($enabledBot != "1")
 			{
 				$disabledMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/disabled_message');
-				if (!empty($disabledMessage))
+				if ($disabledMessage)
 					$telegram->postMessage($chatId, $disabledMessage);
 				return $chatdata->respondSuccess();
 			}
@@ -330,22 +330,22 @@
 
 					$replyMessageId = $telegram->ReplyToMessageID();
 
-					if (!empty($replyMessageId)) // if the message is replying another message
+					if ($replyMessageId) // if the message is replying another message
 					{
 						$errorFlag = false;
 						//$isForeign = false;
 
 						preg_match('/(#\w+)/', $telegram->ReplyToMessageText(), $matches); // match hashtag which contains the chatid
-						if (!empty($matches[0])) // if matched, load using chatid
+						if ($matches[0]) // if matched, load using chatid
 						{
 							$matchedChatId = ltrim($matches[0], "#");
 							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($matchedChatId, 'facebook_chat_id');
-							$isForeign = !empty($foreignChatdata->getFacebookChatId()); // check if current reply message id is saved on database
+							$isForeign = $foreignChatdata->getFacebookChatId(); // check if current reply message id is saved on database
 						}
 						else // if not, try to load using last message id for support
 						{
 							$foreignChatdata = Mage::getModel('chatbot/chatdata')->load($replyMessageId, 'last_support_message_id');
-							$isForeign = !empty($foreignChatdata->getLastSupportMessageId()); // check if current reply message id is saved on database
+							$isForeign = $foreignChatdata->getLastSupportMessageId(); // check if current reply message id is saved on database
 						}
 
 						$replyFromUserId = $telegram->ReplyToMessageFromUserID();
@@ -474,7 +474,7 @@
 						else if ($chatbotHelper->startsWith($text, $admSend2All)) // old checkCommandWithValue
 						{
 							$message = trim($chatbotHelper->getCommandValue($text, $admSend2All));
-							if (!empty($message))
+							if ($message)
 							{
 								$chatbotCollection = Mage::getModel('chatbot/chatdata')->getCollection();
 								$i = 0;
@@ -484,7 +484,7 @@
 									$enabled = // if backend promotional messages are disabled or if the customer wants to receive promotional messages
 										(Mage::getStoreConfig('chatbot_enable/general_config/disable_promotional_messages') != "1") ||
 										($chatbot->getEnablePromotionalMessages() == "1");
-									if (!empty($tgChatId) && ($enabled))
+									if ($tgChatId && $enabled)
 									{
 										$i++;
 										$telegram->postMessage($tgChatId, $message); // $magehelper->__("Message from support") . ":\n" .
@@ -538,7 +538,7 @@
 			if (is_null($chatdata->getTelegramChatId()) && !$chatbotHelper->startsWith($text, $chatbotHelper->_startCmd['command'])) // if user isn't registred, and not using the start command // old checkCommandWithValue
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-				if (!empty($message)) // TODO
+				if ($message) // TODO
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
@@ -617,7 +617,7 @@
 							$chatHash->save();
 
 							$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-							if (!empty($message)) // TODO
+							if ($message) // TODO
 								$telegram->postMessage($chatId, $message);
 						}
 						catch (Exception $e)
@@ -641,7 +641,7 @@
 				else // if customer id isnt on our database, means that we need to insert his data
 				{
 					$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_welcome_msg'); // TODO
-					if (!empty($message)) // TODO
+					if ($message) // TODO
 						$telegram->postMessage($chatId, $message);
 					try
 					{
@@ -664,7 +664,7 @@
 			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_helpCmd))
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_help_msg'); // TODO
-				if (!empty($message)) // TODO
+				if ($message) // TODO
 				{
 					$cmdListing = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_help_command_list');
 					if ($cmdListing == "1")
@@ -680,7 +680,7 @@
 			if ($chatbotHelper->checkCommand($text, $chatbotHelper->_aboutCmd))
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_about_msg'); // TODO
-				if (!empty($message))
+				if ($message)
 					$telegram->postMessage($chatId, $message);
 
 				return $chatdata->respondSuccess();
@@ -740,7 +740,7 @@
 						if ($stock > 0)
 						{
 							$productName = $product->getName();
-							if (empty($productName))
+							if (!($productName))
 								$productName = $mageHelper->__("this product");
 							$telegram->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("adding %s to your cart.", $productName));
 							$telegram->sendChatAction(array('chat_id' => $chatId, 'action' => 'typing'));
@@ -817,13 +817,13 @@
 								foreach ($productIDs as $productID)
 								{
 									$message = $chatbotHelper->prepareTelegramProdMessages($productID);
-									if (!empty($message)) // TODO
+									if ($message) // TODO
 									{
 										$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 										if ($i >= $showMore)
 										{
 											$productImage = $chatbotHelper->loadImageContent($productID);
-											if (!empty($productImage))
+											if ($productImage)
 												$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $productImage, 'caption' => $message));
 											else
 												$telegram->postMessage($chatId, $message);
@@ -907,13 +907,13 @@
 						foreach ($productIDs as $productID)
 						{
 							$message = $chatbotHelper->prepareTelegramProdMessages($productID);
-							if (!empty($message)) // TODO
+							if ($message) // TODO
 							{
 								$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 								if ($i >= $showMore)
 								{
 									$productImage = $chatbotHelper->loadImageContent($productID);
-									if (!empty($productImage))
+									if ($productImage)
 										$telegram->sendPhoto(array('chat_id' => $chatId, 'photo' => $productImage, 'caption' => $message));
 									else
 										$telegram->postMessage($chatId, $message);
@@ -959,7 +959,7 @@
 			}
 			else if ($conversationState == $chatbotHelper->_supportState)
 			{
-				if (!empty($supportGroupId))
+				if ($supportGroupId)
 				{
 					$telegram->forwardMessage(array('chat_id' => $supportGroupId, 'from_chat_id' => $chatId, 'message_id' => $telegram->MessageID())); // Reply to this message to reply to the customer
 					$telegram->postMessage($chatId, $chatbotHelper->_positiveMessages[array_rand($chatbotHelper->_positiveMessages)] . ", " . $mageHelper->__("we have sent your message to support."));
@@ -1039,7 +1039,7 @@
 						}
 						else
 							$productIDs = true;
-						if (!empty($productIDs)) // category with no products
+						if ($productIDs) // category with no products
 						{
 							//$option = array( array("A", "B"), array("C", "D") );
 							$catName = $category->getName();
@@ -1056,7 +1056,7 @@
 						}
 					}
 
-					if (!empty($arr)) // if the loop ended, and there's still categories on arr
+					if ($arr) // if the loop ended, and there's still categories on arr
 						array_push($option, $arr);
 
 					$keyb = $telegram->buildKeyBoard($option);
@@ -1213,7 +1213,7 @@
 			else if ($chatbotHelper->checkCommand($text, $chatbotHelper->_registerCmd)) // TODO
 			{
 				$registerUrl = strtok(Mage::getUrl('customer/account/create'), '?');
-				if (!empty($registerUrl))
+				if ($registerUrl)
 					$telegram->postMessage($chatId, $mageHelper->__("Access %s to register a new account on our shop.", $registerUrl));
 				else
 					$telegram->postMessage($chatId, $chatbotHelper->_errorMessage);
@@ -1247,7 +1247,7 @@
 							foreach($ordersIDs as $orderID)
 							{
 								$message = $chatbotHelper->prepareTelegramOrderMessages($orderID);
-								if (!empty($message)) // TODO
+								if ($message) // TODO
 								{
 									if ($chatbotHelper->_reorderCmd['command'])
 										$message .= "\n\n" . $mageHelper->__("Reorder") . ": " . $chatbotHelper->_reorderCmd['command'] . $orderID;
@@ -1473,7 +1473,7 @@
 										$hasWitaiReplies = true;
 									}
 
-									if (!empty($witResponse))
+									if ($witResponse)
 									{
 										if (property_exists($witResponse->entities, $match))
 										{
@@ -1497,9 +1497,9 @@
 									if ($reply['reply_mode'] == "1") // Text and Command
 									{
 										$cmdId = $reply['command_id'];
-										if (!empty($cmdId))
+										if ($cmdId)
 											$text = $chatbotHelper->validateTelegramCmd($commandPrefix . $chatdata->getCommandString($cmdId)['command']); // 'transform' original text into a known command
-										if (!empty($message))
+										if ($message)
 										{
 											$count = strlen($message);
 											if ($count > $messageLimit)
@@ -1524,7 +1524,7 @@
 									}
 									else if ($reply['reply_mode'] == "0") // Text Only
 									{
-										if (!empty($message))
+										if ($message)
 										{
 											$count = strlen($message);
 											if ($count > $messageLimit)
@@ -1565,7 +1565,7 @@
 				$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_startState); // back to start state
 				if ($enableFinalMessage2Support == "1")
 				{
-					if (!empty($supportGroupId))
+					if ($supportGroupId)
 					{
 //							if ($chatdata->getFacebookConvState() != $chatbotHelper->_supportState) // TODO
 //								$chatdata->updateChatdata('telegram_conv_state', $chatbotHelper->_supportState);
@@ -1592,7 +1592,7 @@
 						$witResponse = $this->_witAi->getTextResponse($text);
 						$hasIntent = false;
 
-						if (!empty($witResponse))
+						if ($witResponse)
 						{
 							if (property_exists($witResponse->entities, "telegram_intent"))
 							{
@@ -1727,7 +1727,7 @@
 						$fallbackQty = 0;
 
 						$fallbackLimit = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message_quantity');
-						if (!empty($fallbackLimit))
+						if ($fallbackLimit)
 						{
 							$fallbackQty = (int)$chatdata->getTelegramFallbackQty();
 							$fallbackQty++;
@@ -1736,7 +1736,7 @@
 							if ($fallbackQty >= (int)$fallbackLimit)
 							{
 								$fallbackMessage = Mage::getStoreConfig('chatbot_enable/telegram_config/fallback_message');
-								if (!empty($fallbackMessage))
+								if ($fallbackMessage)
 								{
 									$fallbackQty = 0;
 									$message = $fallbackMessage;

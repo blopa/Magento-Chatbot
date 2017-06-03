@@ -29,7 +29,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		{
 			// handle webhook configuration
 			$chatbotHelper = $this->_chatbotHelper;
-			if (!empty($webhook) && $action == $chatbotHelper->_tgBot) // set telegram webhook
+			if ($webhook && $action == $chatbotHelper->_tgBot) // set telegram webhook
 			{
 				$mageHelper = Mage::helper('core');
 				$apiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
@@ -56,7 +56,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				;
 				return $message;
 			}
-			else if (!empty($webhook) && $action == $chatbotHelper->_fbBot) // set facebook webhook
+			else if ($webhook && $action == $chatbotHelper->_fbBot) // set facebook webhook
 			{
 				$mageHelper = Mage::helper('core');
 				$customKey = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
@@ -249,7 +249,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				$cmdCode = "";
 				$alias = array();
 				$config = Mage::getStoreConfig($confPath . 'commands_list');
-				if (!empty($config))
+				if ($config)
 				{
 					$commands = unserialize($config);
 					if (is_array($commands))
@@ -258,7 +258,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 						{
 							if ($cmd['command_id'] == $cmdId && $cmd['enable_command'] == "1")
 							{
-								if (empty($cmd['command_code']))
+								if (!($cmd['command_code']))
 								{
 									$cmdCode = $defaultCmds[$cmdId];
 									break;
@@ -276,7 +276,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				else // if no command found, return the default
 					$cmdCode = $defaultCmds[$cmdId];
 
-				if (empty($cmdCode)) // if no command enabled found, return null
+				if (!($cmdCode)) // if no command enabled found, return null
 					return array('command' => null, 'alias' => null);
 
 				$cmdCode = preg_replace( // remove all non-alphanumerics
@@ -371,7 +371,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			{
 				$mageHelper = Mage::helper('core');
 				$supportgroup = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_support_group');
-				if (!empty($supportgroup))
+				if ($supportgroup)
 				{
 					try{
 						if ($supportgroup[0] == "g") // remove the 'g' from groupd id, and add '-'
@@ -388,7 +388,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 						;
 						$result = $telegram->postMessage($supportgroup, $message);
 						$mid = $result['result']['message_id'];
-						if (!empty($mid))
+						if ($mid)
 						{
 							$chatdata->updateChatdata("last_support_message_id", $mid);
 							$chatdata->updateChatdata("last_support_chat", $apiName);

@@ -35,7 +35,7 @@
 							<?php
 								echo $this->__("Start a bot conversation on Telegram") . ": ";
 								$url = $chatbotHelper->_tgUrl . $tgUsername;
-								if (empty($chatdata->getTelegramChatId()))
+								if (!($chatdata->getTelegramChatId()))
 									$url .= "?start=" . $chatdata->getHashKey();
 							?>
 							<a href="<?php echo $url; ?>" target="_blank"><?php echo $this->__('Here') ?></a>

@@ -290,7 +290,7 @@
 
 		/// Get the data of the current message
 		public function getData() {
-			if (empty($this->data)) {
+			if (!($this->data)) {
 				$rawData = file_get_contents("php://input");
 				return json_decode($rawData, true);
 			} else {
