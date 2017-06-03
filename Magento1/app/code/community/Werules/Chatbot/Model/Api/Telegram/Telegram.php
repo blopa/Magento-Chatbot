@@ -4,6 +4,7 @@
  * Telegram Bot Class.
  * @author Gabriele Grillo <gabry.grillo@alice.it>
  */
+// class Werules_Chatbot_Model_Api_Telegram_Telegram
 class Telegram {
 
 	private $bot_id = "";

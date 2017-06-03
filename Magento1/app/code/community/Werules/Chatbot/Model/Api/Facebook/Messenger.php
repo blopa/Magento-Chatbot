@@ -10,6 +10,7 @@
 	 * https://developers.facebook.com/docs/messenger-platform/send-api-reference/sender-actions
 	 * https://developers.facebook.com/docs/messenger-platform/send-api-reference/errors
 	 */
+// class Werules_Chatbot_Model_Api_Facebook_Messenger
 	class Messenger {
 
 		private $bot_id = "";

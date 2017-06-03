@@ -4,6 +4,7 @@
 	//$api_path = Mage::getModuleDir('', 'Werules_Chatbot') . DS . "Model" . DS . "Api" . DS . "witAI" . DS;
 	//require_once($api_path . "witAI.php");
 
+	// class Werules_Chatbot_Model_Api_Facebook_MessengerBot extends Werules_Chatbot_Model_Api_Facebook_Messenger
 	class MessengerBot extends Messenger
 	{
 		public $_originalText;
@@ -19,3 +20,4 @@
 			return $this->sendMessage($chatId, $message);
 		}
 	}
+
