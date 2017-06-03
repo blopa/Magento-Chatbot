@@ -25,8 +25,8 @@
 
 		/// Verify webhook
 		public function verifyWebhook($hub_token) {
-			if ($_REQUEST['hub_verify_token'] == $hub_token) {
-				return $_REQUEST['hub_challenge'];
+			if ($this->data['hub_verify_token'] == $hub_token) {
+				return $this->data['hub_challenge'];
 			}
 			return false;
 		}
@@ -279,7 +279,7 @@
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($content));
 			}
-			curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 			if ($response)
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
