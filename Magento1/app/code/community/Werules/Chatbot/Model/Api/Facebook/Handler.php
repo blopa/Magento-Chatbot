@@ -206,6 +206,8 @@
 
 			if (isset($recipientId)) // it's only set when a human respond on the facebook page
 			{
+				if ($chatdata->getEnableFacebookAdmin() == "0")
+					return $chatdata->respondSuccess();
 				$chatdata->updateChatdata('enable_facebook_admin', "0");
 				//$text = $mageHelper->__("Bot respond is disabled for now because the customer is being replied by a human.");
 				$chatdata->updateChatdata('facebook_conv_state', $chatbotHelper->_supportState); // force update state to support mode
