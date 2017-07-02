@@ -261,7 +261,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Save messages on database before sending to make sure it will be sent eventually
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
-	- Add `CDATA` to configuration descriptions
+	- Add `CDATA` and `<tooltip>` to configuration descriptions
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
