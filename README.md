@@ -145,6 +145,8 @@ Conversation
 - **v0.0.16:**
 	- Code improvements
 	- Fix flood of messages when disabling bot for human respond
+	- Add module version to configuration
+	- Update wit.ai API version
 - **v0.0.15:**
 	- First stable version
 	- Add option to ignore certain messages using Default Replies
@@ -259,6 +261,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Save messages on database before sending to make sure it will be sent eventually
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
+	- Add `CDATA` to configuration descriptions
 
 ## License
 Free. Don't forget to star :D and send pull requests. :D
