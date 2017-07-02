@@ -142,6 +142,9 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.16:**
+	- Code improvements
+	- Fix flood of messages when disabling bot for human respond
 - **v0.0.15:**
 	- First stable version
 	- Add option to ignore certain messages using Default Replies
