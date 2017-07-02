@@ -146,6 +146,7 @@ Conversation
 	- Code improvements
 	- Fix flood of messages when disabling bot for human respond
 	- Add module version to configuration
+	- Update wit.ai API version
 - **v0.0.15:**
 	- First stable version
 	- Add option to ignore certain messages using Default Replies
