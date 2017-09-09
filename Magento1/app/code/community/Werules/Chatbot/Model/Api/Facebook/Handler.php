@@ -416,7 +416,7 @@
 			);
 
 			// user isnt registred HERE
-			//if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
+			if (is_null($chatdata->getFacebookChatId())) // if user isn't registred
 			{
 				$message = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_welcome_msg'); // TODO
 				if ($message) // TODO
