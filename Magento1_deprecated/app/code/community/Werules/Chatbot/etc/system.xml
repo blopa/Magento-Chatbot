@@ -28,7 +28,6 @@
 						<your_custom_key>
 							<label>Your Secret Key</label>
 							<frontend_type>text</frontend_type>
-							<validate>validate-alphanum</validate>
 							<sort_order>0</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
@@ -63,6 +62,7 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
+							<validate>input-number validate-number</validate>
 							<comment>Quantity of Days to Consider a Cart Abandoned.</comment>
 						</abandoned_cart_days>
 						<list_empty_categories>
@@ -316,6 +316,9 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
+							<depends>
+								<enable_abandoned_cart>1</enable_abandoned_cart>
+							</depends>
 							<comment>Abandoned Cart Message.</comment>
 						</abandoned_cart_msg>
 						<commands_list>
@@ -587,6 +590,9 @@
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
+							<depends>
+								<enable_abandoned_cart>1</enable_abandoned_cart>
+							</depends>
 							<comment>Abandoned Cart Message.</comment>
 						</abandoned_cart_msg>
 						<enable_predict_commands>
