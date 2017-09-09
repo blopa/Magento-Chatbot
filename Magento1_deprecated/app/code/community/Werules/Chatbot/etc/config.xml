@@ -7,14 +7,14 @@
 	</modules>
 	<crontab>
 		<jobs>
-			<cron_abandoned_cart>
+			<werules_chatbot_abandoned_cart>
 				<schedule>
 					<cron_expr>0 0 * * *</cron_expr> <!-- every 24hrs -->
 				</schedule>
 				<run>
 					<model>chatbot/cron::crontask</model>
 				</run>
-			</cron_abandoned_cart>
+			</werules_chatbot_abandoned_cart>
 		</jobs>
 	</crontab>
 	<frontend>
