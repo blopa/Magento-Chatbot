@@ -9,7 +9,7 @@ class Werules_Chatbot_Block_Message_Options extends Mage_Adminhtml_Block_System_
 			'label' => Mage::helper('core')->__('Enable Option'),
 			'renderer' => $this->_getRendererEnableCase()
 		));
-		$this->addColumn('menu_option', array(
+		$this->addColumn('option_text', array(
 			'label' => Mage::helper('core')->__('Option Text'),
 			'style' => 'width: 250px'
 		));
@@ -35,10 +35,6 @@ class Werules_Chatbot_Block_Message_Options extends Mage_Adminhtml_Block_System_
 
 	protected function _prepareArrayRow(Varien_Object $row)
 	{
-		$row->setData(
-			'option_extra_attr_' . $this->_getRendererEnableCase()->calcOptionHash($row->getData('enable_option')),
-			'selected="selected"'
-		);
 		$row->setData(
 			'option_extra_attr_' . $this->_getRendererEnableCase()->calcOptionHash($row->getData('enable_option')),
 			'selected="selected"'
