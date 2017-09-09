@@ -527,6 +527,28 @@
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
+					$enableOptions = Mage::getStoreConfig('chatbot_enable/telegram_config/enable_message_options');
+					if ($enableOptions == "1")
+					{
+						$messageOptions = Mage::getStoreConfig('chatbot_enable/telegram_config/message_options');
+						if ($messageOptions)
+						{
+							$options = unserialize($messageOptions);
+							if (is_array($options))
+							{
+								$message .= "\n";
+								foreach($options as $option)
+								{
+									$enabledOpt = $option["enable_option"];
+									if ($enabledOpt == "1")
+									{
+										$cmdId = $option["command_id"];
+										$message .= $chatdata->getCommandString($cmdId)['command'] . "\n";
+									}
+								}
+							}
+						}
+					}
 					$telegram->postMessage($chatId, $message);
 				}
 				try

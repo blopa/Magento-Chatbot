@@ -423,6 +423,38 @@
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
+					$enableOptions = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_message_options');
+					if ($enableOptions == "1")
+					{
+						$messageOptions = Mage::getStoreConfig('chatbot_enable/facebook_config/message_options');
+						if ($messageOptions)
+						{
+							$options = unserialize($messageOptions);
+							if (is_array($options))
+							{
+								$count = 0;
+								$buttons = array();
+								foreach($options as $option)
+								{
+									$enabledOpt = $option["enable_option"];
+									if (($enabledOpt == "1") && ($count <= 10))
+									{
+										$cmdId = $option["command_id"];
+										array_push($buttons,
+													array(
+														'type' => 'postback',
+														'title' => $cmdId,
+														'payload' => $cmdId
+													)
+											);
+										$count++;
+									}
+								}
+								$facebook->sendButtonTemplate($chatId, $message, $buttons);
+								return $chatdata->respondSuccess();
+							}
+						}
+					}
 					$facebook->postMessage($chatId, $message);
 				}
 				try
