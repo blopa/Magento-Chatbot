@@ -462,7 +462,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 				'timestamp' => $createdAt,
 				'elements' => $elements,
 				'address' => $address,
-				'summary' => $summary,
+				'summary' => $summary
 			);
 
 			return $payload;
