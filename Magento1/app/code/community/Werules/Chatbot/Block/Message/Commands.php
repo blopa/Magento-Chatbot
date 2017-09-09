@@ -2,7 +2,7 @@
 class Werules_Chatbot_Block_Message_Commands extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
 {
 	protected $_itemRendererEnableCase;
-    protected $_itemRendererCommands;
+	protected $_itemRendererCommands;
 
 	public function _prepareToRender()
 	{

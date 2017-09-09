@@ -262,6 +262,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Save messages on database before sending to make sure it will be sent eventually
 	- Add compatibility with configurable products
 	- Add compatibility with products with custom options
+	- Add "abandoned cart" messages
 	- Add `CDATA` and `<tooltip>` to configuration descriptions
 
 ## License
