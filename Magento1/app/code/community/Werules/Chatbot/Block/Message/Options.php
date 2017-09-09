@@ -39,5 +39,9 @@ class Werules_Chatbot_Block_Message_Options extends Mage_Adminhtml_Block_System_
 			'option_extra_attr_' . $this->_getRendererEnableCase()->calcOptionHash($row->getData('enable_option')),
 			'selected="selected"'
 		);
+		$row->setData(
+			'option_extra_attr_' . $this->_getRendererEnableCase()->calcOptionHash($row->getData('enable_option')),
+			'selected="selected"'
+		);
 	}
 }
