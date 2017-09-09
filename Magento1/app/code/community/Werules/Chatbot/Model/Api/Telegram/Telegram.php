@@ -4,6 +4,7 @@
  * Telegram Bot Class.
  * @author Gabriele Grillo <gabry.grillo@alice.it>
  */
+// class Werules_Chatbot_Model_Api_Telegram_Telegram
 class Telegram {
 
 	private $bot_id = "";
@@ -1227,7 +1228,7 @@ class Telegram {
 	 * \return the JSON users's message
 	 */
 	public function getData() {
-		if (empty($this->data)) {
+		if (!($this->data)) {
 			$rawData = file_get_contents("php://input");
 			return json_decode($rawData, true);
 		} else {
@@ -1567,4 +1568,3 @@ if (!function_exists('curl_file_create')) {
 	}
 
 }
-?>

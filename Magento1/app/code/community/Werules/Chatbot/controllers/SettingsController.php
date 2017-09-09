@@ -126,7 +126,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 						$chatdata->delete();
 						$chatdata = Mage::getModel('chatbot/chatdata')->load($customerid, 'customer_id'); // reload
 					}
-					if (!empty($data)) // if any found, prepare to merge
+					if ($data) // if any found, prepare to merge
 					{
 						$data["updated_at"] = date('Y-m-d H:i:s');
 						$data["is_logged"] = "1";

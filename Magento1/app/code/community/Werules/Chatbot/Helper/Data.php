@@ -197,7 +197,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 				{
 					foreach ($alias as $al)
 					{
-						if (!empty($al))
+						if ($al)
 							if (strpos($t, $al) !== false)
 								return true;
 					}
@@ -261,7 +261,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
 		$productIDs = $productCollection->getAllIds();
 
-		if (!empty($productIDs))
+		if ($productIDs)
 			return $productIDs;
 
 		return false;
@@ -287,11 +287,11 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	public function getTelegramBotUsername()
 	{
 		$tgUsername = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_bot_username');
-		if (!empty($tgUsername))
+		if ($tgUsername)
 			return $tgUsername;
 
 		$tgApiKey = Mage::getStoreConfig('chatbot_enable/telegram_config/telegram_api_key');
-		if (!empty($tgApiKey))
+		if ($tgApiKey)
 		{
 			$getMe = "https://api.telegram.org/bot" . $tgApiKey . "/getMe";
 			$response = json_decode(file_get_contents($getMe), true);
@@ -352,15 +352,15 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 	public function getFacebookPageChatID()
 	{
 		$fbUsername = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_page_username');
-		if (!empty($fbUsername))
+		if ($fbUsername)
 			return $fbUsername;
 
 		$fbApiKey = Mage::getStoreConfig('chatbot_enable/facebook_config/facebook_api_key');
-		if (!empty($fbApiKey))
+		if ($fbApiKey)
 		{
 			$getMe = "https://graph.facebook.com/v2.8/me?access_token=" . $fbApiKey;
 			$response = json_decode(file_get_contents($getMe), true);
-			if (!empty($response))
+			if ($response)
 				return $response["id"];
 		}
 
@@ -462,7 +462,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 				'timestamp' => $createdAt,
 				'elements' => $elements,
 				'address' => $address,
-				'summary' => $summary,
+				'summary' => $summary
 			);
 
 			return $payload;

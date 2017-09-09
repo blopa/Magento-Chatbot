@@ -10,6 +10,7 @@
 	 * https://developers.facebook.com/docs/messenger-platform/send-api-reference/sender-actions
 	 * https://developers.facebook.com/docs/messenger-platform/send-api-reference/errors
 	 */
+// class Werules_Chatbot_Model_Api_Facebook_Messenger
 	class Messenger {
 
 		private $bot_id = "";
@@ -25,8 +26,8 @@
 
 		/// Verify webhook
 		public function verifyWebhook($hub_token) {
-			if ($_REQUEST['hub_verify_token'] == $hub_token) {
-				return $_REQUEST['hub_challenge'];
+			if ($this->data['hub_verify_token'] == $hub_token) {
+				return $this->data['hub_challenge'];
 			}
 			return false;
 		}
@@ -279,7 +280,7 @@
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($content));
 			}
-			curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 			if ($response)
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -290,7 +291,7 @@
 
 		/// Get the data of the current message
 		public function getData() {
-			if (empty($this->data)) {
+			if (!($this->data)) {
 				$rawData = file_get_contents("php://input");
 				return json_decode($rawData, true);
 			} else {
@@ -308,4 +309,4 @@
 				. ($mimetype ? ";type=$mimetype" : '');
 		}
 	}
-?>
+
