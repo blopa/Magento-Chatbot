@@ -423,6 +423,38 @@
 				{
 					if ($username)
 						$message = str_replace("{customername}", $username, $message);
+					$enableOptions = Mage::getStoreConfig('chatbot_enable/facebook_config/enable_message_options');
+					if ($enableOptions == "1")
+					{
+						$messageOptions = Mage::getStoreConfig('chatbot_enable/facebook_config/message_options');
+						if ($messageOptions)
+						{
+							$options = unserialize($messageOptions);
+							if (is_array($options))
+							{
+								$count = 0;
+								$replies = array();
+								foreach($options as $option)
+								{
+									$enabledOpt = $option["enable_option"];
+									if (($enabledOpt == "1") && ($count <= 10))
+									{
+										$cmdId = $option["option_text"];
+										array_push($replies,
+													array(
+														'content_type' => 'text',
+														'title' => $cmdId,
+														'payload' => $cmdId
+													)
+											);
+										$count++;
+									}
+								}
+								$facebook->sendQuickReply($chatId, $message, $replies);
+								return $chatdata->respondSuccess();
+							}
+						}
+					}
 					$facebook->postMessage($chatId, $message);
 				}
 				try

@@ -17,6 +17,25 @@ function werulesTogleMatchMode(element)
 	}
 }
 
+function werulesTogleEnable(element)
+{
+	//debugger;
+	// var val = element.value;
+	// var name = element.name;
+	// if (val == 0)
+	// {
+	// 	name = name.substr(0, name.lastIndexOf("[")) + "[similarity]";
+	// 	var target = document.getElementsByName(name);
+	// 	target[0].disabled = false;
+	// }
+	// else
+	// {
+	// 	name = name.substr(0, name.lastIndexOf("[")) + "[similarity]";
+	// 	var target = document.getElementsByName(name);
+	// 	target[0].disabled = true;
+	// }
+}
+
 function werulesTogleReplyMode(element)
 {
 	//debugger;
