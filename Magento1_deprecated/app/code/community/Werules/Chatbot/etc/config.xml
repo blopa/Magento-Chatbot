@@ -5,6 +5,18 @@
 			<version>0.0.16</version>
 		</Werules_Chatbot>
 	</modules>
+	<crontab>
+		<jobs>
+			<cron_abandoned_cart>
+				<schedule>
+					<cron_expr>*/1 * * * *</cron_expr>
+				</schedule>
+				<run>
+					<model>chatbot/cron::crontask</model>
+				</run>
+			</cron_abandoned_cart>
+		</jobs>
+	</crontab>
 	<frontend>
 		<translate>
 			<modules>

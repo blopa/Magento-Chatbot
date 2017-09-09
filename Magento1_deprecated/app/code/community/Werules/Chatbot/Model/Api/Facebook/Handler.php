@@ -50,6 +50,10 @@
 			if (!isset($facebook)) // if no apiKey available, break process
 				return json_encode(array("status" => "error"));
 
+			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			if ($enableLog == "1") // log all posts
+				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
+
 			// hub challenge
 			$hubToken = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
 			$verify = $facebook->verifyWebhook($hubToken);
@@ -64,10 +68,6 @@
 
 			// helper
 			$mageHelper = Mage::helper('core');
-
-			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
-			if ($enableLog == "1") // log all posts
-				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
 
 			$appId = $facebook->getAppId();
 			$canDisableBot = Mage::getStoreConfig('chatbot_enable/facebook_config/option_disable_bot');
