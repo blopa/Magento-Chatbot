@@ -243,7 +243,7 @@
 						</enable_message_options>
 						<message_options>
 							<label>Message Commands</label>
-							<frontend_model>werules_chatbot/messagecommands</frontend_model>
+							<frontend_model>werules_chatbot/message_commands</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>9</sort_order>
 							<show_in_default>1</show_in_default>
@@ -495,7 +495,7 @@
 						</enable_message_options>
 						<message_options>
 							<label>Message Options</label>
-							<frontend_model>werules_chatbot/messageoptions</frontend_model>
+							<frontend_model>werules_chatbot/message_options</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
 							<sort_order>13</sort_order>
 							<show_in_default>1</show_in_default>

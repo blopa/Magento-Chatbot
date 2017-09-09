@@ -1,18 +1,17 @@
 <?php
-class Werules_Chatbot_Block_MessageCommands extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
+class Werules_Chatbot_Block_Message_Options extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
 {
 	protected $_itemRendererEnableCase;
-    protected $_itemRendererCommands;
 
 	public function _prepareToRender()
 	{
 		$this->addColumn('enable_option', array(
-			'label' => Mage::helper('core')->__('Enable Command'),
+			'label' => Mage::helper('core')->__('Enable Option'),
 			'renderer' => $this->_getRendererEnableCase()
 		));
-		$this->addColumn('command_id', array(
-			'label' => Mage::helper('core')->__('Command'),
-			'renderer' => $this->_getRendererCommands()
+		$this->addColumn('menu_option', array(
+			'label' => Mage::helper('core')->__('Option Text'),
+			'style' => 'width: 250px'
 		));
 
 		$this->_addAfter = false;
@@ -25,6 +24,7 @@ class Werules_Chatbot_Block_MessageCommands extends Mage_Adminhtml_Block_System_
 		{
 			$this->_itemRendererEnableCase = $this->getLayout()->createBlock(
 				'werules_chatbot/enable',
+				//'werules_chatbot/replyMode',
 				'',
 				array('is_render_to_js_template' => true)
 			)->setExtraParams("style='width: auto;'");
@@ -33,23 +33,10 @@ class Werules_Chatbot_Block_MessageCommands extends Mage_Adminhtml_Block_System_
 		return $this->_itemRendererEnableCase;
 	}
 
-	protected function _getRendererCommands()
-	{
-		if (!$this->_itemRendererCommands)
-		{
-			$this->_itemRendererCommands = $this->getLayout()->createBlock(
-				'werules_chatbot/commandsSelect',
-				'',
-				array('is_render_to_js_template' => true)
-			)->setExtraParams("style='width: 100%;'");
-		}
-		return $this->_itemRendererCommands;
-	}
-
 	protected function _prepareArrayRow(Varien_Object $row)
 	{
 		$row->setData(
-			'option_extra_attr_' . $this->_getRendererCommands()->calcOptionHash($row->getData('command_id')),
+			'option_extra_attr_' . $this->_getRendererEnableCase()->calcOptionHash($row->getData('enable_option')),
 			'selected="selected"'
 		);
 	}
