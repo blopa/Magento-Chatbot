@@ -56,11 +56,20 @@
 							<show_in_store>1</show_in_store>
 							<comment>Automatically Enable Support if Customer Types a Message That The Bot Dosen't Understand.</comment>
 						</enable_support_final_message>
+						<abandoned_cart_days>
+							<label>Abandoned Cart Days</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>3</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Quantity of Days to Consider a Cart Abandoned.</comment>
+						</abandoned_cart_days>
 						<list_empty_categories>
 							<label>List Empty Categoies</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>3</sort_order>
+							<sort_order>4</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -70,7 +79,7 @@
 							<label>Disable Promotional Messages</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>4</sort_order>
+							<sort_order>5</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -80,7 +89,7 @@
 							<label>Enable Log</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>5</sort_order>
+							<sort_order>6</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -290,11 +299,30 @@
 							<show_in_store>1</show_in_store>
 							<comment>Enable Command Listing When The Bot Don't Understand What The Customer Typed</comment>
 						</enable_error_command_list>
+						<enable_abandoned_cart>
+							<label>Enable Abandoned Cart Message</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>14</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Abandoned Cart Message</comment>
+						</enable_abandoned_cart>
+						<abandoned_cart_msg>
+							<label>Abandoned Cart Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>15</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Abandoned Cart Message.</comment>
+						</abandoned_cart_msg>
 						<commands_list>
 							<label>Commands List</label>
 							<frontend_model>werules_chatbot/commands</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
-							<sort_order>14</sort_order>
+							<sort_order>16</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
@@ -304,7 +332,7 @@
 							<label>Enable Default Replies</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>15</sort_order>
+							<sort_order>17</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -314,7 +342,7 @@
 							<label>Default Replies</label>
 							<frontend_model>werules_chatbot/replies</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
-							<sort_order>16</sort_order>
+							<sort_order>18</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
@@ -324,7 +352,7 @@
 						<fallback_message>
 							<label>Fallback Message</label>
 							<frontend_type>text</frontend_type>
-							<sort_order>17</sort_order>
+							<sort_order>19</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -333,7 +361,7 @@
 						<fallback_message_quantity>
 							<label>Fallback Times</label>
 							<frontend_type>text</frontend_type>
-							<sort_order>18</sort_order>
+							<sort_order>20</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -542,11 +570,30 @@
 							<show_in_store>1</show_in_store>
 							<comment>Enable Command Listing When The Bot Don't Understand What The Customer Typed</comment>
 						</enable_error_command_list>
+						<enable_abandoned_cart>
+							<label>Enable Abandoned Cart Message</label>
+							<frontend_type>select</frontend_type>
+							<source_model>chatbot/enable</source_model>
+							<sort_order>18</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable Abandoned Cart Message</comment>
+						</enable_abandoned_cart>
+						<abandoned_cart_msg>
+							<label>Abandoned Cart Message</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>19</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Abandoned Cart Message.</comment>
+						</abandoned_cart_msg>
 						<enable_predict_commands>
 							<label>Enable Command Prediction</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>18</sort_order>
+							<sort_order>20</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -556,7 +603,7 @@
 							<label>Commands List</label>
 							<frontend_model>werules_chatbot/commands</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
-							<sort_order>19</sort_order>
+							<sort_order>21</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
@@ -566,7 +613,7 @@
 							<label>Enable Default Replies</label>
 							<frontend_type>select</frontend_type>
 							<source_model>chatbot/enable</source_model>
-							<sort_order>20</sort_order>
+							<sort_order>22</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -576,7 +623,7 @@
 							<label>Default Replies</label>
 							<frontend_model>werules_chatbot/replies</frontend_model>
 							<backend_model>chatbot/adminhtml_serialized</backend_model> <!-- TODO adminhtml/system_config_backend_serialized_array -->
-							<sort_order>21</sort_order>
+							<sort_order>23</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
@@ -586,7 +633,7 @@
 						<fallback_message>
 							<label>Fallback Message</label>
 							<frontend_type>text</frontend_type>
-							<sort_order>22</sort_order>
+							<sort_order>24</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
@@ -595,7 +642,7 @@
 						<fallback_message_quantity>
 							<label>Fallback Times</label>
 							<frontend_type>text</frontend_type>
-							<sort_order>23</sort_order>
+							<sort_order>25</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>

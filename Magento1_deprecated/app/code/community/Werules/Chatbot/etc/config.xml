@@ -9,7 +9,7 @@
 		<jobs>
 			<cron_abandoned_cart>
 				<schedule>
-					<cron_expr>*/1 * * * *</cron_expr>
+					<cron_expr>0 0 * * *</cron_expr> <!-- every 24hrs -->
 				</schedule>
 				<run>
 					<model>chatbot/cron::crontask</model>
