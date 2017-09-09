@@ -543,7 +543,7 @@
 									if ($enabledOpt == "1")
 									{
 										$cmdId = $option["command_id"];
-										$message .= $chatdata->getCommandString($cmdId)['command'] . "\n";
+										$message .= $commandPrefix . $chatdata->getCommandString($cmdId)['command'] . "\n";
 									}
 								}
 							}
