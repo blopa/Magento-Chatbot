@@ -110,7 +110,7 @@ Go to **System > General Settings  > Chatbot Settings**
     - Track order status
     - Reorder
     - Send email
-    - Custom fallback messages
+    - Custom fallback messages 
     - Much more
 ### Magento1
 #### Deprecated versions
