@@ -107,7 +107,7 @@ Go to **System > General Settings  > Chatbot Settings**
     - List orders
     - Track order status
     - Reorder
-    - Send email
+    - Send email 
     - Custom fallback messages 
     - Much more
 ### Magento1
