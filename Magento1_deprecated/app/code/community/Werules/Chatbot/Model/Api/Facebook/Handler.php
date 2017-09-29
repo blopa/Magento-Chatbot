@@ -685,8 +685,8 @@
 						$noProductFlag = false;
 						$productCollection = $_category->getProductCollection()
 							->addAttributeToSelect('*')
-							->addAttributeToFilter('visibility', 4)
-							->addAttributeToFilter('type_id', 'simple');
+							->addAttributeToFilter('visibility', 4);
+							//->addAttributeToFilter('type_id', 'simple');
 						Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
 						$productIDs = $productCollection->getAllIds();
 
@@ -719,16 +719,19 @@
 
 										$button = array(
 											array(
-												'type' => 'postback',
-												'title' => $mageHelper->__("Add to cart"),
-												'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
-											),
-											array(
 												'type' => 'web_url',
 												'url' => $productUrl,
 												'title' => $mageHelper->__("Visit product's page")
 											)
 										);
+										if ($product->getTypeId() == "simple")
+											array_push($button,
+												array(
+													'type' => 'postback',
+													'title' => $mageHelper->__("Add to cart"),
+													'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
+												)
+											);
 										$element = array(
 											'title' => $product->getName(),
 											'item_url' => $productUrl,
@@ -845,16 +848,19 @@
 
 									$button = array(
 										array(
-											'type' => 'postback',
-											'title' => $mageHelper->__("Add to cart"),
-											'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
-										),
-										array(
 											'type' => 'web_url',
 											'url' => $productUrl,
 											'title' => $mageHelper->__("Visit product's page")
 										)
 									);
+									if ($product->getTypeId() == "simple")
+										array_push($button,
+											array(
+												'type' => 'postback',
+												'title' => $mageHelper->__("Add to cart"),
+												'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
+											)
+										);
 									$element = array(
 										'title' => $product->getName(),
 										'item_url' => $productUrl,
@@ -1041,7 +1047,7 @@
 							$productIDs = $category->getProductCollection()
 								->addAttributeToSelect('*')
 								->addAttributeToFilter('visibility', 4)
-								->addAttributeToFilter('type_id', 'simple')
+								//->addAttributeToFilter('type_id', 'simple')
 								->getAllIds()
 							;
 						}

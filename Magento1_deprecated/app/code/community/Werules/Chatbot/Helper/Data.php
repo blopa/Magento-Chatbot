@@ -250,7 +250,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		$productCollection = Mage::getResourceModel('catalog/product_collection')
 			->addAttributeToSelect('*')
 			->addAttributeToFilter('visibility', 4)
-			->addAttributeToFilter('type_id', 'simple')
+			//->addAttributeToFilter('type_id', 'simple')
 			->addAttributeToFilter(
 				array(
 					array('attribute' => 'sku', 'like' => '%' . $searchString .'%'),

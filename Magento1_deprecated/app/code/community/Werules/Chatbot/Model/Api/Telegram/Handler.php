@@ -801,8 +801,8 @@
 						$noProductFlag = false;
 						$productCollection = $_category->getProductCollection()
 							->addAttributeToSelect('*')
-							->addAttributeToFilter('visibility', 4)
-							->addAttributeToFilter('type_id', 'simple');
+							->addAttributeToFilter('visibility', 4);
+							//->addAttributeToFilter('type_id', 'simple');
 						Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
 						$productIDs = $productCollection->getAllIds();
 
@@ -826,7 +826,8 @@
 									$message = $chatbotHelper->prepareTelegramProdMessages($productID);
 									if ($message) // TODO
 									{
-										$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
+										if (Mage::getModel('catalog/product')->load($productID)->getTypeId() == "simple")
+											$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 										if ($i >= $showMore)
 										{
 											$productImage = $chatbotHelper->loadImageContent($productID);
@@ -916,7 +917,8 @@
 							$message = $chatbotHelper->prepareTelegramProdMessages($productID);
 							if ($message) // TODO
 							{
-								$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
+								if (Mage::getModel('catalog/product')->load($productID)->getTypeId() == "simple")
+									$message .= "\n" . $mageHelper->__("Add to cart") . ": " . $chatbotHelper->_add2CartCmd['command'] . $productID;
 								if ($i >= $showMore)
 								{
 									$productImage = $chatbotHelper->loadImageContent($productID);
@@ -1041,7 +1043,7 @@
 							$productIDs = $category->getProductCollection()
 								->addAttributeToSelect('*')
 								->addAttributeToFilter('visibility', 4)
-								->addAttributeToFilter('type_id', 'simple')
+								//->addAttributeToFilter('type_id', 'simple')
 								->getAllIds();
 						}
 						else
