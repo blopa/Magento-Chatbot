@@ -1,5 +1,5 @@
 <?php
-
+// this class is used to replace Magento own class that contains a glitch
 class Werules_Chatbot_Model_Adminhtml_Serialized extends Mage_Adminhtml_Model_System_Config_Backend_Serialized
 {
 	protected function _afterLoad()

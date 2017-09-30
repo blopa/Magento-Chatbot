@@ -15,6 +15,7 @@
 			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
+		// handle messages sent from chats other than Facebook Messenger
 		public function foreignMessageFromSupport($chatId, $text)
 		{
 			// helpers
@@ -42,6 +43,7 @@
 			return false;
 		}
 
+		// start handling Facebook API request
 		public function facebookHandler()
 		{
 			// Instances the Facebook class
@@ -116,6 +118,7 @@
 			return $facebook->respondSuccess();
 		}
 
+		// after handle, process text message
 		public function processText()
 		{
 			// configs
@@ -741,7 +744,7 @@
 										);
 										array_push($elements, $element);
 
-										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 										{
 											// TODO add option to list more products
 											$button = array(
@@ -870,7 +873,7 @@
 									);
 									array_push($elements, $element);
 
-									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 									{
 										// TODO add option to list more products
 										$button = array(
@@ -1284,7 +1287,7 @@
 									array_push($replies, $reply);
 									if ($i >= $showMore)
 									{
-										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 										{
 											$reply = array(
 												'content_type' => 'text',

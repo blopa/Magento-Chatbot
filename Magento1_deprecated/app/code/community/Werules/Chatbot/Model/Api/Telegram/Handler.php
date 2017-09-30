@@ -22,6 +22,7 @@
 			return $telegram->setWebhook($webhookUrl);
 		}
 
+		// start handling telegram API request
 		public function telegramHandler()
 		{
 			// Instances the Telegram class
@@ -157,6 +158,7 @@
 			return $telegram->respondSuccess();
 		}
 
+		// after handle, process the text message
 		public function processText()
 		{
 			// configs
@@ -836,7 +838,7 @@
 											else
 												$telegram->postMessage($chatId, $message);
 
-											if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+											if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 											{
 												// TODO add option to list more products
 												$telegram->postMessage($chatId, $mageHelper->__("To show more, send") . " " . $listMoreCategories . $_category->getId() . "_" . (string)($i + 1));
@@ -927,7 +929,7 @@
 									else
 										$telegram->postMessage($chatId, $message);
 
-									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 									{
 										// TODO add option to list more products
 										$telegram->postMessage($chatId, $mageHelper->__("To show more, send") . " " . $listMoreSearch . str_replace(" ", "_", $text) . "_" . (string)($i + 1));
@@ -1263,7 +1265,7 @@
 									if ($i >= $showMore)
 									{
 										$telegram->postMessage($chatId, $message);
-										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 										{
 											// TODO add option to list more orders
 											$telegram->postMessage($chatId, $mageHelper->__("To show more, send") . " " . $listMoreOrders . (string)($i + 1));

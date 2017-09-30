@@ -2,6 +2,7 @@
 require_once("Api/Facebook/MessengerBot.php");
 require_once("Api/Telegram/TelegramBot.php");
 
+// handle all cron tasks.
 class Werules_Chatbot_Model_Cron
 {
 	public function crontask()
