@@ -2,7 +2,7 @@
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
-        <route id="helloworld" frontName="helloworld">
+        <route id="webhook" frontName="chatbotwebhook">
             <module name="Werules_Chatbot" />
         </route>
     </router>

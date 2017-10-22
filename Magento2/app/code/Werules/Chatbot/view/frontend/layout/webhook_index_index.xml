@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">
     <container name="root">
-        <block class="Werules\Chatbot\Block\Helloworld" name="helloworld" template="helloworld.phtml" />
+        <block class="Werules\Chatbot\Block\Webhook" name="webhook" template="webhook.phtml" />
     </container>
 </layout>
