@@ -3,8 +3,8 @@ namespace Werules\Chatbot\Block;
 
 class Chatbot extends \Magento\Framework\View\Element\Template
 {
-	public function getHelloWorldTxt()
+	public function renderJsonResponse()
 	{
-		return 'Chatbot in da house? YES';
+		return 'This is working!';
 	}
 }
