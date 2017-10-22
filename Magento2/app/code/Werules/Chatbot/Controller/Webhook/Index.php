@@ -1,5 +1,5 @@
 <?php
-namespace Werules\Chatbot\Controller\Index;
+namespace Werules\Chatbot\Controller\Webhook;
 
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\ResponseInterface;
