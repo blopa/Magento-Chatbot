@@ -3,3 +3,4 @@ copy.bat
 conf.php
 packager.php
 extension/
+*.iml
