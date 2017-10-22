@@ -1,7 +1,0 @@
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd" layout="1column">
-    <body>
-        <referenceContainer name="content">
-            <block class="Werules\Helloworld\Block\Helloworld" name="helloworld" template="helloworld.phtml" />
-        </referenceContainer>
-    </body>
-</page>

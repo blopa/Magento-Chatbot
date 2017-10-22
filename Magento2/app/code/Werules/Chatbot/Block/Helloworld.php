@@ -1,10 +1,10 @@
 <?php
-namespace Werules\Helloworld\Block;
+namespace Werules\Chatbot\Block;
 
 class Helloworld extends \Magento\Framework\View\Element\Template
 {
 	public function getHelloWorldTxt()
 	{
-		return 'Hello world!';
+		return 'Chatbot in da house? YES';
 	}
 }

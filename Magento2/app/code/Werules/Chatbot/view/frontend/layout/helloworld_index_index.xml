@@ -1,0 +1,7 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd" layout="empty">
+    <body>
+        <referenceContainer name="root">
+            <block class="Werules\Chatbot\Block\Helloworld" name="helloworld" template="helloworld.phtml" />
+        </referenceContainer>
+    </body>
+</page>

@@ -1,5 +1,6 @@
 .idea
-copy.bat
+mage1.bat
+mage2.bat
 conf.php
 packager.php
 extension/

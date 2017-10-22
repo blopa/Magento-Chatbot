@@ -1,6 +1,6 @@
 <?php
 
-namespace Werules\Helloworld\Controller\Index;
+namespace Werules\Chatbot\Controller\Index;
 
 use Magento\Framework\App\Action\Context;
 
