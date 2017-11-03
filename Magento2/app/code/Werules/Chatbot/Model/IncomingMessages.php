@@ -17,7 +17,7 @@ class IncomingMessages extends AbstractModel
 	 */
 	protected function _construct()
 	{
-		$this->_init(\Werules\Chatbot\Model\ResourceModel\IncomingMessages::class);
+		$this->_init(\Werules\Chatbot\Model\ResourceModel\IncomingMessages\IncomingMessages::class);
 	}
 
 }

@@ -23,17 +23,17 @@ class Index extends Action
 
 	public function execute()
 	{
-		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
-		$message->setMessageContent('Message 1');
-		$message->save();
-
-		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
-		$message->setMessageContent('Message 2');
-		$message->save();
-
-		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
-		$message->setMessageContent('Message 3');
-		$message->save();
+//		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
+//		$message->setMessageContent('Message 1');
+//		$message->save();
+//
+//		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
+//		$message->setMessageContent('Message 2');
+//		$message->save();
+//
+//		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
+//		$message->setMessageContent('Message 3');
+//		$message->save();
 
 		return $this->resultFactory->create(ResultFactory::TYPE_LAYOUT);
 	}
