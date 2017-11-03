@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<preference for="Werules\Chatbot\Api\MessageRepositoryInterface" type="Werules\Chatbot\Model\MessageRepository"/>
+	<preference for="Werules\Chatbot\Api\Data\MessageInterface" type="Werules\Chatbot\Model\Message"/>
+	<preference for="Werules\Chatbot\Api\Data\MessageSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+	<virtualType name="Werules\Chatbot\Model\ResourceModel\Message\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">werules_chatbot_message</argument>
+			<argument name="resourceModel" xsi:type="string">Werules\Chatbot\Model\ResourceModel\Message\Collection</argument>
+		</arguments>
+	</virtualType>
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="werules_chatbot_message_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\Message\Grid\Collection</item>
+				<item name="werules_chatbot_chatbotuser_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotUser\Grid\Collection</item>
+				<item name="werules_chatbot_chatbotapi_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotAPI\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+	<virtualType name="Werules\Chatbot\Model\ResourceModel\ChatbotUser\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">werules_chatbot_chatbotuser</argument>
+			<argument name="resourceModel" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotUser\Collection</argument>
+		</arguments>
+	</virtualType>
+	<virtualType name="Werules\Chatbot\Model\ResourceModel\ChatbotAPI\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">werules_chatbot_chatbotapi</argument>
+			<argument name="resourceModel" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotAPI\Collection</argument>
+		</arguments>
+	</virtualType>
+</config>

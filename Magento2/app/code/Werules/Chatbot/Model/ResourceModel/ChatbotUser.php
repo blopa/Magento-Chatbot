@@ -19,38 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Cron;
+namespace Werules\Chatbot\Model\ResourceModel;
 
-class Worker
+class ChatbotUser extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 {
 
-	protected $logger;
-
 	/**
-	 * Constructor
-	 *
-	 * @param \Psr\Log\LoggerInterface $logger
-	 */
-	public function __construct(\Psr\Log\LoggerInterface $logger)
-	{
-		$this->logger = $logger;
-	}
-
-	/**
-	 * Execute the cron
+	 * Define resource model
 	 *
 	 * @return void
 	 */
-	public function execute()
+	protected function _construct()
 	{
-//		if (shell_exec('ps aux | grep ' . __FILE__ . ' | wc  -l') > 1) {
-//			exit('already running...');
-//		}
-//		OR
-//		$f = fopen('lock', 'w') or die ('Cannot create lock file');
-//		if (flock($f, LOCK_EX | LOCK_NB)) {
-//			// yay
-//		}
-		$this->logger->addInfo("Cronjob Worker is executed.");
+		$this->_init('werules_chatbot_chatbotuser', 'chatbotuser_id');
 	}
 }

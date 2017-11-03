@@ -19,38 +19,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Cron;
+namespace Werules\Chatbot\Controller\Adminhtml\ChatbotAPI;
 
-class Worker
+class Index extends \Magento\Backend\App\Action
 {
 
-	protected $logger;
+	protected $resultPageFactory;
 
 	/**
 	 * Constructor
 	 *
-	 * @param \Psr\Log\LoggerInterface $logger
+	 * @param \Magento\Backend\App\Action\Context $context
+	 * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
 	 */
-	public function __construct(\Psr\Log\LoggerInterface $logger)
-	{
-		$this->logger = $logger;
+	public function __construct(
+		\Magento\Backend\App\Action\Context $context,
+		\Magento\Framework\View\Result\PageFactory $resultPageFactory
+	) {
+		$this->resultPageFactory = $resultPageFactory;
+		parent::__construct($context);
 	}
 
 	/**
-	 * Execute the cron
+	 * Index action
 	 *
-	 * @return void
+	 * @return \Magento\Framework\Controller\ResultInterface
 	 */
 	public function execute()
 	{
-//		if (shell_exec('ps aux | grep ' . __FILE__ . ' | wc  -l') > 1) {
-//			exit('already running...');
-//		}
-//		OR
-//		$f = fopen('lock', 'w') or die ('Cannot create lock file');
-//		if (flock($f, LOCK_EX | LOCK_NB)) {
-//			// yay
-//		}
-		$this->logger->addInfo("Cronjob Worker is executed.");
+		$resultPage = $this->resultPageFactory->create();
+			$resultPage->getConfig()->getTitle()->prepend(__("ChatbotAPI"));
+			return $resultPage;
 	}
 }

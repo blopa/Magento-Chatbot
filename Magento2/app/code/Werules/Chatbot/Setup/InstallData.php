@@ -19,38 +19,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Cron;
+namespace Werules\Chatbot\Setup;
 
-class Worker
+use Magento\Framework\Setup\InstallDataInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\ModuleDataSetupInterface;
+
+class InstallData implements InstallDataInterface
 {
 
-	protected $logger;
-
 	/**
-	 * Constructor
-	 *
-	 * @param \Psr\Log\LoggerInterface $logger
+	 * {@inheritdoc}
 	 */
-	public function __construct(\Psr\Log\LoggerInterface $logger)
-	{
-		$this->logger = $logger;
-	}
-
-	/**
-	 * Execute the cron
-	 *
-	 * @return void
-	 */
-	public function execute()
-	{
-//		if (shell_exec('ps aux | grep ' . __FILE__ . ' | wc  -l') > 1) {
-//			exit('already running...');
-//		}
-//		OR
-//		$f = fopen('lock', 'w') or die ('Cannot create lock file');
-//		if (flock($f, LOCK_EX | LOCK_NB)) {
-//			// yay
-//		}
-		$this->logger->addInfo("Cronjob Worker is executed.");
+	public function install(
+		ModuleDataSetupInterface $setup,
+		ModuleContextInterface $context
+	) {
+		//Your install script
 	}
 }

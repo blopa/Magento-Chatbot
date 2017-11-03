@@ -19,38 +19,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Cron;
+namespace Werules\Chatbot\Api\Data;
 
-class Worker
+interface MessageSearchResultsInterface extends \Magento\Framework\Api\SearchResultsInterface
 {
 
-	protected $logger;
 
 	/**
-	 * Constructor
-	 *
-	 * @param \Psr\Log\LoggerInterface $logger
+	 * Get Message list.
+	 * @return \Werules\Chatbot\Api\Data\MessageInterface[]
 	 */
-	public function __construct(\Psr\Log\LoggerInterface $logger)
-	{
-		$this->logger = $logger;
-	}
+	public function getItems();
 
 	/**
-	 * Execute the cron
-	 *
-	 * @return void
+	 * Set id list.
+	 * @param \Werules\Chatbot\Api\Data\MessageInterface[] $items
+	 * @return $this
 	 */
-	public function execute()
-	{
-//		if (shell_exec('ps aux | grep ' . __FILE__ . ' | wc  -l') > 1) {
-//			exit('already running...');
-//		}
-//		OR
-//		$f = fopen('lock', 'w') or die ('Cannot create lock file');
-//		if (flock($f, LOCK_EX | LOCK_NB)) {
-//			// yay
-//		}
-		$this->logger->addInfo("Cronjob Worker is executed.");
-	}
+	public function setItems(array $items);
 }

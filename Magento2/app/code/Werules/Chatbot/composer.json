@@ -1,0 +1,21 @@
+{
+    "name": "werules/module-chatbot",
+    "description": "Magento Chatbot Integration",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "email": "info@mage2gen.com",
+            "name": "Mage2Gen"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Werules\\Chatbot\\": ""
+        }
+    }
+}
