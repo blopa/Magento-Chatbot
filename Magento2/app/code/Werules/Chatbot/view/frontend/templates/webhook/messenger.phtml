@@ -1,1 +1,6 @@
-<?php echo $this->requestHandler(); ?>
+<?php
+    const API_NAME = 'messenger';
+    //echo $this->requestHandler(API_NAME);
+    $challenge_hub = $this->getConfigValue('werules_chatbot_messenger/general/enable_hub_challenge');
+    echo var_export($challenge_hub, true);
+?>

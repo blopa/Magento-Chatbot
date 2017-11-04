@@ -32,7 +32,7 @@ class Data extends AbstractHelper
     protected $storeManager;
     protected $objectManager;
 
-    const XML_PATH_CHATBOT = 'chatbot/';
+    //const XML_PATH_CHATBOT = 'werules_chatbot_general/';
 
     public function __construct(Context $context,
         ObjectManagerInterface $objectManager,
@@ -51,25 +51,8 @@ class Data extends AbstractHelper
         );
     }
 
-    public function getGeneralConfig($code, $storeId = null)
-    {
-        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
-    }
-
-    public function requestHandler()
-    {
-        $messenger = $this->objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => 'HUEHUE')); // TODO find a better way to to this
-//        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
-//        $logger->debug('something');
-        $this->logger($messenger);
-        return array('status' => 'success');
-    }
-
-    public function logger($message) // TODO find a better way to to this
-    {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info(var_export($message, true));
-    }
+//    public function getConfig($code, $storeId = null)
+//    {
+//        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
+//    }
 }
