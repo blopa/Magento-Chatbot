@@ -46,7 +46,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="dataType" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">enable_support</item>
+					<item name="label" translate="true" xsi:type="string">Enable Support</item>
 					<item name="formElement" xsi:type="string">checkbox</item>
 					<item name="source" xsi:type="string">ChatbotUser</item>
 					<item name="sortOrder" xsi:type="number">120</item>

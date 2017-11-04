@@ -91,7 +91,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">hash_key</item>
+					<item name="label" translate="true" xsi:type="string">Hash Key</item>
 				</item>
 			</argument>
 		</column>
@@ -99,7 +99,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">enable_promotional_messages</item>
+					<item name="label" translate="true" xsi:type="string">Enable Promotional Messages</item>
 				</item>
 			</argument>
 		</column>
@@ -107,7 +107,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">enable_support</item>
+					<item name="label" translate="true" xsi:type="string">Enable Support</item>
 					<item name="editor" xsi:type="array">
 						<item name="editorType" xsi:type="string">text</item>
 						<item name="validation" xsi:type="array">
@@ -128,7 +128,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">logged</item>
+					<item name="label" translate="true" xsi:type="string">Is Logged</item>
 				</item>
 			</argument>
 		</column>
@@ -136,7 +136,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">admin</item>
+					<item name="label" translate="true" xsi:type="string">Is Admin</item>
 				</item>
 			</argument>
 		</column>
@@ -144,7 +144,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">created_at</item>
+					<item name="label" translate="true" xsi:type="string">Created At</item>
 				</item>
 			</argument>
 		</column>
@@ -152,7 +152,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">updated_at</item>
+					<item name="label" translate="true" xsi:type="string">Updated At</item>
 				</item>
 			</argument>
 		</column>

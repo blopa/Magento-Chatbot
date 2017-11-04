@@ -61,7 +61,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">enabled</item>
+					<item name="label" translate="true" xsi:type="string">Is Enabled</item>
 				</item>
 			</argument>
 		</column>
@@ -69,7 +69,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">chatbot_type</item>
+					<item name="label" translate="true" xsi:type="string">Chatbot Type</item>
 				</item>
 			</argument>
 		</column>
@@ -77,7 +77,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">conversation_state</item>
+					<item name="label" translate="true" xsi:type="string">Conversation State</item>
 				</item>
 			</argument>
 		</column>
@@ -85,7 +85,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">fallback_qty</item>
+					<item name="label" translate="true" xsi:type="string">Fallback Quantity</item>
 				</item>
 			</argument>
 		</column>
@@ -93,7 +93,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">created_at</item>
+					<item name="label" translate="true" xsi:type="string">Created At</item>
 				</item>
 			</argument>
 		</column>
@@ -101,7 +101,7 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">updated_at</item>
+					<item name="label" translate="true" xsi:type="string">Updated At</item>
 				</item>
 			</argument>
 		</column>
