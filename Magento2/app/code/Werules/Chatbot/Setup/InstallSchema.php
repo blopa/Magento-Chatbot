@@ -52,16 +52,6 @@ class InstallSchema implements InstallSchemaInterface
 
 
 		$table_werules_chatbot_message->addColumn(
-			'id',
-			\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-			null,
-			['nullable' => False,'identity' => true,'auto_increment' => true],
-			'Message ID'
-		);
-
-
-
-		$table_werules_chatbot_message->addColumn(
 			'sender_id',
 			\Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
 			255,
@@ -134,16 +124,6 @@ class InstallSchema implements InstallSchemaInterface
 
 
 		$table_werules_chatbot_chatbotuser->addColumn(
-			'id',
-			\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-			null,
-			['nullable' => False,'identity' => true,'auto_increment' => true],
-			'Chatbot User ID'
-		);
-
-
-
-		$table_werules_chatbot_chatbotuser->addColumn(
 			'customer_id',
 			\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
 			null,
@@ -187,7 +167,7 @@ class InstallSchema implements InstallSchemaInterface
 			'enable_promotional_messages',
 			\Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
 			null,
-			['default' => 'false','nullable' => False],
+			['default' => False,'nullable' => False],
 			'Enable Promotional Messages'
 		);
 
@@ -195,10 +175,10 @@ class InstallSchema implements InstallSchemaInterface
 
 		$table_werules_chatbot_chatbotuser->addColumn(
 			'enable_support',
-			\Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+			\Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
 			null,
-			['default' => 'true','nullable' => False],
-			'enable_support'
+			['default' => True,'nullable' => False],
+			'Enable Support?'
 		);
 
 
@@ -207,7 +187,7 @@ class InstallSchema implements InstallSchemaInterface
 			'logged',
 			\Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
 			null,
-			['default' => 'false','nullable' => False],
+			['default' => False,'nullable' => False],
 			'Is Logged'
 		);
 
@@ -217,7 +197,7 @@ class InstallSchema implements InstallSchemaInterface
 			'admin',
 			\Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
 			null,
-			['default' => 'false','nullable' => False],
+			['default' => False,'nullable' => False],
 			'Is Admin'
 		);
 
@@ -256,20 +236,10 @@ class InstallSchema implements InstallSchemaInterface
 
 
 		$table_werules_chatbot_chatbotapi->addColumn(
-			'id',
-			\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-			null,
-			['nullable' => False,'identity' => true,'auto_increment' => true],
-			'ChatbotAPI ID'
-		);
-
-
-
-		$table_werules_chatbot_chatbotapi->addColumn(
 			'enabled',
 			\Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
 			null,
-			['default' => 'true','nullable' => False],
+			['default' => True,'nullable' => False],
 			'Enabled?'
 		);
 
