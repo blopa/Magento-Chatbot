@@ -21,7 +21,7 @@
 
 namespace Werules\Chatbot\Block\Webhook;
 
-class Telegram extends \Magento\Framework\View\Element\Template
+class Telegram extends \Werules\Chatbot\Block\Webhook\Index
 {
 
 }

@@ -21,7 +21,7 @@
 
 namespace Werules\Chatbot\Block\Webhook;
 
-class Messenger extends \Magento\Framework\View\Element\Template
+class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 {
 
 }
