@@ -1,5 +1,4 @@
 <?php
-    const API_NAME = 'messenger';
     $challenge_hub = $this->getConfigValue('werules_chatbot_messenger/general/enable_hub_challenge');
     if ($challenge_hub)
     {
@@ -11,5 +10,5 @@
             echo 'error :(';
     }
     else
-        echo $this->requestHandler(API_NAME);
+        echo $this->requestHandler();
 ?>

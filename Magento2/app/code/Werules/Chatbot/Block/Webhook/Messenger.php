@@ -23,17 +23,38 @@ namespace Werules\Chatbot\Block\Webhook;
 
 class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 {
+//    protected $_messenger;
+
 //    public function __construct(
 //        \Magento\Framework\View\Element\Template\Context $context,
 //        \Werules\Chatbot\Helper\Data $helperData,
-//        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI
+//        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
+//        \Werules\Chatbot\Model\Message $message,
+//        \Werules\Chatbot\Model\Api\Messenger $messenger
 //    )
 //    {
-//        parent::__construct($context, $helperData, $chatbotAPI);
+//        parent::__construct($context, $helperData, $chatbotAPI, $message);
+//        $this->_messenger = $messenger;
 //    }
 
     public function getVerificationHub($hub_token)
     {
-        return $this->_chatbotAPI->getVerificationHub($hub_token);
+        $messenger = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => 'not_needed')); // TODO find a better way to to this
+//        $messenger = $this->_messenger->create(array('bot_token' => 'not_needed'));
+        $result = $messenger->verifyWebhook($hub_token);
+        return $result;
+    }
+
+    public function requestHandler()
+    {
+        $messageModel = $this->_messageModel->create();
+        $messageModel->setSenderId();
+        $messageModel->setContent();
+        $messageModel->setStatus();
+        $messageModel->setDirection();
+        $messageModel->setChatMessageId();
+        $messageModel->setCreatedAt();
+        $messageModel->setUpdatedAt();
+        //return $messageModel->requestHandler();
     }
 }
