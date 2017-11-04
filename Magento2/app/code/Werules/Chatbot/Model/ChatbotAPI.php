@@ -26,11 +26,13 @@ use Werules\Chatbot\Api\Data\ChatbotAPIInterface;
 class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements ChatbotAPIInterface
 {
 
+    protected $_objectManager;
     /**
      * @return void
      */
     protected function _construct()
     {
+        $this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // TODO
         $this->_init('Werules\Chatbot\Model\ResourceModel\ChatbotAPI');
     }
 
@@ -189,6 +191,18 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     // custom methods
     public function requestHandler()
     {
+        $messenger = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => 'HUEHUE')); // TODO find a better way to to this
+//        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
+//        $logger->debug('something');
+        $this->logger($messenger);
         return array('status' => 'success');
+    }
+
+    public function logger($message) // TODO find a better way to to this
+    {
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/test.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info(var_export($message, true));
     }
 }

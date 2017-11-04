@@ -21,6 +21,9 @@
 
 namespace Werules\Chatbot\Controller\Webhook;
 
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultFactory;
+
 class Index extends \Magento\Framework\App\Action\Action
 {
     protected $_chatbotAPI;
@@ -38,5 +41,6 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->getResponse()->representJson(
             $this->_objectManager->get(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($jsonResult)
         );
+//        return $this->resultFactory->create(ResultFactory::TYPE_LAYOUT);
     }
 }
