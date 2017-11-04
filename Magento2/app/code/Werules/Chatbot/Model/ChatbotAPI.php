@@ -185,6 +185,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::UPDATED_AT, $updated_at);
     }
+
     // custom methods
     public function requestHandler()
     {

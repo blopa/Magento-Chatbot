@@ -10,20 +10,20 @@
             <tab>werules</tab>
             <resource>Werules_Chatbot::chatbot_configuration</resource>
             <group id="general" translate="label comment tooltip" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>General Configuration</label>
+                <label>Genetal Settings</label>
                 <comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
                 <field id="enable" translate="label comment tooltip" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable Module</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Enable module.</comment>
                 </field>
-                <field id="your_custom_key" translate="label comment tooltip" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="custom_key" translate="label comment tooltip" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Your Secret Key</label>
                     <validate>validate-alphanum</validate>
                     <comment>This is your custom secret key used for the webhook url, to activate/deactivate the api webhook for telegram, and to use as your challenge hub for facebook. alphanumeric only! access http://(your_store_url)/chatbot/chatdata/(api)/webhook/(your_custom_key) to set the webhook, change api to "telegram" or "facebook".</comment>
                 </field>
                 <field id="list_empty_categories" translate="label comment tooltip" type="select" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>List Empty Categoies</label>
+                    <label>List Empty Categories</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Enable listing of categories with no products or unallowed products (this module supports only simple products for now).</comment>
                 </field>
@@ -45,7 +45,7 @@
             <tab>werules</tab>
             <resource>Werules_Chatbot::chatbot_configuration</resource>
             <group id="general" translate="label comment tooltip" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Messenger Configuration</label>
+                <label>Messenger Settings</label>
                 <comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
                 <field id="enable" translate="label comment tooltip" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Enable Messenger</label>
@@ -71,6 +71,7 @@
                     <label>Enable Facebook Messenger Box</label>
                     <!--TODO depends enable-->
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Enable Facebook Messenger box</comment>
                 </field>
                 <field id="messenger_box_width" translate="label comment tooltip" type="text" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Facebook Messenger Box Size</label>
@@ -121,7 +122,7 @@
                     <label>Enable Command Listing on Help</label>
                     <!--TODO depends enable-->
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable command listing when customer ask for about.</comment>
+                    <comment>Enable command listing when customer ask for help.</comment>
                 </field>
                 <!-- TODO adminhtml/system_config_backend_serialized_array - commands_list -->
                 <field id="commands_list" translate="label comment tooltip" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
