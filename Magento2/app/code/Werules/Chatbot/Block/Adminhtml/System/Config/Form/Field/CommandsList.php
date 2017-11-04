@@ -31,7 +31,7 @@ class CommandsList implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return array(
-//			array('value' => 0, 'label' => 'Start'),
+//            array('value' => 0, 'label' => 'Start'),
             array('value' => 1, 'label' => 'List Categories'),
             array('value' => 2, 'label' => 'Search For Product'),
             array('value' => 3, 'label' => 'Login'),

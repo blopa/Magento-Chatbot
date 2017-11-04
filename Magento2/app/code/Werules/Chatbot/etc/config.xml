@@ -7,6 +7,7 @@
 				<custom_key>HUEHUEHUEBR</custom_key>
 				<list_empty_categories>0</list_empty_categories>
 				<enable_promotional_messages>1</enable_promotional_messages>
+				<enable_post_log>1</enable_post_log>
 			</general>
 		</werules_chatbot_general>
 		<werules_chatbot_messenger>
