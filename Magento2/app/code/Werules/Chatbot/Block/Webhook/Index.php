@@ -24,18 +24,21 @@ namespace Werules\Chatbot\Block\Webhook;
 class Index extends \Magento\Framework\View\Element\Template
 {
     protected $_helper;
+    protected $_chatbotAPI;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
-        \Werules\Chatbot\Helper\Data $helperData
+        \Werules\Chatbot\Helper\Data $helperData,
+        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI
     )
     {
         $this->_helper = $helperData;
+        $this->_chatbotAPI = $chatbotAPI;
         parent::__construct($context);
     }
 
     public function requestHandler()
     {
-        return $this->_helper->requestHandler();
+        return $this->_chatbotAPI->requestHandler();
     }
 }
