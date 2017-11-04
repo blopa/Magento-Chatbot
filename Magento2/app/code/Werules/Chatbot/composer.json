@@ -1,7 +1,7 @@
 {
     "name": "werules/module-chatbot",
     "description": "Magento Chatbot Integration",
-    "license": "GPL-3.0",
+    "license": "MIT",
     "authors": [
         {
             "email": "info@mage2gen.com",
