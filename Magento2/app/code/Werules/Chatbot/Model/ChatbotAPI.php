@@ -207,7 +207,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
 	// custom methods
 
-	public function getJsonTest()
+	public function requestHandler()
 	{
 		return ['status' => 'success'];
 	}

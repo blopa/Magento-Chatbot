@@ -35,18 +35,7 @@ class Index extends Action
 
 	public function execute()
 	{
-//		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
-//		$message->setMessageContent('Message 1');
-//		$message->save();
-//
-//		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
-//		$message->setMessageContent('Message 2');
-//		$message->save();
-//
-//		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
-//		$message->setMessageContent('Message 3');
-//		$message->save();
-		$jsonResult = $this->_chatbotAPI->getJsonTest();
+		$jsonResult = $this->_chatbotAPI->requestHandler();
 
 		$this->getResponse()->representJson(
 			$this->_objectManager->get(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($jsonResult)
