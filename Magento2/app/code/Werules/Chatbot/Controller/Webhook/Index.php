@@ -26,8 +26,11 @@ use Magento\Framework\Controller\ResultFactory;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
-    public function __construct(\Magento\Framework\App\Action\Context $context)
+    protected $_chatbotAPI;
+
+    public function __construct(\Magento\Framework\App\Action\Context $context, \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI)
     {
+        $this->_chatbotAPI = $chatbotAPI;
         parent::__construct($context);
     }
 
