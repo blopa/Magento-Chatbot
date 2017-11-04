@@ -25,7 +25,6 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\ResultFactory;
 class Messenger extends \Magento\Framework\App\Action\Action
 {
-
     protected $_chatbotAPI;
 
     public function __construct(\Magento\Framework\App\Action\Context $context, \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI)

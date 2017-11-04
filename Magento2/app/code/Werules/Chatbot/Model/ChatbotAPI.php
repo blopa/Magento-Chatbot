@@ -187,7 +187,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::UPDATED_AT, $updated_at);
     }
-    
+
     // custom methods
     public function requestHandler()
     {
@@ -197,7 +197,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $this->logger($messenger);
         return array('status' => 'success');
     }
-    
+
     public function logger($message) // TODO find a better way to to this
     {
         $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/test.log');
