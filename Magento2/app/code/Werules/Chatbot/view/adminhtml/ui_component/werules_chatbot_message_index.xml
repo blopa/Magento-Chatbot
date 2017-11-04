@@ -57,14 +57,6 @@
 				</item>
 			</argument>
 		</column>
-		<column name="id">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">id</item>
-				</item>
-			</argument>
-		</column>
 		<column name="sender_id">
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">

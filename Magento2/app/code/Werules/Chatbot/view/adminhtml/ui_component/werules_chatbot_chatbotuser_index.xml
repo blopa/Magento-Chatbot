@@ -10,6 +10,14 @@
 			<item name="deps" xsi:type="string">werules_chatbot_chatbotuser_index.werules_chatbot_chatbotuser_grid_data_source</item>
 		</item>
 		<item name="spinner" xsi:type="string">werules_chatbot_chatbotuser_columns</item>
+		<item name="buttons" xsi:type="array">
+			<item name="add" xsi:type="array">
+				<item name="name" xsi:type="string">add</item>
+				<item name="label" translate="true" xsi:type="string">Add new ChatbotUser</item>
+				<item name="class" xsi:type="string">primary</item>
+				<item name="url" xsi:type="string">*/*/new</item>
+			</item>
+		</item>
 	</argument>
 	<dataSource name="werules_chatbot_chatbotuser_grid_data_source">
 		<argument name="dataProvider" xsi:type="configurableObject">
@@ -40,7 +48,29 @@
 		<paging name="listing_paging"/>
 	</listingToolbar>
 	<columns name="werules_chatbot_chatbotuser_columns">
-		<argument name="data" xsi:type="array"/>
+		<argument name="data" xsi:type="array">
+			<item name="config" xsi:type="array">
+				<item name="editorConfig" xsi:type="array">
+					<item name="selectProvider" xsi:type="string">werules_chatbot_chatbotuser_index.werules_chatbot_chatbotuser_index.werules_chatbot_chatbotuser_columns.ids</item>
+					<item name="enabled" xsi:type="boolean">true</item>
+					<item name="indexField" xsi:type="string">chatbotuser_id</item>
+					<item name="clientConfig" xsi:type="array">
+						<item name="saveUrl" path="werules_chatbot/ChatbotUser/inlineEdit" xsi:type="url"/>
+						<item name="validateBeforeSave" xsi:type="boolean">false</item>
+					</item>
+				</item>
+				<item name="childDefaults" xsi:type="array">
+					<item name="fieldAction" xsi:type="array">
+						<item name="provider" xsi:type="string">werules_chatbot_chatbotuser_index.werules_chatbot_chatbotuser_index.werules_chatbot_chatbotuser_columns_editor</item>
+						<item name="target" xsi:type="string">startEdit</item>
+						<item name="params" xsi:type="array">
+							<item name="0" xsi:type="string">${ $.$data.rowIndex }</item>
+							<item name="1" xsi:type="boolean">true</item>
+						</item>
+					</item>
+				</item>
+			</item>
+		</argument>
 		<selectionsColumn name="ids">
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
@@ -54,14 +84,6 @@
 					<item name="filter" xsi:type="string">text</item>
 					<item name="sorting" xsi:type="string">asc</item>
 					<item name="label" translate="true" xsi:type="string">ID</item>
-				</item>
-			</argument>
-		</column>
-		<column name="id">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">id</item>
 				</item>
 			</argument>
 		</column>
@@ -86,9 +108,22 @@
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
 					<item name="label" translate="true" xsi:type="string">enable_support</item>
+					<item name="editor" xsi:type="array">
+						<item name="editorType" xsi:type="string">text</item>
+						<item name="validation" xsi:type="array">
+							<item name="required-entry" xsi:type="boolean">true</item>
+						</item>
+					</item>
 				</item>
 			</argument>
 		</column>
+		<actionsColumn class="Werules\Chatbot\Ui\Component\Listing\Column\ChatbotUserActions" name="actions">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="indexField" xsi:type="string">chatbotuser_id</item>
+				</item>
+			</argument>
+		</actionsColumn>
 		<column name="logged">
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
