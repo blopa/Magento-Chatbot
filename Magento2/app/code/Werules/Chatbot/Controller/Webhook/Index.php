@@ -25,6 +25,14 @@ use \Magento\Framework\App\Action\Action;
 
 class Index extends Action
 {
+	protected $_chatbotAPI;
+
+	public function __construct(\Magento\Framework\App\Action\Context $context, \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI)
+	{
+		$this->_chatbotAPI = $chatbotAPI;
+		parent::__construct($context);
+	}
+
 	public function execute()
 	{
 //		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
@@ -38,7 +46,7 @@ class Index extends Action
 //		$message = $this->_objectManager->create('Werules\Chatbot\Model\IncomingMessages');
 //		$message->setMessageContent('Message 3');
 //		$message->save();
-		$jsonResult = ['data' => 'test'];
+		$jsonResult = $this->_chatbotAPI->getJsonTest();
 
 		$this->getResponse()->representJson(
 			$this->_objectManager->get(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($jsonResult)
