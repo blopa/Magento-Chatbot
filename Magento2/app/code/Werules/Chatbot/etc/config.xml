@@ -1,16 +1,36 @@
-<?xml version="1.0"?>
+<?xml version="1.0" ?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
-    <default>
-        <werules_chatbot_general>
-            <general>
-                <enable>1</enable>
-                <your_custom_key>0J98R32HRT843TH34HT</your_custom_key>
-            </general>
-        </werules_chatbot_general>
-        <werules_chatbot_messenger>
-            <general>
-                <enable>0</enable>
-            </general>
-        </werules_chatbot_messenger>
-    </default>
+	<default>
+		<werules_chatbot_general>
+			<general>
+				<enable>1</enable>
+				<custom_key>HUEHUEHUEBR</custom_key>
+				<list_empty_categories>0</list_empty_categories>
+				<enable_promotional_messages>1</enable_promotional_messages>
+			</general>
+		</werules_chatbot_general>
+		<werules_chatbot_messenger>
+			<general>
+				<enable>0</enable>
+				<disabled_message>Sorry, I'm not available at the moment.</disabled_message>
+				<api_key/>
+				<bot_username/>
+				<enable_messenger_box>0</enable_messenger_box>
+				<messenger_box_width>200</messenger_box_width>
+				<enable_referral>0</enable_referral>
+				<referral_message/>
+				<support_group/>
+				<welcome_message>Welcome :D</welcome_message>
+				<enable_message_options>0</enable_message_options>
+				<message_options/>
+				<help_message>SOS!</help_message>
+				<enable_help_command_list>0</enable_help_command_list>
+				<commands_list/>
+				<enable_default_replies>0</enable_default_replies>
+				<default_replies/>
+				<fallback_message>Sorry, I didn't get that.</fallback_message>
+				<fallback_message_quantity>3</fallback_message_quantity>
+			</general>
+		</werules_chatbot_messenger>
+	</default>
 </config>

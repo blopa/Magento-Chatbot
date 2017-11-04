@@ -1,162 +1,152 @@
-<?xml version="1.0"?>
+<?xml version="1.0" ?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
-    <system>
-        <tab id="werules" translate="label comment tooltip" sortOrder="10">
-            <label>Chatbot Integration</label>
-        </tab>
-        <section id="werules_chatbot_general" translate="label comment tooltip" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-            <class>separator-top</class>
-            <label>Genetal Settings</label>
-            <tab>werules</tab>
-            <resource>Werules_Chatbot::chatbot_configuration</resource>
-            <group id="general" translate="label comment tooltip" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Genetal Settings</label>
-                <comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
-                <field id="enable" translate="label comment tooltip" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Module</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable module.</comment>
-                </field>
-                <field id="custom_key" translate="label comment tooltip" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Your Secret Key</label>
-                    <validate>validate-alphanum</validate>
-                    <comment>This is your custom secret key used for the webhook url, to activate/deactivate the api webhook for telegram, and to use as your challenge hub for facebook. alphanumeric only! access http://(your_store_url)/chatbot/chatdata/(api)/webhook/(your_custom_key) to set the webhook, change api to "telegram" or "facebook".</comment>
-                </field>
-                <field id="list_empty_categories" translate="label comment tooltip" type="select" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>List Empty Categories</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable listing of categories with no products or unallowed products (this module supports only simple products for now).</comment>
-                </field>
-                <field id="enable_promotional_messages" translate="label comment tooltip" type="select" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Promotional Messages</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable the option for the customer to choose to receive or not promotional messages.</comment>
-                </field>
-                <field id="enable_post_log" translate="label comment tooltip" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Log</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Log will be at root/var/log/.</comment>
-                </field>
-            </group>
-        </section>
-        <section id="werules_chatbot_messenger" translate="label comment tooltip" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-            <class>separator-top</class>
-            <label>Messenger Settings</label>
-            <tab>werules</tab>
-            <resource>Werules_Chatbot::chatbot_configuration</resource>
-            <group id="general" translate="label comment tooltip" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Messenger Settings</label>
-                <comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
-                <field id="enable" translate="label comment tooltip" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Messenger</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable Messenger.</comment>
-                </field>
-                <field id="disabled_message" translate="label comment tooltip" type="text" sortOrder="2" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Unavailability Message</label>
-                    <!--TODO depends enable-->
-                    <comment>Message to send when bot is disabled. leave it empty to send no message. please check the maximum size for messages on telegram api, otherwise your message might not be sent.</comment>
-                </field>
-                <field id="api_key" translate="label comment tooltip" type="text" sortOrder="3" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Page Access Token</label>
-                    <!--TODO depends enable-->
-                    <comment>Your page access token.</comment>
-                </field>
-                <field id="bot_username" translate="label comment tooltip" type="text" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Facebook Page Username</label>
-                    <!--TODO depends enable-->
-                    <comment>Facebook page username.</comment>
-                </field>
-                <field id="enable_messenger_box" translate="label comment tooltip" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Facebook Messenger Box</label>
-                    <!--TODO depends enable-->
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable Facebook Messenger box</comment>
-                </field>
-                <field id="messenger_box_width" translate="label comment tooltip" type="text" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Facebook Messenger Box Size</label>
-                    <!--TODO depends enable_messenger_box-->
-                    <validate>input-number validate-number</validate>
-                    <comment>Facebook messenger box size.</comment>
-                </field>
-                <field id="enable_referral" translate="label comment tooltip" type="select" sortOrder="7" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Referral</label>
-                    <!--TODO depends enable_messenger_box-->
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable referral.</comment>
-                </field>
-                <field id="referral_message" translate="label comment tooltip" type="text" sortOrder="8" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Referral Message</label>
-                    <!--TODO depends enable_referral-->
-                    <comment>Referral message.</comment>
-                </field>
-                <field id="support_group" translate="label comment tooltip" type="text" sortOrder="9" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Messenger Support Chat ID</label>
-                    <!--TODO depends enable-->
-                    <comment>The chat ID of the support admin. This feature isn't very useful since you can simply log into your page and directly reply your customers from there.</comment>
-                </field>
-                <field id="welcome_message" translate="label comment tooltip" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Messenger Welcome Message</label>
-                    <!--TODO depends enable-->
-                    <comment>First message the bot will send to your client. please check the maximum size for messages on facebook api, otherwise your message might not be sent. you can use "{customername}" to send the customer name.</comment>
-                </field>
-                <field id="enable_message_options" translate="label comment tooltip" type="select" sortOrder="11" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Welcome Message Options</label>
-                    <!--TODO depends enable-->
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable welcome message options.</comment>
-                </field>
-                <!-- TODO adminhtml/system_config_backend_serialized_array message_options -->
-                <field id="message_options" translate="label comment tooltip" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Welcome Message Options</label>
-                    <frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
-                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
-                    <comment>Welcome message options.</comment>
-                </field>
-                <field id="help_message" translate="label comment tooltip" type="text" sortOrder="13" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Messenger Help Message</label>
-                    <!--TODO depends enable-->
-                    <comment>Message will be sent when customer asks for help. please check the maximum size for messages on facebook api, otherwise your message might not be sent.</comment>
-                </field>
-                <field id="enable_help_command_list" translate="label comment tooltip" type="select" sortOrder="14" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Command Listing on Help</label>
-                    <!--TODO depends enable-->
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable command listing when customer ask for help.</comment>
-                </field>
-                <!-- TODO adminhtml/system_config_backend_serialized_array - commands_list -->
-                <field id="commands_list" translate="label comment tooltip" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Commands List</label>
-                    <frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
-                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
-                    <comment>Code of the commands and it's alias. Alias must be split by comma. eg.: "support,chat,talk,sac".</comment>
-                    <!--<tooltip>TODO</tooltip>-->
-                </field>
-                <field id="enable_default_replies" translate="label comment tooltip" type="select" sortOrder="16" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Enable Default Replies</label>
-                    <!--TODO depends enable-->
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>Enable default replies.</comment>
-                </field>
-                <!-- TODO adminhtml/system_config_backend_serialized_array default_replies -->
-                <field id="default_replies" translate="label comment tooltip" sortOrder="17" showInDefault="1" showInWebsite="1" showInStore="0">
-                    <label>Default Replies</label>
-                    <frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
-                    <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
-                    <comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
-                </field>
-                <field id="fallback_message" translate="label comment tooltip" type="text" sortOrder="18" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Fallback Message</label>
-                    <!--TODO depends enable-->
-                    <comment>Message will be sent when the bot don't understand customer messages for the Nst time.</comment>
-                </field>
-                <field id="fallback_message_quantity" translate="label comment tooltip" type="text" sortOrder="19" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Fallback Quantity</label>
-                    <!--TODO depends enable-->
-                    <validate>input-number validate-number</validate>
-                    <comment>Number of fallbacks before sending the fallback message.</comment>
-                </field>
-            </group>
-        </section>
-    </system>
+	<system>
+		<tab id="werules" translate="label comment tooltip" sortOrder="10">
+			<label>Chatbot Integration</label>
+		</tab>
+		<section id="werules_chatbot_general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip">
+			<label>Genetal Settings</label>
+			<tab>werules</tab>
+			<resource>Werules_Chatbot::config_werules_chatbot</resource>
+			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
+				<label>Genetal Settings</label>
+				<comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
+				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
+					<label>Enable Module</label>
+					<comment>Enable module.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="custom_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip" type="text">
+					<label>Your Secret Key</label>
+					<comment>This is your custom secret key used for the webhook url, to activate/deactivate the api webhook for telegram, and to use as your challenge hub for facebook. alphanumeric only! access http://(your_store_url)/chatbot/chatdata/(api)/webhook/(your_custom_key) to set the webhook, change api to &quot;telegram&quot; or &quot;facebook&quot;.</comment>
+				</field>
+				<field id="list_empty_categories" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip" type="select">
+					<label>List Empty Categories</label>
+					<comment>Enable listing of categories with no products or unallowed products (this module supports only simple products for now).</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="enable_promotional_messages" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip" type="select">
+					<label>Enable Promotional Messages</label>
+					<comment>Enable the option for the customer to choose to receive or not promotional messages.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+			</group>
+		</section>
+		<section id="werules_chatbot_messenger" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip">
+			<label>Messenger Settings</label>
+			<tab>werules</tab>
+			<resource>Werules_Chatbot::config_werules_chatbot</resource>
+			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
+				<label>Messenger Settings</label>
+				<comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
+				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
+					<label>Enable Messenger Bot</label>
+					<comment>Enable Messenger bot.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="disabled_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip" type="text">
+					<label>Unavailability Message</label>
+					<!--TODO depends enable-->
+					<comment>Message to send when bot is disabled. leave it empty to send no message. please check the maximum size for messages on telegram api, otherwise your message might not be sent.</comment>
+				</field>
+				<field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip" type="text">
+					<label>Page Access Token</label>
+					<!--TODO depends enable-->
+					<comment>Your page access token.</comment>
+				</field>
+				<field id="bot_username" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="4" translate="label comment tooltip" type="text">
+					<label>Facebook Page Username</label>
+					<!--TODO depends enable-->
+					<comment>Facebook page username.</comment>
+				</field>
+				<field id="enable_messenger_box" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip" type="select">
+					<label>Enable Facebook Messenger Box</label>
+					<comment>Enable Facebook Messenger box</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="messenger_box_width" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="6" translate="label comment tooltip" type="text">
+					<label>Facebook Messenger Box Size</label>
+					<!--TODO depends enable_messenger_box-->
+					<validate>input-number validate-number</validate>
+					<comment>Facebook messenger box size.</comment>
+				</field>
+				<field id="enable_referral" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="7" translate="label comment tooltip" type="select">
+					<label>Enable Referral</label>
+					<comment>Enable referral.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="referral_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="text">
+					<label>Referral Message</label>
+					<!--TODO depends enable_referral-->
+					<comment>Referral message.</comment>
+				</field>
+				<field id="support_group" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="9" translate="label comment tooltip" type="text">
+					<label>Messenger Support Chat ID</label>
+					<!--TODO depends enable-->
+					<comment>The chat ID of the support admin. This feature isn't very useful since you can simply log into your page and directly reply your customers from there.</comment>
+				</field>
+				<field id="welcome_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip" type="text">
+					<label>Welcome Message</label>
+					<!--TODO depends enable-->
+					<comment>First message the bot will send to your client. please check the maximum size for messages on facebook api, otherwise your message might not be sent. you can use "{customername}" to send the customer name.</comment>
+				</field>
+				<field id="enable_message_options" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="11" translate="label comment tooltip" type="select">
+					<label>Enable Welcome Message Options</label>
+					<comment>Enable welcome message options.</comment>
+					<!--TODO depends enable-->
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<!-- TODO adminhtml/system_config_backend_serialized_array message_options -->
+				<field id="message_options" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="12" translate="label comment tooltip">
+					<label>Welcome Message Options</label>
+					<comment>Welcome message options.</comment>
+					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
+				</field>
+				<field id="help_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="13" translate="label comment tooltip" type="text">
+					<label>Help Message</label>
+					<!--TODO depends enable-->
+					<comment>Message will be sent when customer asks for help. please check the maximum size for messages on facebook api, otherwise your message might not be sent.</comment>
+				</field>
+				<field id="enable_help_command_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="14" translate="label comment tooltip" type="select">
+					<label>Enable Command Listing on Help Command</label>
+					<!--TODO depends enable-->
+					<comment>Enable command listing when customer ask for help.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<!-- TODO adminhtml/system_config_backend_serialized_array - commands_list -->
+				<field id="commands_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="15" translate="label comment tooltip">
+					<label>Commands List</label>
+					<comment>Code of the commands and it's alias. Alias must be split by comma. eg.: &quot;support,chat,talk,sac&quot;.</comment>
+					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
+					<!--<tooltip>TODO</tooltip>-->
+				</field>
+				<field id="enable_default_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="16" translate="label comment tooltip" type="select">
+					<label>Enable Default Replies</label>
+					<!--TODO depends enable-->
+					<comment>Enable default replies.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<!-- TODO adminhtml/system_config_backend_serialized_array default_replies -->
+				<field id="default_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="17" translate="label comment tooltip">
+					<label>Default Replies</label>
+					<comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
+					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
+				</field>
+				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="18" translate="label comment tooltip" type="text">
+					<label>Fallback Message</label>
+					<!--TODO depends enable-->
+					<comment>Message will be sent when the bot don't understand customer messages for the Nst time.</comment>
+				</field>
+				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="19" translate="label comment tooltip" type="text">
+					<label>Fallback Quantity</label>
+					<!--TODO depends enable-->
+					<validate>input-number validate-number</validate>
+					<comment>Number of fallbacks before sending the fallback message.</comment>
+				</field>
+			</group>
+		</section>
+	</system>
 </config>
