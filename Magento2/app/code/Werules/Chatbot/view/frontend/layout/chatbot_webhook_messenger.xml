@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">
+    <container name="root">
+        <block class="Werules\Chatbot\Block\Webhook\Messenger" name="webhook.messenger" template="Werules_Chatbot::webhook/messenger.phtml"/>
+    </container>
+</layout>
