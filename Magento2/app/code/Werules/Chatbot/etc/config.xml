@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <werules_chatbot_general>
+            <general>
+                <enable>1</enable>
+                <your_custom_key>0J98R32HRT843TH34HT</your_custom_key>
+            </general>
+        </werules_chatbot_general>
+        <werules_chatbot_messenger>
+            <general>
+                <enable>0</enable>
+            </general>
+        </werules_chatbot_messenger>
+    </default>
+</config>
