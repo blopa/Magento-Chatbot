@@ -23,5 +23,17 @@ namespace Werules\Chatbot\Block\Webhook;
 
 class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 {
+//    public function __construct(
+//        \Magento\Framework\View\Element\Template\Context $context,
+//        \Werules\Chatbot\Helper\Data $helperData,
+//        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI
+//    )
+//    {
+//        parent::__construct($context, $helperData, $chatbotAPI);
+//    }
 
+    public function getVerificationHub($hub_token)
+    {
+        return $this->_chatbotAPI->getVerificationHub($hub_token);
+    }
 }

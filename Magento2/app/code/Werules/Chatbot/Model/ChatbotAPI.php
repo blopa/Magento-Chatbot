@@ -22,16 +22,19 @@
 namespace Werules\Chatbot\Model;
 
 use Werules\Chatbot\Api\Data\ChatbotAPIInterface;
+const MESSENGER = 'messenger';
+const TELEGRAM = 'telegram';
 
 class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements ChatbotAPIInterface
 {
+    protected $_apiModel;
     protected $_objectManager;
     /**
      * @return void
      */
     protected function _construct()
     {
-        $this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // TODO
+        $this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // TODO find a better way to to this
         $this->_init('Werules\Chatbot\Model\ResourceModel\ChatbotAPI');
     }
 
@@ -187,14 +190,31 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->setData(self::UPDATED_AT, $updated_at);
     }
 
-    // custom methods
-    public function requestHandler()
+    public function initChatbotAPI($chatbot_type, $api_token)
     {
-        $messenger = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => 'HUEHUE')); // TODO find a better way to to this
+        $this->setChatbotType($chatbot_type);
+
+        if ($chatbot_type == MESSENGER)
+        {
+            $this->_apiModel = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $api_token)); // TODO find a better way to to this
+        }
+    }
+
+    // custom methods
+    public function requestHandler($api_name)
+    {
+        $this->initChatbotAPI(MESSENGER, 'needed_TODO');
 //        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
 //        $logger->debug('something');
-        $this->logger($messenger);
+        $this->logger($this->_apiModel);
         return 'hello world';//array('status' => 'success');
+    }
+
+    public function getVerificationHub($hub_token)
+    {
+        $this->initChatbotAPI(MESSENGER, 'not_needed');
+        $result = $this->_apiModel->verifyWebhook($hub_token);
+        return $result;
     }
 
     public function logger($message) // TODO find a better way to to this

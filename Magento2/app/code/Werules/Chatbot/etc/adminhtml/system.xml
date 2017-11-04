@@ -37,7 +37,7 @@
 				</field>
 			</group>
 		</section>
-		<section id="werules_chatbot_messenger" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip">
+		<section id="werules_chatbot_messenger" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip">
 			<label>Messenger Settings</label>
 			<tab>werules</tab>
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
