@@ -36,11 +36,11 @@ class Index extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
-        $jsonResult = $this->_chatbotAPI->requestHandler();
-
-        $this->getResponse()->representJson(
-            $this->_objectManager->get(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($jsonResult)
-        );
-//        return $this->resultFactory->create(ResultFactory::TYPE_LAYOUT);
+//        $jsonResult = $this->_chatbotAPI->requestHandler();
+//
+//        $this->getResponse()->representJson(
+//            $this->_objectManager->get(\Magento\Framework\Json\Helper\Data::class)->jsonEncode($jsonResult)
+//        );
+        return $this->resultFactory->create(ResultFactory::TYPE_LAYOUT);
     }
 }
