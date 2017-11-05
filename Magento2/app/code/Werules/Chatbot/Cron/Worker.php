@@ -32,7 +32,7 @@ class Worker
      *
      * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(\Psr\Log\LoggerInterface $logger, \Werules\Chatbot\Model\MessageFactory $message)
+    public function __construct(\Psr\Log\LoggerInterface $logger, \Werules\Chatbot\Model\Message $message)
     {
         $this->_logger = $logger;
         $this->_messageModel = $message;
@@ -54,5 +54,10 @@ class Worker
 //            }
 //        }
         $this->_logger->addInfo("Cronjob Worker is executed.");
+        $messageCollection = $this->_messageModel->getCollection()
+                    ->addFieldToFilter('status', array('eq' => '0'));
+        foreach($messageCollection as $m) {
+            $this->_logger->addInfo(var_export($m->getContent(), true));
+        }
     }
 }
