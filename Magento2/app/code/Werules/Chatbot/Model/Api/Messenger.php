@@ -47,8 +47,12 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 
     /// Verify webhook
     public function verifyWebhook($hub_token) {
-        if ($this->data['hub_verify_token'] == $hub_token) {
-            return $this->data['hub_challenge'];
+        if (isset($this->data['hub_verify_token']))
+        {
+            if ($this->data['hub_verify_token'] == $hub_token) {
+                if (isset($this->data['hub_challenge']))
+                    return $this->data['hub_challenge'];
+            }
         }
         return false;
     }

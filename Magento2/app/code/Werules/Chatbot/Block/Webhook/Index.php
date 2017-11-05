@@ -33,7 +33,7 @@ class Index extends \Magento\Framework\View\Element\Template
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Werules\Chatbot\Helper\Data $helperData,
         \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
-        \Werules\Chatbot\Model\Message $message
+        \Werules\Chatbot\Model\MessageFactory $message
     )
     {
         $this->_helper = $helperData;

@@ -47,14 +47,18 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 
     public function requestHandler()
     {
+        $messenger = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => 'not_needed')); // TODO find a better way to to this
         $messageModel = $this->_messageModel->create();
-        $messageModel->setSenderId();
-        $messageModel->setContent();
-        $messageModel->setStatus();
-        $messageModel->setDirection();
-        $messageModel->setChatMessageId();
-        $messageModel->setCreatedAt();
-        $messageModel->setUpdatedAt();
+        $messageModel->setSenderId($messenger->ChatID());
+        $messageModel->setContent($messenger->Text());
+        $messageModel->setStatus(0); // 0 -> not processed / 1 -> processing / 2 -> processed
+        $messageModel->setDirection(0); // 0 -> incoming / 1 -> outgoing
+        $messageModel->setChatMessageId($messenger->MessageID());
+        $datetime = date('Y-m-d H:i:s');
+        $messageModel->setCreatedAt($datetime);
+        $messageModel->setUpdatedAt($datetime);
+        $messageModel->save();
+        return 'ok :)';
         //return $messageModel->requestHandler();
     }
 }
