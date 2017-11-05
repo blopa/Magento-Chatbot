@@ -57,8 +57,14 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $datetime = date('Y-m-d H:i:s');
         $messageModel->setCreatedAt($datetime);
         $messageModel->setUpdatedAt($datetime);
-        $messageModel->save();
-        return 'ok :)';
-        //return $messageModel->requestHandler();
+
+        try {
+            $messageModel->save();
+            $response = $this->_helper->getJsonSuccessResponse();
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            $response = $this->_helper->getJsonErrorResponse();
+        }
+
+        return $response;
     }
 }
