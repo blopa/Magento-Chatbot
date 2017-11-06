@@ -60,7 +60,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $messageModel = $this->_messageModel->create();
         $messageModel->setSenderId($messenger->ChatID());
         $messageModel->setContent($messenger->Text());
-        $messageModel->setStatus(0); // 0 -> not processed / 1 -> processing / 2 -> processed
+        $messageModel->setStatus(1); // 0 -> not processed / 1 -> processing / 2 -> processed
         $messageModel->setDirection(0); // 0 -> incoming / 1 -> outgoing
         $messageModel->setChatMessageId($messenger->MessageID());
         $datetime = date('Y-m-d H:i:s');
@@ -69,7 +69,8 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 
         try {
             $messageModel->save();
-            $this->_cronWorker->execute();
+            //$this->_cronWorker->execute();
+            $this->_queueProcessor->processIncomingMessage($messageModel->getMessageId());
             return $this->_helper->getJsonSuccessResponse();
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             return $this->_helper->getJsonErrorResponse();

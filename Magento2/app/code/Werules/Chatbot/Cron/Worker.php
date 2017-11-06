@@ -26,16 +26,22 @@ class Worker
 
     protected $_logger;
     protected $_messageModel;
+    protected $_queueProcessor;
 
     /**
      * Constructor
      *
      * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(\Psr\Log\LoggerInterface $logger, \Werules\Chatbot\Model\Message $message)
+    public function __construct(
+        \Psr\Log\LoggerInterface $logger,
+        \Werules\Chatbot\Model\Message $message,
+        \Werules\Chatbot\Model\QueueProcessor $queueProcessor
+    )
     {
         $this->_logger = $logger;
         $this->_messageModel = $message;
+        $this->_queueProcessor = $queueProcessor;
     }
 
     /**
@@ -53,11 +59,24 @@ class Worker
 //                    ->addFieldToFilter('status', array('eq' => '0'));
 //            }
 //        }
-        $this->_logger->addInfo("Cronjob Worker is executed.");
         $messageCollection = $this->_messageModel->getCollection()
                     ->addFieldToFilter('status', array('eq' => '0'));
-        foreach($messageCollection as $m) {
-            $this->_logger->addInfo(var_export($m->getContent(), true));
+        foreach($messageCollection as $message) {
+            //$this->_logger->addInfo(var_export($m->getContent(), true));
+            $direction = $message->getDirection();
+            if ($direction == 0)
+            {
+                $message->setStatus(1); // processing
+                $message->save();
+                $this->_queueProcessor->processIncomingMessage($message->getMessageId());
+            }
+            else if ($direction == 1)
+            {
+                $message->setStatus(1); // processing
+                $message->save();
+                $this->_queueProcessor->processOutgoingMessage($message->getMessageId());
+            }
         }
+        $this->_logger->addInfo("Cronjob Worker is executed.");
     }
 }
