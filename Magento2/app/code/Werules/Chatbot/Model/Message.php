@@ -194,4 +194,28 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
 
         }
     }
+
+    public function processIncomingMessage()
+    {
+        $message = $this;
+        // TODO do something
+        $this->logger("Message ID -> " . $message->getMessageId());
+        $this->logger("Message Content -> " . $message->getContent());
+    }
+
+    public function processOutgoingMessage()
+    {
+        $message = $this;
+        // TODO do something
+        $this->logger("Message ID -> " . $message->getMessageId());
+        $this->logger("Message Content -> " . $message->getContent());
+    }
+
+    public function logger($message) // TODO find a better way to to this
+    {
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info(var_export($message, true));
+    }
 }

@@ -26,7 +26,6 @@ class Worker
 
     protected $_logger;
     protected $_messageModel;
-    protected $_queueProcessor;
 
     /**
      * Constructor
@@ -35,13 +34,11 @@ class Worker
      */
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
-        \Werules\Chatbot\Model\Message $message,
-        \Werules\Chatbot\Model\QueueProcessor $queueProcessor
+        \Werules\Chatbot\Model\Message $message
     )
     {
         $this->_logger = $logger;
         $this->_messageModel = $message;
-        $this->_queueProcessor = $queueProcessor;
     }
 
     /**
@@ -68,13 +65,13 @@ class Worker
             {
                 $message->setStatus(1); // processing
                 $message->save();
-                $this->_queueProcessor->processIncomingMessage($message->getMessageId());
+                $message->processIncomingMessage();
             }
             else if ($direction == 1)
             {
                 $message->setStatus(1); // processing
                 $message->save();
-                $this->_queueProcessor->processOutgoingMessage($message->getMessageId());
+                $message->processOutgoingMessage();
             }
         }
         $this->_logger->addInfo("Cronjob Worker is executed.");

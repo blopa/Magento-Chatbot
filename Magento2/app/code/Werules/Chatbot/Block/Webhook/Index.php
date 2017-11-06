@@ -27,7 +27,6 @@ class Index extends \Magento\Framework\View\Element\Template
     protected $_chatbotAPI;
     protected $_messageModel;
     protected $_objectManager;
-    protected $_queueProcessor;
 //    protected $_cronWorker;
 
     public function __construct(
@@ -35,8 +34,7 @@ class Index extends \Magento\Framework\View\Element\Template
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Werules\Chatbot\Helper\Data $helperData,
         \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
-        \Werules\Chatbot\Model\MessageFactory $message,
-        \Werules\Chatbot\Model\QueueProcessor $queueProcessor
+        \Werules\Chatbot\Model\MessageFactory $message
 //        \Werules\Chatbot\Cron\Worker $cronWorker
     )
     {
@@ -44,7 +42,6 @@ class Index extends \Magento\Framework\View\Element\Template
         $this->_chatbotAPI = $chatbotAPI;
         $this->_messageModel = $message;
         $this->_objectManager = $objectManager;
-        $this->_queueProcessor = $queueProcessor;
 //        $this->_cronWorker = $cronWorker;
         parent::__construct($context);
     }
