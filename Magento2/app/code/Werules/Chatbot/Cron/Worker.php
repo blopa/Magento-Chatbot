@@ -60,19 +60,10 @@ class Worker
                     ->addFieldToFilter('status', array('eq' => '0'));
         foreach($messageCollection as $message) {
             //$this->_logger->addInfo(var_export($m->getContent(), true));
-            $direction = $message->getDirection();
-            if ($direction == 0)
-            {
-                $message->setStatus(1); // processing
-                $message->save();
-                $message->processIncomingMessage();
-            }
-            else if ($direction == 1)
-            {
-                $message->setStatus(1); // processing
-                $message->save();
-                $message->processOutgoingMessage();
-            }
+
+            $message->setStatus(1); // processing
+            $message->save();
+            $message->processMessage();
         }
         $this->_logger->addInfo("Cronjob Worker is executed.");
     }

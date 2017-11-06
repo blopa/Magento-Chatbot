@@ -201,14 +201,14 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     }
 
     // custom methods
-    public function requestHandler($api_name)
-    {
-        $this->initChatbotAPI($this->_messenger_name, 'needed_TODO');
-//        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
-//        $logger->debug('something');
-        $this->logger($this->_apiModel);
-        return 'hello world';//array('status' => 'success');
-    }
+//    public function requestHandler($api_name)
+//    {
+//        $this->initChatbotAPI($this->_messenger_name, 'needed_TODO');
+////        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
+////        $logger->debug('something');
+//        $this->logger($this->_apiModel);
+//        return 'hello world';//array('status' => 'success');
+//    }
 
     public function logger($message) // TODO find a better way to to this
     {

@@ -187,15 +187,23 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::CHAT_MESSAGE_ID, $chat_message_id);
     }
 
-    public function requestHandler($api_name)
-    {
-        if ($api_name == $this->_messenger_name)
-        {
+//    public function requestHandler($api_name)
+//    {
+//        if ($api_name == $this->_messenger_name)
+//        {
+//
+//        }
+//    }
 
-        }
+    public function processMessage()
+    {
+        if ($this->getDirection() == 0)
+            $this->processIncomingMessage();
+        else //if ($this->getDirection() == 1)
+            $this->processOutgoingMessage();
     }
 
-    public function processIncomingMessage()
+    protected function processIncomingMessage()
     {
         $message = $this;
         // TODO do something
@@ -203,7 +211,7 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         $this->logger("Message Content -> " . $message->getContent());
     }
 
-    public function processOutgoingMessage()
+    protected function processOutgoingMessage()
     {
         $message = $this;
         // TODO do something
