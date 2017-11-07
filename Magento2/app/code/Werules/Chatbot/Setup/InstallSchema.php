@@ -323,6 +323,13 @@ class InstallSchema implements InstallSchemaInterface
             'Updated At'
         );
 
+        $table_werules_chatbot_message->addColumn(
+            'chatbot_type',
+            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            null,
+            [],
+            'Chatbot Type'
+        );
 
         $setup->getConnection()->createTable($table_werules_chatbot_chatbotapi);
 

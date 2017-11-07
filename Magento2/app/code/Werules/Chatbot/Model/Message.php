@@ -187,6 +187,27 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::CHAT_MESSAGE_ID, $chat_message_id);
     }
 
+
+
+    /**
+     * Get chatbot_type
+     * @return string
+     */
+    public function getChatbotType()
+    {
+        return $this->getData(self::CHATBOT_TYPE);
+    }
+
+    /**
+     * Set chatbot_type
+     * @param string $chatbot_type
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setChatbotType($chatbot_type)
+    {
+        return $this->setData(self::CHATBOT_TYPE, $chatbot_type);
+    }
+
 //    public function requestHandler($api_name)
 //    {
 //        if ($api_name == $this->_messenger_name)

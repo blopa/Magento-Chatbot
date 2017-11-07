@@ -24,14 +24,15 @@ namespace Werules\Chatbot\Api\Data;
 interface MessageInterface
 {
 
-    const UPDATED_AT = 'updated_at';
+    const SENDER_ID = 'sender_id';
     const CREATED_AT = 'created_at';
     const MESSAGE_ID = 'message_id';
     const CONTENT = 'content';
     const DIRECTION = 'direction';
     const CHAT_MESSAGE_ID = 'chat_message_id';
+    const CHATBOT_TYPE = 'chatbot_type';
+    const UPDATED_AT = 'updated_at';
     const STATUS = 'status';
-    const SENDER_ID = 'sender_id';
 
 
     /**
@@ -137,4 +138,17 @@ interface MessageInterface
      * @return \Werules\Chatbot\Api\Data\MessageInterface
      */
     public function setChatMessageId($chat_message_id);
+
+    /**
+     * Get chatbot_type
+     * @return string|null
+     */
+    public function getChatbotType();
+
+    /**
+     * Set chatbot_type
+     * @param string $chatbot_type
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setChatbotType($chatbot_type);
 }
