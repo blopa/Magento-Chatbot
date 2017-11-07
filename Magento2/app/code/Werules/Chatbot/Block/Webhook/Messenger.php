@@ -57,17 +57,18 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
     public function requestHandler()
     {
         $messenger = $this->initMessengerAPI('not_needed');
-        $messageObject = new stdClass();
+        $messageObject = new \stdClass();
         $messageObject->senderId = $messenger->ChatID();
         $messageObject->content = $messenger->Text();
-        $messageObject->status = 1;
-        $messageObject->direction = 0;
+        $messageObject->status = $this->_define::PROCESSING;
+        $messageObject->direction = $this->_define::INCOMING;
+        $messageObject->chatType = $this->_define::MESSENGER_INT;
         $messageObject->chatMessageId = $messenger->MessageID();
         $datetime = date('Y-m-d H:i:s');
         $messageObject->createdAt = $datetime;
         $messageObject->updatedAt = $datetime;
 
-        $this->messageHandler($messageObject);
+        $result = $this->messageHandler($messageObject);
 //        $messageModel = $this->_messageModel->create();
 //        $messageModel->setSenderId($messenger->ChatID());
 //        $messageModel->setContent($messenger->Text());
@@ -86,5 +87,6 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 //        $messageModel->processMessage();
 //
 //        return $this->_helper->getJsonSuccessResponse();
+        return $result;
     }
 }

@@ -27,6 +27,7 @@ class Index extends \Magento\Framework\View\Element\Template
     protected $_chatbotAPI;
     protected $_messageModel;
     protected $_objectManager;
+    protected $_define;
 //    protected $_cronWorker;
 
     public function __construct(
@@ -42,6 +43,7 @@ class Index extends \Magento\Framework\View\Element\Template
         $this->_chatbotAPI = $chatbotAPI;
         $this->_messageModel = $message;
         $this->_objectManager = $objectManager;
+        $this->_define = new \Werules\Chatbot\Helper\Define;
 //        $this->_cronWorker = $cronWorker;
         parent::__construct($context);
     }
@@ -51,8 +53,8 @@ class Index extends \Magento\Framework\View\Element\Template
         $messageModel = $this->_messageModel->create();
         $messageModel->setSenderId($messageObject->senderId);
         $messageModel->setContent($messageObject->content);
-        $messageModel->setStatus($messageObject->status); // 0 -> not processed / 1 -> processing / 2 -> processed
-        $messageModel->setDirection($messageObject->direction); // 0 -> incoming / 1 -> outgoing
+        $messageModel->setStatus($messageObject->status);
+        $messageModel->setDirection($messageObject->direction);
         $messageModel->setChatMessageId($messageObject->chatMessageId);
         $messageModel->setCreatedAt($messageObject->createdAt);
         $messageModel->setUpdatedAt($messageObject->updatedAt);
