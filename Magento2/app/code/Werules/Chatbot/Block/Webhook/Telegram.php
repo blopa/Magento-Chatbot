@@ -26,5 +26,7 @@ class Telegram extends \Werules\Chatbot\Block\Webhook\Index
     public function requestHandler()
     {
         // TODO
+        $messageObject = new stdClass();
+        $this->messageHandler($messageObject);
     }
 }

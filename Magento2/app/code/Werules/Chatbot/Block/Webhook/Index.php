@@ -46,9 +46,25 @@ class Index extends \Magento\Framework\View\Element\Template
         parent::__construct($context);
     }
 
-    public function requestHandler()
+    protected function messageHandler($messageObject)
     {
-        // TODO
+        $messageModel = $this->_messageModel->create();
+        $messageModel->setSenderId($messageObject->senderId);
+        $messageModel->setContent($messageObject->content);
+        $messageModel->setStatus($messageObject->status); // 0 -> not processed / 1 -> processing / 2 -> processed
+        $messageModel->setDirection($messageObject->direction); // 0 -> incoming / 1 -> outgoing
+        $messageModel->setChatMessageId($messageObject->chatMessageId);
+        $messageModel->setCreatedAt($messageObject->createdAt);
+        $messageModel->setUpdatedAt($messageObject->updatedAt);
+
+        try {
+            $messageModel->save();
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            return $this->_helper->getJsonErrorResponse();
+        }
+        $messageModel->processMessage();
+
+        return $this->_helper->getJsonSuccessResponse();
     }
 
     public function getConfigValue($code)
