@@ -46,6 +46,11 @@ class Index extends \Magento\Framework\View\Element\Template
         parent::__construct($context);
     }
 
+    public function requestHandler()
+    {
+        // TODO
+    }
+
     public function getConfigValue($code)
     {
         return $this->_helper->getConfigValue($code);
