@@ -27,6 +27,7 @@ class Index extends \Magento\Framework\View\Element\Template
     protected $_chatbotAPI;
     protected $_messageModel;
     protected $_objectManager;
+    protected $_define;
 //    protected $_cronWorker;
 
     public function __construct(
@@ -42,13 +43,30 @@ class Index extends \Magento\Framework\View\Element\Template
         $this->_chatbotAPI = $chatbotAPI;
         $this->_messageModel = $message;
         $this->_objectManager = $objectManager;
+        $this->_define = new \Werules\Chatbot\Helper\Define;
 //        $this->_cronWorker = $cronWorker;
         parent::__construct($context);
     }
 
-    public function requestHandler()
+    protected function messageHandler($messageObject)
     {
-        // TODO
+        $messageModel = $this->_messageModel->create();
+        $messageModel->setSenderId($messageObject->senderId);
+        $messageModel->setContent($messageObject->content);
+        $messageModel->setStatus($messageObject->status);
+        $messageModel->setDirection($messageObject->direction);
+        $messageModel->setChatMessageId($messageObject->chatMessageId);
+        $messageModel->setCreatedAt($messageObject->createdAt);
+        $messageModel->setUpdatedAt($messageObject->updatedAt);
+
+        try {
+            $messageModel->save();
+        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+            return $this->_helper->getJsonErrorResponse();
+        }
+        $messageModel->processMessage();
+
+        return $this->_helper->getJsonSuccessResponse();
     }
 
     public function getConfigValue($code)

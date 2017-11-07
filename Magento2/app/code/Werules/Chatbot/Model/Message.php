@@ -25,13 +25,13 @@ use Werules\Chatbot\Api\Data\MessageInterface;
 
 class Message extends \Magento\Framework\Model\AbstractModel implements MessageInterface
 {
-    protected $_messenger_name = 'messenger'; // TODO
-    protected $_telegram_name = 'telegram'; // TODO
+    protected $_define;
     /**
      * @return void
      */
     protected function _construct()
     {
+        $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_init('Werules\Chatbot\Model\ResourceModel\Message');
     }
 
@@ -187,9 +187,30 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::CHAT_MESSAGE_ID, $chat_message_id);
     }
 
+
+
+    /**
+     * Get chatbot_type
+     * @return string
+     */
+    public function getChatbotType()
+    {
+        return $this->getData(self::CHATBOT_TYPE);
+    }
+
+    /**
+     * Set chatbot_type
+     * @param string $chatbot_type
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setChatbotType($chatbot_type)
+    {
+        return $this->setData(self::CHATBOT_TYPE, $chatbot_type);
+    }
+
 //    public function requestHandler($api_name)
 //    {
-//        if ($api_name == $this->_messenger_name)
+//        if ($api_name == $this->_define::MESSENGER_INT)
 //        {
 //
 //        }

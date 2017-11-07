@@ -27,14 +27,14 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 {
     protected $_apiModel;
     protected $_objectManager;
-    protected $_messenger_name = 'messenger'; // TODO
-    protected $_telegram_name = 'telegram'; // TODO
+    protected $_define;
     /**
      * @return void
      */
     protected function _construct()
     {
         $this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // TODO find a better way to to this
+        $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_init('Werules\Chatbot\Model\ResourceModel\ChatbotAPI');
     }
 
@@ -194,7 +194,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         $this->setChatbotType($chatbot_type);
 
-        if ($chatbot_type == $this->_messenger_name)
+        if ($chatbot_type == $this->_define::MESSENGER_INT)
         {
             $this->_apiModel = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $api_token)); // TODO find a better way to to this
         }
@@ -203,7 +203,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     // custom methods
 //    public function requestHandler($api_name)
 //    {
-//        $this->initChatbotAPI($this->_messenger_name, 'needed_TODO');
+//        $this->initChatbotAPI($this->_define::MESSENGER_INT, 'needed_TODO');
 ////        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
 ////        $logger->debug('something');
 //        $this->logger($this->_apiModel);

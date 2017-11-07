@@ -57,23 +57,36 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
     public function requestHandler()
     {
         $messenger = $this->initMessengerAPI('not_needed');
-        $messageModel = $this->_messageModel->create();
-        $messageModel->setSenderId($messenger->ChatID());
-        $messageModel->setContent($messenger->Text());
-        $messageModel->setStatus(1); // 0 -> not processed / 1 -> processing / 2 -> processed
-        $messageModel->setDirection(0); // 0 -> incoming / 1 -> outgoing
-        $messageModel->setChatMessageId($messenger->MessageID());
+        $messageObject = new \stdClass();
+        $messageObject->senderId = $messenger->ChatID();
+        $messageObject->content = $messenger->Text();
+        $messageObject->status = $this->_define::PROCESSING;
+        $messageObject->direction = $this->_define::INCOMING;
+        $messageObject->chatType = $this->_define::MESSENGER_INT;
+        $messageObject->chatMessageId = $messenger->MessageID();
         $datetime = date('Y-m-d H:i:s');
-        $messageModel->setCreatedAt($datetime);
-        $messageModel->setUpdatedAt($datetime);
+        $messageObject->createdAt = $datetime;
+        $messageObject->updatedAt = $datetime;
 
-        try {
-            $messageModel->save();
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
-            return $this->_helper->getJsonErrorResponse();
-        }
-        $messageModel->processMessage();
+        $result = $this->messageHandler($messageObject);
+//        $messageModel = $this->_messageModel->create();
+//        $messageModel->setSenderId($messenger->ChatID());
+//        $messageModel->setContent($messenger->Text());
+//        $messageModel->setStatus(1); // 0 -> not processed / 1 -> processing / 2 -> processed
+//        $messageModel->setDirection(0); // 0 -> incoming / 1 -> outgoing
+//        $messageModel->setChatMessageId($messenger->MessageID());
+//        $datetime = date('Y-m-d H:i:s');
+//        $messageModel->setCreatedAt($datetime);
+//        $messageModel->setUpdatedAt($datetime);
 
-        return $this->_helper->getJsonSuccessResponse();
+//        try {
+//            $messageModel->save();
+//        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+//            return $this->_helper->getJsonErrorResponse();
+//        }
+//        $messageModel->processMessage();
+//
+//        return $this->_helper->getJsonSuccessResponse();
+        return $result;
     }
 }
