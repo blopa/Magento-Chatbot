@@ -25,7 +25,8 @@ use Werules\Chatbot\Api\Data\MessageInterface;
 
 class Message extends \Magento\Framework\Model\AbstractModel implements MessageInterface
 {
-
+    protected $_messenger_name = 'messenger'; // TODO
+    protected $_telegram_name = 'telegram'; // TODO
     /**
      * @return void
      */
@@ -184,5 +185,45 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
     public function setChatMessageId($chat_message_id)
     {
         return $this->setData(self::CHAT_MESSAGE_ID, $chat_message_id);
+    }
+
+//    public function requestHandler($api_name)
+//    {
+//        if ($api_name == $this->_messenger_name)
+//        {
+//
+//        }
+//    }
+
+    public function processMessage()
+    {
+        if ($this->getDirection() == 0)
+            $this->processIncomingMessage();
+        else //if ($this->getDirection() == 1)
+            $this->processOutgoingMessage();
+    }
+
+    protected function processIncomingMessage()
+    {
+        $message = $this;
+        // TODO do something
+        $this->logger("Message ID -> " . $message->getMessageId());
+        $this->logger("Message Content -> " . $message->getContent());
+    }
+
+    protected function processOutgoingMessage()
+    {
+        $message = $this;
+        // TODO do something
+        $this->logger("Message ID -> " . $message->getMessageId());
+        $this->logger("Message Content -> " . $message->getContent());
+    }
+
+    public function logger($message) // TODO find a better way to to this
+    {
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info(var_export($message, true));
     }
 }

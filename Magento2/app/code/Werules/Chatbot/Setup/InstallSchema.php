@@ -225,6 +225,16 @@ class InstallSchema implements InstallSchemaInterface
         $table_werules_chatbot_chatbotapi = $setup->getConnection()->newTable($setup->getTable('werules_chatbot_chatbotapi'));
 
 
+// TODO uncomment this
+//        $table_werules_chatbot_chatbotapi->addForeignKey(
+//            $installer->getFkName('werules_chatbot_chatbotapi', 'chatbotuser_id', 'werules_chatbot_chatbotuser', 'chatbotuser_id'),
+//            'chatbotuser_id',
+//            $installer->getTable('werules_chatbot_chatbotuser'),
+//            'chatbotuser_id',
+//            \Magento\Framework\DB\Ddl\Table::ACTION_CASCADE
+//        );
+
+
         $table_werules_chatbot_chatbotapi->addColumn(
             'chatbotapi_id',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,

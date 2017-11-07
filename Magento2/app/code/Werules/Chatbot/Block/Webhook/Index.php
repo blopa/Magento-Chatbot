@@ -25,25 +25,34 @@ class Index extends \Magento\Framework\View\Element\Template
 {
     protected $_helper;
     protected $_chatbotAPI;
+    protected $_messageModel;
+    protected $_objectManager;
+//    protected $_cronWorker;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Werules\Chatbot\Helper\Data $helperData,
-        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI
+        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
+        \Werules\Chatbot\Model\MessageFactory $message
+//        \Werules\Chatbot\Cron\Worker $cronWorker
     )
     {
         $this->_helper = $helperData;
         $this->_chatbotAPI = $chatbotAPI;
+        $this->_messageModel = $message;
+        $this->_objectManager = $objectManager;
+//        $this->_cronWorker = $cronWorker;
         parent::__construct($context);
+    }
+
+    public function requestHandler()
+    {
+        // TODO
     }
 
     public function getConfigValue($code)
     {
         return $this->_helper->getConfigValue($code);
-    }
-
-    public function requestHandler($api_name)
-    {
-        return $this->_chatbotAPI->requestHandler($api_name);
     }
 }

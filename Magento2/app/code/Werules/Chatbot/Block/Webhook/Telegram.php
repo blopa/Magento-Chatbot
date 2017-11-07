@@ -23,5 +23,8 @@ namespace Werules\Chatbot\Block\Webhook;
 
 class Telegram extends \Werules\Chatbot\Block\Webhook\Index
 {
-
+    public function requestHandler()
+    {
+        // TODO
+    }
 }

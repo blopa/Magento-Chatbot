@@ -22,13 +22,13 @@
 namespace Werules\Chatbot\Model;
 
 use Werules\Chatbot\Api\Data\ChatbotAPIInterface;
-const MESSENGER = 'messenger';
-const TELEGRAM = 'telegram';
 
 class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements ChatbotAPIInterface
 {
     protected $_apiModel;
     protected $_objectManager;
+    protected $_messenger_name = 'messenger'; // TODO
+    protected $_telegram_name = 'telegram'; // TODO
     /**
      * @return void
      */
@@ -194,28 +194,21 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         $this->setChatbotType($chatbot_type);
 
-        if ($chatbot_type == MESSENGER)
+        if ($chatbot_type == $this->_messenger_name)
         {
             $this->_apiModel = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $api_token)); // TODO find a better way to to this
         }
     }
 
     // custom methods
-    public function requestHandler($api_name)
-    {
-        $this->initChatbotAPI(MESSENGER, 'needed_TODO');
-//        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
-//        $logger->debug('something');
-        $this->logger($this->_apiModel);
-        return 'hello world';//array('status' => 'success');
-    }
-
-    public function getVerificationHub($hub_token)
-    {
-        $this->initChatbotAPI(MESSENGER, 'not_needed');
-        $result = $this->_apiModel->verifyWebhook($hub_token);
-        return $result;
-    }
+//    public function requestHandler($api_name)
+//    {
+//        $this->initChatbotAPI($this->_messenger_name, 'needed_TODO');
+////        $logger = $this->_objectManager->get('Psr\Log\LoggerInterface'); // TODO why isn't this working?
+////        $logger->debug('something');
+//        $this->logger($this->_apiModel);
+//        return 'hello world';//array('status' => 'success');
+//    }
 
     public function logger($message) // TODO find a better way to to this
     {

@@ -51,6 +51,27 @@ class Data extends AbstractHelper
         );
     }
 
+    protected function getJsonResponse($success)
+    {
+        header_remove('Content-Type'); // TODO
+        header('Content-Type: application/json'); // TODO
+        if ($success)
+            $arr = array("status" => "success", "success" => true);
+        else
+            $arr = array("status" => "error", "success" => false);
+        return json_encode($arr);
+    }
+
+    public function getJsonSuccessResponse()
+    {
+        return $this->getJsonResponse(true);
+    }
+
+    public function getJsonErrorResponse()
+    {
+        return $this->getJsonResponse(false);
+    }
+
 //    public function getConfig($code, $storeId = null)
 //    {
 //        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);

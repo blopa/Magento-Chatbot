@@ -24,16 +24,21 @@ namespace Werules\Chatbot\Cron;
 class Worker
 {
 
-    protected $logger;
+    protected $_logger;
+    protected $_messageModel;
 
     /**
      * Constructor
      *
      * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(\Psr\Log\LoggerInterface $logger)
+    public function __construct(
+        \Psr\Log\LoggerInterface $logger,
+        \Werules\Chatbot\Model\Message $message
+    )
     {
-        $this->logger = $logger;
+        $this->_logger = $logger;
+        $this->_messageModel = $message;
     }
 
     /**
@@ -43,14 +48,23 @@ class Worker
      */
     public function execute()
     {
-//        if (shell_exec('ps aux | grep ' . __FILE__ . ' | wc  -l') > 1) {
-//            exit('already running...');
+//        $lock = fopen('werules_chatbot_cron_lock', 'w') or die ('Cannot create lock file');
+//        if (flock($lock, LOCK_EX | LOCK_NB)) {
+//            while (true)
+//            {
+//                $messageCollection = $this->_messageModel->getCollection()
+//                    ->addFieldToFilter('status', array('eq' => '0'));
+//            }
 //        }
-//        OR
-//        $f = fopen('lock', 'w') or die ('Cannot create lock file');
-//        if (flock($f, LOCK_EX | LOCK_NB)) {
-//            // yay
-//        }
-        $this->logger->addInfo("Cronjob Worker is executed.");
+        $messageCollection = $this->_messageModel->getCollection()
+                    ->addFieldToFilter('status', array('eq' => '0'));
+        foreach($messageCollection as $message) {
+            //$this->_logger->addInfo(var_export($m->getContent(), true));
+
+            $message->setStatus(1); // processing
+            $message->save();
+            $message->processMessage();
+        }
+        $this->_logger->addInfo("Cronjob Worker is executed.");
     }
 }
