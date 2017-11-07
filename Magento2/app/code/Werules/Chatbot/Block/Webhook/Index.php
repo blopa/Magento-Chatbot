@@ -64,7 +64,7 @@ class Index extends \Magento\Framework\View\Element\Template
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
             return $this->_helper->getJsonErrorResponse();
         }
-        $messageModel->processMessage();
+        $this->_helper->processMessage($messageModel->getMessageId());
 
         return $this->_helper->getJsonSuccessResponse();
     }

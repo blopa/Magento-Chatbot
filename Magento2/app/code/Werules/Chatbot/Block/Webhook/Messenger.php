@@ -84,7 +84,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 //        } catch (\Magento\Framework\Exception\LocalizedException $e) {
 //            return $this->_helper->getJsonErrorResponse();
 //        }
-//        $messageModel->processMessage();
+//        $this->_helper->processMessage($messageModel->getMessageId());
 //
 //        return $this->_helper->getJsonSuccessResponse();
         return $result;

@@ -31,16 +31,21 @@ class Data extends AbstractHelper
 {
     protected $storeManager;
     protected $objectManager;
+    protected $_messageModel;
+    protected $_chatbotAPI;
 
-    //const XML_PATH_CHATBOT = 'werules_chatbot_general/';
-
-    public function __construct(Context $context,
+    public function __construct(
+        Context $context,
         ObjectManagerInterface $objectManager,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
+        \Werules\Chatbot\Model\MessageFactory $message
     )
     {
         $this->objectManager = $objectManager;
         $this->storeManager  = $storeManager;
+        $this->_messageModel  = $message;
+        $this->_chatbotAPI  = $chatbotAPI;
         parent::__construct($context);
     }
 
@@ -49,6 +54,14 @@ class Data extends AbstractHelper
         return $this->scopeConfig->getValue(
             $field, ScopeInterface::SCOPE_STORE, $storeId
         );
+    }
+
+    public function logger($message) // TODO find a better way to to this
+    {
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info(var_export($message, true));
     }
 
     protected function getJsonResponse($success)
@@ -70,6 +83,30 @@ class Data extends AbstractHelper
     public function getJsonErrorResponse()
     {
         return $this->getJsonResponse(false);
+    }
+
+    public function processMessage($message_id)
+    {
+        $message = $this->_messageModel->create();
+        $message->load($message_id);
+        if ($message->getDirection() == 0)
+            $this->processIncomingMessage($message);
+        else //if ($message->getDirection() == 1)
+            $this->processOutgoingMessage($message);
+    }
+
+    private function processIncomingMessage($message)
+    {
+        // TODO do something
+        $this->logger("Message ID -> " . $message->getMessageId());
+        $this->logger("Message Content -> " . $message->getContent());
+    }
+
+    private function processOutgoingMessage($message)
+    {
+        // TODO do something
+        $this->logger("Message ID -> " . $message->getMessageId());
+        $this->logger("Message Content -> " . $message->getContent());
     }
 
 //    public function getConfig($code, $storeId = null)
