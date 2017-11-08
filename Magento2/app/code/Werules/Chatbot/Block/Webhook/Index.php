@@ -53,6 +53,7 @@ class Index extends \Magento\Framework\View\Element\Template
         $messageModel = $this->_messageModel->create();
         $messageModel->setSenderId($messageObject->senderId);
         $messageModel->setContent($messageObject->content);
+        $messageModel->setContentType($this->_define::CONTENT_TEXT); // TODO
         $messageModel->setStatus($messageObject->status);
         $messageModel->setDirection($messageObject->direction);
         $messageModel->setChatMessageId($messageObject->chatMessageId);

@@ -141,6 +141,7 @@ class Data extends AbstractHelper
         $outgoingMessage = $this->_messageModel->create();
         $outgoingMessage->setSenderId($incomingMessage->getSenderId());
         $outgoingMessage->setContent($message);
+        $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
         $outgoingMessage->setStatus($this->_define::NOT_PROCESSED);
         $outgoingMessage->setDirection($this->_define::OUTGOING);
         $outgoingMessage->setChatMessageId($incomingMessage->getChatMessageId());
