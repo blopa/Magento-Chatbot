@@ -37,14 +37,9 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 //        $this->_messenger = $messenger;
 //    }
 
-    public function initMessengerAPI($bot_token)
-    {
-        return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this
-    }
-
     public function getVerificationHub($hub_token)
     {
-        $messenger = $this->initMessengerAPI('not_needed');
+        $messenger = $this->_chatbotAPI->initMessengerAPI('not_needed');
 //        $messenger = $this->_messenger->create(array('bot_token' => 'not_needed'));
         $result = $messenger->verifyWebhook($hub_token);
 
@@ -56,7 +51,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 
     public function requestHandler()
     {
-        $messenger = $this->initMessengerAPI('not_needed');
+        $messenger = $this->_chatbotAPI->initMessengerAPI('not_needed');
         $messageObject = new \stdClass();
         $messageObject->senderId = $messenger->ChatID();
         $messageObject->content = $messenger->Text();

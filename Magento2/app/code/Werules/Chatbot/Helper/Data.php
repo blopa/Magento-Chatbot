@@ -122,17 +122,44 @@ class Data extends AbstractHelper
 
         $this->logger("Message ID -> " . $message->getMessageId());
         $this->logger("Message Content -> " . $message->getContent());
-        $this->logger("ChatbotAPI Type -> " . $chatbotAPI->getChatbotType());
+        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
+
+        $this->prepareOutgoingMessage($message, $chatbotAPI);
+    }
+
+    private function prepareOutgoingMessage($incomingMessage, $chatbotAPI)
+    {
+        if ($incomingMessage->getContent() == 'foobar')
+        {
+            $message = 'eggs and spam';
+        }
+        else
+        {
+            $message = 'hello :D';
+        }
+
+        $outgoingMessage = $this->_messageModel->create();
+        $outgoingMessage->setSenderId($incomingMessage->getSenderId());
+        $outgoingMessage->setContent($message);
+        $outgoingMessage->setStatus($this->_define::NOT_PROCESSED);
+        $outgoingMessage->setDirection($this->_define::OUTGOING);
+        $outgoingMessage->setChatMessageId($incomingMessage->getChatMessageId());
+        $outgoingMessage->setChatbotType($incomingMessage->getChatbotType());
+        $datetime = date('Y-m-d H:i:s');
+        $outgoingMessage->setCreatedAt($datetime);
+        $outgoingMessage->setUpdatedAt($datetime);
+        $outgoingMessage->save();
+
+        $this->processOutgoingMessage($outgoingMessage);
     }
 
     private function processOutgoingMessage($message)
     {
-        // TODO do something
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+//        $chatbotAPI = $this->_chatbotAPI->create();
+//        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
 
-        $this->logger("Message ID -> " . $message->getMessageId());
-        $this->logger("Message Content -> " . $message->getContent());
+        $this->logger("Outgoing Message ID -> " . $message->getMessageId());
+        $this->logger("Outgoing Message Content -> " . $message->getContent());
     }
 
 //    public function getConfig($code, $storeId = null)
