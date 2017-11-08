@@ -105,5 +105,13 @@
 				</item>
 			</argument>
 		</column>
+		<column name="chatbotuser_id">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">ChatbotUser ID</item>
+				</item>
+			</argument>
+		</column>
 	</columns>
 </listing>

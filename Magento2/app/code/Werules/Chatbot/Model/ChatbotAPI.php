@@ -190,6 +190,25 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->setData(self::UPDATED_AT, $updated_at);
     }
 
+    /**
+     * Get chatbotuser_id
+     * @return string
+     */
+    public function getChatbotuserId()
+    {
+        return $this->getData(self::CHATBOTUSER_ID);
+    }
+
+    /**
+     * Set chatbotuser_id
+     * @param string $chatbotuser_id
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setChatbotuserId($chatbotuser_id)
+    {
+        return $this->setData(self::CHATBOTUSER_ID, $chatbotuser_id);
+    }
+
     public function initMessengerAPI($bot_token) // TODO TODO TODO
     {
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this

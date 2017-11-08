@@ -25,14 +25,16 @@ interface MessageInterface
 {
 
     const SENDER_ID = 'sender_id';
+    const UPDATED_AT = 'updated_at';
     const CREATED_AT = 'created_at';
     const MESSAGE_ID = 'message_id';
     const CONTENT = 'content';
+    const CONTENT_TYPE = 'content_type';
     const DIRECTION = 'direction';
     const CHAT_MESSAGE_ID = 'chat_message_id';
     const CHATBOT_TYPE = 'chatbot_type';
-    const UPDATED_AT = 'updated_at';
     const STATUS = 'status';
+    const CHATBOTAPI_ID = 'chatbotapi_id';
 
 
     /**
@@ -151,4 +153,30 @@ interface MessageInterface
      * @return \Werules\Chatbot\Api\Data\MessageInterface
      */
     public function setChatbotType($chatbot_type);
+
+    /**
+     * Get chatbotapi_id
+     * @return string|null
+     */
+    public function getChatbotapiId();
+
+    /**
+     * Set chatbotapi_id
+     * @param string $chatbotapi_id
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setChatbotapiId($chatbotapi_id);
+
+    /**
+     * Get content_type
+     * @return string|null
+     */
+    public function getContentType();
+
+    /**
+     * Set content_type
+     * @param string $content_type
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setContentType($content_type);
 }
