@@ -33,12 +33,13 @@ class Data extends AbstractHelper
     protected $objectManager;
     protected $_messageModel;
     protected $_chatbotAPI;
+    protected $_define;
 
     public function __construct(
         Context $context,
         ObjectManagerInterface $objectManager,
         StoreManagerInterface $storeManager,
-        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
+        \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message
     )
     {
@@ -46,6 +47,7 @@ class Data extends AbstractHelper
         $this->storeManager  = $storeManager;
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
+        $this->_define = new \Werules\Chatbot\Helper\Define;
         parent::__construct($context);
     }
 
@@ -89,24 +91,76 @@ class Data extends AbstractHelper
     {
         $message = $this->_messageModel->create();
         $message->load($message_id);
-        if ($message->getDirection() == 0)
-            $this->processIncomingMessage($message);
-        else //if ($message->getDirection() == 1)
-            $this->processOutgoingMessage($message);
+
+        if ($message->getMessageId())
+        {
+            if ($message->getDirection() == 0)
+                $this->processIncomingMessage($message);
+            else //if ($message->getDirection() == 1)
+                $this->processOutgoingMessage($message);
+        }
     }
 
     private function processIncomingMessage($message)
     {
         // TODO do something
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+
+        if (!($chatbotAPI->getChatbotapiId()))
+        {
+            $chatbotAPI->setEnabled($this->_define::DISABLED);
+            $chatbotAPI->setChatbotType($this->_define::MESSENGER_INT);
+            $chatbotAPI->setChatId($message->getSenderId());
+            $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
+            $chatbotAPI->setFallbackQty(0);
+            $datetime = date('Y-m-d H:i:s');
+            $chatbotAPI->setCreatedAt($datetime);
+            $chatbotAPI->setUpdatedAt($datetime);
+            $chatbotAPI->save();
+        }
+
         $this->logger("Message ID -> " . $message->getMessageId());
         $this->logger("Message Content -> " . $message->getContent());
+        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
+
+        $this->prepareOutgoingMessage($message, $chatbotAPI);
+    }
+
+    private function prepareOutgoingMessage($incomingMessage, $chatbotAPI)
+    {
+        if ($incomingMessage->getContent() == 'foobar')
+        {
+            $message = 'eggs and spam';
+        }
+        else
+        {
+            $message = 'hello :D';
+        }
+
+        $outgoingMessage = $this->_messageModel->create();
+        $outgoingMessage->setSenderId($incomingMessage->getSenderId());
+        $outgoingMessage->setContent($message);
+        $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
+        $outgoingMessage->setStatus($this->_define::NOT_PROCESSED);
+        $outgoingMessage->setDirection($this->_define::OUTGOING);
+        $outgoingMessage->setChatMessageId($incomingMessage->getChatMessageId());
+        $outgoingMessage->setChatbotType($incomingMessage->getChatbotType());
+        $datetime = date('Y-m-d H:i:s');
+        $outgoingMessage->setCreatedAt($datetime);
+        $outgoingMessage->setUpdatedAt($datetime);
+        $outgoingMessage->save();
+
+        $this->processOutgoingMessage($outgoingMessage);
     }
 
     private function processOutgoingMessage($message)
     {
-        // TODO do something
-        $this->logger("Message ID -> " . $message->getMessageId());
-        $this->logger("Message Content -> " . $message->getContent());
+//        $chatbotAPI = $this->_chatbotAPI->create();
+//        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+
+        $this->logger("Outgoing Message ID -> " . $message->getMessageId());
+        $this->logger("Outgoing Message Content -> " . $message->getContent());
     }
 
 //    public function getConfig($code, $storeId = null)

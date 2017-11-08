@@ -31,4 +31,8 @@ class Define
     const PROCESSED = 2;
     const INCOMING = 0;
     const OUTGOING = 1;
+    const DISABLED = 0;
+    const ENABLED = 1;
+    const CONVERSATION_STARTED = 0;
+    const CONTENT_TEXT = 0;
 }

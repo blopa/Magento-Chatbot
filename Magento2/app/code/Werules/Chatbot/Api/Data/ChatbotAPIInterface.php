@@ -27,6 +27,7 @@ interface ChatbotAPIInterface
     const FALLBACK_QTY = 'fallback_qty';
     const CHAT_ID = 'chat_id';
     const CREATED_AT = 'created_at';
+    const CHATBOTUSER_ID = 'chatbotuser_id';
     const ENABLED = 'enabled';
     const CONVERSATION_STATE = 'conversation_state';
     const CHATBOT_TYPE = 'chatbot_type';
@@ -137,4 +138,17 @@ interface ChatbotAPIInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setUpdatedAt($updated_at);
+
+    /**
+     * Get chatbotuser_id
+     * @return string|null
+     */
+    public function getChatbotuserId();
+
+    /**
+     * Set chatbotuser_id
+     * @param string $chatbotuser_id
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setChatbotuserId($chatbotuser_id);
 }

@@ -190,14 +190,28 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->setData(self::UPDATED_AT, $updated_at);
     }
 
-    public function initChatbotAPI($chatbot_type, $api_token)
+    /**
+     * Get chatbotuser_id
+     * @return string
+     */
+    public function getChatbotuserId()
     {
-        $this->setChatbotType($chatbot_type);
+        return $this->getData(self::CHATBOTUSER_ID);
+    }
 
-        if ($chatbot_type == $this->_define::MESSENGER_INT)
-        {
-            $this->_apiModel = $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $api_token)); // TODO find a better way to to this
-        }
+    /**
+     * Set chatbotuser_id
+     * @param string $chatbotuser_id
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setChatbotuserId($chatbotuser_id)
+    {
+        return $this->setData(self::CHATBOTUSER_ID, $chatbotuser_id);
+    }
+
+    public function initMessengerAPI($bot_token) // TODO TODO TODO
+    {
+        return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this
     }
 
     // custom methods
@@ -208,6 +222,16 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 ////        $logger->debug('something');
 //        $this->logger($this->_apiModel);
 //        return 'hello world';//array('status' => 'success');
+//    }
+
+//    public function initChatbotAPI($chatbot_type, $api_token)
+//    {
+//        $this->setChatbotType($chatbot_type);
+//
+//        if ($chatbot_type == $this->_define::MESSENGER_INT)
+//        {
+//            $this->_apiModel = $this->initMessengerAPI('not_needed');
+//        }
 //    }
 
     public function logger($message) // TODO find a better way to to this

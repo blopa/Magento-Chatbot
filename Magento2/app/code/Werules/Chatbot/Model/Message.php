@@ -187,8 +187,6 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::CHAT_MESSAGE_ID, $chat_message_id);
     }
 
-
-
     /**
      * Get chatbot_type
      * @return string
@@ -206,6 +204,44 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
     public function setChatbotType($chatbot_type)
     {
         return $this->setData(self::CHATBOT_TYPE, $chatbot_type);
+    }
+
+    /**
+     * Get chatbotapi_id
+     * @return string
+     */
+    public function getChatbotapiId()
+    {
+        return $this->getData(self::CHATBOTAPI_ID);
+    }
+
+    /**
+     * Set chatbotapi_id
+     * @param string $chatbotapi_id
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setChatbotapiId($chatbotapi_id)
+    {
+        return $this->setData(self::CHATBOTAPI_ID, $chatbotapi_id);
+    }
+
+    /**
+     * Get content_type
+     * @return string
+     */
+    public function getContentType()
+    {
+        return $this->getData(self::CONTENT_TYPE);
+    }
+
+    /**
+     * Set content_type
+     * @param string $content_type
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setContentType($content_type)
+    {
+        return $this->setData(self::CONTENT_TYPE, $content_type);
     }
 
 //    public function requestHandler($api_name)
