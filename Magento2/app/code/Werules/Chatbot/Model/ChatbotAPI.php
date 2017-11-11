@@ -28,6 +28,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     protected $_apiModel;
     protected $_objectManager;
     protected $_define;
+    protected $_helper;
     /**
      * @return void
      */
@@ -35,6 +36,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         $this->_objectManager = \Magento\Framework\App\ObjectManager::getInstance(); // TODO find a better way to to this
         $this->_define = new \Werules\Chatbot\Helper\Define;
+         $this->_helper = $this->_objectManager->create('Werules\Chatbot\Helper\Data'); // TODO find a better way to to this
+        // $this->_helper = new \Werules\Chatbot\Helper\Data;
         $this->_init('Werules\Chatbot\Model\ResourceModel\ChatbotAPI');
     }
 
@@ -230,15 +233,20 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 //
 //        if ($chatbot_type == $this->_define::MESSENGER_INT)
 //        {
-//            $this->_apiModel = $this->initMessengerAPI('not_needed');
+//            $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+//            $this->_apiModel = $this->initMessengerAPI($api_token);
 //        }
 //    }
 
-    public function logger($message) // TODO find a better way to to this
+    public function sendMessage($message)
     {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info(var_export($message, true));
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        {
+            $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+            $this->_apiModel = $this->initMessengerAPI($api_token);
+            $this->_apiModel->sendMessage($message->getSenderId(), $message->getContent());
+        }
+
+        return true;
     }
 }

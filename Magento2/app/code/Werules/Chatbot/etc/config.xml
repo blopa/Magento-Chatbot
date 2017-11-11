@@ -19,14 +19,16 @@
 				<enable_messenger_box>0</enable_messenger_box>
 				<messenger_box_width>200</messenger_box_width>
 				<enable_referral>0</enable_referral>
-				<referral_message/>
+				<referral_message>Hello :D</referral_message>
 				<support_group/>
 				<welcome_message>Welcome :D</welcome_message>
 				<enable_message_options>0</enable_message_options>
 				<message_options/>
 				<help_message>SOS!</help_message>
 				<enable_help_command_list>0</enable_help_command_list>
-				<commands_list/>
+				<commands_list> <!-- thanks to https://duzun.me/playground/serialize and https://stackoverflow.com/questions/14297926/structure-of-a-serialized-php-string -->
+					a:16:{s:18:"_1510428167773_773";a:4:{s:10:"command_id";s:1:"2";s:14:"enable_command";s:1:"1";s:12:"command_code";s:6:"Search";s:18:"command_alias_list";s:0:"";}s:18:"_1510428168781_781";a:4:{s:10:"command_id";s:1:"3";s:14:"enable_command";s:1:"1";s:12:"command_code";s:5:"Login";s:18:"command_alias_list";s:0:"";}s:17:"_1510428170069_69";a:4:{s:10:"command_id";s:1:"4";s:14:"enable_command";s:1:"1";s:12:"command_code";s:11:"List Orders";s:18:"command_alias_list";s:0:"";}s:18:"_1510428170781_781";a:4:{s:10:"command_id";s:1:"5";s:14:"enable_command";s:1:"1";s:12:"command_code";s:7:"Reorder";s:18:"command_alias_list";s:0:"";}s:18:"_1510428171332_332";a:4:{s:10:"command_id";s:1:"6";s:14:"enable_command";s:1:"1";s:12:"command_code";s:11:"Add to Cart";s:18:"command_alias_list";s:0:"";}s:18:"_1510428171828_828";a:4:{s:10:"command_id";s:1:"7";s:14:"enable_command";s:1:"1";s:12:"command_code";s:8:"Checkout";s:18:"command_alias_list";s:0:"";}s:18:"_1510428172317_317";a:4:{s:10:"command_id";s:1:"8";s:14:"enable_command";s:1:"1";s:12:"command_code";s:10:"Clear Cart";s:18:"command_alias_list";s:0:"";}s:18:"_1510428172909_909";a:4:{s:10:"command_id";s:1:"9";s:14:"enable_command";s:1:"1";s:12:"command_code";s:11:"Track Order";s:18:"command_alias_list";s:0:"";}s:18:"_1510428173452_452";a:4:{s:10:"command_id";s:2:"10";s:14:"enable_command";s:1:"1";s:12:"command_code";s:7:"Support";s:18:"command_alias_list";s:0:"";}s:17:"_1510428174012_12";a:4:{s:10:"command_id";s:2:"11";s:14:"enable_command";s:1:"1";s:12:"command_code";s:10:"Send Email";s:18:"command_alias_list";s:0:"";}s:18:"_1510428174525_525";a:4:{s:10:"command_id";s:2:"12";s:14:"enable_command";s:1:"1";s:12:"command_code";s:6:"Cancel";s:18:"command_alias_list";s:5:"Abort";}s:18:"_1510428175116_116";a:4:{s:10:"command_id";s:2:"13";s:14:"enable_command";s:1:"1";s:12:"command_code";s:4:"Help";s:18:"command_alias_list";s:0:"";}s:18:"_1510428176398_398";a:4:{s:10:"command_id";s:2:"14";s:14:"enable_command";s:1:"1";s:12:"command_code";s:5:"About";s:18:"command_alias_list";s:0:"";}s:18:"_1510428176911_911";a:4:{s:10:"command_id";s:2:"15";s:14:"enable_command";s:1:"1";s:12:"command_code";s:6:"Logout";s:18:"command_alias_list";s:0:"";}s:18:"_1510428177356_356";a:4:{s:10:"command_id";s:2:"16";s:14:"enable_command";s:1:"1";s:12:"command_code";s:8:"Register";s:18:"command_alias_list";s:0:"";}s:18:"_1510428242102_102";a:4:{s:10:"command_id";s:1:"1";s:14:"enable_command";s:1:"1";s:12:"command_code";s:15:"List Categories";s:18:"command_alias_list";s:0:"";}}
+				</commands_list>
 				<enable_default_replies>0</enable_default_replies>
 				<default_replies/>
 				<fallback_message>Sorry, I didn't get that.</fallback_message>

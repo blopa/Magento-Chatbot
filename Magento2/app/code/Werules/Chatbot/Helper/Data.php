@@ -34,16 +34,20 @@ class Data extends AbstractHelper
     protected $_messageModel;
     protected $_chatbotAPI;
     protected $_define;
+    protected $_configPrefix;
+    protected $_serializer;
 
     public function __construct(
         Context $context,
         ObjectManagerInterface $objectManager,
+        \Magento\Framework\Serialize\Serializer\Json $serializer,
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message
     )
     {
         $this->objectManager = $objectManager;
+        $this->_serializer = $serializer;
         $this->storeManager  = $storeManager;
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
@@ -110,7 +114,7 @@ class Data extends AbstractHelper
         if (!($chatbotAPI->getChatbotapiId()))
         {
             $chatbotAPI->setEnabled($this->_define::DISABLED);
-            $chatbotAPI->setChatbotType($this->_define::MESSENGER_INT);
+            $chatbotAPI->setChatbotType($message->getChatbotType()); // TODO
             $chatbotAPI->setChatId($message->getSenderId());
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setFallbackQty(0);
@@ -124,43 +128,276 @@ class Data extends AbstractHelper
         $this->logger("Message Content -> " . $message->getContent());
         $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
-        $this->prepareOutgoingMessage($message, $chatbotAPI);
+        $this->prepareOutgoingMessage($message);
     }
 
-    private function prepareOutgoingMessage($incomingMessage, $chatbotAPI)
+    private function prepareOutgoingMessage($message)
     {
-        if ($incomingMessage->getContent() == 'foobar')
+        $responseContents = $this->processMessageRequest($message);
+
+        if ($responseContents)
         {
-            $message = 'eggs and spam';
+            foreach ($responseContents as $content)
+            {
+                $outgoingMessage = $this->_messageModel->create();
+                $outgoingMessage->setSenderId($message->getSenderId());
+                $outgoingMessage->setContent($content);
+                $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
+                $outgoingMessage->setStatus($this->_define::PROCESSING);
+                $outgoingMessage->setDirection($this->_define::OUTGOING);
+                $outgoingMessage->setChatMessageId($message->getChatMessageId());
+                $outgoingMessage->setChatbotType($message->getChatbotType());
+                $datetime = date('Y-m-d H:i:s');
+                $outgoingMessage->setCreatedAt($datetime);
+                $outgoingMessage->setUpdatedAt($datetime);
+                $outgoingMessage->save();
+
+                $this->processOutgoingMessage($outgoingMessage->getMessageId());
+            }
+
+            $incomingMessage = $this->_messageModel->create();
+            $incomingMessage->load($message->getMessageId()); // TODO
+            $incomingMessage->setStatus($this->_define::PROCESSED);
+            $datetime = date('Y-m-d H:i:s');
+            $incomingMessage->setUpdatedAt($datetime);
+            $incomingMessage->save();
+
+//        $this->processOutgoingMessage($outgoingMessage);
+        }
+    }
+
+    private function processOutgoingMessage($message_id)
+    {
+        $outgoingMessage = $this->_messageModel->create();
+        $outgoingMessage->load($message_id);
+
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
+        $result = $chatbotAPI->sendMessage($outgoingMessage);
+
+        if ($result)
+        {
+            $outgoingMessage->setStatus($this->_define::PROCESSED);
+            $datetime = date('Y-m-d H:i:s');
+            $outgoingMessage->setUpdatedAt($datetime);
+            $outgoingMessage->save();
+        }
+
+        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
+        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
+    }
+
+    private function processMessageRequest($message)
+    {
+        $this->_configPrefix = 'werules_chatbot_messenger';
+        $messageContent = $message->getContent();
+        $responseContent = array();
+//        if ($messageContent == 'foobar')
+//        {
+//            array_push($content, 'eggs and spam');
+//        }
+//        else if ($messageContent == 'flood')
+//        {
+//            array_push($content, 'so you want a flood?');
+//            array_push($content, 'okay then');
+//            array_push($content, 'here we go');
+//            array_push($content, 'floooooood');
+//            array_push($content, 'flooood');
+//            array_push($content, 'flooood flooood flooood flooood flooood');
+//            array_push($content, 'flood..!');
+//        }
+//        else
+//        {
+//            array_push($content, 'hello :D');
+//        }
+//
+//        return $content;
+
+        $commandResponses = $this->handleCommands($messageContent);
+        if ($commandResponses)
+        {
+            foreach ($commandResponses as $commandResponse)
+            {
+                array_push($responseContent, $commandResponse);
+            }
         }
         else
-        {
-            $message = 'hello :D';
-        }
+            array_push($responseContent, "dunno :/");
 
-        $outgoingMessage = $this->_messageModel->create();
-        $outgoingMessage->setSenderId($incomingMessage->getSenderId());
-        $outgoingMessage->setContent($message);
-        $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
-        $outgoingMessage->setStatus($this->_define::NOT_PROCESSED);
-        $outgoingMessage->setDirection($this->_define::OUTGOING);
-        $outgoingMessage->setChatMessageId($incomingMessage->getChatMessageId());
-        $outgoingMessage->setChatbotType($incomingMessage->getChatbotType());
-        $datetime = date('Y-m-d H:i:s');
-        $outgoingMessage->setCreatedAt($datetime);
-        $outgoingMessage->setUpdatedAt($datetime);
-        $outgoingMessage->save();
-
-        $this->processOutgoingMessage($outgoingMessage);
+        return $responseContent;
     }
 
-    private function processOutgoingMessage($message)
+    private function handleCommands($messageContent)
     {
-//        $chatbotAPI = $this->_chatbotAPI->create();
-//        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
+        $this->logger($serializedCommands);
+        $commandsList = $this->_serializer->unserialize($serializedCommands);
+        $result = false;
+        if (is_array($commandsList))
+        {
+            foreach($commandsList as $command)
+            {
+                if ($messageContent == $command['command_code'])
+                {
+                    if ($command['command_id'] == $this->_define::START_COMMAND_ID)
+                        $result = $this->processStartCommand();
+                    else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                        $result = $this->processListCategoriesCommand();
+                    else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
+                        $result = $this->processSearchCommand();
+                    else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
+                        $result = $this->processLoginCommand();
+                    else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
+                        $result = $this->processListOrdersCommand();
+                    else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
+                        $result = $this->processReorderCommand();
+                    else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
+                        $result = $this->processAddToCartCommand();
+                    else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
+                        $result = $this->processCheckoutCommand();
+                    else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
+                        $result = $this->processClearCartCommand();
+                    else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
+                        $result = $this->processTrackOrderCommand();
+                    else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
+                        $result = $this->processSupportCommand();
+                    else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
+                        $result = $this->processSendEmailCommand();
+                    else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
+                        $result = $this->processCancelCommand();
+                    else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
+                        $result = $this->processHelpCommand();
+                    else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
+                        $result = $this->processAboutCommand();
+                    else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
+                        $result = $this->processLogoutCommand();
+                    else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
+                        $result = $this->processRegisterCommand();
+                    break;
+                }
+            }
+        }
 
-        $this->logger("Outgoing Message ID -> " . $message->getMessageId());
-        $this->logger("Outgoing Message Content -> " . $message->getContent());
+        return $result;
+    }
+
+    private function processStartCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the START command!');
+        return $result;
+    }
+
+    private function processListCategoriesCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LIST_CATEGORIES command!');
+        return $result;
+    }
+
+    private function processSearchCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the SEARCH command!');
+        return $result;
+    }
+
+    private function processLoginCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LOGIN command!');
+        return $result;
+    }
+
+    private function processListOrdersCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LIST_ORDERS command!');
+        return $result;
+    }
+
+    private function processReorderCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the REORDER command!');
+        return $result;
+    }
+
+    private function processAddToCartCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the ADD_TO_CART command!');
+        return $result;
+    }
+
+    private function processCheckoutCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the CHECKOUT command!');
+        return $result;
+    }
+
+    private function processClearCartCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the CLEAR_CART command!');
+        return $result;
+    }
+
+    private function processTrackOrderCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the TRACK_ORDER command!');
+        return $result;
+    }
+
+    private function processSupportCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the SUPPORT command!');
+        return $result;
+    }
+
+    private function processSendEmailCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the SEND_EMAIL command!');
+        return $result;
+    }
+
+    private function processCancelCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the CANCEL command!');
+        return $result;
+    }
+
+    private function processHelpCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the HELP command!');
+        return $result;
+    }
+
+    private function processAboutCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the ABOUT command!');
+        return $result;
+    }
+
+    private function processLogoutCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LOGOUT command!');
+        return $result;
+    }
+
+    private function processRegisterCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the REGISTER command!');
+        return $result;
     }
 
 //    public function getConfig($code, $storeId = null)

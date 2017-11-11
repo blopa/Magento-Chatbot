@@ -39,8 +39,8 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 
     public function getVerificationHub($hub_token)
     {
-        $messenger = $this->_chatbotAPI->initMessengerAPI('not_needed');
-//        $messenger = $this->_messenger->create(array('bot_token' => 'not_needed'));
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $messenger = $this->_chatbotAPI->initMessengerAPI($api_token);
         $result = $messenger->verifyWebhook($hub_token);
 
         if ($result)
@@ -51,13 +51,15 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 
     public function requestHandler()
     {
-        $messenger = $this->_chatbotAPI->initMessengerAPI('not_needed');
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $messenger = $this->_chatbotAPI->initMessengerAPI($api_token);
         $messageObject = new \stdClass();
         $messageObject->senderId = $messenger->ChatID();
         $messageObject->content = $messenger->Text();
         $messageObject->status = $this->_define::PROCESSING;
         $messageObject->direction = $this->_define::INCOMING;
-        $messageObject->chatType = $this->_define::MESSENGER_INT;
+        $messageObject->chatType = $this->_define::MESSENGER_INT; // TODO
+        $messageObject->contentType = $this->_define::CONTENT_TEXT; // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
         $datetime = date('Y-m-d H:i:s');
         $messageObject->createdAt = $datetime;

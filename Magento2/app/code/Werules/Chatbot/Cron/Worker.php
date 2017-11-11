@@ -36,16 +36,18 @@ class Worker
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \Werules\Chatbot\Model\Message $message,
-        \Werules\Chatbot\Helper\Data $helperData
+        \Werules\Chatbot\Helper\Data $helperData,
+        \Werules\Chatbot\Helper\Define $define
     )
     {
         $this->_logger = $logger;
         $this->_messageModel = $message;
         $this->_helper = $helperData;
+        $this->_define = $define;
     }
 
     /**
-     * Execute the cron
+     * Process all pending messages that for some reason wasn't processed yet
      *
      * @return void
      */
@@ -59,14 +61,23 @@ class Worker
 //                    ->addFieldToFilter('status', array('eq' => '0'));
 //            }
 //        }
+        $processingLimit = $this->_define::SECONDS_IN_HOUR;
         $messageCollection = $this->_messageModel->getCollection()
-                    ->addFieldToFilter('status', array('eq' => '0'));
-        foreach($messageCollection as $message) {
+            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED));
+        foreach ($messageCollection as $message) {
             //$this->_logger->addInfo(var_export($m->getContent(), true));
-
-            $message->setStatus(1); // processing
-            $message->save();
-            $this->_helper->processMessage($message->getMessageId());
+            $datetime = date('Y-m-d H:i:s');
+            if ($message->getStatus() == $this->_define::NOT_PROCESSED)
+            {
+                $message->setStatus($this->_define::PROCESSING); // processing
+                $message->setUpdatedAt($datetime);
+                $message->save();
+                $this->_helper->processMessage($message->getMessageId());
+            }
+            else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
+            {
+                $this->_helper->processMessage($message->getMessageId());
+            }
         }
         $this->_logger->addInfo("Cronjob Worker is executed.");
     }
