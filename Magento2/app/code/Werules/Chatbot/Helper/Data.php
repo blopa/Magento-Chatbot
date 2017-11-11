@@ -188,7 +188,7 @@ class Data extends AbstractHelper
     {
         $this->_configPrefix = 'werules_chatbot_messenger';
         $messageContent = $message->getContent();
-//        $content = array();
+        $responseContent = array();
 //        if ($messageContent == 'foobar')
 //        {
 //            array_push($content, 'eggs and spam');
@@ -210,13 +210,23 @@ class Data extends AbstractHelper
 //
 //        return $content;
 
-        $this->handleCommands($messageContent);
+        $commandResponses = $this->handleCommands($messageContent);
+        if ($commandResponses)
+        {
+            foreach ($commandResponses as $commandResponse)
+            {
+                array_push($responseContent, $commandResponse);
+            }
+        }
+
+        return $responseContent;
     }
 
     private function handleCommands($messageContent)
     {
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $commandsList = unserialize($serializedCommands);
+        $result = false;
         if (is_array($commandsList))
         {
             foreach($commandsList as $command)
@@ -224,66 +234,165 @@ class Data extends AbstractHelper
                 if ($messageContent == $command['command_code'])
                 {
                     if ($command['command_id'] == $this->_define::START_COMMAND_ID)
-                        $this->processStartCommand();
+                        $result = $this->processStartCommand();
                     else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
-                        $this->processListCategoriesCommand();
+                        $result = $this->processListCategoriesCommand();
                     else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
-                        $this->processSearchCommand();
+                        $result = $this->processSearchCommand();
                     else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
-                        $this->processLoginCommand();
+                        $result = $this->processLoginCommand();
                     else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
-                        $this->processListOrdersCommand();
+                        $result = $this->processListOrdersCommand();
                     else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
-                        $this->processReorderCommand();
+                        $result = $this->processReorderCommand();
                     else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
-                        $this->processAddToCartCommand();
+                        $result = $this->processAddToCartCommand();
                     else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
-                        $this->processCheckoutCommand();
+                        $result = $this->processCheckoutCommand();
                     else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
-                        $this->processClearCartCommand();
+                        $result = $this->processClearCartCommand();
                     else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
-                        $this->processTrackOrderCommand();
+                        $result = $this->processTrackOrderCommand();
                     else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
-                        $this->processSupportCommand();
+                        $result = $this->processSupportCommand();
                     else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
-                        $this->processSendEmailCommand();
+                        $result = $this->processSendEmailCommand();
                     else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
-                        $this->processCancelCommand();
+                        $result = $this->processCancelCommand();
                     else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
-                        $this->processHelpCommand();
+                        $result = $this->processHelpCommand();
                     else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
-                        $this->processAboutCommand();
+                        $result = $this->processAboutCommand();
                     else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
-                        $this->processLogoutCommand();
+                        $result = $this->processLogoutCommand();
                     else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
-                        $this->processRegisterCommand();
+                        $result = $this->processRegisterCommand();
                     break;
                 }
             }
         }
+
+        return $result;
     }
 
     private function processStartCommand()
     {
-        // TODO
+        $result = array();
+        array_push($result, 'you just sent the START command!');
+        return $result;
     }
 
-    private function processListCategoriesCommand(){}
-    private function processSearchCommand(){}
-    private function processLoginCommand(){}
-    private function processListOrdersCommand(){}
-    private function processReorderCommand(){}
-    private function processAddToCartCommand(){}
-    private function processCheckoutCommand(){}
-    private function processClearCartCommand(){}
-    private function processTrackOrderCommand(){}
-    private function processSupportCommand(){}
-    private function processSendEmailCommand(){}
-    private function processCancelCommand(){}
-    private function processHelpCommand(){}
-    private function processAboutCommand(){}
-    private function processLogoutCommand(){}
-    private function processRegisterCommand(){}
+    private function processListCategoriesCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LIST_CATEGORIES command!');
+        return $result;
+    }
+
+    private function processSearchCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the SEARCH command!');
+        return $result;
+    }
+
+    private function processLoginCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LOGIN command!');
+        return $result;
+    }
+
+    private function processListOrdersCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LIST_ORDERS command!');
+        return $result;
+    }
+
+    private function processReorderCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the REORDER command!');
+        return $result;
+    }
+
+    private function processAddToCartCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the ADD_TO_CART command!');
+        return $result;
+    }
+
+    private function processCheckoutCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the CHECKOUT command!');
+        return $result;
+    }
+
+    private function processClearCartCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the CLEAR_CART command!');
+        return $result;
+    }
+
+    private function processTrackOrderCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the TRACK_ORDER command!');
+        return $result;
+    }
+
+    private function processSupportCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the SUPPORT command!');
+        return $result;
+    }
+
+    private function processSendEmailCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the SEND_EMAIL command!');
+        return $result;
+    }
+
+    private function processCancelCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the CANCEL command!');
+        return $result;
+    }
+
+    private function processHelpCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the HELP command!');
+        return $result;
+    }
+
+    private function processAboutCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the ABOUT command!');
+        return $result;
+    }
+
+    private function processLogoutCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the LOGOUT command!');
+        return $result;
+    }
+
+    private function processRegisterCommand()
+    {
+        $result = array();
+        array_push($result, 'you just sent the REGISTER command!');
+        return $result;
+    }
 
 //    public function getConfig($code, $storeId = null)
 //    {
