@@ -230,7 +230,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 //
 //        if ($chatbot_type == $this->_define::MESSENGER_INT)
 //        {
-//            $this->_apiModel = $this->initMessengerAPI('not_needed');
+//            $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+//            $this->_apiModel = $this->initMessengerAPI($api_token);
 //        }
 //    }
 
