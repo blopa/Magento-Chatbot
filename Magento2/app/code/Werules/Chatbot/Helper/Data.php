@@ -124,10 +124,10 @@ class Data extends AbstractHelper
         $this->logger("Message Content -> " . $message->getContent());
         $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
-        $this->prepareOutgoingMessage($message, $chatbotAPI);
+        $this->prepareOutgoingMessage($message);
     }
 
-    private function prepareOutgoingMessage($incomingMessage, $chatbotAPI)
+    private function prepareOutgoingMessage($incomingMessage)
     {
         if ($incomingMessage->getContent() == 'foobar')
         {
@@ -142,7 +142,7 @@ class Data extends AbstractHelper
         $outgoingMessage->setSenderId($incomingMessage->getSenderId());
         $outgoingMessage->setContent($message);
         $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
-        $outgoingMessage->setStatus($this->_define::NOT_PROCESSED);
+        $outgoingMessage->setStatus($this->_define::PROCESSING);
         $outgoingMessage->setDirection($this->_define::OUTGOING);
         $outgoingMessage->setChatMessageId($incomingMessage->getChatMessageId());
         $outgoingMessage->setChatbotType($incomingMessage->getChatbotType());
@@ -151,13 +151,24 @@ class Data extends AbstractHelper
         $outgoingMessage->setUpdatedAt($datetime);
         $outgoingMessage->save();
 
-        $this->processOutgoingMessage($outgoingMessage);
+//        $this->processOutgoingMessage($outgoingMessage);
+        $this->processOutgoingMessage($outgoingMessage->getMessageId());
     }
 
-    private function processOutgoingMessage($message)
+    private function processOutgoingMessage($message_id)
     {
-//        $chatbotAPI = $this->_chatbotAPI->create();
-//        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $message = $this->_messageModel->create();
+        $message->load($message_id);
+
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $result = $chatbotAPI->sendMessage($message);
+
+        if ($result)
+        {
+            $message->setStatus($this->_define::PROCESSED);
+            $message->save();
+        }
 
         $this->logger("Outgoing Message ID -> " . $message->getMessageId());
         $this->logger("Outgoing Message Content -> " . $message->getContent());
