@@ -35,4 +35,5 @@ class Define
     const ENABLED = 1;
     const CONVERSATION_STARTED = 0;
     const CONTENT_TEXT = 0;
+    const SECONDS_IN_HOUR = 3600;
 }
