@@ -218,6 +218,8 @@ class Data extends AbstractHelper
                 array_push($responseContent, $commandResponse);
             }
         }
+        else
+            array_push($responseContent, "dunno :/");
 
         return $responseContent;
     }
