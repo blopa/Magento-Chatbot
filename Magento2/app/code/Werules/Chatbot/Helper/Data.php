@@ -35,16 +35,19 @@ class Data extends AbstractHelper
     protected $_chatbotAPI;
     protected $_define;
     protected $_configPrefix;
+    protected $_serializer;
 
     public function __construct(
         Context $context,
         ObjectManagerInterface $objectManager,
+        \Magento\Framework\Serialize\Serializer\Json $serializer,
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message
     )
     {
         $this->objectManager = $objectManager;
+        $this->_serializer = $serializer;
         $this->storeManager  = $storeManager;
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
@@ -228,7 +231,7 @@ class Data extends AbstractHelper
     {
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $this->logger($serializedCommands);
-        $commandsList = unserialize($serializedCommands);
+        $commandsList = $this->_serializer->unserialize($serializedCommands);
         $result = false;
         if (is_array($commandsList))
         {
