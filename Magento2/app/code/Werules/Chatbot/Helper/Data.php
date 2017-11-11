@@ -124,42 +124,42 @@ class Data extends AbstractHelper
         $this->logger("Message Content -> " . $message->getContent());
         $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
-        $this->processMessageRequest($message);
+        $this->prepareOutgoingMessage($message);
     }
 
-    private function processMessageRequest($message)
+    private function prepareOutgoingMessage($message)
     {
-        if ($message->getContent() == 'foobar')
-        {
-            $content = 'eggs and spam';
-        }
-        else
-        {
-            $content = 'hello :D';
-        }
+        $responseContents = $this->processMessageRequest($message);
 
-        $outgoingMessage = $this->_messageModel->create();
-        $outgoingMessage->setSenderId($message->getSenderId());
-        $outgoingMessage->setContent($content);
-        $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
-        $outgoingMessage->setStatus($this->_define::PROCESSING);
-        $outgoingMessage->setDirection($this->_define::OUTGOING);
-        $outgoingMessage->setChatMessageId($message->getChatMessageId());
-        $outgoingMessage->setChatbotType($message->getChatbotType());
-        $datetime = date('Y-m-d H:i:s');
-        $outgoingMessage->setCreatedAt($datetime);
-        $outgoingMessage->setUpdatedAt($datetime);
-        $outgoingMessage->save();
+        if ($responseContents)
+        {
+            foreach ($responseContents as $content)
+            {
+                $outgoingMessage = $this->_messageModel->create();
+                $outgoingMessage->setSenderId($message->getSenderId());
+                $outgoingMessage->setContent($content);
+                $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
+                $outgoingMessage->setStatus($this->_define::PROCESSING);
+                $outgoingMessage->setDirection($this->_define::OUTGOING);
+                $outgoingMessage->setChatMessageId($message->getChatMessageId());
+                $outgoingMessage->setChatbotType($message->getChatbotType());
+                $datetime = date('Y-m-d H:i:s');
+                $outgoingMessage->setCreatedAt($datetime);
+                $outgoingMessage->setUpdatedAt($datetime);
+                $outgoingMessage->save();
 
-        $incomingMessage = $this->_messageModel->create();
-        $incomingMessage->load($message->getMessageId()); // TODO
-        $incomingMessage->setStatus($this->_define::PROCESSED);
-        //$datetime = date('Y-m-d H:i:s');
-        $incomingMessage->setUpdatedAt($datetime);
-        $incomingMessage->save();
+                $this->processOutgoingMessage($outgoingMessage->getMessageId());
+            }
+
+            $incomingMessage = $this->_messageModel->create();
+            $incomingMessage->load($message->getMessageId()); // TODO
+            $incomingMessage->setStatus($this->_define::PROCESSED);
+            $datetime = date('Y-m-d H:i:s');
+            $incomingMessage->setUpdatedAt($datetime);
+            $incomingMessage->save();
 
 //        $this->processOutgoingMessage($outgoingMessage);
-        $this->processOutgoingMessage($outgoingMessage->getMessageId());
+        }
     }
 
     private function processOutgoingMessage($message_id)
@@ -181,6 +181,31 @@ class Data extends AbstractHelper
 
         $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
         $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
+    }
+
+    private function processMessageRequest($message)
+    {
+        $content = array();
+        if ($message->getContent() == 'foobar')
+        {
+            array_push($content, 'eggs and spam');
+        }
+        else if ($message->getContent() == 'flood')
+        {
+            array_push($content, 'so you want a flood?');
+            array_push($content, 'okay then');
+            array_push($content, 'here we go');
+            array_push($content, 'floooooood');
+            array_push($content, 'flooood');
+            array_push($content, 'flooood flooood flooood flooood flooood');
+            array_push($content, 'flood');
+        }
+        else
+        {
+            array_push($content, 'hello :D');
+        }
+
+        return $content;
     }
 
 //    public function getConfig($code, $storeId = null)
