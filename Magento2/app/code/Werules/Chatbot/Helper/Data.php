@@ -227,6 +227,7 @@ class Data extends AbstractHelper
     private function handleCommands($messageContent)
     {
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
+        $this->logger($serializedCommands);
         $commandsList = unserialize($serializedCommands);
         $result = false;
         if (is_array($commandsList))
