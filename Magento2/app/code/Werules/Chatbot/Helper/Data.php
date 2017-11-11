@@ -124,32 +124,39 @@ class Data extends AbstractHelper
         $this->logger("Message Content -> " . $message->getContent());
         $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
-        $this->prepareOutgoingMessage($message);
+        $this->processMessageRequest($message);
     }
 
-    private function prepareOutgoingMessage($incomingMessage)
+    private function processMessageRequest($message)
     {
-        if ($incomingMessage->getContent() == 'foobar')
+        if ($message->getContent() == 'foobar')
         {
-            $message = 'eggs and spam';
+            $content = 'eggs and spam';
         }
         else
         {
-            $message = 'hello :D';
+            $content = 'hello :D';
         }
 
         $outgoingMessage = $this->_messageModel->create();
-        $outgoingMessage->setSenderId($incomingMessage->getSenderId());
-        $outgoingMessage->setContent($message);
+        $outgoingMessage->setSenderId($message->getSenderId());
+        $outgoingMessage->setContent($content);
         $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
         $outgoingMessage->setStatus($this->_define::PROCESSING);
         $outgoingMessage->setDirection($this->_define::OUTGOING);
-        $outgoingMessage->setChatMessageId($incomingMessage->getChatMessageId());
-        $outgoingMessage->setChatbotType($incomingMessage->getChatbotType());
+        $outgoingMessage->setChatMessageId($message->getChatMessageId());
+        $outgoingMessage->setChatbotType($message->getChatbotType());
         $datetime = date('Y-m-d H:i:s');
         $outgoingMessage->setCreatedAt($datetime);
         $outgoingMessage->setUpdatedAt($datetime);
         $outgoingMessage->save();
+
+        $incomingMessage = $this->_messageModel->create();
+        $incomingMessage->load($message->getMessageId()); // TODO
+        $incomingMessage->setStatus($this->_define::PROCESSED);
+        //$datetime = date('Y-m-d H:i:s');
+        $incomingMessage->setUpdatedAt($datetime);
+        $incomingMessage->save();
 
 //        $this->processOutgoingMessage($outgoingMessage);
         $this->processOutgoingMessage($outgoingMessage->getMessageId());
@@ -157,21 +164,23 @@ class Data extends AbstractHelper
 
     private function processOutgoingMessage($message_id)
     {
-        $message = $this->_messageModel->create();
-        $message->load($message_id);
+        $outgoingMessage = $this->_messageModel->create();
+        $outgoingMessage->load($message_id);
 
         $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
-        $result = $chatbotAPI->sendMessage($message);
+        $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
+        $result = $chatbotAPI->sendMessage($outgoingMessage);
 
         if ($result)
         {
-            $message->setStatus($this->_define::PROCESSED);
-            $message->save();
+            $outgoingMessage->setStatus($this->_define::PROCESSED);
+            $datetime = date('Y-m-d H:i:s');
+            $outgoingMessage->setUpdatedAt($datetime);
+            $outgoingMessage->save();
         }
 
-        $this->logger("Outgoing Message ID -> " . $message->getMessageId());
-        $this->logger("Outgoing Message Content -> " . $message->getContent());
+        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
+        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
     }
 
 //    public function getConfig($code, $storeId = null)
