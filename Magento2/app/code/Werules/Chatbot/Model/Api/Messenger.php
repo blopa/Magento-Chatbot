@@ -321,7 +321,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
             if ($rawData)
                 return json_decode($rawData, true);
             else
-                return json_decode($_REQUEST, true);
+                return $_REQUEST;
         } else {
             return $this->data;
         }
