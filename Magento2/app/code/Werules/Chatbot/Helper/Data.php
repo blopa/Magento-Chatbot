@@ -34,6 +34,7 @@ class Data extends AbstractHelper
     protected $_messageModel;
     protected $_chatbotAPI;
     protected $_define;
+    protected $_configPrefix;
 
     public function __construct(
         Context $context,
@@ -185,28 +186,104 @@ class Data extends AbstractHelper
 
     private function processMessageRequest($message)
     {
-        $content = array();
-        if ($message->getContent() == 'foobar')
-        {
-            array_push($content, 'eggs and spam');
-        }
-        else if ($message->getContent() == 'flood')
-        {
-            array_push($content, 'so you want a flood?');
-            array_push($content, 'okay then');
-            array_push($content, 'here we go');
-            array_push($content, 'floooooood');
-            array_push($content, 'flooood');
-            array_push($content, 'flooood flooood flooood flooood flooood');
-            array_push($content, 'flood..!');
-        }
-        else
-        {
-            array_push($content, 'hello :D');
-        }
+        $this->_configPrefix = 'werules_chatbot_messenger';
+        $messageContent = $message->getContent();
+//        $content = array();
+//        if ($messageContent == 'foobar')
+//        {
+//            array_push($content, 'eggs and spam');
+//        }
+//        else if ($messageContent == 'flood')
+//        {
+//            array_push($content, 'so you want a flood?');
+//            array_push($content, 'okay then');
+//            array_push($content, 'here we go');
+//            array_push($content, 'floooooood');
+//            array_push($content, 'flooood');
+//            array_push($content, 'flooood flooood flooood flooood flooood');
+//            array_push($content, 'flood..!');
+//        }
+//        else
+//        {
+//            array_push($content, 'hello :D');
+//        }
+//
+//        return $content;
 
-        return $content;
+        $this->handleCommands($messageContent);
     }
+
+    private function handleCommands($messageContent)
+    {
+        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
+        $commandsList = unserialize($serializedCommands);
+        if (is_array($commandsList))
+        {
+            foreach($commandsList as $command)
+            {
+                if ($messageContent == $command['command_code'])
+                {
+                    if ($command['command_id'] == $this->_define::START_COMMAND_ID)
+                        $this->processStartCommand();
+                    else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                        $this->processListCategoriesCommand();
+                    else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
+                        $this->processSearchCommand();
+                    else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
+                        $this->processLoginCommand();
+                    else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
+                        $this->processListOrdersCommand();
+                    else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
+                        $this->processReorderCommand();
+                    else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
+                        $this->processAddToCartCommand();
+                    else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
+                        $this->processCheckoutCommand();
+                    else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
+                        $this->processClearCartCommand();
+                    else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
+                        $this->processTrackOrderCommand();
+                    else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
+                        $this->processSupportCommand();
+                    else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
+                        $this->processSendEmailCommand();
+                    else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
+                        $this->processCancelCommand();
+                    else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
+                        $this->processHelpCommand();
+                    else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
+                        $this->processAboutCommand();
+                    else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
+                        $this->processLogoutCommand();
+                    else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
+                        $this->processRegisterCommand();
+                    break;
+                }
+            }
+        }
+    }
+
+    private function processStartCommand()
+    {
+        // TODO
+    }
+
+    private function processListCategoriesCommand(){}
+    private function processSearchCommand(){}
+    private function processLoginCommand(){}
+    private function processListOrdersCommand(){}
+    private function processReorderCommand(){}
+    private function processAddToCartCommand(){}
+    private function processCheckoutCommand(){}
+    private function processClearCartCommand(){}
+    private function processTrackOrderCommand(){}
+    private function processSupportCommand(){}
+    private function processSendEmailCommand(){}
+    private function processCancelCommand(){}
+    private function processHelpCommand(){}
+    private function processAboutCommand(){}
+    private function processLogoutCommand(){}
+    private function processRegisterCommand(){}
 
 //    public function getConfig($code, $storeId = null)
 //    {
