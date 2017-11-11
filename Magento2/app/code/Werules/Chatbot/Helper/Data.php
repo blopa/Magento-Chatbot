@@ -110,7 +110,7 @@ class Data extends AbstractHelper
         if (!($chatbotAPI->getChatbotapiId()))
         {
             $chatbotAPI->setEnabled($this->_define::DISABLED);
-            $chatbotAPI->setChatbotType($this->_define::MESSENGER_INT);
+            $chatbotAPI->setChatbotType($message->getChatbotType()); // TODO
             $chatbotAPI->setChatId($message->getSenderId());
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setFallbackQty(0);
