@@ -51,6 +51,7 @@ class Data extends AbstractHelper
         $this->storeManager  = $storeManager;
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
+        $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
         parent::__construct($context);
     }
@@ -107,7 +108,9 @@ class Data extends AbstractHelper
 
     private function processIncomingMessage($message)
     {
-        // TODO do something
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            $this->_configPrefix = 'werules_chatbot_messenger';
+
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
 
@@ -189,7 +192,6 @@ class Data extends AbstractHelper
 
     private function processMessageRequest($message)
     {
-        $this->_configPrefix = 'werules_chatbot_messenger';
         $messageContent = $message->getContent();
         $responseContent = array();
 //        if ($messageContent == 'foobar')
@@ -237,7 +239,8 @@ class Data extends AbstractHelper
         {
             foreach($commandsList as $command)
             {
-                if ($messageContent == $command['command_code'])
+                // if ($messageContent == $command['command_code'])
+                if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
                 {
                     if ($command['command_id'] == $this->_define::START_COMMAND_ID)
                         $result = $this->processStartCommand();
