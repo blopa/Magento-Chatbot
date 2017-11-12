@@ -144,8 +144,8 @@ class Data extends AbstractHelper
             {
                 $outgoingMessage = $this->_messageModel->create();
                 $outgoingMessage->setSenderId($message->getSenderId());
-                $outgoingMessage->setContent($content);
-                $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
+                $outgoingMessage->setContent($content['content']);
+                $outgoingMessage->setContentType($content['content_type']); // TODO
                 $outgoingMessage->setStatus($this->_define::PROCESSING);
                 $outgoingMessage->setDirection($this->_define::OUTGOING);
                 $outgoingMessage->setChatMessageId($message->getChatMessageId());
@@ -176,7 +176,10 @@ class Data extends AbstractHelper
 
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
-        $result = $chatbotAPI->sendMessage($outgoingMessage);
+
+        $result = false;
+        if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
+            $result = $chatbotAPI->sendMessage($outgoingMessage);
 
         if ($result)
         {
@@ -224,7 +227,7 @@ class Data extends AbstractHelper
             }
         }
         else
-            array_push($responseContent, "dunno :/");
+            array_push($responseContent, array('content_type' => $this->_define::CONTENT_TEXT, 'content' => 'Dunno!'));
 
         return $responseContent;
     }
@@ -287,119 +290,136 @@ class Data extends AbstractHelper
     private function processStartCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the START command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the START command!';
         return $result;
     }
 
     private function processListCategoriesCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LIST_CATEGORIES command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the LIST_CATEGORIES command!';
         return $result;
     }
 
     private function processSearchCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the SEARCH command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the SEARCH command!';
         return $result;
     }
 
     private function processLoginCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LOGIN command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the LOGIN command!';
         return $result;
     }
 
     private function processListOrdersCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LIST_ORDERS command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the LIST_ORDERS command!';
         return $result;
     }
 
     private function processReorderCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the REORDER command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the REORDER command!';
         return $result;
     }
 
     private function processAddToCartCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the ADD_TO_CART command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the ADD_TO_CART command!';
         return $result;
     }
 
     private function processCheckoutCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the CHECKOUT command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the CHECKOUT command!';
         return $result;
     }
 
     private function processClearCartCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the CLEAR_CART command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the CLEAR_CART command!';
         return $result;
     }
 
     private function processTrackOrderCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the TRACK_ORDER command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the TRACK_ORDER command!';
         return $result;
     }
 
     private function processSupportCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the SUPPORT command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the SUPPORT command!';
         return $result;
     }
 
     private function processSendEmailCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the SEND_EMAIL command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the SEND_EMAIL command!';
         return $result;
     }
 
     private function processCancelCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the CANCEL command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the CANCEL command!';
         return $result;
     }
 
     private function processHelpCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the HELP command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the HELP command!';
         return $result;
     }
 
     private function processAboutCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the ABOUT command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the ABOUT command!';
         return $result;
     }
 
     private function processLogoutCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LOGOUT command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the LOGOUT command!';
         return $result;
     }
 
     private function processRegisterCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the REGISTER command!');
+        $result['content_type'] = $this->_define::CONTENT_TEXT;
+        $result['content'] = 'you just sent the REGISTER command!';
         return $result;
     }
 
