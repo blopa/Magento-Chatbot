@@ -202,6 +202,7 @@ class Data extends AbstractHelper
     {
         //$messageContent = $message->getContent();
         $responseContent = array();
+        $commandResponses = false;
 //        if ($messageContent == 'foobar')
 //        {
 //            array_push($content, 'eggs and spam');
@@ -223,7 +224,9 @@ class Data extends AbstractHelper
 //
 //        return $content;
 
-        $commandResponses = $this->handleCommands($message);
+        $conversationStateResponses = $this->handleConversationState($message);
+        if (!$conversationStateResponses)
+            $commandResponses = $this->handleCommands($message);
         if ($commandResponses)
         {
             foreach ($commandResponses as $commandResponse)
@@ -235,6 +238,30 @@ class Data extends AbstractHelper
             array_push($responseContent, array('content_type' => $this->_define::CONTENT_TEXT, 'content' => 'Dunno!'));
 
         return $responseContent;
+    }
+
+    private function handleConversationState($message)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $result = false;
+
+        if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
+        {
+            $result = $this->listProductsFromCategory($message);
+        }
+
+        return $result;
+    }
+
+    private function listProductsFromCategory($message)
+    {
+        return false;
+    }
+
+    private function getProductDetailsMessage($message)
+    {
+        // TODO
     }
 
     private function handleCommands($message)
