@@ -258,7 +258,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
             $this->_apiModel = $this->initMessengerAPI($api_token);
             $decodedContent = json_decode($messageContent);
-            $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent['message'], $decodedContent['quick_replies']);
+            $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
         }
 
         return true;

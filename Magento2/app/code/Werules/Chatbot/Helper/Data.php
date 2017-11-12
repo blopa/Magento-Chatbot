@@ -318,9 +318,9 @@ class Data extends AbstractHelper
                 array_push($quickReplies, $quickReply);
             }
         }
-        $content = array();
-        $content['message'] = 'Pick one of the following categories.';
-        $content['quick_replies'] = $quickReplies;
+        $content = new \stdClass();
+        $content->message = 'Pick one of the following categories.';
+        $content->quick_replies = $quickReplies;
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
         $responseMessage['content'] = json_encode($content);
