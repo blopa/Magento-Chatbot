@@ -37,6 +37,7 @@ class Data extends AbstractHelper
     protected $_configPrefix;
     protected $_serializer;
     protected $_categoryHelper;
+    protected $_categoryFactory;
 
     public function __construct(
         Context $context,
@@ -45,7 +46,8 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Helper\Category $categoryHelper
+        \Magento\Catalog\Helper\Category $categoryHelper,
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory
     )
     {
         $this->objectManager = $objectManager;
@@ -56,6 +58,7 @@ class Data extends AbstractHelper
         $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_categoryHelper = $categoryHelper;
+        $this->_categoryFactory = $categoryFactory;
         parent::__construct($context);
     }
 
@@ -254,8 +257,21 @@ class Data extends AbstractHelper
         return $result;
     }
 
+    public function getCategory($category_id)
+    {
+        $category = $this->_categoryFactory->create();
+        $category->load($category_id);
+
+        return $category;
+    }
+
     private function listProductsFromCategory($message)
     {
+        if ($message->getMessagePayload())
+            $category = $this->getCategory($message->getMessagePayload());
+        else // TODO
+            $category = $this->getCategory($message->getMessagePayload());
+
         return false;
     }
 
@@ -570,6 +586,7 @@ class Data extends AbstractHelper
 //    }
     public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
-        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+        //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+        return $this->_categoryFactory->create()->getCollection();
     }
 }
