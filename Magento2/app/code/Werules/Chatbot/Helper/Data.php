@@ -36,7 +36,8 @@ class Data extends AbstractHelper
     protected $_define;
     protected $_configPrefix;
     protected $_serializer;
-    protected $_categoryHelper;
+//    protected $_categoryHelper;
+    protected $_categoryFactory;
 
     public function __construct(
         Context $context,
@@ -45,7 +46,8 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Helper\Category $categoryHelper
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory
+//        \Magento\Catalog\Helper\Category $categoryHelper
     )
     {
         $this->objectManager = $objectManager;
@@ -55,7 +57,8 @@ class Data extends AbstractHelper
         $this->_chatbotAPI  = $chatbotAPI;
         $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
-        $this->_categoryHelper = $categoryHelper;
+        $this->_categoryFactory = $categoryFactory;
+//        $this->_categoryHelper = $categoryHelper;
         parent::__construct($context);
     }
 
@@ -389,7 +392,7 @@ class Data extends AbstractHelper
     private function processListCategoriesCommand()
     {
         $result = array();
-        $categories = $this->getStoreCategories(false,false,true);
+        $categories = $this->getStoreCategories();
         $quickReplies = array();
         foreach ($categories as $category)
         {
@@ -399,7 +402,7 @@ class Data extends AbstractHelper
                 $quickReply = array(
                     'content_type' => 'text', // TODO messenger pattern
                     'title' => $categoryName,
-                    'payload' => $categoryName
+                    'payload' => $category->getId()
                 );
                 array_push($quickReplies, $quickReply);
             }
@@ -568,8 +571,10 @@ class Data extends AbstractHelper
 //    {
 //        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
 //    }
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    public function getStoreCategories($filter = [])
     {
-        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+        //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+        $collection = $this->_categoryFactory->create()->getCollection()->addAttributeToFilter($filter)->setPageSize(1);
+        return $collection;
     }
 }
