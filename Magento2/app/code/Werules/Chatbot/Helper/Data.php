@@ -574,7 +574,11 @@ class Data extends AbstractHelper
     public function getStoreCategories($filter = [])
     {
         //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-        $collection = $this->_categoryFactory->create()->getCollection()->addAttributeToFilter($filter)->setPageSize(1);
+        if ($filter)
+            $collection = $this->_categoryFactory->create()->getCollection()->addAttributeToFilter($filter)->setPageSize(1);
+        else
+            $collection = $this->_categoryFactory->create()->getCollection()->setPageSize(1);
+
         return $collection;
     }
 }
