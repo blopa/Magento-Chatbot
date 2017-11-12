@@ -320,10 +320,10 @@ class Data extends AbstractHelper
         }
         $content = array();
         $content['message'] = 'Pick one of the following categories.';
-        $content['quick_replies'] = json_encode($quickReplies);
+        $content['quick_replies'] = $quickReplies;
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
-        $responseMessage['content'] = $content;
+        $responseMessage['content'] = json_encode($content);
         array_push($result, $responseMessage);
         return $result;
     }
