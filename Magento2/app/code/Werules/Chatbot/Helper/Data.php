@@ -46,7 +46,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Model\CategoryFactory $categoryFactory
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryFactory
 //        \Magento\Catalog\Helper\Category $categoryHelper
     )
     {
@@ -409,7 +409,7 @@ class Data extends AbstractHelper
         }
         $contentObject = new \stdClass();
         $contentObject->message = 'Pick one of the following categories.';
-        $contentObject->quick_replies = $categories;
+        $contentObject->quick_replies = $categories;//$quickReplies;
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
         $responseMessage['content'] = json_encode($contentObject);
