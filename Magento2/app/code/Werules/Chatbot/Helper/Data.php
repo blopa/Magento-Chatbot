@@ -409,7 +409,7 @@ class Data extends AbstractHelper
         }
         $contentObject = new \stdClass();
         $contentObject->message = 'Pick one of the following categories.';
-        $contentObject->quick_replies = $quickReplies;
+        $contentObject->quick_replies = $categories;
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
         $responseMessage['content'] = json_encode($contentObject);
