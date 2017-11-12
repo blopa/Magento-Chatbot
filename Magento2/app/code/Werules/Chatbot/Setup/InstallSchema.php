@@ -343,13 +343,13 @@ class InstallSchema implements InstallSchemaInterface
         
 
         
-//        $table_werules_chatbot_chatbotapi->addColumn(
-//            'chatbotuser_id',
-//            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-//            null,
-//            [],
-//            'ChatbotUser ID'
-//        );
+        $table_werules_chatbot_chatbotapi->addColumn(
+            'chatbotuser_id',
+            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+            null,
+            [],
+            'ChatbotUser ID'
+        );
         
 
         

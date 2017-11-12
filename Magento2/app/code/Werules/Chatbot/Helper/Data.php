@@ -183,6 +183,8 @@ class Data extends AbstractHelper
         $result = false;
         if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
             $result = $chatbotAPI->sendMessage($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
+            $result = $chatbotAPI->sendQuickReply($outgoingMessage);
 
         if ($result)
         {
@@ -302,12 +304,27 @@ class Data extends AbstractHelper
     {
         $result = array();
         $categories = $this->getStoreCategories(false,false,true);
-        foreach ($categories as $category){
-            $responseMessage = array();
-            $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-            $responseMessage['content'] = $category->getName();
-            array_push($result, $responseMessage);
+        $quickReplies = array();
+        foreach ($categories as $category)
+        {
+            $categoryName = $category->getName();
+            if ($categoryName)
+            {
+                $quickReply = array(
+                    'content_type' => 'text', // TODO messenger pattern
+                    'title' => $categoryName,
+                    'payload' => $categoryName
+                );
+                array_push($quickReplies, $quickReply);
+            }
         }
+        $content = array();
+        $content['message'] = 'Pick one of the following categories.';
+        $content['quick_replies'] = json_encode($quickReplies);
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
+        $responseMessage['content'] = $content;
+        array_push($result, $responseMessage);
         return $result;
     }
 
