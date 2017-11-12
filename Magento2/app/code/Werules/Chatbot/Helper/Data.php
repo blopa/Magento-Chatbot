@@ -46,7 +46,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryFactory
+        \Magento\Catalog\Model\Category $categoryFactory
 //        \Magento\Catalog\Helper\Category $categoryHelper
     )
     {
@@ -571,10 +571,10 @@ class Data extends AbstractHelper
 //    {
 //        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
 //    }
-    public function getStoreCategories($filter = '*')
+    public function getStoreCategories()
     {
         //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-        $collection = $this->_categoryFactory->create()->addAttributeToSelect($filter);
+        $collection = $this->_categoryFactory->create()->getCollection();
 
         return $collection;
     }
