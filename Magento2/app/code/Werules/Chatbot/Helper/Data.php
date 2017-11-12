@@ -40,6 +40,7 @@ class Data extends AbstractHelper
     protected $_categoryFactory;
     protected $_categoryCollectionFactory;
     protected $_storeManagerInterface;
+    protected $_commandsList;
 
     public function __construct(
         Context $context,
@@ -363,88 +364,107 @@ class Data extends AbstractHelper
         return $text;
     }
 
+    private function prepareCommandsList($commands)
+    {
+        $commandsList = array();
+        foreach($commands as $command)
+        {
+            if ($command['enable_command'] == '1')
+            {
+                $command_id = $command['command_id'];
+                $commandsList[$command_id] = array(
+                    'command_code' => $command['command_code'],
+                    'command_alias_list' => explode(',', $command['command_alias_list'])
+                );
+            }
+        }
+        return $commandsList;
+    }
+
     private function handleCommands($message)
     {
         $messageContent = $message->getContent();
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
-        $this->logger($serializedCommands);
         $commandsList = $this->_serializer->unserialize($serializedCommands);
+        $this->_commandsList = $this->prepareCommandsList($commandsList);
+//        $this->logger($serializedCommands);
+//        $this->logger($this->_commandsList);
         $result = false;
         $state = false;
-        if (is_array($commandsList))
+        if (is_array($this->_commandsList))
         {
-            foreach($commandsList as $command)
+            foreach($this->_commandsList as $key => $command)
             {
-                // if ($messageContent == $command['command_code'])
+                // if ($messageContent == $command['command_code']) // TODO add alias check
                 if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
                 {
-                    if ($command['command_id'] == $this->_define::START_COMMAND_ID)
+                    if ($key == $this->_define::START_COMMAND_ID)
                     {
                         $result = $this->processStartCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                    else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
                     {
                         $result = $this->processListCategoriesCommand();
                         if ($result)
                             $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
                     }
-                    else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
+                    else if ($key == $this->_define::SEARCH_COMMAND_ID)
                     {
                         $result = $this->processSearchCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
+                    else if ($key == $this->_define::LOGIN_COMMAND_ID)
                     {
                         $result = $this->processLoginCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
+                    else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
                     {
                         $result = $this->processListOrdersCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
+                    else if ($key == $this->_define::REORDER_COMMAND_ID)
                     {
                         $result = $this->processReorderCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
+                    else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
                     {
                         $result = $this->processAddToCartCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
+                    else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
                     {
                         $result = $this->processCheckoutCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
+                    else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
                     {
                         $result = $this->processClearCartCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
+                    else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
                     {
                         $result = $this->processTrackOrderCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
+                    else if ($key == $this->_define::SUPPORT_COMMAND_ID)
                     {
                         $result = $this->processSupportCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
+                    else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
                     {
                         $result = $this->processSendEmailCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
+                    else if ($key == $this->_define::CANCEL_COMMAND_ID)
                     {
                         $result = $this->processCancelCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
+                    else if ($key == $this->_define::HELP_COMMAND_ID)
                     {
                         $result = $this->processHelpCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
+                    else if ($key == $this->_define::ABOUT_COMMAND_ID)
                     {
                         $result = $this->processAboutCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
+                    else if ($key == $this->_define::LOGOUT_COMMAND_ID)
                     {
                         $result = $this->processLogoutCommand();
                     }
-                    else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
+                    else if ($key == $this->_define::REGISTER_COMMAND_ID)
                     {
                         $result = $this->processRegisterCommand();
                     }
