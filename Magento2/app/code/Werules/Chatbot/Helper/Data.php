@@ -36,7 +36,7 @@ class Data extends AbstractHelper
     protected $_define;
     protected $_configPrefix;
     protected $_serializer;
-//    protected $_categoryHelper;
+    protected $_categoryHelper;
     protected $_categoryFactory;
 
     public function __construct(
@@ -46,7 +46,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-//        \Magento\Catalog\Helper\Category $categoryHelper,
+        \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory
     )
     {
@@ -57,7 +57,7 @@ class Data extends AbstractHelper
         $this->_chatbotAPI  = $chatbotAPI;
         $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
-//        $this->_categoryHelper = $categoryHelper;
+        $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
         parent::__construct($context);
     }
@@ -257,7 +257,7 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    public function getCategory($category_id)
+    public function getCategoryById($category_id)
     {
         $category = $this->_categoryFactory->create();
         $category->load($category_id);
@@ -265,17 +265,36 @@ class Data extends AbstractHelper
         return $category;
     }
 
-    private function listProductsFromCategory($message)
+    public function getCategoryProducts($category_id)
     {
-        if ($message->getMessagePayload())
-            $category = $this->getCategory($message->getMessagePayload());
-        else // TODO
-            $category = $this->getCategory($message->getMessagePayload());
+        $productCollection = $this->getCategoryById($category_id)->getProductCollection();
+        $productCollection->addAttributeToSelect('*');
 
-        return false;
+        return $productCollection;
     }
 
-    private function getProductDetailsMessage($message)
+    private function listProductsFromCategory($message)
+    {
+        $result = array();
+        if ($message->getMessagePayload())
+            $category = $this->getCategoryById($message->getMessagePayload());
+        else // TODO
+            $category = $this->getCategoryById($message->getContent());
+
+        $productCollection = $this->getCategoryProducts($category->getId())->getProductCollection();
+
+        foreach ($productCollection as $product)
+        {
+            $responseMessage = array();
+            $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+            $responseMessage['content'] = $product->getName();
+            array_push($result, $responseMessage);
+        }
+
+        return $result;
+    }
+
+    private function getProductDetailsMessage($product)
     {
         // TODO
     }
@@ -586,7 +605,7 @@ class Data extends AbstractHelper
 //    }
     public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
-        //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-        return $this->_categoryFactory->create()->getCollection();
+        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+//        return $this->_categoryFactory->create()->getCollection();
     }
 }
