@@ -60,5 +60,5 @@ class Define
 
     // conversation states
     const CONVERSATION_STARTED = 0;
-    const CONVERSATION_LIST_CATEGORIES = 2;
+    const CONVERSATION_LIST_CATEGORIES = 1;
 }
