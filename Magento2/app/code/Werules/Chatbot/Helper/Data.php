@@ -194,6 +194,8 @@ class Data extends AbstractHelper
             $result = $chatbotAPI->sendMessage($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
             $result = $chatbotAPI->sendQuickReply($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
+            $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
 
         if ($result)
         {
@@ -295,7 +297,7 @@ class Data extends AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $content = $this->getProductDetailsMessage($product);
+            $content = $this->getProductDetailsObject($product);
             array_push($productList, $content);
         }
 
@@ -307,7 +309,7 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function getProductDetailsMessage($product)
+    private function getProductDetailsObject($product)
     {
         $result = array();
         if ($product->getId())
