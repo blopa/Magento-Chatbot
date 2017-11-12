@@ -571,13 +571,10 @@ class Data extends AbstractHelper
 //    {
 //        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
 //    }
-    public function getStoreCategories($filter = [])
+    public function getStoreCategories($filter = '*')
     {
         //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-        if ($filter)
-            $collection = $this->_categoryFactory->create()->getCollection()->addAttributeToFilter($filter);
-        else
-            $collection = $this->_categoryFactory->create()->getCollection();
+        $collection = $this->_categoryFactory->create()->addAttributeToFilter($filter);
 
         return $collection;
     }
