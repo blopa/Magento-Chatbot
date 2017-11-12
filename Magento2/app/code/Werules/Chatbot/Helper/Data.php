@@ -574,7 +574,7 @@ class Data extends AbstractHelper
     public function getStoreCategories($filter = '*')
     {
         //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-        $collection = $this->_categoryFactory->create()->addAttributeToFilter($filter);
+        $collection = $this->_categoryFactory->create()->addAttributeToSelect($filter);
 
         return $collection;
     }
