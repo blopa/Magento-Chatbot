@@ -33,7 +33,6 @@ class Define
     const OUTGOING = 1;
     const DISABLED = 0;
     const ENABLED = 1;
-    const CONVERSATION_STARTED = 0;
     const SECONDS_IN_HOUR = 3600;
 
     // commands
@@ -58,4 +57,8 @@ class Define
     // message content types
     const CONTENT_TEXT = 0;
     const QUICK_REPLY = 1;
+
+    // conversation states
+    const CONVERSATION_STARTED = 0;
+    const CONVERSATION_LIST_CATEGORIES = 2;
 }

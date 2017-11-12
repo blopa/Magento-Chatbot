@@ -200,7 +200,7 @@ class Data extends AbstractHelper
 
     private function processMessageRequest($message)
     {
-        $messageContent = $message->getContent();
+        //$messageContent = $message->getContent();
         $responseContent = array();
 //        if ($messageContent == 'foobar')
 //        {
@@ -223,7 +223,7 @@ class Data extends AbstractHelper
 //
 //        return $content;
 
-        $commandResponses = $this->handleCommands($messageContent);
+        $commandResponses = $this->handleCommands($message);
         if ($commandResponses)
         {
             foreach ($commandResponses as $commandResponse)
@@ -237,12 +237,14 @@ class Data extends AbstractHelper
         return $responseContent;
     }
 
-    private function handleCommands($messageContent)
+    private function handleCommands($message)
     {
+        $messageContent = $message->getContent();
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $this->logger($serializedCommands);
         $commandsList = $this->_serializer->unserialize($serializedCommands);
         $result = false;
+        $state = false;
         if (is_array($commandsList))
         {
             foreach($commandsList as $command)
@@ -251,45 +253,102 @@ class Data extends AbstractHelper
                 if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
                 {
                     if ($command['command_id'] == $this->_define::START_COMMAND_ID)
+                    {
                         $result = $this->processStartCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                    {
                         $result = $this->processListCategoriesCommand();
+                        if ($result)
+                            $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+                    }
                     else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
+                    {
                         $result = $this->processSearchCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
+                    {
                         $result = $this->processLoginCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
+                    {
                         $result = $this->processListOrdersCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
+                    {
                         $result = $this->processReorderCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
+                    {
                         $result = $this->processAddToCartCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
+                    {
                         $result = $this->processCheckoutCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
+                    {
                         $result = $this->processClearCartCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
+                    {
                         $result = $this->processTrackOrderCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
+                    {
                         $result = $this->processSupportCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
+                    {
                         $result = $this->processSendEmailCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
+                    {
                         $result = $this->processCancelCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
+                    {
                         $result = $this->processHelpCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
+                    {
                         $result = $this->processAboutCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
+                    {
                         $result = $this->processLogoutCommand();
+                    }
                     else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
+                    {
                         $result = $this->processRegisterCommand();
+                    }
                     break;
                 }
             }
         }
 
+        if ($state)
+            $this->updateConversationState($message->getSenderId(), $state);
+
         return $result;
+    }
+
+    private function updateConversationState($sender_id, $state)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($sender_id, 'chat_id'); // TODO
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setConversationState($state);
+            $datetime = date('Y-m-d H:i:s');
+            $chatbotAPI->setUpdatedAt($datetime);
+            $chatbotAPI->save();
+
+            return true;
+        }
+
+        return false;
     }
 
     private function processStartCommand()
@@ -318,12 +377,12 @@ class Data extends AbstractHelper
                 array_push($quickReplies, $quickReply);
             }
         }
-        $content = new \stdClass();
-        $content->message = 'Pick one of the following categories.';
-        $content->quick_replies = $quickReplies;
+        $contentObject = new \stdClass();
+        $contentObject->message = 'Pick one of the following categories.';
+        $contentObject->quick_replies = $quickReplies;
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
-        $responseMessage['content'] = json_encode($content);
+        $responseMessage['content'] = json_encode($contentObject);
         array_push($result, $responseMessage);
         return $result;
     }
