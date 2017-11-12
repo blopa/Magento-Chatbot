@@ -65,6 +65,30 @@
 				</item>
 			</argument>
 		</column>
+		<column name="content">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">Content</item>
+				</item>
+			</argument>
+		</column>
+		<column name="status">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">Status</item>
+				</item>
+			</argument>
+		</column>
+		<column name="direction">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">Direction</item>
+				</item>
+			</argument>
+		</column>
 		<column name="created_at">
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
@@ -94,14 +118,6 @@
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
 					<item name="label" translate="true" xsi:type="string">Content Type</item>
-				</item>
-			</argument>
-		</column>
-		<column name="message_payload">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">Message Payload</item>
 				</item>
 			</argument>
 		</column>

@@ -242,25 +242,89 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-            $this->_apiModel = $this->initMessengerAPI($api_token);
-            $this->_apiModel->sendMessage($message->getSenderId(), $message->getContent());
+            $this->sendMessageToMessenger($message);
         }
 
         return true;
     }
 
+    public function sendMessageToMessenger($message)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($api_token);
+
+        $this->_apiModel->sendMessage($message->getSenderId(), $message->getContent());
+    }
+
     public function sendQuickReply($message)
     {
-        $messageContent = $message->getContent();
         if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-            $this->_apiModel = $this->initMessengerAPI($api_token);
-            $decodedContent = json_decode($messageContent);
-            $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
+            $this->sendQuickReplyToMessenger($message);
         }
 
         return true;
+    }
+
+    public function sendQuickReplyToMessenger($message)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($api_token);
+
+        $messageContent = $message->getContent();
+        $decodedContent = json_decode($messageContent);
+//            foreach ($decodedContent->quick_replies as $quickReply)
+//            {
+//                // TODO build quickreplies here
+//            }
+        $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
+    }
+
+    public function sendImageWithOptions($message)
+    {
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        {
+            $this->sendImageWithOptionsToMessenger($message);
+        }
+
+        return true;
+    }
+
+    public function sendImageWithOptionsToMessenger($message)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($api_token);
+
+        $messageContent = $message->getContent();
+        $decodedContent = json_decode($messageContent);
+
+        $elements = array();
+        foreach ($decodedContent as $decodedObject)
+        {
+            $auxArr = array();
+            foreach ($decodedObject->buttons as $button)
+            {
+                $auxArr2 = array(
+                    'type' => $button->type,
+                    'title' => $button->title
+                );
+
+                if (isset($button->payload))
+                    $auxArr2['payload'] = $button->payload;
+                if (isset($button->url))
+                    $auxArr2['url'] = $button->url;
+                array_push($auxArr, $auxArr2);
+            }
+
+            $element = array(
+                'title' => $decodedObject->title,
+                'item_url' => $decodedObject->item_url,
+                'image_url' => $decodedObject->image_url,
+                'subtitle' => $decodedObject->subtitle,
+                'buttons' => $auxArr
+            );
+            array_push($elements, $element);
+        }
+        $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
     }
 }
