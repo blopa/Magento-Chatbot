@@ -46,7 +46,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Api\CategoryRepositoryInterface $categoryFactory
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory
 //        \Magento\Catalog\Helper\Category $categoryHelper
     )
     {
@@ -575,9 +575,9 @@ class Data extends AbstractHelper
     {
         //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
         if ($filter)
-            $collection = $this->_categoryFactory->create()->getCollection()->addAttributeToFilter($filter)->setPageSize(1);
+            $collection = $this->_categoryFactory->create()->getCollection()->addAttributeToFilter($filter);
         else
-            $collection = $this->_categoryFactory->create()->getCollection()->setPageSize(1);
+            $collection = $this->_categoryFactory->create()->getCollection();
 
         return $collection;
     }
