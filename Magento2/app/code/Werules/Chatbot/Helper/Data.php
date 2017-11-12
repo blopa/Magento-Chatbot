@@ -46,7 +46,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryFactory
+        \Magento\Catalog\Api\CategoryRepositoryInterface $categoryFactory
 //        \Magento\Catalog\Helper\Category $categoryHelper
     )
     {
