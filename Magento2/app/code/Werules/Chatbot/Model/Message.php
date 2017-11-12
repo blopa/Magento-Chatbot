@@ -207,25 +207,6 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
     }
 
     /**
-     * Get chatbotapi_id
-     * @return string
-     */
-    public function getChatbotapiId()
-    {
-        return $this->getData(self::CHATBOTAPI_ID);
-    }
-
-    /**
-     * Set chatbotapi_id
-     * @param string $chatbotapi_id
-     * @return \Werules\Chatbot\Api\Data\MessageInterface
-     */
-    public function setChatbotapiId($chatbotapi_id)
-    {
-        return $this->setData(self::CHATBOTAPI_ID, $chatbotapi_id);
-    }
-
-    /**
      * Get content_type
      * @return string
      */
@@ -244,11 +225,22 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::CONTENT_TYPE, $content_type);
     }
 
-//    public function requestHandler($api_name)
-//    {
-//        if ($api_name == $this->_define::MESSENGER_INT)
-//        {
-//
-//        }
-//    }
+    /**
+     * Get message_payload
+     * @return string
+     */
+    public function getMessagePayload()
+    {
+        return $this->getData(self::MESSAGE_PAYLOAD);
+    }
+
+    /**
+     * Set message_payload
+     * @param string $message_payload
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setMessagePayload($message_payload)
+    {
+        return $this->setData(self::MESSAGE_PAYLOAD, $message_payload);
+    }
 }

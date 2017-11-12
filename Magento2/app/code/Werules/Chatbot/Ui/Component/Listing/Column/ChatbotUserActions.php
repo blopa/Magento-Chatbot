@@ -25,8 +25,8 @@ class ChatbotUserActions extends \Magento\Ui\Component\Listing\Columns\Column
 {
 
     const URL_PATH_DETAILS = 'werules_chatbot/chatbotuser/details';
-    const URL_PATH_DELETE = 'werules_chatbot/chatbotuser/delete';
     protected $urlBuilder;
+    const URL_PATH_DELETE = 'werules_chatbot/chatbotuser/delete';
     const URL_PATH_EDIT = 'werules_chatbot/chatbotuser/edit';
 
     /**

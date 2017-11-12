@@ -22,8 +22,8 @@
 namespace Werules\Chatbot\Setup;
 
 use Magento\Framework\Setup\InstallSchemaInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\SchemaSetupInterface;
 
 class InstallSchema implements InstallSchemaInterface
 {
@@ -340,9 +340,6 @@ class InstallSchema implements InstallSchemaInterface
 //            ['nullable' => False],
 //            'ChatbotAPI ID'
 //        );
-        
-
-        
         $table_werules_chatbot_chatbotapi->addColumn(
             'chatbotuser_id',
             \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
@@ -360,8 +357,17 @@ class InstallSchema implements InstallSchemaInterface
             ['nullable' => False],
             'Content Type'
         );
+        
 
-    
+        
+        $table_werules_chatbot_message->addColumn(
+            'message_payload',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            null,
+            [],
+            'Message Payload'
+        );
+
 // TODO uncomment this
 //        $table_werules_chatbot_message->addForeignKey(
 //            $installer->getFkName('werules_chatbot_message', 'chatbotapi_id', 'werules_chatbot_chatbotapi', 'chatbotapi_id'),

@@ -21,37 +21,37 @@
 
 namespace Werules\Chatbot\Model;
 
-use Werules\Chatbot\Api\ChatbotUserRepositoryInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\CouldNotDeleteException;
-use Werules\Chatbot\Api\Data\ChatbotUserInterfaceFactory;
-use Magento\Framework\Api\DataObjectHelper;
+use Werules\Chatbot\Api\ChatbotUserRepositoryInterface;
+use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Framework\Api\SortOrder;
 use Werules\Chatbot\Api\Data\ChatbotUserSearchResultsInterfaceFactory;
 use Werules\Chatbot\Model\ResourceModel\ChatbotUser as ResourceChatbotUser;
-use Magento\Framework\Reflection\DataObjectProcessor;
+use Werules\Chatbot\Api\Data\ChatbotUserInterfaceFactory;
+use Magento\Framework\Api\DataObjectHelper;
 use Werules\Chatbot\Model\ResourceModel\ChatbotUser\CollectionFactory as ChatbotUserCollectionFactory;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Exception\CouldNotDeleteException;
 
 class ChatbotUserRepository implements chatbotUserRepositoryInterface
 {
 
+    protected $resource;
+
     protected $dataObjectProcessor;
-
-    protected $chatbotUserFactory;
-
-    private $storeManager;
-
-    protected $dataObjectHelper;
-
-    protected $dataChatbotUserFactory;
 
     protected $chatbotUserCollectionFactory;
 
-    protected $resource;
+    private $storeManager;
+
+    protected $chatbotUserFactory;
+
+    protected $dataChatbotUserFactory;
 
     protected $searchResultsFactory;
+
+    protected $dataObjectHelper;
 
 
     /**

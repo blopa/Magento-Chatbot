@@ -24,15 +24,15 @@ namespace Werules\Chatbot\Api\Data;
 interface ChatbotAPIInterface
 {
 
-    const FALLBACK_QTY = 'fallback_qty';
-    const CHAT_ID = 'chat_id';
-    const CREATED_AT = 'created_at';
     const CHATBOTUSER_ID = 'chatbotuser_id';
-    const ENABLED = 'enabled';
+    const FALLBACK_QTY = 'fallback_qty';
+    const CHATBOTAPI_ID = 'chatbotapi_id';
+    const CREATED_AT = 'created_at';
     const CONVERSATION_STATE = 'conversation_state';
     const CHATBOT_TYPE = 'chatbot_type';
     const UPDATED_AT = 'updated_at';
-    const CHATBOTAPI_ID = 'chatbotapi_id';
+    const ENABLED = 'enabled';
+    const CHAT_ID = 'chat_id';
 
 
     /**
