@@ -36,7 +36,7 @@ class Data extends AbstractHelper
     protected $_define;
     protected $_configPrefix;
     protected $_serializer;
-    protected $_categoryHelper;
+//    protected $_categoryHelper;
     protected $_categoryFactory;
 
     public function __construct(
@@ -46,7 +46,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Helper\Category $categoryHelper,
+//        \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory
     )
     {
@@ -57,7 +57,7 @@ class Data extends AbstractHelper
         $this->_chatbotAPI  = $chatbotAPI;
         $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
-        $this->_categoryHelper = $categoryHelper;
+//        $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
         parent::__construct($context);
     }
