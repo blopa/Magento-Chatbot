@@ -39,6 +39,7 @@ class Data extends AbstractHelper
     protected $_categoryHelper;
     protected $_categoryFactory;
     protected $_categoryCollectionFactory;
+    protected $_storeManagerInterface;
 
     public function __construct(
         Context $context,
@@ -49,7 +50,8 @@ class Data extends AbstractHelper
         \Werules\Chatbot\Model\MessageFactory $message,
         \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
+        \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
     )
     {
         $this->objectManager = $objectManager;
@@ -62,6 +64,7 @@ class Data extends AbstractHelper
         $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
+        $this->_storeManagerInterface = $storeManagerInterface;
         parent::__construct($context);
     }
 
@@ -311,7 +314,8 @@ class Data extends AbstractHelper
         {
             $productName = $product->getName();
             $productUrl = $product->getProductUrl();
-            $productImage = $product->getImage();
+//            $productImage = $product->getImage();
+            $productImage = $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage();
             // TODO add placeholder
             $options = array(
                 array(
