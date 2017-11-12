@@ -282,6 +282,7 @@ class Data extends AbstractHelper
     private function listProductsFromCategory($message)
     {
         $result = array();
+        $productList = array();
         if ($message->getMessagePayload())
             $category = $this->getCategoryById($message->getMessagePayload());
         else
@@ -291,18 +292,63 @@ class Data extends AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $responseMessage = array();
-            $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-            $responseMessage['content'] = $product->getName();
-            array_push($result, $responseMessage);
+            $content = $this->getProductDetailsMessage($product);
+            array_push($productList, $content);
         }
+
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::IMAGE_WITH_OPTIONS;
+        $responseMessage['content'] = json_encode($productList);
+        array_push($result, $responseMessage);
 
         return $result;
     }
 
     private function getProductDetailsMessage($product)
     {
-        // TODO
+        $result = array();
+        if ($product->getId())
+        {
+            $productName = $product->getName();
+            $productUrl = $product->getProductUrl();
+            $productImage = $product->getImage();
+            // TODO add placeholder
+            $options = array(
+                array(
+                    'type' => 'postback',
+                    'title' => 'Add to cart',
+                    'payload' => 'todo_here'
+                ),
+                array(
+                    'type' => 'web_url',
+                    'title' => "Visit product's page",
+                    'url' => $productUrl
+                )
+            );
+            $element = array(
+                'title' => $productName,
+                'item_url' => $productUrl,
+                'image_url' => $productImage,
+                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+                'buttons' => $options
+            );
+            array_push($result, $element);
+        }
+
+        return $result;
+    }
+
+    public function excerpt($text, $size)
+    {
+        if (strlen($text) > $size)
+        {
+            $text = substr($text, 0, $size);
+            $text = substr($text, 0, strrpos($text, " "));
+            $etc = " ...";
+            $text = $text . $etc;
+        }
+
+        return $text;
     }
 
     private function handleCommands($message)

@@ -57,6 +57,8 @@ class Define
     // message content types
     const CONTENT_TEXT = 0;
     const QUICK_REPLY = 1;
+    const IMAGE_WITH_TEXT = 2;
+    const IMAGE_WITH_OPTIONS = 3;
 
     // conversation states
     const CONVERSATION_STARTED = 0;
