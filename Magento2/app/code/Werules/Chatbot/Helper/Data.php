@@ -252,6 +252,12 @@ class Data extends AbstractHelper
             $result = $this->listProductsFromCategory($message);
         }
 
+        if ($result)
+        {
+            $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
+            $chatbotAPI->save();
+        }
+
         return $result;
     }
 
@@ -311,7 +317,7 @@ class Data extends AbstractHelper
 
     private function getProductDetailsObject($product)
     {
-        $result = array();
+        $element = array();
         if ($product->getId())
         {
             $productName = $product->getName();
@@ -338,10 +344,10 @@ class Data extends AbstractHelper
                 'subtitle' => $this->excerpt($product->getShortDescription(), 60),
                 'buttons' => $options
             );
-            array_push($result, $element);
+            //array_push($result, $element);
         }
 
-        return $result;
+        return $element;
     }
 
     public function excerpt($text, $size)
