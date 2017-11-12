@@ -24,8 +24,8 @@ namespace Werules\Chatbot\Controller\Adminhtml;
 abstract class ChatbotUser extends \Magento\Backend\App\Action
 {
 
-    const ADMIN_RESOURCE = 'Werules_Chatbot::top_level';
     protected $_coreRegistry;
+    const ADMIN_RESOURCE = 'Werules_Chatbot::top_level';
 
     /**
      * @param \Magento\Backend\App\Action\Context $context

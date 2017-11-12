@@ -21,37 +21,37 @@
 
 namespace Werules\Chatbot\Model;
 
-use Werules\Chatbot\Api\Data\MessageSearchResultsInterfaceFactory;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
+use Werules\Chatbot\Api\Data\MessageInterfaceFactory;
 use Werules\Chatbot\Model\ResourceModel\Message as ResourceMessage;
-use Magento\Framework\Exception\CouldNotDeleteException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Reflection\DataObjectProcessor;
+use Werules\Chatbot\Api\Data\MessageSearchResultsInterfaceFactory;
 use Werules\Chatbot\Api\MessageRepositoryInterface;
+use Magento\Framework\Api\SortOrder;
 use Werules\Chatbot\Model\ResourceModel\Message\CollectionFactory as MessageCollectionFactory;
 use Magento\Framework\Api\DataObjectHelper;
-use Magento\Framework\Api\SortOrder;
-use Werules\Chatbot\Api\Data\MessageInterfaceFactory;
-use Magento\Framework\Reflection\DataObjectProcessor;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Exception\CouldNotDeleteException;
 
 class MessageRepository implements messageRepositoryInterface
 {
 
-    protected $dataObjectProcessor;
+    protected $resource;
 
-    protected $messageFactory;
+    protected $dataObjectProcessor;
 
     private $storeManager;
 
-    protected $dataObjectHelper;
+    protected $messageFactory;
 
-    protected $resource;
-
-    protected $dataMessageFactory;
+    protected $messageCollectionFactory;
 
     protected $searchResultsFactory;
 
-    protected $messageCollectionFactory;
+    protected $dataObjectHelper;
+
+    protected $dataMessageFactory;
 
 
     /**

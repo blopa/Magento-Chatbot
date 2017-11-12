@@ -21,17 +21,17 @@
 
 namespace Werules\Chatbot\Model\ChatbotUser;
 
-use Werules\Chatbot\Model\ResourceModel\ChatbotUser\CollectionFactory;
 use Magento\Framework\App\Request\DataPersistorInterface;
+use Werules\Chatbot\Model\ResourceModel\ChatbotUser\CollectionFactory;
 
 class DataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {
 
     protected $collection;
 
-    protected $loadedData;
     protected $dataPersistor;
 
+    protected $loadedData;
 
     /**
      * Constructor

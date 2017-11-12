@@ -24,17 +24,17 @@ namespace Werules\Chatbot\Api\Data;
 interface ChatbotUserInterface
 {
 
-    const QUOTE_ID = 'quote_id';
-    const HASH_KEY = 'hash_key';
-    const SESSION_ID = 'session_id';
-    const CREATED_AT = 'created_at';
     const CHATBOTUSER_ID = 'chatbotuser_id';
-    const ADMIN = 'admin';
     const CUSTOMER_ID = 'customer_id';
-    const ENABLE_PROMOTIONAL_MESSAGES = 'enable_promotional_messages';
+    const CREATED_AT = 'created_at';
     const LOGGED = 'logged';
+    const SESSION_ID = 'session_id';
     const ENABLE_SUPPORT = 'enable_support';
+    const HASH_KEY = 'hash_key';
+    const QUOTE_ID = 'quote_id';
+    const ADMIN = 'admin';
     const UPDATED_AT = 'updated_at';
+    const ENABLE_PROMOTIONAL_MESSAGES = 'enable_promotional_messages';
 
 
     /**

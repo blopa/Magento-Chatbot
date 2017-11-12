@@ -36,6 +36,8 @@ class Data extends AbstractHelper
     protected $_define;
     protected $_configPrefix;
     protected $_serializer;
+//    protected $_categoryHelper;
+    protected $_categoryFactory;
 
     public function __construct(
         Context $context,
@@ -43,7 +45,9 @@ class Data extends AbstractHelper
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
-        \Werules\Chatbot\Model\MessageFactory $message
+        \Werules\Chatbot\Model\MessageFactory $message,
+//        \Magento\Catalog\Helper\Category $categoryHelper,
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory
     )
     {
         $this->objectManager = $objectManager;
@@ -51,7 +55,10 @@ class Data extends AbstractHelper
         $this->storeManager  = $storeManager;
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
+        $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
+//        $this->_categoryHelper = $categoryHelper;
+        $this->_categoryFactory = $categoryFactory;
         parent::__construct($context);
     }
 
@@ -107,7 +114,9 @@ class Data extends AbstractHelper
 
     private function processIncomingMessage($message)
     {
-        // TODO do something
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            $this->_configPrefix = 'werules_chatbot_messenger';
+
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
 
@@ -141,8 +150,8 @@ class Data extends AbstractHelper
             {
                 $outgoingMessage = $this->_messageModel->create();
                 $outgoingMessage->setSenderId($message->getSenderId());
-                $outgoingMessage->setContent($content);
-                $outgoingMessage->setContentType($this->_define::CONTENT_TEXT); // TODO
+                $outgoingMessage->setContent($content['content']);
+                $outgoingMessage->setContentType($content['content_type']); // TODO
                 $outgoingMessage->setStatus($this->_define::PROCESSING);
                 $outgoingMessage->setDirection($this->_define::OUTGOING);
                 $outgoingMessage->setChatMessageId($message->getChatMessageId());
@@ -173,7 +182,12 @@ class Data extends AbstractHelper
 
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
-        $result = $chatbotAPI->sendMessage($outgoingMessage);
+
+        $result = false;
+        if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
+            $result = $chatbotAPI->sendMessage($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
+            $result = $chatbotAPI->sendQuickReply($outgoingMessage);
 
         if ($result)
         {
@@ -189,9 +203,9 @@ class Data extends AbstractHelper
 
     private function processMessageRequest($message)
     {
-        $this->_configPrefix = 'werules_chatbot_messenger';
-        $messageContent = $message->getContent();
+        //$messageContent = $message->getContent();
         $responseContent = array();
+        $commandResponses = false;
 //        if ($messageContent == 'foobar')
 //        {
 //            array_push($content, 'eggs and spam');
@@ -213,7 +227,9 @@ class Data extends AbstractHelper
 //
 //        return $content;
 
-        $commandResponses = $this->handleCommands($messageContent);
+        $conversationStateResponses = $this->handleConversationState($message);
+        if (!$conversationStateResponses)
+            $commandResponses = $this->handleCommands($message);
         if ($commandResponses)
         {
             foreach ($commandResponses as $commandResponse)
@@ -222,181 +238,345 @@ class Data extends AbstractHelper
             }
         }
         else
-            array_push($responseContent, "dunno :/");
+            array_push($responseContent, array('content_type' => $this->_define::CONTENT_TEXT, 'content' => 'Dunno!'));
 
         return $responseContent;
     }
 
-    private function handleCommands($messageContent)
+    private function handleConversationState($message)
     {
-        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
-        $this->logger($serializedCommands);
-        $commandsList = $this->_serializer->unserialize($serializedCommands);
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = false;
-        if (is_array($commandsList))
+
+        if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
         {
-            foreach($commandsList as $command)
-            {
-                if ($messageContent == $command['command_code'])
-                {
-                    if ($command['command_id'] == $this->_define::START_COMMAND_ID)
-                        $result = $this->processStartCommand();
-                    else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
-                        $result = $this->processListCategoriesCommand();
-                    else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
-                        $result = $this->processSearchCommand();
-                    else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
-                        $result = $this->processLoginCommand();
-                    else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
-                        $result = $this->processListOrdersCommand();
-                    else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
-                        $result = $this->processReorderCommand();
-                    else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
-                        $result = $this->processAddToCartCommand();
-                    else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
-                        $result = $this->processCheckoutCommand();
-                    else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
-                        $result = $this->processClearCartCommand();
-                    else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
-                        $result = $this->processTrackOrderCommand();
-                    else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
-                        $result = $this->processSupportCommand();
-                    else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
-                        $result = $this->processSendEmailCommand();
-                    else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
-                        $result = $this->processCancelCommand();
-                    else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
-                        $result = $this->processHelpCommand();
-                    else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
-                        $result = $this->processAboutCommand();
-                    else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
-                        $result = $this->processLogoutCommand();
-                    else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
-                        $result = $this->processRegisterCommand();
-                    break;
-                }
-            }
+            $result = $this->listProductsFromCategory($message);
         }
 
         return $result;
     }
 
+    public function getCategory($category_id)
+    {
+        $category = $this->_categoryFactory->create();
+        $category->load($category_id);
+
+        return $category;
+    }
+
+    private function listProductsFromCategory($message)
+    {
+        if ($message->getMessagePayload())
+            $category = $this->getCategory($message->getMessagePayload());
+        else // TODO
+            $category = $this->getCategory($message->getMessagePayload());
+
+        return false;
+    }
+
+    private function getProductDetailsMessage($message)
+    {
+        // TODO
+    }
+
+    private function handleCommands($message)
+    {
+        $messageContent = $message->getContent();
+        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
+        $this->logger($serializedCommands);
+        $commandsList = $this->_serializer->unserialize($serializedCommands);
+        $result = false;
+        $state = false;
+        if (is_array($commandsList))
+        {
+            foreach($commandsList as $command)
+            {
+                // if ($messageContent == $command['command_code'])
+                if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
+                {
+                    if ($command['command_id'] == $this->_define::START_COMMAND_ID)
+                    {
+                        $result = $this->processStartCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                    {
+                        $result = $this->processListCategoriesCommand();
+                        if ($result)
+                            $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+                    }
+                    else if ($command['command_id'] == $this->_define::SEARCH_COMMAND_ID)
+                    {
+                        $result = $this->processSearchCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::LOGIN_COMMAND_ID)
+                    {
+                        $result = $this->processLoginCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::LIST_ORDERS_COMMAND_ID)
+                    {
+                        $result = $this->processListOrdersCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::REORDER_COMMAND_ID)
+                    {
+                        $result = $this->processReorderCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::ADD_TO_CART_COMMAND_ID)
+                    {
+                        $result = $this->processAddToCartCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::CHECKOUT_COMMAND_ID)
+                    {
+                        $result = $this->processCheckoutCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::CLEAR_CART_COMMAND_ID)
+                    {
+                        $result = $this->processClearCartCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::TRACK_ORDER_COMMAND_ID)
+                    {
+                        $result = $this->processTrackOrderCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::SUPPORT_COMMAND_ID)
+                    {
+                        $result = $this->processSupportCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::SEND_EMAIL_COMMAND_ID)
+                    {
+                        $result = $this->processSendEmailCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::CANCEL_COMMAND_ID)
+                    {
+                        $result = $this->processCancelCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::HELP_COMMAND_ID)
+                    {
+                        $result = $this->processHelpCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::ABOUT_COMMAND_ID)
+                    {
+                        $result = $this->processAboutCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::LOGOUT_COMMAND_ID)
+                    {
+                        $result = $this->processLogoutCommand();
+                    }
+                    else if ($command['command_id'] == $this->_define::REGISTER_COMMAND_ID)
+                    {
+                        $result = $this->processRegisterCommand();
+                    }
+                    break;
+                }
+            }
+        }
+
+        if ($state)
+            $this->updateConversationState($message->getSenderId(), $state);
+
+        return $result;
+    }
+
+    private function updateConversationState($sender_id, $state)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($sender_id, 'chat_id'); // TODO
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setConversationState($state);
+            $datetime = date('Y-m-d H:i:s');
+            $chatbotAPI->setUpdatedAt($datetime);
+            $chatbotAPI->save();
+
+            return true;
+        }
+
+        return false;
+    }
+
     private function processStartCommand()
     {
-        $result = array();
-        array_push($result, 'you just sent the START command!');
-        return $result;
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the START command!';
+        return $responseMessage;
     }
 
     private function processListCategoriesCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LIST_CATEGORIES command!');
+        $categories = $this->getStoreCategories(false,false,true);
+        $quickReplies = array();
+        foreach ($categories as $category)
+        {
+            $categoryName = $category->getName();
+            if ($categoryName)
+            {
+                $quickReply = array(
+                    'content_type' => 'text', // TODO messenger pattern
+                    'title' => $categoryName,
+                    'payload' => $category->getId()
+                );
+                array_push($quickReplies, $quickReply);
+            }
+        }
+        $contentObject = new \stdClass();
+        $contentObject->message = 'Pick one of the following categories.';
+        $contentObject->quick_replies = $quickReplies;
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
+        $responseMessage['content'] = json_encode($contentObject);
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processSearchCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the SEARCH command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the SEARCH command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processLoginCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LOGIN command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the LOGIN command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processListOrdersCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LIST_ORDERS command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the LIST_ORDERS command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processReorderCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the REORDER command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the REORDER command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processAddToCartCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the ADD_TO_CART command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the ADD_TO_CART command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processCheckoutCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the CHECKOUT command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the CHECKOUT command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processClearCartCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the CLEAR_CART command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the CLEAR_CART command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processTrackOrderCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the TRACK_ORDER command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the TRACK_ORDER command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processSupportCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the SUPPORT command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the SUPPORT command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processSendEmailCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the SEND_EMAIL command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the SEND_EMAIL command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processCancelCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the CANCEL command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the CANCEL command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processHelpCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the HELP command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the HELP command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processAboutCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the ABOUT command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the ABOUT command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processLogoutCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the LOGOUT command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the LOGOUT command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
     private function processRegisterCommand()
     {
         $result = array();
-        array_push($result, 'you just sent the REGISTER command!');
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
+        $responseMessage['content'] = 'you just sent the REGISTER command!';
+        array_push($result, $responseMessage);
         return $result;
     }
 
@@ -404,4 +584,9 @@ class Data extends AbstractHelper
 //    {
 //        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
 //    }
+    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    {
+        //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+        return $this->_categoryFactory->create()->getCollection();
+    }
 }

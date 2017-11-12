@@ -271,7 +271,9 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 
     /// Get payload
     public function getPayload() {
-        return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
+        if (isset($this->data["entry"][0]["messaging"][0]["postback"]["payload"]))
+            return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
+        return false;
     }
 
     /// Get quickreply payload

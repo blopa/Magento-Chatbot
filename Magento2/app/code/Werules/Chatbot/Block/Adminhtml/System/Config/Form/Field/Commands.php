@@ -98,13 +98,15 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
 
     protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
+        $optionExtraAttr = [];
+        $optionExtraAttr['option_' . $this->_getRendererCommands()->calcOptionHash($row->getData('command_id'))] = 'selected="selected"';
         $row->setData(
-            'option_extra_attr_' . $this->_getRendererCommands()->calcOptionHash($row->getData('command_id')),
-            'selected="selected"'
+            'option_extra_attrs', $optionExtraAttr
         );
+        $optionExtraAttr = [];
+        $optionExtraAttr['option_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_command'))] = 'selected="selected"';
         $row->setData(
-            'option_extra_attr_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_command')),
-            'selected="selected"'
+            'option_extra_attrs', $optionExtraAttr
         );
     }
 }
