@@ -258,6 +258,10 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
             $this->_apiModel = $this->initMessengerAPI($api_token);
             $decodedContent = json_decode($messageContent);
+//            foreach ($decodedContent->quick_replies as $quickReply)
+//            {
+//                // TODO build quickreplies here
+//            }
             $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
         }
 
@@ -272,6 +276,29 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
             $this->_apiModel = $this->initMessengerAPI($api_token);
             $decodedContent = json_decode($messageContent);
+
+            $elements = array();
+            foreach ($decodedContent as $decodedObject)
+            {
+                $auxArr = array();
+                $auxArr['title'] = $decodedObject['title'];
+                $auxArr['item_url'] = $decodedObject['item_url'];
+                $auxArr['image_url'] = $decodedObject['image_url'];
+                $auxArr['subtitle'] = $decodedObject['subtitle'];
+                $auxArr['buttons'] = array();
+                foreach ($decodedObject['buttons'] as $button)
+                {
+                    $auxArr2 = array();
+                    $auxArr2['type'] = $button['type'];
+                    $auxArr2['title'] = $button['title'];
+                    if (isset($button['payload']))
+                        $auxArr2['payload'] = $button['payload'];
+                    if (isset($button['payload']))
+                        $auxArr2['url'] = $button['url'];
+                    array_push($auxArr['buttons'], $auxArr2);
+                }
+            }
+            $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
         }
     }
 }
