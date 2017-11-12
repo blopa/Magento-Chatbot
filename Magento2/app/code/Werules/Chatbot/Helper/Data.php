@@ -206,29 +206,19 @@ class Data extends AbstractHelper
         //$messageContent = $message->getContent();
         $responseContent = array();
         $commandResponses = false;
-//        if ($messageContent == 'foobar')
-//        {
-//            array_push($content, 'eggs and spam');
-//        }
-//        else if ($messageContent == 'flood')
-//        {
-//            array_push($content, 'so you want a flood?');
-//            array_push($content, 'okay then');
-//            array_push($content, 'here we go');
-//            array_push($content, 'floooooood');
-//            array_push($content, 'flooood');
-//            array_push($content, 'flooood flooood flooood flooood flooood');
-//            array_push($content, 'flood..!');
-//        }
-//        else
-//        {
-//            array_push($content, 'hello :D');
-//        }
-//
-//        return $content;
+        $conversationStateResponses = false;
 
-        $conversationStateResponses = $this->handleConversationState($message);
-        if (!$conversationStateResponses)
+        if (count($responseContent) <= 0)
+            $conversationStateResponses = $this->handleConversationState($message);
+        if ($conversationStateResponses)
+        {
+            foreach ($conversationStateResponses as $conversationStateResponse)
+            {
+                array_push($responseContent, $conversationStateResponse);
+            }
+        }
+
+        if (count($responseContent) <= 0)
             $commandResponses = $this->handleCommands($message);
         if ($commandResponses)
         {
@@ -237,8 +227,8 @@ class Data extends AbstractHelper
                 array_push($responseContent, $commandResponse);
             }
         }
-        else
-            array_push($responseContent, array('content_type' => $this->_define::CONTENT_TEXT, 'content' => 'Dunno!'));
+
+//        array_push($responseContent, array('content_type' => $this->_define::CONTENT_TEXT, 'content' => 'Dunno!'));
 
         return $responseContent;
     }
@@ -265,7 +255,7 @@ class Data extends AbstractHelper
         return $category;
     }
 
-    public function getCategoryProducts($category_id)
+    public function getProductsFromCategoryId($category_id)
     {
         $productCollection = $this->getCategoryById($category_id)->getProductCollection();
         $productCollection->addAttributeToSelect('*');
@@ -281,7 +271,7 @@ class Data extends AbstractHelper
         else // TODO
             $category = $this->getCategoryById($message->getContent());
 
-        $productCollection = $this->getCategoryProducts($category->getId())->getProductCollection();
+        $productCollection = $this->getProductsFromCategoryId($category->getId());
 
         foreach ($productCollection as $product)
         {
