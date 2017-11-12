@@ -38,6 +38,7 @@ class Data extends AbstractHelper
     protected $_serializer;
     protected $_categoryHelper;
     protected $_categoryFactory;
+    protected $_categoryCollectionFactory;
 
     public function __construct(
         Context $context,
@@ -47,7 +48,8 @@ class Data extends AbstractHelper
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
         \Magento\Catalog\Helper\Category $categoryHelper,
-        \Magento\Catalog\Model\CategoryFactory $categoryFactory
+        \Magento\Catalog\Model\CategoryFactory $categoryFactory,
+        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory
     )
     {
         $this->objectManager = $objectManager;
@@ -59,6 +61,7 @@ class Data extends AbstractHelper
         $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
+        $this->_categoryCollectionFactory = $categoryCollectionFactory;
         parent::__construct($context);
     }
 
@@ -255,6 +258,19 @@ class Data extends AbstractHelper
         return $category;
     }
 
+    public function getCategoryByName($name)
+    {
+        return $this->getCategoriesByName($name)->getFirstItem();
+    }
+
+    public function getCategoriesByName($name)
+    {
+        $categoryCollection = $this->_categoryCollectionFactory->create();
+        $categoryCollection = $categoryCollection->addAttributeToFilter('name', $name);
+
+        return $categoryCollection;
+    }
+
     public function getProductsFromCategoryId($category_id)
     {
         $productCollection = $this->getCategoryById($category_id)->getProductCollection();
@@ -268,8 +284,8 @@ class Data extends AbstractHelper
         $result = array();
         if ($message->getMessagePayload())
             $category = $this->getCategoryById($message->getMessagePayload());
-        else // TODO
-            $category = $this->getCategoryById($message->getContent());
+        else
+            $category = $this->getCategoryByName($message->getContent());
 
         $productCollection = $this->getProductsFromCategoryId($category->getId());
 
