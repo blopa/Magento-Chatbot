@@ -36,8 +36,7 @@ class Data extends AbstractHelper
     protected $_define;
     protected $_configPrefix;
     protected $_serializer;
-//    protected $_categoryHelper;
-    protected $_categoryFactory;
+    protected $_categoryHelper;
 
     public function __construct(
         Context $context,
@@ -46,8 +45,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\MessageFactory $message,
-        \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryFactory
-//        \Magento\Catalog\Helper\Category $categoryHelper
+        \Magento\Catalog\Helper\Category $categoryHelper
     )
     {
         $this->objectManager = $objectManager;
@@ -57,8 +55,7 @@ class Data extends AbstractHelper
         $this->_chatbotAPI  = $chatbotAPI;
         $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
-        $this->_categoryFactory = $categoryFactory;
-//        $this->_categoryHelper = $categoryHelper;
+        $this->_categoryHelper = $categoryHelper;
         parent::__construct($context);
     }
 
@@ -392,7 +389,7 @@ class Data extends AbstractHelper
     private function processListCategoriesCommand()
     {
         $result = array();
-        $categories = $this->getStoreCategories();
+        $categories = $this->getStoreCategories(false,false,true);
         $quickReplies = array();
         foreach ($categories as $category)
         {
@@ -409,7 +406,7 @@ class Data extends AbstractHelper
         }
         $contentObject = new \stdClass();
         $contentObject->message = 'Pick one of the following categories.';
-        $contentObject->quick_replies = $categories;//$quickReplies;
+        $contentObject->quick_replies = $quickReplies;
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
         $responseMessage['content'] = json_encode($contentObject);
@@ -571,11 +568,8 @@ class Data extends AbstractHelper
 //    {
 //        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
 //    }
-    public function getStoreCategories()
+    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
-        //return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-        $collection = $this->_categoryFactory->create()->addAttributeToSelect('*');
-
-        return $collection;
+        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
     }
 }
