@@ -262,7 +262,24 @@ class Data extends AbstractHelper
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = false;
 
-        $result = $chatbotAPI->getNLPTextMeaning($message->getContent());
+        $entity = $chatbotAPI->getNLPTextMeaning($message->getContent());
+
+        if (isset($entity['intent']))
+        {
+            $intent = $entity['intent']['value'];
+            if ($intent == 'command')
+            {
+                if (isset($entity['command']))
+                {
+                    $command = $entity['command'];
+                    if (isset($entity['keyword']))
+                    {
+                        $keyword = $entity['keyword'];
+                        $result = $this->handleCommandsWithParameters($command, $keyword);
+                    }
+                }
+            }
+        }
 
         return $result;
     }
@@ -442,7 +459,16 @@ class Data extends AbstractHelper
         return $commandsList;
     }
 
-    private function handleCommands($message)
+    private function handleCommandsWithParameters($command, $keyword)
+    {
+        return $this->handleCommands($command, $keyword);
+
+//        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
+//        $commandsList = $this->_serializer->unserialize($serializedCommands);
+//        $this->_commandsList = $this->prepareCommandsList($commandsList);
+    }
+
+    private function handleCommands($message, $keyword = null)
     {
         $messageContent = $message->getContent();
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
@@ -461,75 +487,143 @@ class Data extends AbstractHelper
                 {
                     if ($key == $this->_define::START_COMMAND_ID)
                     {
-                        $result = $this->processStartCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processStartCommand();
+                        }
                     }
                     else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
                     {
-                        $result = $this->processListCategoriesCommand();
-                        if ($result)
-                            $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processListCategoriesCommand();
+                            if ($result)
+                                $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+                        }
                     }
                     else if ($key == $this->_define::SEARCH_COMMAND_ID)
                     {
-                        $result = $this->processSearchCommand();
-                        if ($result)
-                            $state = $this->_define::CONVERSATION_SEARCH;
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processSearchCommand();
+                            if ($result)
+                                $state = $this->_define::CONVERSATION_SEARCH;
+                        }
                     }
                     else if ($key == $this->_define::LOGIN_COMMAND_ID)
                     {
-                        $result = $this->processLoginCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processLoginCommand();
+                        }
                     }
                     else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
                     {
-                        $result = $this->processListOrdersCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processListOrdersCommand();
+                        }
                     }
                     else if ($key == $this->_define::REORDER_COMMAND_ID)
                     {
-                        $result = $this->processReorderCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processReorderCommand();
+                        }
                     }
                     else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
                     {
-                        $result = $this->processAddToCartCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processAddToCartCommand();
+                        }
                     }
                     else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
                     {
-                        $result = $this->processCheckoutCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processCheckoutCommand();
+                        }
                     }
                     else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
                     {
-                        $result = $this->processClearCartCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processClearCartCommand();
+                        }
                     }
                     else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
                     {
-                        $result = $this->processTrackOrderCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processTrackOrderCommand();
+                        }
                     }
                     else if ($key == $this->_define::SUPPORT_COMMAND_ID)
                     {
-                        $result = $this->processSupportCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processSupportCommand();
+                        }
                     }
                     else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
                     {
-                        $result = $this->processSendEmailCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processSendEmailCommand();
+                        }
                     }
                     else if ($key == $this->_define::CANCEL_COMMAND_ID)
                     {
-                        $result = $this->processCancelCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processCancelCommand();
+                        }
                     }
                     else if ($key == $this->_define::HELP_COMMAND_ID)
                     {
-                        $result = $this->processHelpCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processHelpCommand();
+                        }
                     }
                     else if ($key == $this->_define::ABOUT_COMMAND_ID)
                     {
-                        $result = $this->processAboutCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processAboutCommand();
+                        }
                     }
                     else if ($key == $this->_define::LOGOUT_COMMAND_ID)
                     {
-                        $result = $this->processLogoutCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processLogoutCommand();
+                        }
                     }
                     else if ($key == $this->_define::REGISTER_COMMAND_ID)
                     {
-                        $result = $this->processRegisterCommand();
+                        if ($keyword){}
+                        else
+                        {
+                            $result = $this->processRegisterCommand();
+                        }
                     }
                     break;
                 }

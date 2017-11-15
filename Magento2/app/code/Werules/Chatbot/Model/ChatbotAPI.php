@@ -334,72 +334,53 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
     }
 
+    private function getEntitiesValue($entity, $entitiesAttributes)
+    {
+        $finalEntity = array();
+        if (count($entitiesAttributes) > 0)
+        {
+            foreach ($entitiesAttributes as $entityAttribute)
+            {
+                if (isset($entity[$entityAttribute]))
+                {
+                    foreach ($entity[$entityAttribute] as $entAttr)
+                    {
+                        if (isset($entAttr['confidence']))
+                        {
+                            if ($entAttr['confidence'] > 0.1)
+                            {
+                                if (isset($entAttr['value']))
+                                    $finalEntity[$entityAttribute] = $entAttr['value'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $finalEntity;
+    }
+
     public function getNLPTextMeaning($text)
     {
         $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
         $this->_NLPModel = $this->initWitAIAPI($api_token);
 
-        $result = $this->_NLPModel->getTextResponse($text);
+        $response = $this->_NLPModel->getTextResponse($text);
+        $result = array();
 
-        if (isset($result['_text']))
+        if (isset($response['_text']))
         {
-            if ($result['_text'] == $text)
+            if ($response['_text'] == $text)
             {
-                $intention = '';
-                $keyword = '';
-                $command = '';
-                if (isset($result['entities']))
+                if (isset($response['entities']))
                 {
-                    if (count($result['entities']) > 0)
-                    {
-                        foreach ($result['entities'] as $entity)
-                        {
-                            if (isset($entity['intent']) && $intention == '')
-                            {
-                                foreach ($entity['intent'] as $intent)
-                                {
-                                    if (isset($intent['confidence']))
-                                    {
-                                        if ($intent['confidence'] > 0.1)
-                                        {
-                                            if (isset($intent['value']))
-                                                $intention = $intent['value'];
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (isset($entity['keyword']))
-                            {
-                                foreach ($entity['keyword'] as $key)
-                                {
-                                    if (isset($key['confidence']))
-                                    {
-                                        if ($key['confidence'] > 0.1)
-                                        {
-                                            if (isset($key['value']))
-                                                $keyword = $key['value'];
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (isset($entity['command']) && $intention == 'command')
-                            {
-                                foreach ($entity['command'] as $comm)
-                                {
-                                    if (isset($comm['confidence']))
-                                    {
-                                        if ($comm['confidence'] > 0.1)
-                                        {
-                                            if (isset($comm['value']))
-                                                $command = $comm['value'];
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    $entitiesList = array(
+                        'intent',
+                        'keyword',
+                        'command'
+                    );
+                    $result = $this->getEntitiesValue($response['entities'], $entitiesList);
                 }
             }
         }
