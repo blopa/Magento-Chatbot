@@ -24,7 +24,7 @@ namespace Werules\Chatbot\Model\Api;
 class witAI extends \Magento\Framework\Model\AbstractModel {
 
     protected $_token;
-    protected $_version = '15/11/2017';
+    protected $_version = '11/11/2017';
     //protected $_data;
 
     /// Class constructor

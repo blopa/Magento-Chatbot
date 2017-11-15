@@ -26,6 +26,7 @@ use Werules\Chatbot\Api\Data\ChatbotAPIInterface;
 class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements ChatbotAPIInterface
 {
     protected $_apiModel;
+    protected $_NLPModel;
     protected $_objectManager;
     protected $_define;
     protected $_helper;
@@ -217,6 +218,11 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this
     }
 
+    public function initWitAIAPI($token) // TODO TODO TODO
+    {
+        return $this->_objectManager->create('Werules\Chatbot\Model\Api\witAI', array('token' => $token)); // TODO find a better way to to this
+    }
+
     // custom methods
 //    public function requestHandler($api_name)
 //    {
@@ -326,5 +332,25 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             array_push($elements, $element);
         }
         $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
+    }
+
+    public function getNLPTextMeaning($text)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
+        $this->_NLPModel = $this->initWitAIAPI($api_token);
+
+        $result = $this->_NLPModel->getTextResponse($text);
+
+        return $result;
+    }
+
+    public function getNLPAudioMeaning($audio)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
+        $this->_NLPModel = $this->initWitAIAPI($api_token);
+
+        $result = $this->_NLPModel->getAudioResponse($audio);
+
+        return $result;
     }
 }
