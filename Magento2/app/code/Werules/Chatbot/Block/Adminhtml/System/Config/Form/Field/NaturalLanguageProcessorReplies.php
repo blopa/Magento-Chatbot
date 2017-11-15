@@ -56,6 +56,11 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
             //'style' => 'width: 100%',
             'class' => 'validate-no-html-tags'
         ));
+        $this->addColumn('confidence', array(
+            'label' => __('Confidence'),
+            //'style' => 'width: 100%',
+            'class' => 'input-number validate-number validate-number-range number-range-1-100'
+        ));
         $this->addColumn('stop_processing', array(
             'label' => __('Stop Processing'),
             'renderer' => $this->_getRendererYesNo()

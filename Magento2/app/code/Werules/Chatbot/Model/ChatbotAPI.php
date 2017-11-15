@@ -281,7 +281,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $decodedContent = json_decode($messageContent);
 //            foreach ($decodedContent->quick_replies as $quickReply)
 //            {
-//                // TODO build quickreplies here
+//                // TODO build quickreplies here for generic
 //            }
         $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
     }
@@ -340,6 +340,69 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $this->_NLPModel = $this->initWitAIAPI($api_token);
 
         $result = $this->_NLPModel->getTextResponse($text);
+
+        if (isset($result['_text']))
+        {
+            if ($result['_text'] == $text)
+            {
+                $intention = '';
+                $keyword = '';
+                $command = '';
+                if (isset($result['entities']))
+                {
+                    if (count($result['entities']) > 0)
+                    {
+                        foreach ($result['entities'] as $entity)
+                        {
+                            if (isset($entity['intent']) && $intention == '')
+                            {
+                                foreach ($entity['intent'] as $intent)
+                                {
+                                    if (isset($intent['confidence']))
+                                    {
+                                        if ($intent['confidence'] > 0.1)
+                                        {
+                                            if (isset($intent['value']))
+                                                $intention = $intent['value'];
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (isset($entity['keyword']))
+                            {
+                                foreach ($entity['keyword'] as $key)
+                                {
+                                    if (isset($key['confidence']))
+                                    {
+                                        if ($key['confidence'] > 0.1)
+                                        {
+                                            if (isset($key['value']))
+                                                $keyword = $key['value'];
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (isset($entity['command']) && $intention == 'command')
+                            {
+                                foreach ($entity['command'] as $comm)
+                                {
+                                    if (isset($comm['confidence']))
+                                    {
+                                        if ($comm['confidence'] > 0.1)
+                                        {
+                                            if (isset($comm['value']))
+                                                $command = $comm['value'];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return $result;
     }

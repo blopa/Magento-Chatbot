@@ -219,6 +219,7 @@ class Data extends AbstractHelper
         $responseContent = array();
         $commandResponses = false;
         $conversationStateResponses = false;
+        $NLPResponses = false;
 
         if (count($responseContent) <= 0)
             $conversationStateResponses = $this->handleConversationState($message);
@@ -240,9 +241,30 @@ class Data extends AbstractHelper
             }
         }
 
+        if (count($responseContent) <= 0)
+            $NLPResponses = $this->handleNaturalLanguageProcessor($message); // getNLPTextMeaning
+        if ($NLPResponses)
+        {
+            foreach ($NLPResponses as $NLPResponse)
+            {
+                array_push($responseContent, $NLPResponse);
+            }
+        }
+
 //        array_push($responseContent, array('content_type' => $this->_define::CONTENT_TEXT, 'content' => 'Dunno!'));
 
         return $responseContent;
+    }
+
+    private function handleNaturalLanguageProcessor($message)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $result = false;
+
+        $result = $chatbotAPI->getNLPTextMeaning($message->getContent());
+
+        return $result;
     }
 
     private function handleConversationState($message)

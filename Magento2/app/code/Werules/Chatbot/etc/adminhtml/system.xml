@@ -135,21 +135,26 @@
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
 				</field>
 				<field id="enable_nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="19" translate="label comment tooltip" type="select">
-					<label>Enable Natual Language Processor Replies (wit.ai)</label>
-					<comment>Enable Natual Language Processor replies.</comment>
+					<label>Enable Natural Language Processor Replies (wit.ai)</label>
+					<comment>Enable Natural Language Processor replies.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<field id="nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="text">
-					<label>Natual Language Processor Replies (wit.ai)</label>
+				<field id="nlp_entity_prefix" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="text">
+					<label>Natural Language Processor Entity Prefix</label>
+					<validate>validate-no-html-tags</validate>
+					<comment>Natural Language Processor entity prefix is a prefix name to flag that the request is coming from Messenger.</comment>
+				</field>
+				<field id="nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="21" translate="label comment tooltip" type="text">
+					<label>Natural Language Processor Replies (wit.ai)</label>
 					<comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\NaturalLanguageProcessorReplies</frontend_model>
 				</field>
-				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="21" translate="label comment tooltip" type="text">
+				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label comment tooltip" type="text">
 					<label>Fallback Message</label>
 					<comment>Message will be sent when the bot don't understand customer messages for the Nst time.</comment>
 				</field>
-				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label comment tooltip" type="text">
+				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="23" translate="label comment tooltip" type="text">
 					<label>Fallback Quantity</label>
 					<validate>input-number validate-number</validate>
 					<comment>Number of fallbacks before sending the fallback message.</comment>
