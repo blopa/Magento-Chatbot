@@ -35,9 +35,9 @@ namespace Werules\Chatbot\Model\Api;
 
 class Messenger extends \Magento\Framework\Model\AbstractModel {
 
-    private $bot_token = "";
+    private $bot_token;
     private $api_version = "v2.11";
-    private $data = array();
+    private $data;
 
     /// Class constructor
     public function __construct($bot_token) {
