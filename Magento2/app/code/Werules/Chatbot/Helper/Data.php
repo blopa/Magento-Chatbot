@@ -41,6 +41,7 @@ class Data extends AbstractHelper
     protected $_categoryCollectionFactory;
     protected $_storeManagerInterface;
     protected $_commandsList;
+    protected $_productCollection;
 
     public function __construct(
         Context $context,
@@ -52,7 +53,8 @@ class Data extends AbstractHelper
         \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
+        \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
+        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
         $this->objectManager = $objectManager;
@@ -66,6 +68,7 @@ class Data extends AbstractHelper
         $this->_categoryFactory = $categoryFactory;
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
         $this->_storeManagerInterface = $storeManagerInterface;
+        $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
 
@@ -252,6 +255,10 @@ class Data extends AbstractHelper
         {
             $result = $this->listProductsFromCategory($message);
         }
+        else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SEARCH)
+        {
+            $result = $this->listProductsFromSearch($message);
+        }
 
         if ($result)
         {
@@ -260,6 +267,38 @@ class Data extends AbstractHelper
         }
 
         return $result;
+    }
+
+    public function listProductsFromSearch($message)
+    {
+        $result = array();
+        $productList = array();
+        $productCollection = $this->getProductCollectionByName($message->getContent());
+
+        foreach ($productCollection as $product)
+        {
+            $content = $this->getProductDetailsObject($product);
+            array_push($productList, $content);
+        }
+
+        $responseMessage = array();
+        $responseMessage['content_type'] = $this->_define::IMAGE_WITH_OPTIONS;
+        $responseMessage['content'] = json_encode($productList);
+        array_push($result, $responseMessage);
+
+        return $result;
+    }
+
+    public function getProductCollectionByName($searchString)
+    {
+        $collection = $this->_productCollection->create();
+        $collection->addAttributeToSelect('*'); // ['name', 'sku']
+        $collection->addAttributeToFilter(array(
+            array('attribute' => 'name', 'like' => '%' . $searchString . '%'),
+            array('attribute' => 'sku', 'like' => '%' . $searchString . '%'),
+        ));
+//        $collection->setPageSize(3); // fetching only 3 products
+        return $collection;
     }
 
     public function getCategoryById($category_id)
@@ -411,6 +450,8 @@ class Data extends AbstractHelper
                     else if ($key == $this->_define::SEARCH_COMMAND_ID)
                     {
                         $result = $this->processSearchCommand();
+                        if ($result)
+                            $state = $this->_define::CONVERSATION_SEARCH;
                     }
                     else if ($key == $this->_define::LOGIN_COMMAND_ID)
                     {
@@ -538,7 +579,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array();
         $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the SEARCH command!';
+        $responseMessage['content'] = 'Sure, send me the name of the product you\'re looking for';
         array_push($result, $responseMessage);
         return $result;
     }
