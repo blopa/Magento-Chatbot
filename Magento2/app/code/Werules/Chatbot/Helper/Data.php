@@ -54,7 +54,7 @@ class Data extends AbstractHelper
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
-        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection // https://magento.stackexchange.com/questions/138184/magento-2-filter-product-collection-by-multiple-categories-magento-2-1 // https://magento.stackexchange.com/questions/157054/how-to-advanced-search-a-products-programatically
+        \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
         $this->objectManager = $objectManager;
