@@ -5,11 +5,11 @@
 			<label>Chatbot Integration</label>
 		</tab>
 		<section id="werules_chatbot_general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip">
-			<label>Genetal Settings</label>
+			<label>General Settings</label>
 			<tab>werules</tab>
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
-				<label>Genetal Settings</label>
+				<label>General Settings</label>
 				<comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Enable Module</label>
@@ -34,6 +34,15 @@
 					<label>Enable Log</label>
 					<comment>Log will be at root/var/log/.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="enable_wit_ai" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="6" translate="label comment tooltip" type="select">
+					<label>Enable wit.ai</label>
+					<comment>Enable wit.ai Natural Language Processor.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="wit_ai_token" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="7" translate="label comment tooltip" type="text">
+					<label>wit.ai Server Access Token</label>
+					<comment>wit.ai Server Access Token.</comment>
 				</field>
 			</group>
 		</section>
@@ -125,11 +134,22 @@
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
 				</field>
-				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="19" translate="label comment tooltip" type="text">
+				<field id="enable_nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="19" translate="label comment tooltip" type="select">
+					<label>Enable Natual Language Processor Replies (wit.ai)</label>
+					<comment>Enable Natual Language Processor replies.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="text">
+					<label>Natual Language Processor Replies (wit.ai)</label>
+					<comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
+					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
+					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
+				</field>
+				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="21" translate="label comment tooltip" type="text">
 					<label>Fallback Message</label>
 					<comment>Message will be sent when the bot don't understand customer messages for the Nst time.</comment>
 				</field>
-				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="text">
+				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label comment tooltip" type="text">
 					<label>Fallback Quantity</label>
 					<validate>input-number validate-number</validate>
 					<comment>Number of fallbacks before sending the fallback message.</comment>
