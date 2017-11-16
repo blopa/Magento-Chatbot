@@ -275,7 +275,8 @@ class Data extends AbstractHelper
                     if (isset($entity['keyword']))
                     {
                         $keyword = $entity['keyword'];
-                        $result = $this->handleCommandsWithParameters($command, $keyword);
+                        // TODO add command somehow
+                        $result = $this->handleCommandsWithParameters($message, $command, $keyword);
                     }
                 }
             }
@@ -284,19 +285,23 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function handleConversationState($message)
+    private function handleConversationState($message, $keyword = false)
     {
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = false;
+        if ($keyword)
+            $messageContent = $keyword;
+        else
+            $messageContent = $message->getContent();
 
         if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
         {
-            $result = $this->listProductsFromCategory($message);
+            $result = $this->listProductsFromCategory($messageContent, $message->getPayload());
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SEARCH)
         {
-            $result = $this->listProductsFromSearch($message);
+            $result = $this->listProductsFromSearch($messageContent);
         }
 
         if ($result)
@@ -308,11 +313,11 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    public function listProductsFromSearch($message)
+    public function listProductsFromSearch($messageContent)
     {
         $result = array();
         $productList = array();
-        $productCollection = $this->getProductCollectionByName($message->getContent());
+        $productCollection = $this->getProductCollectionByName($messageContent);
 
         foreach ($productCollection as $product)
         {
@@ -369,14 +374,14 @@ class Data extends AbstractHelper
         return $productCollection;
     }
 
-    private function listProductsFromCategory($message)
+    private function listProductsFromCategory($messageContent, $messagePayload = false)
     {
         $result = array();
         $productList = array();
-        if ($message->getMessagePayload())
-            $category = $this->getCategoryById($message->getMessagePayload());
+        if ($messagePayload)
+            $category = $this->getCategoryById($messagePayload);
         else
-            $category = $this->getCategoryByName($message->getContent());
+            $category = $this->getCategoryByName($messageContent);
 
         $productCollection = $this->getProductsFromCategoryId($category->getId());
 
@@ -459,179 +464,135 @@ class Data extends AbstractHelper
         return $commandsList;
     }
 
-    private function handleCommandsWithParameters($command, $keyword)
+    private function processCommands($messageContent, $senderId, $setStateOnly = false)
     {
-        return $this->handleCommands($command, $keyword);
-
-//        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
-//        $commandsList = $this->_serializer->unserialize($serializedCommands);
-//        $this->_commandsList = $this->prepareCommandsList($commandsList);
-    }
-
-    private function handleCommands($message, $keyword = null)
-    {
-        $messageContent = $message->getContent();
+//        $messageContent = $message->getContent();
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $commandsList = $this->_serializer->unserialize($serializedCommands);
         $this->_commandsList = $this->prepareCommandsList($commandsList);
-//        $this->logger($serializedCommands);
-//        $this->logger($this->_commandsList);
+        if (!is_array($this->_commandsList))
+            return false;
+
         $result = false;
         $state = false;
-        if (is_array($this->_commandsList))
+        foreach($this->_commandsList as $key => $command)
         {
-            foreach($this->_commandsList as $key => $command)
+//                 if ($messageContent == $command['command_code']) // TODO add alias check
+            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
             {
-                // if ($messageContent == $command['command_code']) // TODO add alias check
-                if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
+                if ($key == $this->_define::START_COMMAND_ID)
                 {
-                    if ($key == $this->_define::START_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processStartCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processListCategoriesCommand();
-                            if ($result)
-                                $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
-                        }
-                    }
-                    else if ($key == $this->_define::SEARCH_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processSearchCommand();
-                            if ($result)
-                                $state = $this->_define::CONVERSATION_SEARCH;
-                        }
-                    }
-                    else if ($key == $this->_define::LOGIN_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processLoginCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processListOrdersCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::REORDER_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processReorderCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processAddToCartCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processCheckoutCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processClearCartCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processTrackOrderCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::SUPPORT_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processSupportCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processSendEmailCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::CANCEL_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processCancelCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::HELP_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processHelpCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::ABOUT_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processAboutCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::LOGOUT_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processLogoutCommand();
-                        }
-                    }
-                    else if ($key == $this->_define::REGISTER_COMMAND_ID)
-                    {
-                        if ($keyword){}
-                        else
-                        {
-                            $result = $this->processRegisterCommand();
-                        }
-                    }
-                    break;
+                    if ($setStateOnly)
+                        $result = $this->processStartCommand();
                 }
+                else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processListCategoriesCommand();
+                    $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+                }
+                else if ($key == $this->_define::SEARCH_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processSearchCommand();
+                    $state = $this->_define::CONVERSATION_SEARCH;
+                }
+                else if ($key == $this->_define::LOGIN_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processLoginCommand();
+                }
+                else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processListOrdersCommand();
+                }
+                else if ($key == $this->_define::REORDER_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processReorderCommand();
+                }
+                else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processAddToCartCommand();
+                }
+                else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processCheckoutCommand();
+                }
+                else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processClearCartCommand();
+                }
+                else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processTrackOrderCommand();
+                }
+                else if ($key == $this->_define::SUPPORT_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processSupportCommand();
+                }
+                else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processSendEmailCommand();
+                }
+                else if ($key == $this->_define::CANCEL_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processCancelCommand();
+                }
+                else if ($key == $this->_define::HELP_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processHelpCommand();
+                }
+                else if ($key == $this->_define::ABOUT_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processAboutCommand();
+                }
+                else if ($key == $this->_define::LOGOUT_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processLogoutCommand();
+                }
+                else if ($key == $this->_define::REGISTER_COMMAND_ID)
+                {
+                    if ($setStateOnly)
+                        $result = $this->processRegisterCommand();
+                }
+                break;
             }
         }
+        if (($state && $result) || $setStateOnly)
+            $this->updateConversationState($senderId, $state);
 
-        if ($state)
-            $this->updateConversationState($message->getSenderId(), $state);
+        return $result;
+    }
+
+    private function handleCommandsWithParameters($message, $command, $keyword)
+    {
+//        $this->logger($serializedCommands);
+//        $this->logger($this->_commandsList);
+
+        $this->processCommands($command, $message->getSenderId(), true); // ignore output
+        $result = $this->handleConversationState($message, $keyword);
+
+        return $result;
+    }
+
+//    private function handleCommands($messageContent, $senderId)
+    private function handleCommands($message)
+    {
+//        $this->logger($serializedCommands);
+//        $this->logger($this->_commandsList);
+        $result = $this->processCommands($message->getContent(), $message->getSenderId());
 
         return $result;
     }
