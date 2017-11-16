@@ -567,6 +567,10 @@ class Data extends AbstractHelper
                     if ($setStateOnly)
                         $result = $this->processRegisterCommand();
                 }
+                else
+                {
+                    // TODO add error handler here
+                }
                 break;
             }
         }
