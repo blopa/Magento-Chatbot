@@ -31,10 +31,10 @@ class ReplyModeList implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return array(
-            array('value'=>0, 'label'=>'No Reply'),
-            array('value'=>1, 'label'=>'Text Only'),
-            array('value'=>2, 'label'=>'Command Only'),
-            array('value'=>3, 'label'=>'Text and Command')
+            array('value' => 0, 'label' => __("No Reply")),
+            array('value' => 1, 'label' => __("Text Only")),
+            array('value' => 2, 'label' => __("Command Only")),
+            array('value' => 3, 'label' => __("Text and Command"))
         );
     }
 }

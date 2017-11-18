@@ -31,23 +31,23 @@ class CommandsList implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return array(
-//            array('value' => 0, 'label' => 'Start'),
-            array('value' => 1, 'label' => 'List Categories'),
-            array('value' => 2, 'label' => 'Search For Product'),
-            array('value' => 3, 'label' => 'Login'),
-            array('value' => 4, 'label' => 'List Orders'),
-            array('value' => 5, 'label' => 'Reorder'),
-            array('value' => 6, 'label' => 'Add Product to Cart'),
-            array('value' => 7, 'label' => 'Checkout on Website'),
-            array('value' => 8, 'label' => 'Clear Cart'),
-            array('value' => 9, 'label' => 'Track Order Status'),
-            array('value' => 10, 'label' => 'Talk to Support'),
-            array('value' => 11, 'label' => 'Send Email'),
-            array('value' => 12, 'label' => 'Cancel'),
-            array('value' => 13, 'label' => 'Help'),
-            array('value' => 14, 'label' => 'About'),
-            array('value' => 15, 'label' => 'Logout'),
-            array('value' => 16, 'label' => 'Register')
+//            array('value' => 0, 'label' => __("Start")),
+            array('value' => 1, 'label' => __("List Categories")),
+            array('value' => 2, 'label' => __("Search For Product")),
+            array('value' => 3, 'label' => __("Login")),
+            array('value' => 4, 'label' => __("List Orders")),
+            array('value' => 5, 'label' => __("Reorder")),
+            array('value' => 6, 'label' => __("Add Product to Cart")),
+            array('value' => 7, 'label' => __("Checkout on Website")),
+            array('value' => 8, 'label' => __("Clear Cart")),
+            array('value' => 9, 'label' => __("Track Order Status")),
+            array('value' => 10, 'label' => __("Talk to Support")),
+            array('value' => 11, 'label' => __("Send Email")),
+            array('value' => 12, 'label' => __("Cancel")),
+            array('value' => 13, 'label' => __("Help")),
+            array('value' => 14, 'label' => __("About")),
+            array('value' => 15, 'label' => __("Logout")),
+            array('value' => 16, 'label' => __("Register"))
         );
     }
 }
