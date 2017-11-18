@@ -339,7 +339,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $finalEntity = array();
         if (count($entitiesAttributes) > 0)
         {
-            foreach ($entitiesAttributes as $entityAttribute)
+            foreach ($entitiesAttributes as $key => $entityAttribute)
             {
                 if (isset($entity[$entityAttribute]))
                 {
@@ -350,7 +350,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                             if ($entAttr['confidence'] > 0.1)
                             {
                                 if (isset($entAttr['value']))
-                                    $finalEntity[$entityAttribute] = $entAttr['value'];
+                                    $finalEntity[$key] = $entAttr['value'];
                             }
                         }
                     }
@@ -395,12 +395,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $result;
     }
 
-    public function getEntitiesArray($prefix = '')
+    private function getEntitiesArray($prefix = '')
     {
         return array(
-            $prefix . 'intent',
-            $prefix . 'keyword',
-            $prefix . 'command'
+            'intent' => $prefix . 'intent',
+            'parameter' => 'parameter',
+            'keyword' => 'keyword'
         );
     }
 

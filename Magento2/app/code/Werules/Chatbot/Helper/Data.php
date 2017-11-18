@@ -251,6 +251,9 @@ class Data extends AbstractHelper
             }
         }
 
+//        if (count($responseContent) <= 0)
+//            array_push($responseContent, 'Sorry, I didnt get that'); // TODO
+
         return $responseContent;
     }
 
@@ -264,14 +267,8 @@ class Data extends AbstractHelper
 
         if (isset($entity['intent']))
         {
-            if ($entity['intent'] == 'command')
-            {
-                if (isset($entity['command']))
-                {
-                    if (isset($entity['keyword']))
-                        $result = $this->handleCommandsWithParameters($message, $entity['command'], $entity['keyword']);
-                }
-            }
+            if (isset($entity['parameter']))
+                $result = $this->handleCommandsWithParameters($message, $entity['intent'], $entity['parameter']);
         }
 
         return $result;
