@@ -246,7 +246,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendMessage($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $this->sendMessageToMessenger($message);
         }
@@ -264,7 +264,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendQuickReply($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $this->sendQuickReplyToMessenger($message);
         }
@@ -288,7 +288,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendImageWithOptions($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $this->sendImageWithOptionsToMessenger($message);
         }
@@ -357,6 +357,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                 }
             }
         }
+        if (count($finalEntity) < count($entitiesAttributes))
+            return array();
 
         return $finalEntity;
     }
@@ -368,6 +370,10 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
         $response = $this->_NLPModel->getTextResponse($text);
         $result = array();
+        $prefix = '';
+
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
+            $prefix = $this->_helper->getConfigValue('werules_chatbot_messenger/general/nlp_entity_prefix');
 
         if (isset($response['_text']))
         {
@@ -375,17 +381,27 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             {
                 if (isset($response['entities']))
                 {
-                    $entitiesList = array(
-                        'intent',
-                        'keyword',
-                        'command'
-                    );
+                    $entitiesList = $this->getEntitiesArray($prefix);
                     $result = $this->getEntitiesValue($response['entities'], $entitiesList);
+                    if (count($result) <= 0) // if no specific API entities, look for general
+                    {
+                        $entitiesList = $this->getEntitiesArray();
+                        $result = $this->getEntitiesValue($response['entities'], $entitiesList);
+                    }
                 }
             }
         }
 
         return $result;
+    }
+
+    public function getEntitiesArray($prefix = '')
+    {
+        return array(
+            $prefix . 'intent',
+            $prefix . 'keyword',
+            $prefix . 'command'
+        );
     }
 
     public function getNLPAudioMeaning($audio)
