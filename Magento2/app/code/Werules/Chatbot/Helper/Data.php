@@ -266,18 +266,12 @@ class Data extends AbstractHelper
 
         if (isset($entity['intent']))
         {
-            $intent = $entity['intent']['value'];
-            if ($intent == 'command')
+            if ($entity['intent'] == 'command')
             {
                 if (isset($entity['command']))
                 {
-                    $command = $entity['command'];
                     if (isset($entity['keyword']))
-                    {
-                        $keyword = $entity['keyword'];
-                        // TODO add command somehow
-                        $result = $this->handleCommandsWithParameters($message, $command, $keyword);
-                    }
+                        $result = $this->handleCommandsWithParameters($message, $entity['command'], $entity['keyword']);
                 }
             }
         }
@@ -321,13 +315,24 @@ class Data extends AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $content = $this->getProductDetailsObject($product);
-            array_push($productList, $content);
+            $productObject = $this->getProductDetailsObject($product);
+            array_push($productList, $productObject);
+        }
+
+        if (count($productList) > 0)
+        {
+            $contentType = $this->_define::IMAGE_WITH_OPTIONS;
+            $content = json_encode($productList);
+        }
+        else
+        {
+            $content = 'Ops, didn\'t find anything for you';
+            $contentType = $this->_define::CONTENT_TEXT;
         }
 
         $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::IMAGE_WITH_OPTIONS;
-        $responseMessage['content'] = json_encode($productList);
+        $responseMessage['content_type'] = $contentType;
+        $responseMessage['content'] = $content;
         array_push($result, $responseMessage);
 
         return $result;
@@ -387,13 +392,24 @@ class Data extends AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $content = $this->getProductDetailsObject($product);
-            array_push($productList, $content);
+            $productObject = $this->getProductDetailsObject($product);
+            array_push($productList, $productObject);
+        }
+
+        if (count($productList) > 0)
+        {
+            $contentType = $this->_define::IMAGE_WITH_OPTIONS;
+            $content = json_encode($productList);
+        }
+        else
+        {
+            $content = 'Ops, didn\'t find anything for you';
+            $contentType = $this->_define::CONTENT_TEXT;
         }
 
         $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::IMAGE_WITH_OPTIONS;
-        $responseMessage['content'] = json_encode($productList);
+        $responseMessage['content_type'] = $contentType;
+        $responseMessage['content'] = $content;
         array_push($result, $responseMessage);
 
         return $result;
@@ -482,89 +498,89 @@ class Data extends AbstractHelper
             {
                 if ($key == $this->_define::START_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processStartCommand();
                 }
                 else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processListCategoriesCommand();
                     $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
                 }
                 else if ($key == $this->_define::SEARCH_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processSearchCommand();
                     $state = $this->_define::CONVERSATION_SEARCH;
                 }
                 else if ($key == $this->_define::LOGIN_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processLoginCommand();
                 }
                 else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processListOrdersCommand();
                 }
                 else if ($key == $this->_define::REORDER_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processReorderCommand();
                 }
                 else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processAddToCartCommand();
                 }
                 else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processCheckoutCommand();
                 }
                 else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processClearCartCommand();
                 }
                 else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processTrackOrderCommand();
                 }
                 else if ($key == $this->_define::SUPPORT_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processSupportCommand();
                 }
                 else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processSendEmailCommand();
                 }
                 else if ($key == $this->_define::CANCEL_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processCancelCommand();
                 }
                 else if ($key == $this->_define::HELP_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processHelpCommand();
                 }
                 else if ($key == $this->_define::ABOUT_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processAboutCommand();
                 }
                 else if ($key == $this->_define::LOGOUT_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processLogoutCommand();
                 }
                 else if ($key == $this->_define::REGISTER_COMMAND_ID)
                 {
-                    if ($setStateOnly)
+                    if (!$setStateOnly)
                         $result = $this->processRegisterCommand();
                 }
                 else
@@ -574,7 +590,7 @@ class Data extends AbstractHelper
                 break;
             }
         }
-        if (($state && $result) || $setStateOnly)
+        if ($state && (($result) || $setStateOnly))
             $this->updateConversationState($senderId, $state);
 
         return $result;

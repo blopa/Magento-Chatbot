@@ -59,7 +59,7 @@ class witAI extends \Magento\Framework\Model\AbstractModel {
         $context = stream_context_create($options);
         $url = 'https://api.wit.ai/' . $endPoint . '?v=' . $this->_version . $content;
         $result = file_get_contents($url, false, $context);
-        $result = json_decode($result);
+        $result = json_decode($result, true);
 
         if ($result)
             return $result;
