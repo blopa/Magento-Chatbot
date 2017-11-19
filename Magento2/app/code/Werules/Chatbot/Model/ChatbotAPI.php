@@ -347,10 +347,14 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                     {
                         if (isset($entAttr['confidence']))
                         {
-                            if ($entAttr['confidence'] > 0.1)
+                            if (isset($entAttr['value']))
                             {
-                                if (isset($entAttr['value']))
-                                    $finalEntity[$key] = $entAttr['value'];
+                                $entityArray = array(
+                                    'value' => $entAttr['value'],
+                                    'confidence' => $entAttr['confidence']
+                                );
+//                                array_push($finalEntity, $ent);
+                                $finalEntity[$key] = $entityArray;
                             }
                         }
                     }

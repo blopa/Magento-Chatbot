@@ -267,8 +267,12 @@ class Data extends AbstractHelper
 
         if (isset($entity['intent']))
         {
+            $intent = $entity['intent'];
             if (isset($entity['parameter']))
-                $result = $this->handleCommandsWithParameters($message, $entity['intent'], $entity['parameter']);
+            {
+                $parameter = $entity['parameter'];
+                $result = $this->handleCommandsWithParameters($message, $intent['value'], $parameter['value']);
+            }
         }
 
         return $result;

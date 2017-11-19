@@ -38,7 +38,7 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Data\Form\Element\Factory $elementFactory,
-        array $data = []
+        array $data = array()
     )
     {
         $this->_elementFactory  = $elementFactory;
@@ -78,6 +78,7 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
                 'Werules\Chatbot\Block\Adminhtml\System\Config\Options\YesNo',
                 '',
                 array('data' => array('is_render_to_js_template' => true))
+//                array('is_render_to_js_template' => true)
             ); // ->setExtraParams('style="width: 100%;"');
         }
         return $this->_itemRendererYesNo;
@@ -90,7 +91,8 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
             $this->_itemRendererCommands = $this->getLayout()->createBlock(
                 'Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\CommandsSelect',
                 '',
-                array('is_render_to_js_template' => true)
+                array('data' => array('is_render_to_js_template' => true))
+//                array('is_render_to_js_template' => true)
             ); // ->setExtraParams('style="width: 100%;"');
         }
         return $this->_itemRendererCommands;
@@ -98,12 +100,12 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
 
     protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
-        $optionExtraAttr = [];
+        $optionExtraAttr = array();
         $optionExtraAttr['option_' . $this->_getRendererCommands()->calcOptionHash($row->getData('command_id'))] = 'selected="selected"';
         $row->setData(
             'option_extra_attrs', $optionExtraAttr
         );
-        $optionExtraAttr = [];
+        $optionExtraAttr = array();
         $optionExtraAttr['option_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_command'))] = 'selected="selected"';
         $row->setData(
             'option_extra_attrs', $optionExtraAttr

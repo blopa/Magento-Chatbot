@@ -39,7 +39,7 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Data\Form\Element\Factory $elementFactory,
-        array $data = []
+        array $data = array()
     )
     {
         $this->_elementFactory  = $elementFactory;
@@ -92,23 +92,25 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
                 'Werules\Chatbot\Block\Adminhtml\System\Config\Options\YesNo',
                 '',
                 array('data' => array('is_render_to_js_template' => true))
+//                array('is_render_to_js_template' => true)
             ); // ->setExtraParams('style="width: 100%;"');
         }
         return $this->_itemRendererYesNo;
     }
 
-    protected function _getRendererReplyMode()
-    {
-        if (!$this->_itemRendererReplyMode)
-        {
-            $this->_itemRendererReplyMode = $this->getLayout()->createBlock(
-                'Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\ReplyModeSelect',
-                '',
-                array('is_render_to_js_template' => true)
-            ); // ->setExtraParams('style="width: 100%;"');
-        }
-        return $this->_itemRendererReplyMode;
-    }
+//    protected function _getRendererReplyMode()
+//    {
+//        if (!$this->_itemRendererReplyMode)
+//        {
+//            $this->_itemRendererReplyMode = $this->getLayout()->createBlock(
+//                'Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\ReplyModeSelect',
+//                '',
+////                array('data' => array('is_render_to_js_template' => true))
+//                  array('is_render_to_js_template' => true)
+//            ); // ->setExtraParams('style="width: 100%;"');
+//        }
+//        return $this->_itemRendererReplyMode;
+//    }
 
     protected function _getRendererCommands()
     {
@@ -117,8 +119,10 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
             $this->_itemRendererCommands = $this->getLayout()->createBlock(
                 'Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\CommandsSelect',
                 '',
-                array('is_render_to_js_template' => true)
+                array('data' => array('is_render_to_js_template' => true))
+//                array('is_render_to_js_template' => true)
             ); // ->setExtraParams('style="width: 100%;"');
+//            $this->_itemRendererCommands->setClass('custom_class');
         }
         return $this->_itemRendererCommands;
     }
@@ -135,10 +139,10 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
         $row->setData(
             'option_extra_attrs', $optionExtraAttr
         );
-        $optionExtraAttr = array();
-        $optionExtraAttr['option_' . $this->_getRendererReplyMode()->calcOptionHash($row->getData('reply_mode'))] = 'selected="selected"';
-        $row->setData(
-            'option_extra_attrs', $optionExtraAttr
-        );
+//        $optionExtraAttr = array();
+//        $optionExtraAttr['option_' . $this->_getRendererReplyMode()->calcOptionHash($row->getData('reply_mode'))] = 'selected="selected"';
+//        $row->setData(
+//            'option_extra_attrs', $optionExtraAttr
+//        );
     }
 }
