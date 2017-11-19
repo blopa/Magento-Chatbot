@@ -48,39 +48,39 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
     protected function _construct()
     {
         $this->addColumn('enable_reply', array(
-            'label' => __('Enable Reply'),
+            'label' => __("Enable"),
             'renderer' => $this->_getRendererYesNo()
         ));
-        $this->addColumn('nlp_entity', array(
-            'label' => __('wit.ai entity'),
-            //'style' => 'width: 100%',
-            'class' => 'validate-no-html-tags'
+        $this->addColumn('command_id', array(
+            'label' => __("Mapped Command"),
+            'renderer' => $this->_getRendererCommands()
         ));
+//        $this->addColumn('nlp_entity', array(
+//            'label' => __("wit.ai entity"),
+//            //'style' => 'width: 100%',
+//            'class' => 'validate-no-html-tags'
+//        ));
         $this->addColumn('confidence', array(
-            'label' => __('Confidence'),
+            'label' => __("Acceptable Confidence"),
             //'style' => 'width: 100%',
             'class' => 'input-number validate-number validate-number-range number-range-1-100'
         ));
-        $this->addColumn('stop_processing', array(
-            'label' => __('Stop Processing'),
-            'renderer' => $this->_getRendererYesNo()
-        ));
-        $this->addColumn('reply_mode', array(
-            'label' => __('Reply Mode'),
-            'renderer' => $this->_getRendererReplyMode()
-        ));
+//        $this->addColumn('stop_processing', array(
+//            'label' => __("Stop Processing"),
+//            'renderer' => $this->_getRendererYesNo()
+//        ));
+//        $this->addColumn('reply_mode', array(
+//            'label' => __("Reply Mode"),
+//            'renderer' => $this->_getRendererReplyMode()
+//        ));
         $this->addColumn('reply_text', array(
-            'label' => __('Reply Text'),
+            'label' => __("Reply Text"),
             //'style' => 'width: 100%',
             'class' => 'validate-no-html-tags'
         ));
-        $this->addColumn('command_id', array(
-            'label' => __('Command'),
-            'renderer' => $this->_getRendererCommands()
-        ));
 
         $this->_addAfter = false;
-        $this->_addButtonLabel = __('Add');
+        $this->_addButtonLabel = __("Add");
         parent::_construct();
     }
 

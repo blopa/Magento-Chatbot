@@ -321,7 +321,7 @@ class Data extends AbstractHelper
         }
         else
         {
-            $content = __('Sorry, no products found for this criteria.');
+            $content = __("Sorry, no products found for this criteria.");
             $contentType = $this->_define::CONTENT_TEXT;
         }
 
@@ -398,7 +398,7 @@ class Data extends AbstractHelper
         }
         else
         {
-            $content = __('Sorry, no products found in this category.');
+            $content = __("Sorry, no products found in this category.");
             $contentType = $this->_define::CONTENT_TEXT;
         }
 
@@ -488,7 +488,7 @@ class Data extends AbstractHelper
         $state = false;
         foreach($this->_commandsList as $key => $command)
         {
-//                 if ($messageContent == $command['command_code']) // TODO add alias check
+//            if ($messageContent == $command['command_code']) // TODO add alias check
             if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
             {
                 if ($key == $this->_define::START_COMMAND_ID)

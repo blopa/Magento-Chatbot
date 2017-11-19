@@ -47,26 +47,26 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
     protected function _construct()
     {
         $this->addColumn('command_id', array(
-            'label' => __('Command'),
+            'label' => __("Command"),
             'renderer' => $this->_getRendererCommands()
         ));
         $this->addColumn('enable_command', array(
-            'label' => __('Enable Command'),
+            'label' => __("Enable Command"),
             'renderer' => $this->_getRendererYesNo()
         ));
         $this->addColumn('command_code', array(
-            'label' => __('Command Code'),
+            'label' => __("Command Code"),
             //'style' => 'width: 100%',
             'class' => 'validate-no-html-tags'
         ));
         $this->addColumn('command_alias_list', array(
-            'label' => __('Command Alias (Separated by Comma)'),
+            'label' => __("Command Alias (Separated by Comma)"),
             //'style' => 'width: 100%',
             'class' => 'validate-no-html-tags'
         ));
 
         $this->_addAfter = false;
-        $this->_addButtonLabel = __('Add');
+        $this->_addButtonLabel = __("Add");
         parent::_construct();
     }
 
