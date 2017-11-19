@@ -61,7 +61,7 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
 //            'class' => 'validate-no-html-tags'
 //        ));
         $this->addColumn('confidence', array(
-            'label' => __("Acceptable Confidence"),
+            'label' => __("Acceptable Confidence (%)"),
             //'style' => 'width: 100%',
             'class' => 'input-number validate-number validate-number-range number-range-1-100'
         ));

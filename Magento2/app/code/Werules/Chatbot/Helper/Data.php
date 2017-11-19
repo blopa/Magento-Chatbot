@@ -461,7 +461,7 @@ class Data extends AbstractHelper
     private function prepareCommandsList($commands)
     {
         $commandsList = array();
-        foreach($commands as $command)
+        foreach ($commands as $command)
         {
             if ($command['enable_command'] == '1')
             {
@@ -486,7 +486,7 @@ class Data extends AbstractHelper
 
         $result = false;
         $state = false;
-        foreach($this->_commandsList as $key => $command)
+        foreach ($this->_commandsList as $key => $command)
         {
 //            if ($messageContent == $command['command_code']) // TODO add alias check
             if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
