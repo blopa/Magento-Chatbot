@@ -26,6 +26,7 @@ use Werules\Chatbot\Api\Data\ChatbotAPIInterface;
 class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements ChatbotAPIInterface
 {
     protected $_apiModel;
+    protected $_NLPModel;
     protected $_objectManager;
     protected $_define;
     protected $_helper;
@@ -217,6 +218,11 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this
     }
 
+    public function initWitAIAPI($token) // TODO TODO TODO
+    {
+        return $this->_objectManager->create('Werules\Chatbot\Model\Api\witAI', array('token' => $token)); // TODO find a better way to to this
+    }
+
     // custom methods
 //    public function requestHandler($api_name)
 //    {
@@ -240,7 +246,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendMessage($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $this->sendMessageToMessenger($message);
         }
@@ -258,7 +264,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendQuickReply($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $this->sendQuickReplyToMessenger($message);
         }
@@ -275,14 +281,14 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $decodedContent = json_decode($messageContent);
 //            foreach ($decodedContent->quick_replies as $quickReply)
 //            {
-//                // TODO build quickreplies here
+//                // TODO build quickreplies here for generic
 //            }
         $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
     }
 
     public function sendImageWithOptions($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $this->sendImageWithOptionsToMessenger($message);
         }
@@ -326,5 +332,89 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             array_push($elements, $element);
         }
         $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
+    }
+
+    private function getEntitiesValue($entity, $entitiesAttributes)
+    {
+        $finalEntity = array();
+        if (count($entitiesAttributes) > 0)
+        {
+            foreach ($entitiesAttributes as $key => $entityAttribute)
+            {
+                if (isset($entity[$entityAttribute]))
+                {
+                    foreach ($entity[$entityAttribute] as $entAttr)
+                    {
+                        if (isset($entAttr['confidence']))
+                        {
+                            if (isset($entAttr['value']))
+                            {
+                                $entityArray = array(
+                                    'value' => $entAttr['value'],
+                                    'confidence' => $entAttr['confidence']
+                                );
+//                                array_push($finalEntity, $ent);
+                                $finalEntity[$key] = $entityArray;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (count($finalEntity) < count($entitiesAttributes))
+            return array();
+
+        return $finalEntity;
+    }
+
+    public function getNLPTextMeaning($text)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
+        $this->_NLPModel = $this->initWitAIAPI($api_token);
+
+        $response = $this->_NLPModel->getTextResponse($text);
+        $result = array();
+        $prefix = '';
+
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
+            $prefix = $this->_helper->getConfigValue('werules_chatbot_messenger/general/nlp_entity_prefix');
+
+        if (isset($response['_text']))
+        {
+            if ($response['_text'] == $text)
+            {
+                if (isset($response['entities']))
+                {
+                    $entitiesList = $this->getEntitiesArray($prefix);
+                    $result = $this->getEntitiesValue($response['entities'], $entitiesList);
+                    if (count($result) <= 0) // if no specific API entities, look for general
+                    {
+                        $entitiesList = $this->getEntitiesArray();
+                        $result = $this->getEntitiesValue($response['entities'], $entitiesList);
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    private function getEntitiesArray($prefix = '')
+    {
+        return array(
+            'intent' => $prefix . 'intent',
+            'parameter' => 'parameter',
+            'keyword' => 'keyword'
+        );
+    }
+
+    public function getNLPAudioMeaning($audio)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
+        $this->_NLPModel = $this->initWitAIAPI($api_token);
+
+        $result = $this->_NLPModel->getAudioResponse($audio);
+
+        return $result;
     }
 }

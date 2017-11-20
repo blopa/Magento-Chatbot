@@ -24,30 +24,51 @@ namespace Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field;
 class CommandsList implements \Magento\Framework\Option\ArrayInterface
 {
     /**
-     * Provide available options as a value/label array
+     * Options getter
      *
      * @return array
      */
     public function toOptionArray()
     {
+        $commands = $this->toArray();
+        $result = array();
+        foreach ($commands as $key => $command)
+        {
+            $arr = array(
+                'value' => $key,
+                'label' => $command
+            );
+            array_push($result, $arr);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get options in "key-value" format
+     *
+     * @return array
+     */
+    public function toArray()
+    {
         return array(
-//            array('value' => 0, 'label' => 'Start'),
-            array('value' => 1, 'label' => 'List Categories'),
-            array('value' => 2, 'label' => 'Search For Product'),
-            array('value' => 3, 'label' => 'Login'),
-            array('value' => 4, 'label' => 'List Orders'),
-            array('value' => 5, 'label' => 'Reorder'),
-            array('value' => 6, 'label' => 'Add Product to Cart'),
-            array('value' => 7, 'label' => 'Checkout on Website'),
-            array('value' => 8, 'label' => 'Clear Cart'),
-            array('value' => 9, 'label' => 'Track Order Status'),
-            array('value' => 10, 'label' => 'Talk to Support'),
-            array('value' => 11, 'label' => 'Send Email'),
-            array('value' => 12, 'label' => 'Cancel'),
-            array('value' => 13, 'label' => 'Help'),
-            array('value' => 14, 'label' => 'About'),
-            array('value' => 15, 'label' => 'Logout'),
-            array('value' => 16, 'label' => 'Register')
+//            0 => __("Start"),
+            1 => __("List Categories"),
+            2 => __("Search For Product"),
+            3 => __("Login"),
+            4 => __("List Orders"),
+            5 => __("Reorder"),
+            6 => __("Add Product to Cart"),
+            7 => __("Checkout on Website"),
+            8 => __("Clear Cart"),
+            9 => __("Track Order Status"),
+            10 => __("Talk to Support"),
+            11 => __("Send Email"),
+            12 => __("Cancel"),
+            13 => __("Help"),
+            14 => __("About"),
+            15 => __("Logout"),
+            16 => __("Register")
         );
     }
 }

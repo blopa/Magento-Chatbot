@@ -35,9 +35,9 @@ namespace Werules\Chatbot\Model\Api;
 
 class Messenger extends \Magento\Framework\Model\AbstractModel {
 
-    private $bot_token = "";
+    private $bot_token;
     private $api_version = "v2.11";
-    private $data = array();
+    private $data;
 
     /// Class constructor
     public function __construct($bot_token) {
@@ -54,6 +54,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
                     return $this->data['hub_challenge'];
             }
         }
+
         return false;
     }
 
@@ -236,7 +237,10 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 
     /// Get the text of the current message
     public function Text() {
-        return $this->data["entry"][0]["messaging"][0]["message"]["text"];
+        if (isset($this->data["entry"][0]["messaging"][0]["message"]["text"]))
+            return $this->data["entry"][0]["messaging"][0]["message"]["text"];
+
+        return false;
     }
 
     /// Get the userdata who sent the message
@@ -273,6 +277,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
     public function getPayload() {
         if (isset($this->data["entry"][0]["messaging"][0]["postback"]["payload"]))
             return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
+
         return false;
     }
 

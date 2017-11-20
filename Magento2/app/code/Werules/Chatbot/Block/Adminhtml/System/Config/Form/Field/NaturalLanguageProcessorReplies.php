@@ -21,13 +21,14 @@
 
 namespace Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field;
 
-class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
+class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray
 {
     /**
      * @var \Magento\Framework\Data\Form\Element\Factory
      */
     protected $_elementFactory;
     protected $_itemRendererCommands;
+    protected $_itemRendererReplyMode;
     protected $_itemRendererYesNo;
 
     /**
@@ -46,21 +47,34 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
     }
     protected function _construct()
     {
-        $this->addColumn('command_id', array(
-            'label' => __("Command"),
-            'renderer' => $this->_getRendererCommands()
-        ));
-        $this->addColumn('enable_command', array(
-            'label' => __("Enable Command"),
+        $this->addColumn('enable_reply', array(
+            'label' => __("Enable"),
             'renderer' => $this->_getRendererYesNo()
         ));
-        $this->addColumn('command_code', array(
-            'label' => __("Command Code"),
-            //'style' => 'width: 100%',
-            'class' => 'validate-no-html-tags'
+        $this->addColumn('command_id', array(
+            'label' => __("Mapped Command"),
+            'renderer' => $this->_getRendererCommands()
         ));
-        $this->addColumn('command_alias_list', array(
-            'label' => __("Command Alias (Separated by Comma)"),
+//        $this->addColumn('nlp_entity', array(
+//            'label' => __("wit.ai entity"),
+//            //'style' => 'width: 100%',
+//            'class' => 'validate-no-html-tags'
+//        ));
+        $this->addColumn('confidence', array(
+            'label' => __("Acceptable Confidence (%)"),
+            //'style' => 'width: 100%',
+            'class' => 'input-number validate-number validate-number-range number-range-1-100'
+        ));
+//        $this->addColumn('stop_processing', array(
+//            'label' => __("Stop Processing"),
+//            'renderer' => $this->_getRendererYesNo()
+//        ));
+//        $this->addColumn('reply_mode', array(
+//            'label' => __("Reply Mode"),
+//            'renderer' => $this->_getRendererReplyMode()
+//        ));
+        $this->addColumn('reply_text', array(
+            'label' => __("Reply Text"),
             //'style' => 'width: 100%',
             'class' => 'validate-no-html-tags'
         ));
@@ -69,8 +83,6 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
         $this->_addButtonLabel = __("Add");
         parent::_construct();
     }
-
-//    protected function _prepareToRender() {}
 
     protected function _getRendererYesNo()
     {
@@ -86,6 +98,20 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
         return $this->_itemRendererYesNo;
     }
 
+//    protected function _getRendererReplyMode()
+//    {
+//        if (!$this->_itemRendererReplyMode)
+//        {
+//            $this->_itemRendererReplyMode = $this->getLayout()->createBlock(
+//                'Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\ReplyModeSelect',
+//                '',
+////                array('data' => array('is_render_to_js_template' => true))
+//                  array('is_render_to_js_template' => true)
+//            ); // ->setExtraParams('style="width: 100%;"');
+//        }
+//        return $this->_itemRendererReplyMode;
+//    }
+
     protected function _getRendererCommands()
     {
         if (!$this->_itemRendererCommands)
@@ -96,6 +122,7 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
                 array('data' => array('is_render_to_js_template' => true))
 //                array('is_render_to_js_template' => true)
             ); // ->setExtraParams('style="width: 100%;"');
+//            $this->_itemRendererCommands->setClass('custom_class');
         }
         return $this->_itemRendererCommands;
     }
@@ -108,9 +135,14 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
             'option_extra_attrs', $optionExtraAttr
         );
         $optionExtraAttr = array();
-        $optionExtraAttr['option_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_command'))] = 'selected="selected"';
+        $optionExtraAttr['option_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_reply'))] = 'selected="selected"';
         $row->setData(
             'option_extra_attrs', $optionExtraAttr
         );
+//        $optionExtraAttr = array();
+//        $optionExtraAttr['option_' . $this->_getRendererReplyMode()->calcOptionHash($row->getData('reply_mode'))] = 'selected="selected"';
+//        $row->setData(
+//            'option_extra_attrs', $optionExtraAttr
+//        );
     }
 }

@@ -31,6 +31,9 @@
 				</commands_list>
 				<enable_default_replies>0</enable_default_replies>
 				<default_replies/>
+				<enable_nlp_replies/>
+				<nlp_entity_prefix>messenger_</nlp_entity_prefix>
+				<nlp_replies/>
 				<fallback_message>Sorry, I didn't get that.</fallback_message>
 				<fallback_message_quantity>3</fallback_message_quantity>
 				<enable_hub_challenge>1</enable_hub_challenge>
