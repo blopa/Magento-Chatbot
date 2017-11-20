@@ -411,6 +411,10 @@ class Data extends AbstractHelper
         {
             $result = $this->listProductsFromSearch($messageContent);
         }
+        else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_EMAIL)
+        {
+            $result = $this->sendEmailFromMessage($messageContent);
+        }
 
         if ($result)
         {
@@ -707,6 +711,7 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                     $result = $this->processSendEmailCommand();
+                $state = $this->_define::CONVERSATION_EMAIL;
             }
             else if ($command == $this->_define::CANCEL_COMMAND_ID)
             {
@@ -779,6 +784,63 @@ class Data extends AbstractHelper
         return false;
     }
 
+    private function sendEmailFromMessage($text)
+    {
+        $result = array();
+        $response = $this->sendZendEmail($text);
+        if ($response)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Email sent.")
+            );
+        }
+        else
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Sorry, I wasn't able to send an email this time. Please try again later.")
+            );
+        }
+
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function sendZendEmail($text) // TODO TODO TODO
+    {
+        $storeName = 'store_name';
+        $storeEmail = 'sample@sample.com';// TODO
+
+        $url = __("Not informed");
+        $customerEmail = __("Not informed");
+        $customerName = __("Not informed");
+
+        $mail = new \Zend_Mail('UTF-8');
+
+        $emailBody =
+            __("Message from chatbot customer") . "<br><br>" .
+            __("Customer name") . ": " .
+            $customerName . "<br>" .
+            __("Message") . ":<br>" .
+            $text . "<br><br>" .
+            __("Contacts") . ":<br>" .
+            __("Chatbot") . ": " . $url . "<br>" .
+            __("Email") . ": " . $customerEmail . "<br>";
+
+        $mail->setBodyHtml($emailBody);
+        $mail->setFrom($storeEmail, $storeName);
+        $mail->addTo($storeEmail, $storeName);
+        $mail->setSubject(__("Contact from chatbot"));
+
+        try {
+            $mail->send();
+            return true;
+        } catch (\Exception $exception) {
+            return false;
+        }
+    }
+
     public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
         return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
@@ -835,7 +897,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LOGIN command!' // TODO
+            'content' => 'you just sent the START command!' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -946,7 +1008,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the TRACK_RDER command!' // TODO
+            'content' => 'you just sent the TRACK_ORDER command!' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -968,7 +1030,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the SEND_EMAIL command!' // TODO
+            'content' => __("Sure, send me the email content.")
         );
         array_push($result, $responseMessage);
         return $result;
