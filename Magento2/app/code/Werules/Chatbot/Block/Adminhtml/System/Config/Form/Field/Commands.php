@@ -70,6 +70,8 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
         parent::_construct();
     }
 
+//    protected function _prepareToRender() {}
+
     protected function _getRendererYesNo()
     {
         if (!$this->_itemRendererYesNo)
