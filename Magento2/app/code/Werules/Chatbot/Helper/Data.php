@@ -495,7 +495,7 @@ class Data extends AbstractHelper
             $productName = $product->getName();
             $productUrl = $product->getProductUrl();
 //            $productImage = $product->getImage();
-            $productImage = $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage();
+            $productImage = $this->getStoreURL('catalog/product') . $product->getImage();
             // TODO add placeholder
             $options = array(
                 array(
@@ -723,6 +723,11 @@ class Data extends AbstractHelper
         return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
     }
 
+    private function getStoreURL($path)
+    {
+        return $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . $path;
+    }
+
     // COMMANDS FUNCTIONS
     private function processListCategoriesCommand()
     {
@@ -803,9 +808,10 @@ class Data extends AbstractHelper
     private function processRegisterCommand()
     {
         $result = array();
+        $registerUrl = $this->getStoreURL('customer/account/create');
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the REGISTER command!' // TODO
+            'content' => __("Access %1 to register a new account on our shop.", $registerUrl)
         );
         array_push($result, $responseMessage);
         return $result;
