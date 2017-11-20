@@ -263,6 +263,7 @@ class Data extends AbstractHelper
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = false;
+        $parameter = false;
 
         $entity = $chatbotAPI->getNLPTextMeaning($message->getContent());
 
@@ -272,29 +273,38 @@ class Data extends AbstractHelper
             if (isset($entity['parameter']))
             {
                 $parameter = $entity['parameter'];
-                $commandString = $intent['value'];
-                $commandCode = $this->getCurrentCommand($commandString);
+                if (isset($entity['parameter']))
+                    $parameter = $parameter['value'];
+            }
 
-                if ($commandCode)
+            $commandString = $intent['value'];
+            $commandCode = $this->getCurrentCommand($commandString);
+
+            if ($commandCode)
+            {
+                if (isset($intent['confidence']))
                 {
-                    if (isset($intent['confidence']))
+                    $entityData = $this->getCommandNLPEntityData($commandCode);
+                    if (isset($entityData['confidence']))
                     {
-                        $entityData = $this->getCommandNLPEntityData($commandCode);
-                        if (isset($entityData['confidence']))
+                        if ($intent['confidence'] >= $entityData['confidence'])
                         {
-                            if ($intent['confidence'] >= $entityData['confidence'])
-                                $result = $this->handleCommandsWithParameters($message, $commandString, $parameter['value'], $commandCode);
-                            if (isset($entityData['reply_text']))
+                            if ($parameter)
+                                $result = $this->handleCommandsWithParameters($message, $commandString, $parameter, $commandCode);
+                            else
+                                $result = $this->processCommands($commandString, $message->getSenderId(), false, $commandCode);
+                        }
+
+                        if (isset($entityData['reply_text']))
+                        {
+                            $extraText = $entityData['reply_text'];
+                            if ($extraText != '')
                             {
-                                $extraText = $entityData['reply_text'];
-                                if ($extraText != '')
-                                {
-                                    $extraMessage = array(
-                                        'content_type' => $this->_define::CONTENT_TEXT,
-                                        'content' => $extraText
-                                    );
-                                    array_unshift($result, $extraMessage);
-                                }
+                                $extraMessage = array(
+                                    'content_type' => $this->_define::CONTENT_TEXT,
+                                    'content' => $extraText
+                                );
+                                array_unshift($result, $extraMessage);
                             }
                         }
                     }
