@@ -42,6 +42,7 @@ class Data extends AbstractHelper
     protected $_storeManagerInterface;
     protected $_commandsList;
     protected $_productCollection;
+    protected $_currentCommand;
 
     public function __construct(
         Context $context,
@@ -267,15 +268,40 @@ class Data extends AbstractHelper
 
         if (isset($entity['intent']))
         {
-            $intent = $entity['intent'];
+            $intent = $entity['intent']; // command array
             if (isset($entity['parameter']))
             {
                 $parameter = $entity['parameter'];
-                $result = $this->handleCommandsWithParameters($message, $intent['value'], $parameter['value']);
+                $commandString = $intent['value'];
+                $commandCode = $this->getCurrentCommand($commandString);
+
+                if ($commandCode)
+                {
+                    $confidence = $this->getCommandNLPEntityConfidence($commandCode);
+                    if ($intent['confidence'] >= $confidence)
+                        $result = $this->handleCommandsWithParameters($message, $commandString, $parameter['value'], $commandCode);
+                }
             }
         }
 
         return $result;
+    }
+
+    private function getCommandNLPEntityConfidence($commandCode)
+    {
+        $confidence = 0.8; // TODO default module confidence
+        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
+        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
+
+        foreach ($NLPEntitiesList as $key => $entity)
+        {
+            if (isset($entity['command_id']))
+                if ($entity['command_id'] == $commandCode)
+                    if (isset($entity['confidence']))
+                        $confidence = (float)$entity['confidence'] / 100;
+        }
+
+        return $confidence;
     }
 
     private function handleConversationState($message, $keyword = false)
@@ -479,114 +505,129 @@ class Data extends AbstractHelper
         return $commandsList;
     }
 
-    private function processCommands($messageContent, $senderId, $setStateOnly = false)
+    private function getCurrentCommand($messageContent)
     {
-//        $messageContent = $message->getContent();
+        if (isset($this->_currentCommand))
+            return $this->_currentCommand;
+
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $commandsList = $this->_serializer->unserialize($serializedCommands);
         $this->_commandsList = $this->prepareCommandsList($commandsList);
         if (!is_array($this->_commandsList))
             return false;
 
-        $result = false;
-        $state = false;
         foreach ($this->_commandsList as $key => $command)
         {
-//            if ($messageContent == $command['command_code']) // TODO add alias check
             if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
             {
-                if ($key == $this->_define::START_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processStartCommand();
-                }
-                else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processListCategoriesCommand();
-                    $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
-                }
-                else if ($key == $this->_define::SEARCH_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processSearchCommand();
-                    $state = $this->_define::CONVERSATION_SEARCH;
-                }
-                else if ($key == $this->_define::LOGIN_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processLoginCommand();
-                }
-                else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processListOrdersCommand();
-                }
-                else if ($key == $this->_define::REORDER_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processReorderCommand();
-                }
-                else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processAddToCartCommand();
-                }
-                else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processCheckoutCommand();
-                }
-                else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processClearCartCommand();
-                }
-                else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processTrackOrderCommand();
-                }
-                else if ($key == $this->_define::SUPPORT_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processSupportCommand();
-                }
-                else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processSendEmailCommand();
-                }
-                else if ($key == $this->_define::CANCEL_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processCancelCommand();
-                }
-                else if ($key == $this->_define::HELP_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processHelpCommand();
-                }
-                else if ($key == $this->_define::ABOUT_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processAboutCommand();
-                }
-                else if ($key == $this->_define::LOGOUT_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processLogoutCommand();
-                }
-                else if ($key == $this->_define::REGISTER_COMMAND_ID)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processRegisterCommand();
-                }
-                else
-                {
-                    // TODO add error handler here
-                }
-                break;
+                $this->_currentCommand = $key;
+                return $key;
+            }
+        }
+
+        return false;
+    }
+
+    private function processCommands($messageContent, $senderId, $setStateOnly = false, $key = false)
+    {
+//        $messageContent = $message->getContent();
+        $result = false;
+        $state = false;
+        if (!$key)
+            $key = $this->getCurrentCommand($messageContent);
+
+        if ($key)
+        {
+            if ($key == $this->_define::START_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processStartCommand();
+            }
+            else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processListCategoriesCommand();
+                $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+            }
+            else if ($key == $this->_define::SEARCH_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processSearchCommand();
+                $state = $this->_define::CONVERSATION_SEARCH;
+            }
+            else if ($key == $this->_define::LOGIN_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processLoginCommand();
+            }
+            else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processListOrdersCommand();
+            }
+            else if ($key == $this->_define::REORDER_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processReorderCommand();
+            }
+            else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processAddToCartCommand();
+            }
+            else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processCheckoutCommand();
+            }
+            else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processClearCartCommand();
+            }
+            else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processTrackOrderCommand();
+            }
+            else if ($key == $this->_define::SUPPORT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processSupportCommand();
+            }
+            else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processSendEmailCommand();
+            }
+            else if ($key == $this->_define::CANCEL_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processCancelCommand();
+            }
+            else if ($key == $this->_define::HELP_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processHelpCommand();
+            }
+            else if ($key == $this->_define::ABOUT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processAboutCommand();
+            }
+            else if ($key == $this->_define::LOGOUT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processLogoutCommand();
+            }
+            else if ($key == $this->_define::REGISTER_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processRegisterCommand();
+            }
+            else
+            {
+                // TODO add error handler here
             }
         }
         if ($state && (($result) || $setStateOnly))
@@ -595,18 +636,14 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function handleCommandsWithParameters($message, $command, $keyword)
+    private function handleCommandsWithParameters($message, $command, $keyword, $commandCode = false)
     {
-//        $this->logger($serializedCommands);
-//        $this->logger($this->_commandsList);
-
-        $this->processCommands($command, $message->getSenderId(), true); // ignore output
+        $this->processCommands($command, $message->getSenderId(), true, $commandCode); // ignore output
         $result = $this->handleConversationState($message, $keyword);
 
         return $result;
     }
 
-//    private function handleCommands($messageContent, $senderId)
     private function handleCommands($message)
     {
 //        $this->logger($serializedCommands);
