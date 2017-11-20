@@ -222,6 +222,16 @@ class Data extends AbstractHelper
         $conversationStateResponses = false;
         $NLPResponses = false;
 
+        $command = $this->getCurrentCommand($message->getContent());
+        $cancelResponses = $this->checkCancelCommand($command, $message->getSenderId());
+        if ($cancelResponses)
+        {
+            foreach ($cancelResponses as $cancelResponse)
+            {
+                array_push($responseContent, $cancelResponse);
+            }
+        }
+
         if (count($responseContent) <= 0)
             $conversationStateResponses = $this->handleConversationState($message);
         if ($conversationStateResponses)
@@ -617,99 +627,108 @@ class Data extends AbstractHelper
         return false;
     }
 
-    private function processCommands($messageContent, $senderId, $setStateOnly = false, $key = false)
+    private function checkCancelCommand($command, $senderId)
+    {
+        $result = array();
+        if ($command == $this->_define::CANCEL_COMMAND_ID)
+            $result = $this->processCancelCommand($senderId);
+
+        return $result;
+    }
+
+    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false)
     {
 //        $messageContent = $message->getContent();
         $result = false;
         $state = false;
-        if (!$key)
-            $key = $this->getCurrentCommand($messageContent);
+        if (!$command)
+            $command = $this->getCurrentCommand($messageContent);
 
-        if ($key)
+        if ($command)
         {
-            if ($key == $this->_define::START_COMMAND_ID)
+            if ($command == $this->_define::START_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processStartCommand();
             }
-            else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+            else if ($command == $this->_define::LIST_CATEGORIES_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processListCategoriesCommand();
                 $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
             }
-            else if ($key == $this->_define::SEARCH_COMMAND_ID)
+            else if ($command == $this->_define::SEARCH_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processSearchCommand();
                 $state = $this->_define::CONVERSATION_SEARCH;
             }
-            else if ($key == $this->_define::LOGIN_COMMAND_ID)
+            else if ($command == $this->_define::LOGIN_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processLoginCommand();
             }
-            else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
+            else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processListOrdersCommand();
             }
-            else if ($key == $this->_define::REORDER_COMMAND_ID)
+            else if ($command == $this->_define::REORDER_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processReorderCommand();
             }
-            else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
+            else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processAddToCartCommand();
             }
-            else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
+            else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processCheckoutCommand();
             }
-            else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
+            else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processClearCartCommand();
             }
-            else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
+            else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processTrackOrderCommand();
             }
-            else if ($key == $this->_define::SUPPORT_COMMAND_ID)
+            else if ($command == $this->_define::SUPPORT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processSupportCommand();
             }
-            else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
+            else if ($command == $this->_define::SEND_EMAIL_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processSendEmailCommand();
             }
-            else if ($key == $this->_define::CANCEL_COMMAND_ID)
+            else if ($command == $this->_define::CANCEL_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processCancelCommand($senderId);
             }
-            else if ($key == $this->_define::HELP_COMMAND_ID)
+            else if ($command == $this->_define::HELP_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processHelpCommand();
             }
-            else if ($key == $this->_define::ABOUT_COMMAND_ID)
+            else if ($command == $this->_define::ABOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processAboutCommand();
             }
-            else if ($key == $this->_define::LOGOUT_COMMAND_ID)
+            else if ($command == $this->_define::LOGOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processLogoutCommand();
             }
-            else if ($key == $this->_define::REGISTER_COMMAND_ID)
+            else if ($command == $this->_define::REGISTER_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processRegisterCommand();
