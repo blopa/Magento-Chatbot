@@ -222,6 +222,16 @@ class Data extends AbstractHelper
         $conversationStateResponses = false;
         $NLPResponses = false;
 
+        $command = $this->getCurrentCommand($message->getContent());
+        $cancelResponses = $this->checkCancelCommand($command, $message->getSenderId());
+        if ($cancelResponses)
+        {
+            foreach ($cancelResponses as $cancelResponse)
+            {
+                array_push($responseContent, $cancelResponse);
+            }
+        }
+
         if (count($responseContent) <= 0)
             $conversationStateResponses = $this->handleConversationState($message);
         if ($conversationStateResponses)
@@ -263,37 +273,79 @@ class Data extends AbstractHelper
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = false;
+        $parameterValue = false;
+        $parameter = false;
 
         $entity = $chatbotAPI->getNLPTextMeaning($message->getContent());
 
         if (isset($entity['intent']))
         {
             $intent = $entity['intent']; // command string
-            if (isset($entity['parameter']))
+            if (isset($entity['parameter'])) // check if has parameter
             {
                 $parameter = $entity['parameter'];
-                $commandString = $intent['value'];
-                $commandCode = $this->getCurrentCommand($commandString);
+                if (isset($parameter['value']))
+                    if (isset($parameter['parameter']))
+                        $parameterValue = $parameter['value'];
+            }
 
-                if ($commandCode)
+            $commandString = $intent['value'];
+            $commandCode = $this->getCurrentCommand($commandString);
+
+            if ($commandCode)
+            {
+                if (isset($intent['confidence']))
                 {
-                    if (isset($intent['confidence']))
+                    $entityData = $this->getCommandNLPEntityData($commandCode);
+                    if (isset($entityData['confidence']))
                     {
-                        $entityData = $this->getCommandNLPEntityData($commandCode);
-                        if (isset($entityData['confidence']))
+                        $confidence = $entityData['confidence'];
+                        if ($intent['confidence'] >= $confidence) // check intent confidence
                         {
-                            if ($intent['confidence'] >= $entityData['confidence'])
-                                $result = $this->handleCommandsWithParameters($message, $commandString, $parameter['value'], $commandCode);
-                            if (isset($entityData['reply_text']))
+                            if ($parameterValue)
                             {
-                                $extraText = $entityData['reply_text'];
-                                if ($extraText != '')
+                                if ($parameter['confidence'] >= $confidence) // check parameter confidence
+                                    $result = $this->handleCommandsWithParameters($message, $commandString, $parameterValue, $commandCode);
+                            }
+                            else
+                                $result = $this->processCommands($commandString, $message->getSenderId(), false, $commandCode);
+
+                            if ($result)
+                            {
+                                if (isset($entity['reply'])) // extra reply text from wit.ai
                                 {
-                                    $extraMessage = array(
-                                        'content_type' => $this->_define::CONTENT_TEXT,
-                                        'content' => $extraText
-                                    );
-                                    array_unshift($result, $extraMessage);
+                                    $reply = $entity['reply'];
+                                    if (isset($reply['value']))
+                                    {
+                                        $extraText = $reply['value'];
+                                        if (isset($reply['confidence']))
+                                        {
+                                            if ($reply['confidence'] >= $confidence) // check text reply confidence
+                                            {
+                                                if ($extraText != '')
+                                                {
+                                                    $extraMessage = array(
+                                                        'content_type' => $this->_define::CONTENT_TEXT,
+                                                        'content' => $extraText
+                                                    );
+                                                    array_unshift($result, $extraMessage);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (isset($entityData['reply_text'])) // extra reply text from Magento backend config
+                                {
+                                    $extraText = $entityData['reply_text'];
+                                    if ($extraText != '')
+                                    {
+                                        $extraMessage = array(
+                                            'content_type' => $this->_define::CONTENT_TEXT,
+                                            'content' => $extraText
+                                        );
+                                        array_unshift($result, $extraMessage);
+                                    }
                                 }
                             }
                         }
@@ -495,7 +547,7 @@ class Data extends AbstractHelper
             $productName = $product->getName();
             $productUrl = $product->getProductUrl();
 //            $productImage = $product->getImage();
-            $productImage = $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' . $product->getImage();
+            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
             // TODO add placeholder
             $options = array(
                 array(
@@ -575,99 +627,108 @@ class Data extends AbstractHelper
         return false;
     }
 
-    private function processCommands($messageContent, $senderId, $setStateOnly = false, $key = false)
+    private function checkCancelCommand($command, $senderId)
+    {
+        $result = array();
+        if ($command == $this->_define::CANCEL_COMMAND_ID)
+            $result = $this->processCancelCommand($senderId);
+
+        return $result;
+    }
+
+    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false)
     {
 //        $messageContent = $message->getContent();
         $result = false;
         $state = false;
-        if (!$key)
-            $key = $this->getCurrentCommand($messageContent);
+        if (!$command)
+            $command = $this->getCurrentCommand($messageContent);
 
-        if ($key)
+        if ($command)
         {
-            if ($key == $this->_define::START_COMMAND_ID)
+            if ($command == $this->_define::START_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processStartCommand();
             }
-            else if ($key == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+            else if ($command == $this->_define::LIST_CATEGORIES_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processListCategoriesCommand();
                 $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
             }
-            else if ($key == $this->_define::SEARCH_COMMAND_ID)
+            else if ($command == $this->_define::SEARCH_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processSearchCommand();
                 $state = $this->_define::CONVERSATION_SEARCH;
             }
-            else if ($key == $this->_define::LOGIN_COMMAND_ID)
+            else if ($command == $this->_define::LOGIN_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processLoginCommand();
             }
-            else if ($key == $this->_define::LIST_ORDERS_COMMAND_ID)
+            else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processListOrdersCommand();
             }
-            else if ($key == $this->_define::REORDER_COMMAND_ID)
+            else if ($command == $this->_define::REORDER_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processReorderCommand();
             }
-            else if ($key == $this->_define::ADD_TO_CART_COMMAND_ID)
+            else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processAddToCartCommand();
             }
-            else if ($key == $this->_define::CHECKOUT_COMMAND_ID)
+            else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processCheckoutCommand();
             }
-            else if ($key == $this->_define::CLEAR_CART_COMMAND_ID)
+            else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processClearCartCommand();
             }
-            else if ($key == $this->_define::TRACK_ORDER_COMMAND_ID)
+            else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processTrackOrderCommand();
             }
-            else if ($key == $this->_define::SUPPORT_COMMAND_ID)
+            else if ($command == $this->_define::SUPPORT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processSupportCommand();
             }
-            else if ($key == $this->_define::SEND_EMAIL_COMMAND_ID)
+            else if ($command == $this->_define::SEND_EMAIL_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processSendEmailCommand();
             }
-            else if ($key == $this->_define::CANCEL_COMMAND_ID)
+            else if ($command == $this->_define::CANCEL_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processCancelCommand();
+                    $result = $this->processCancelCommand($senderId);
             }
-            else if ($key == $this->_define::HELP_COMMAND_ID)
+            else if ($command == $this->_define::HELP_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processHelpCommand();
             }
-            else if ($key == $this->_define::ABOUT_COMMAND_ID)
+            else if ($command == $this->_define::ABOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processAboutCommand();
             }
-            else if ($key == $this->_define::LOGOUT_COMMAND_ID)
+            else if ($command == $this->_define::LOGOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processLogoutCommand();
             }
-            else if ($key == $this->_define::REGISTER_COMMAND_ID)
+            else if ($command == $this->_define::REGISTER_COMMAND_ID)
             {
                 if (!$setStateOnly)
                     $result = $this->processRegisterCommand();
@@ -700,10 +761,10 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function updateConversationState($sender_id, $state)
+    private function updateConversationState($senderId, $state)
     {
         $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($sender_id, 'chat_id'); // TODO
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
 
         if ($chatbotAPI->getChatbotapiId())
         {
@@ -718,6 +779,25 @@ class Data extends AbstractHelper
         return false;
     }
 
+    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    {
+        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+    }
+
+    private function getStoreURL($extraPath, $path = false)
+    {
+        if ($path)
+            return $this->_storeManagerInterface->getStore()->getBaseUrl($path) . $extraPath;
+
+        return $this->_storeManagerInterface->getStore()->getBaseUrl() . $extraPath;
+    }
+
+    private function getMediaURL($path)
+    {
+        return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+    }
+
+    // COMMANDS FUNCTIONS
     private function processListCategoriesCommand()
     {
         $result = array();
@@ -778,6 +858,29 @@ class Data extends AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => 'you just sent the LOGIN command!' // TODO
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function processLogoutCommand()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the LOGOUT command!' // TODO
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function processRegisterCommand()
+    {
+        $result = array();
+        $registerUrl = $this->getStoreURL('customer/account/create');
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => __("Access %1 to register a new account on our shop.", $registerUrl)
         );
         array_push($result, $responseMessage);
         return $result;
@@ -871,68 +974,45 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function processCancelCommand()
+    private function processCancelCommand($senderId)
     {
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the CANCEL command!' // TODO
+            'content' => __("Ok, canceled.")
         );
         array_push($result, $responseMessage);
+        $this->updateConversationState($senderId, $this->_define::CONVERSATION_STARTED);
         return $result;
     }
 
     private function processHelpCommand()
     {
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the HELP command!' // TODO
-        );
-        array_push($result, $responseMessage);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/help_message');
+        if ($text)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => $text
+            );
+            array_push($result, $responseMessage);
+        }
         return $result;
     }
 
     private function processAboutCommand()
     {
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the ABOUT command!' // TODO
-        );
-        array_push($result, $responseMessage);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/about_message');
+        if ($text)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => $text
+            );
+            array_push($result, $responseMessage);
+        }
         return $result;
-    }
-
-    private function processLogoutCommand()
-    {
-        $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LOGOUT command!' // TODO
-        );
-        array_push($result, $responseMessage);
-        return $result;
-    }
-
-    private function processRegisterCommand()
-    {
-        $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the REGISTER command!' // TODO
-        );
-        array_push($result, $responseMessage);
-        return $result;
-    }
-
-//    public function getConfig($code, $storeId = null)
-//    {
-//        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
-//    }
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
-    {
-        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-//        return $this->_categoryFactory->create()->getCollection();
     }
 }

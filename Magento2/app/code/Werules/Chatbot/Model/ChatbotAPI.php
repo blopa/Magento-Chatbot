@@ -361,7 +361,9 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                 }
             }
         }
-        if (count($finalEntity) < count($entitiesAttributes))
+//        if (count($finalEntity) < count($entitiesAttributes))
+//            return array();
+        if (!isset($finalEntity['intent'])) // TODO mandatory
             return array();
 
         return $finalEntity;
@@ -402,9 +404,10 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     private function getEntitiesArray($prefix = '')
     {
         return array(
-            'intent' => $prefix . 'intent',
+            'intent' => $prefix . 'intent',  // TODO mandatory
             'parameter' => 'parameter',
-            'keyword' => 'keyword'
+            'keyword' => 'keyword',
+            'reply' => $prefix . 'reply'
         );
     }
 
