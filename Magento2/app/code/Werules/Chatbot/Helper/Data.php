@@ -287,15 +287,39 @@ class Data extends AbstractHelper
                     $entityData = $this->getCommandNLPEntityData($commandCode);
                     if (isset($entityData['confidence']))
                     {
-                        if ($intent['confidence'] >= $entityData['confidence'])
+                        $confidence = $entityData['confidence'];
+                        if ($intent['confidence'] >= $confidence)
                         {
                             if ($parameter)
                                 $result = $this->handleCommandsWithParameters($message, $commandString, $parameter, $commandCode);
                             else
                                 $result = $this->processCommands($commandString, $message->getSenderId(), false, $commandCode);
+
+                            if (isset($entity['reply'])) // extra reply text from wit.ai
+                            {
+                                $reply = $entity['reply'];
+                                if (isset($reply['value']))
+                                {
+                                    $extraText = $reply['value'];
+                                    if (isset($reply['confidence']))
+                                    {
+                                        if ($reply['confidence'] >= $confidence)
+                                        {
+                                            if ($extraText != '')
+                                            {
+                                                $extraMessage = array(
+                                                    'content_type' => $this->_define::CONTENT_TEXT,
+                                                    'content' => $extraText
+                                                );
+                                                array_unshift($result, $extraMessage);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
 
-                        if (isset($entityData['reply_text']))
+                        if (isset($entityData['reply_text'])) // extra reply text from Magento backend config
                         {
                             $extraText = $entityData['reply_text'];
                             if ($extraText != '')
