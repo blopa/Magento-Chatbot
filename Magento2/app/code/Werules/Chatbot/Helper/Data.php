@@ -263,6 +263,7 @@ class Data extends AbstractHelper
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = false;
+        $parameterValue = false;
         $parameter = false;
 
         $entity = $chatbotAPI->getNLPTextMeaning($message->getContent());
@@ -270,11 +271,12 @@ class Data extends AbstractHelper
         if (isset($entity['intent']))
         {
             $intent = $entity['intent']; // command string
-            if (isset($entity['parameter']))
+            if (isset($entity['parameter'])) // check if has parameter
             {
                 $parameter = $entity['parameter'];
-                if (isset($entity['parameter']))
-                    $parameter = $parameter['value'];
+                if (isset($parameter['value']))
+                    if (isset($parameter['parameter']))
+                        $parameterValue = $parameter['value'];
             }
 
             $commandString = $intent['value'];
@@ -288,47 +290,53 @@ class Data extends AbstractHelper
                     if (isset($entityData['confidence']))
                     {
                         $confidence = $entityData['confidence'];
-                        if ($intent['confidence'] >= $confidence)
+                        if ($intent['confidence'] >= $confidence) // check intent confidence
                         {
-                            if ($parameter)
-                                $result = $this->handleCommandsWithParameters($message, $commandString, $parameter, $commandCode);
+                            if ($parameterValue)
+                            {
+                                if ($parameter['confidence'] >= $confidence) // check parameter confidence
+                                    $result = $this->handleCommandsWithParameters($message, $commandString, $parameterValue, $commandCode);
+                            }
                             else
                                 $result = $this->processCommands($commandString, $message->getSenderId(), false, $commandCode);
 
-                            if (isset($entity['reply'])) // extra reply text from wit.ai
+                            if ($result)
                             {
-                                $reply = $entity['reply'];
-                                if (isset($reply['value']))
+                                if (isset($entity['reply'])) // extra reply text from wit.ai
                                 {
-                                    $extraText = $reply['value'];
-                                    if (isset($reply['confidence']))
+                                    $reply = $entity['reply'];
+                                    if (isset($reply['value']))
                                     {
-                                        if ($reply['confidence'] >= $confidence)
+                                        $extraText = $reply['value'];
+                                        if (isset($reply['confidence']))
                                         {
-                                            if ($extraText != '')
+                                            if ($reply['confidence'] >= $confidence) // check text reply confidence
                                             {
-                                                $extraMessage = array(
-                                                    'content_type' => $this->_define::CONTENT_TEXT,
-                                                    'content' => $extraText
-                                                );
-                                                array_unshift($result, $extraMessage);
+                                                if ($extraText != '')
+                                                {
+                                                    $extraMessage = array(
+                                                        'content_type' => $this->_define::CONTENT_TEXT,
+                                                        'content' => $extraText
+                                                    );
+                                                    array_unshift($result, $extraMessage);
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        }
 
-                        if (isset($entityData['reply_text'])) // extra reply text from Magento backend config
-                        {
-                            $extraText = $entityData['reply_text'];
-                            if ($extraText != '')
-                            {
-                                $extraMessage = array(
-                                    'content_type' => $this->_define::CONTENT_TEXT,
-                                    'content' => $extraText
-                                );
-                                array_unshift($result, $extraMessage);
+                                if (isset($entityData['reply_text'])) // extra reply text from Magento backend config
+                                {
+                                    $extraText = $entityData['reply_text'];
+                                    if ($extraText != '')
+                                    {
+                                        $extraMessage = array(
+                                            'content_type' => $this->_define::CONTENT_TEXT,
+                                            'content' => $extraText
+                                        );
+                                        array_unshift($result, $extraMessage);
+                                    }
+                                }
                             }
                         }
                     }
