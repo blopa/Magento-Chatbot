@@ -18,7 +18,7 @@
 				</field>
 				<field id="custom_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip" type="text">
 					<label>Your Secret Key</label>
-					<comment>This is your custom secret key used for the webhook url, to activate/deactivate the api webhook for telegram, and to use as your challenge hub for facebook. alphanumeric only! access http://(your_store_url)/chatbot/chatdata/(api)/webhook/(your_custom_key) to set the webhook, change api to &quot;telegram&quot; or &quot;facebook&quot;.</comment>
+					<comment>This is your custom secret key used for the webhook url, to activate/deactivate the API webhook for telegram, and to use as your challenge hub for Facebook. alphanumeric only! access http://(your_store_url)/chatbot/chatdata/(api)/webhook/(your_custom_key) to set the webhook, change API to &quot;telegram&quot; or &quot;facebook&quot;.</comment>
 				</field>
 				<field id="list_empty_categories" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip" type="select">
 					<label>List Empty Categories</label>
@@ -60,7 +60,7 @@
 				</field>
 				<field id="disabled_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip" type="text">
 					<label>Unavailability Message</label>
-					<comment>Message to send when bot is disabled. leave it empty to send no message. please check the maximum size for messages on telegram api, otherwise your message might not be sent.</comment>
+					<comment>Message to send when bot is disabled. Leave it empty to send no message. Please check the maximum size for messages on Messenger API, otherwise your message might not be sent.</comment>
 				</field>
 				<field id="api_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="4" translate="label comment tooltip" type="text">
 					<label>Page Access Token</label>
@@ -78,7 +78,7 @@
 				<field id="messenger_box_width" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="7" translate="label comment tooltip" type="text">
 					<label>Facebook Messenger Box Size</label>
 					<validate>input-number validate-number</validate>
-					<comment>Facebook messenger box size.</comment>
+					<comment>Facebook Messenger box size.</comment>
 				</field>
 				<field id="enable_referral" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="select">
 					<label>Enable Referral</label>
@@ -95,7 +95,7 @@
 				</field>
 				<field id="welcome_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="11" translate="label comment tooltip" type="text">
 					<label>Welcome Message</label>
-					<comment>First message the bot will send to your client. please check the maximum size for messages on facebook api, otherwise your message might not be sent. you can use "{customername}" to send the customer name.</comment>
+					<comment>First message the bot will send to your client. please check the maximum size for messages on Facebook API, otherwise your message might not be sent. you can use "{customername}" to send the customer name.</comment>
 				</field>
 				<field id="enable_message_options" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="12" translate="label comment tooltip" type="select">
 					<label>Enable Welcome Message Options</label>
@@ -108,53 +108,53 @@
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
 				</field>
-				<field id="help_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="14" translate="label comment tooltip" type="text">
+				<field id="help_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="15" translate="label comment tooltip" type="text">
 					<label>Help Message</label>
-					<comment>Message will be sent when customer asks for help. please check the maximum size for messages on facebook api, otherwise your message might not be sent.</comment>
+					<comment>Message will be sent when customer asks for help. Please check the maximum size for messages on Facebook API, otherwise your message might not be sent.</comment>
 				</field>
-				<field id="enable_help_command_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="15" translate="label comment tooltip" type="select">
+				<field id="enable_help_command_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="16" translate="label comment tooltip" type="select">
 					<label>Enable Command Listing on Help Command</label>
 					<comment>Enable command listing when customer ask for help.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<field id="commands_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="16" translate="label comment tooltip" type="text">
+				<field id="commands_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="17" translate="label comment tooltip" type="text">
 					<label>Commands List</label>
 					<comment>Code of the commands and it's alias. Alias must be split by comma. eg.: &quot;support,chat,talk,sac&quot;.</comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
 				</field>
-				<field id="enable_default_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="17" translate="label comment tooltip" type="select">
+				<field id="enable_default_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="18" translate="label comment tooltip" type="select">
 					<label>Enable Default Replies</label>
 					<comment>Enable default replies.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<field id="default_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="18" translate="label comment tooltip" type="text">
+				<field id="default_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="19" translate="label comment tooltip" type="text">
 					<label>Default Replies</label>
 					<comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
 				</field>
-				<field id="enable_nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="19" translate="label comment tooltip" type="select">
+				<field id="enable_nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="select">
 					<label>Enable Natural Language Processor Replies (wit.ai)</label>
 					<comment>Enable Natural Language Processor replies.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<field id="nlp_entity_prefix" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="text">
+				<field id="nlp_entity_prefix" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="21" translate="label comment tooltip" type="text">
 					<label>Natural Language Processor Entity Prefix</label>
 					<validate>validate-no-html-tags</validate>
 					<comment>Natural Language Processor entity prefix is a prefix name to flag that the request is coming from Messenger.</comment>
 				</field>
-				<field id="nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="21" translate="label comment tooltip" type="text">
+				<field id="nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label comment tooltip" type="text">
 					<label>Natural Language Processor Replies (wit.ai)</label>
 					<comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\NaturalLanguageProcessorReplies</frontend_model>
 				</field>
-				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="22" translate="label comment tooltip" type="text">
+				<field id="fallback_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="23" translate="label comment tooltip" type="text">
 					<label>Fallback Message</label>
 					<comment>Message will be sent when the bot don't understand customer messages for the Nst time.</comment>
 				</field>
-				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="23" translate="label comment tooltip" type="text">
+				<field id="fallback_message_quantity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="24" translate="label comment tooltip" type="text">
 					<label>Fallback Quantity</label>
 					<validate>input-number validate-number</validate>
 					<comment>Number of fallbacks before sending the fallback message.</comment>
@@ -163,6 +163,10 @@
 					<label>Enable Hub Challenge Verification</label>
 					<comment>Enable Hub Challenge verification.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="about_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="14" translate="label comment tooltip" type="text">
+					<label>About Message</label>
+					<comment>Message will be sent when customer asks informations about the store. Please check the maximum size for messages on Facebook API, otherwise your message might not be sent.</comment>
 				</field>
 			</group>
 		</section>

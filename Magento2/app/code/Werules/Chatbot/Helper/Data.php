@@ -650,7 +650,7 @@ class Data extends AbstractHelper
             else if ($key == $this->_define::CANCEL_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processCancelCommand();
+                    $result = $this->processCancelCommand($senderId);
             }
             else if ($key == $this->_define::HELP_COMMAND_ID)
             {
@@ -700,10 +700,10 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function updateConversationState($sender_id, $state)
+    private function updateConversationState($senderId, $state)
     {
         $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($sender_id, 'chat_id'); // TODO
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
 
         if ($chatbotAPI->getChatbotapiId())
         {
@@ -718,6 +718,12 @@ class Data extends AbstractHelper
         return false;
     }
 
+    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    {
+        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+    }
+
+    // COMMANDS FUNCTIONS
     private function processListCategoriesCommand()
     {
         $result = array();
@@ -778,6 +784,28 @@ class Data extends AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => 'you just sent the LOGIN command!' // TODO
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function processLogoutCommand()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the LOGOUT command!' // TODO
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function processRegisterCommand()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the REGISTER command!' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -871,68 +899,45 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function processCancelCommand()
+    private function processCancelCommand($senderId)
     {
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the CANCEL command!' // TODO
+            'content' => __("Ok, canceled.")
         );
         array_push($result, $responseMessage);
+        $this->updateConversationState($senderId, $this->_define::CONVERSATION_STARTED);
         return $result;
     }
 
     private function processHelpCommand()
     {
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the HELP command!' // TODO
-        );
-        array_push($result, $responseMessage);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/help_message');
+        if ($text)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => $text
+            );
+            array_push($result, $responseMessage);
+        }
         return $result;
     }
 
     private function processAboutCommand()
     {
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the ABOUT command!' // TODO
-        );
-        array_push($result, $responseMessage);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/about_message');
+        if ($text)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => $text
+            );
+            array_push($result, $responseMessage);
+        }
         return $result;
-    }
-
-    private function processLogoutCommand()
-    {
-        $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LOGOUT command!' // TODO
-        );
-        array_push($result, $responseMessage);
-        return $result;
-    }
-
-    private function processRegisterCommand()
-    {
-        $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the REGISTER command!' // TODO
-        );
-        array_push($result, $responseMessage);
-        return $result;
-    }
-
-//    public function getConfig($code, $storeId = null)
-//    {
-//        return $this->getConfigValue(self::XML_PATH_CHATBOT . $code, $storeId);
-//    }
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
-    {
-        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-//        return $this->_categoryFactory->create()->getCollection();
     }
 }
