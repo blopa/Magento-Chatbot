@@ -302,7 +302,6 @@ class Data extends AbstractHelper
             }
         }
 
-//        $this->logger($result);
         return $result;
     }
 
@@ -379,7 +378,8 @@ class Data extends AbstractHelper
         foreach ($productCollection as $product)
         {
             $productObject = $this->getProductDetailsObject($product);
-            array_push($productList, $productObject);
+            if (count($productList) < 10) // TODO
+                array_push($productList, $productObject);
         }
 
         if (count($productList) > 0)
@@ -460,7 +460,8 @@ class Data extends AbstractHelper
         foreach ($productCollection as $product)
         {
             $productObject = $this->getProductDetailsObject($product);
-            array_push($productList, $productObject);
+            if (count($productList) < 10) // TODO
+                array_push($productList, $productObject);
         }
 
         if (count($productList) > 0)
