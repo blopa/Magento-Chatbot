@@ -495,7 +495,7 @@ class Data extends AbstractHelper
             $productName = $product->getName();
             $productUrl = $product->getProductUrl();
 //            $productImage = $product->getImage();
-            $productImage = $this->getStoreURL('catalog/product') . $product->getImage();
+            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
             // TODO add placeholder
             $options = array(
                 array(
@@ -723,9 +723,17 @@ class Data extends AbstractHelper
         return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
     }
 
-    private function getStoreURL($path)
+    private function getStoreURL($extraPath, $path = false)
     {
-        return $this->_storeManagerInterface->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . $path;
+        if ($path)
+            return $this->_storeManagerInterface->getStore()->getBaseUrl($path) . $extraPath;
+
+        return $this->_storeManagerInterface->getStore()->getBaseUrl() . $extraPath;
+    }
+
+    private function getMediaURL($path)
+    {
+        return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
     }
 
     // COMMANDS FUNCTIONS
