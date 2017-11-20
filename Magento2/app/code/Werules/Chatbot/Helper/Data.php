@@ -268,7 +268,7 @@ class Data extends AbstractHelper
 
         if (isset($entity['intent']))
         {
-            $intent = $entity['intent']; // command array
+            $intent = $entity['intent']; // command string
             if (isset($entity['parameter']))
             {
                 $parameter = $entity['parameter'];
@@ -277,31 +277,69 @@ class Data extends AbstractHelper
 
                 if ($commandCode)
                 {
-                    $confidence = $this->getCommandNLPEntityConfidence($commandCode);
-                    if ($intent['confidence'] >= $confidence)
-                        $result = $this->handleCommandsWithParameters($message, $commandString, $parameter['value'], $commandCode);
+                    if (isset($intent['confidence']))
+                    {
+                        $entityData = $this->getCommandNLPEntityData($commandCode);
+                        if (isset($entityData['confidence']))
+                        {
+                            if ($intent['confidence'] >= $entityData['confidence'])
+                                $result = $this->handleCommandsWithParameters($message, $commandString, $parameter['value'], $commandCode);
+                            if (isset($entityData['reply_text']))
+                            {
+                                $extraText = $entityData['reply_text'];
+                                if ($extraText != '')
+                                {
+                                    $extraMessage = array(
+                                        'content_type' => $this->_define::CONTENT_TEXT,
+                                        'content' => $extraText
+                                    );
+                                    array_unshift($result, $extraMessage);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
+//        $this->logger($result);
         return $result;
     }
 
-    private function getCommandNLPEntityConfidence($commandCode)
+    private function getCommandNLPEntityData($commandCode)
     {
-        $confidence = 0.8; // TODO default module confidence
+        $result = array();
         $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
         $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
 
         foreach ($NLPEntitiesList as $key => $entity)
         {
             if (isset($entity['command_id']))
+            {
                 if ($entity['command_id'] == $commandCode)
-                    if (isset($entity['confidence']))
-                        $confidence = (float)$entity['confidence'] / 100;
+                {
+                    $confidence = 0.7; // TODO default module confidence
+                    $extraText = '';
+                    if (isset($entity['enable_reply']))
+                    {
+                        if ($entity['enable_reply'] == '1')
+                        {
+                            if (isset($entity['confidence']))
+                                $confidence = (float)$entity['confidence'] / 100;
+                            if (isset($entity['reply_text']))
+                                $extraText = $entity['reply_text'];
+
+                            $result = array(
+                                'confidence' => $confidence,
+                                'reply_text' => $extraText
+                            );
+                        }
+                    }
+                }
+            }
         }
 
-        return $confidence;
+        return $result;
     }
 
     private function handleConversationState($message, $keyword = false)
@@ -355,9 +393,13 @@ class Data extends AbstractHelper
             $contentType = $this->_define::CONTENT_TEXT;
         }
 
-        $responseMessage = array();
-        $responseMessage['content_type'] = $contentType;
-        $responseMessage['content'] = $content;
+//        $responseMessage = array();
+//        $responseMessage['content_type'] = $contentType;
+//        $responseMessage['content'] = $content;
+        $responseMessage = array(
+            'content_type' => $contentType,
+            'content' => $content
+        );
         array_push($result, $responseMessage);
 
         return $result;
@@ -432,9 +474,13 @@ class Data extends AbstractHelper
             $contentType = $this->_define::CONTENT_TEXT;
         }
 
-        $responseMessage = array();
-        $responseMessage['content_type'] = $contentType;
-        $responseMessage['content'] = $content;
+//        $responseMessage = array();
+//        $responseMessage['content_type'] = $contentType;
+//        $responseMessage['content'] = $content;
+        $responseMessage = array(
+            'content_type' => $contentType,
+            'content' => $content
+        );
         array_push($result, $responseMessage);
 
         return $result;
@@ -671,14 +717,6 @@ class Data extends AbstractHelper
         return false;
     }
 
-    private function processStartCommand()
-    {
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the START command!'; // TODO
-        return $responseMessage;
-    }
-
     private function processListCategoriesCommand()
     {
         $result = array();
@@ -700,9 +738,24 @@ class Data extends AbstractHelper
         $contentObject = new \stdClass();
         $contentObject->message = __("Please select a category.");
         $contentObject->quick_replies = $quickReplies;
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
-        $responseMessage['content'] = json_encode($contentObject);
+//        $responseMessage = array();
+//        $responseMessage['content_type'] = $this->_define::QUICK_REPLY;
+//        $responseMessage['content'] = json_encode($contentObject);
+        $responseMessage = array(
+            'content_type' => $this->_define::QUICK_REPLY,
+            'content' => json_encode($contentObject)
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function processStartCommand()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the LOGIN command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -710,9 +763,10 @@ class Data extends AbstractHelper
     private function processSearchCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = __("Sure, send me the name of the product you're looking for.");
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => __("Sure, send me the name of the product you're looking for.")
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -720,9 +774,10 @@ class Data extends AbstractHelper
     private function processLoginCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the LOGIN command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the LOGIN command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -730,9 +785,10 @@ class Data extends AbstractHelper
     private function processListOrdersCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the LIST_ORDERS command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the LIST_ORDERS command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -740,9 +796,10 @@ class Data extends AbstractHelper
     private function processReorderCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the REORDER command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the REORDER command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -750,9 +807,10 @@ class Data extends AbstractHelper
     private function processAddToCartCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the ADD_TO_CART command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the ADD_TO_CART command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -760,9 +818,10 @@ class Data extends AbstractHelper
     private function processCheckoutCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the CHECKOUT command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the CHECKOUT command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -770,9 +829,10 @@ class Data extends AbstractHelper
     private function processClearCartCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the CLEAR_CART command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the CLEAR_CART command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -780,9 +840,10 @@ class Data extends AbstractHelper
     private function processTrackOrderCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the TRACK_ORDER command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the TRACK_RDER command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -790,9 +851,10 @@ class Data extends AbstractHelper
     private function processSupportCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the SUPPORT command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the SUPPORT command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -800,9 +862,10 @@ class Data extends AbstractHelper
     private function processSendEmailCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the SEND_EMAIL command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the SEND_EMAIL command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -810,9 +873,10 @@ class Data extends AbstractHelper
     private function processCancelCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the CANCEL command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the CANCEL command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -820,9 +884,10 @@ class Data extends AbstractHelper
     private function processHelpCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the HELP command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the HELP command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -830,9 +895,10 @@ class Data extends AbstractHelper
     private function processAboutCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the ABOUT command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the ABOUT command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -840,9 +906,10 @@ class Data extends AbstractHelper
     private function processLogoutCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the LOGOUT command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the LOGOUT command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
@@ -850,9 +917,10 @@ class Data extends AbstractHelper
     private function processRegisterCommand()
     {
         $result = array();
-        $responseMessage = array();
-        $responseMessage['content_type'] = $this->_define::CONTENT_TEXT;
-        $responseMessage['content'] = 'you just sent the REGISTER command!'; // TODO
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'you just sent the REGISTER command!' // TODO
+        );
         array_push($result, $responseMessage);
         return $result;
     }
