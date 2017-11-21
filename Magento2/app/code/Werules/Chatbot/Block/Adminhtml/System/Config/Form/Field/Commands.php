@@ -104,11 +104,8 @@ class Commands extends \Magento\Config\Block\System\Config\Form\Field\FieldArray
     {
         $optionExtraAttr = array();
         $optionExtraAttr['option_' . $this->_getRendererCommands()->calcOptionHash($row->getData('command_id'))] = 'selected="selected"';
-        $row->setData(
-            'option_extra_attrs', $optionExtraAttr
-        );
-        $optionExtraAttr = array();
         $optionExtraAttr['option_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_command'))] = 'selected="selected"';
+
         $row->setData(
             'option_extra_attrs', $optionExtraAttr
         );
