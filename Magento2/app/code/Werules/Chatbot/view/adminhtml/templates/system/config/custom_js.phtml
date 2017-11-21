@@ -1,0 +1,36 @@
+<?php
+    // TODO
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+?>
+<script type="text/javascript">
+    var custom_key = document.getElementById('werules_chatbot_general_general_custom_key').value;
+    updateCustomKeyUrl(custom_key);
+
+    function updateCustomKeyUrl(custom_key)
+    {
+        var messenger_url = document.getElementById('werules_messenger_url');
+        var telegram_url = document.getElementById('werules_telegram_url');
+        var store_url = '<?php echo $baseUrl; ?>';
+//        messenger_url.href = store_url + 'chatbot/webhook/endpoint/api/messenger/key/' + custom_key;
+        messenger_url.href = 'https://werules.github.io/chatbot/?key=' + custom_key;
+        telegram_url.href = store_url + 'chatbot/webhook/endpoint/api/messenger/key/' + custom_key;
+    }
+
+    function generateCustomKey()
+    {
+        var key_input = document.getElementById('werules_chatbot_general_general_custom_key');
+        var custom_key = getRandomCustomKey(Math.floor(Math.random() *  4));
+        key_input.value = custom_key;
+//        updateCustomKeyUrl(custom_key);
+    }
+
+    function getRandomCustomKey(qty)
+    {
+        var key = '';
+        for (var i = 0; i <= qty; i++)
+            key += Math.random().toString(36).substring(2, 15);
+        return key;
+    }
+</script>

@@ -10,7 +10,10 @@
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>General Settings</label>
-				<comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
+				<comment><![CDATA[
+					<h3>Magento Chatbot v0.0.16</h3>
+					<p><b>To use this module you'll have to use SSL in your store.</b></p>
+				]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Enable Module</label>
 					<comment>Enable module.</comment>
@@ -18,7 +21,10 @@
 				</field>
 				<field id="custom_key" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip" type="text">
 					<label>Your Secret Key</label>
-					<comment>This is your custom secret key used for the webhook url, to activate/deactivate the API webhook for telegram, and to use as your challenge hub for Facebook. alphanumeric only! access http://(your_store_url)/chatbot/chatdata/(api)/webhook/(your_custom_key) to set the webhook, change API to &quot;telegram&quot; or &quot;facebook&quot;.</comment>
+					<comment><![CDATA[
+						<a href="javascript:generateCustomKey()">Generate</a>
+						<p>This is your secret key used for the webhook URL and Facebook Verification Hub. Click <a id="werules_messenger_url" href="#" target="_blank">here</a> to get instructions on how to configure your endpoint for Messenger or <a id="werules_telegram_url" href="#" target="_blank">here</a> to configure it for Telegram.</p>
+					]]></comment>
 				</field>
 				<field id="list_empty_categories" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip" type="select">
 					<label>List Empty Categories</label>
