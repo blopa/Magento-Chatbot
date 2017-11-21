@@ -48,6 +48,26 @@ class Index extends \Magento\Framework\View\Element\Template
         parent::__construct($context);
     }
 
+    protected function createMessageObject(){} // TODO
+
+    protected function checkSecretKeyEndpoint()
+    {
+        return true; // TODO
+    }
+
+    public function requestHandler()
+    {
+        $result = array();
+        $correctKey = $this->checkSecretKeyEndpoint();
+        if ($correctKey)
+        {
+            $messageObject = $this->createMessageObject();
+            $result = $this->messageHandler($messageObject);
+        }
+
+        return $result;
+    }
+
     protected function messageHandler($messageObject)
     {
         $messageModel = $this->_messageModel->create();

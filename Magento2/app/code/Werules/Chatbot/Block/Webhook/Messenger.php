@@ -49,7 +49,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             return $this->_helper->getJsonErrorResponse();
     }
 
-    public function requestHandler()
+    protected function createMessageObject()
     {
         $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
         $messenger = $this->_chatbotAPI->initMessengerAPI($api_token);
@@ -66,7 +66,9 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $messageObject->createdAt = $datetime;
         $messageObject->updatedAt = $datetime;
 
-        $result = $this->messageHandler($messageObject);
+        return $messageObject;
+
+//        $result = $this->messageHandler($messageObject);
 //        $messageModel = $this->_messageModel->create();
 //        $messageModel->setSenderId($messenger->ChatID());
 //        $messageModel->setContent($messenger->Text());
@@ -85,6 +87,6 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 //        $this->_helper->processMessage($messageModel->getMessageId());
 //
 //        return $this->_helper->getJsonSuccessResponse();
-        return $result;
+//        return $result;
     }
 }
