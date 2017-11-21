@@ -131,11 +131,8 @@ class NaturalLanguageProcessorReplies extends \Magento\Config\Block\System\Confi
     {
         $optionExtraAttr = array();
         $optionExtraAttr['option_' . $this->_getRendererCommands()->calcOptionHash($row->getData('command_id'))] = 'selected="selected"';
-        $row->setData(
-            'option_extra_attrs', $optionExtraAttr
-        );
-        $optionExtraAttr = array();
         $optionExtraAttr['option_' . $this->_getRendererYesNo()->calcOptionHash($row->getData('enable_reply'))] = 'selected="selected"';
+
         $row->setData(
             'option_extra_attrs', $optionExtraAttr
         );
