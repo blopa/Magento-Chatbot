@@ -5,8 +5,9 @@
     $baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
 ?>
 <script type="text/javascript">
-    var custom_key = document.getElementById('werules_chatbot_general_general_custom_key').value;
-    updateCustomKeyUrl(custom_key);
+    var custom_key = document.getElementById('werules_chatbot_general_general_custom_key');
+    if (custom_key)
+        updateCustomKeyUrl(custom_key.value);
 
     function updateCustomKeyUrl(custom_key)
     {

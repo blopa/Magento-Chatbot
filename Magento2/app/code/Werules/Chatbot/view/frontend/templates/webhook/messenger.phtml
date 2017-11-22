@@ -1,14 +1,3 @@
 <?php
-    $challenge_hub = $this->getConfigValue('werules_chatbot_messenger/general/enable_hub_challenge');
-    if ($challenge_hub)
-    {
-        $hub_token = $this->getConfigValue('werules_chatbot_general/general/custom_key');
-        $verification_hub = $this->getVerificationHub($hub_token);
-        if ($verification_hub)
-            echo $verification_hub;
-        else
-            echo __("Please check your Hub Verify Token.");
-    }
-    else
-        echo $this->requestHandler();
+    echo $this->requestHandler();
 ?>

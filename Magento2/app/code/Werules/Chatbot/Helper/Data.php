@@ -285,8 +285,7 @@ class Data extends AbstractHelper
             {
                 $parameter = $entity['parameter'];
                 if (isset($parameter['value']))
-                    if (isset($parameter['parameter']))
-                        $parameterValue = $parameter['value'];
+                    $parameterValue = $parameter['value'];
             }
 
             $commandString = $intent['value'];

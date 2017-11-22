@@ -52,6 +52,7 @@ class Index extends \Magento\Framework\View\Element\Template
     }
 
     protected function createMessageObject(){} // TODO
+    protected function processRequest(){} // TODO
 
     protected function checkEndpointSecretKey()
     {
@@ -65,14 +66,19 @@ class Index extends \Magento\Framework\View\Element\Template
 
     public function requestHandler()
     {
+        $enabled = $this->getConfigValue('werules_chatbot_general/general/enable');
+        if ($enabled != $this->_define::ENABLED)
+            return $this->getJsonErrorResponse();
+
         $correctKey = $this->checkEndpointSecretKey();
         if ($correctKey)
         {
-            $messageObject = $this->createMessageObject();
-            $result = $this->messageHandler($messageObject);
+//            $messageObject = $this->createMessageObject();
+//            $result = $this->messageHandler($messageObject);
+            $result = $this->processRequest();
         }
         else
-            $result = $this->_helper->getJsonErrorResponse();
+            $result = $this->getJsonErrorResponse();
 
         return $result;
     }
@@ -105,4 +111,14 @@ class Index extends \Magento\Framework\View\Element\Template
     {
         return $this->_helper->getConfigValue($code);
     }
+
+    protected function getJsonErrorResponse()
+    {
+        return $this->_helper->getJsonErrorResponse();
+    }
+
+//    public function getDefine()
+//    {
+//        return $this->_define;
+//    }
 }
