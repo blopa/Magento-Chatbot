@@ -6,7 +6,8 @@
 ?>
 <script type="text/javascript">
     var custom_key = document.getElementById('werules_chatbot_general_general_custom_key').value;
-    updateCustomKeyUrl(custom_key);
+    if (custom_key)
+        updateCustomKeyUrl(custom_key);
 
     function updateCustomKeyUrl(custom_key)
     {

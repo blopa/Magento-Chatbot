@@ -65,6 +65,10 @@ class Index extends \Magento\Framework\View\Element\Template
 
     public function requestHandler()
     {
+        $enabled = $this->getConfigValue('werules_chatbot_general/general/enable');
+        if ($enabled != $this->_define::ENABLED)
+            return $this->_helper->getJsonErrorResponse();
+
         $correctKey = $this->checkEndpointSecretKey();
         if ($correctKey)
         {
