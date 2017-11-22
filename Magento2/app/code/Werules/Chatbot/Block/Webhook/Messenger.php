@@ -60,9 +60,9 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
                 $hub_token = $this->getConfigValue('werules_chatbot_general/general/custom_key');
                 $verification_hub = $this->getVerificationHub($hub_token);
                 if ($verification_hub)
-                    $result =  $verification_hub;
+                    $result = $verification_hub;
                 else
-                    $result =  __("Please check your Hub Verify Token.");
+                    $result = __("Please check your Hub Verify Token.");
             }
             else // process message
             {
@@ -71,7 +71,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             }
         }
         else
-            $result =  $this->getJsonErrorResponse();
+            $result = $this->getJsonErrorResponse();
 
         return $result;
     }
