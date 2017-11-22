@@ -52,6 +52,7 @@ class Index extends \Magento\Framework\View\Element\Template
     }
 
     protected function createMessageObject(){} // TODO
+    protected function processRequest(){} // TODO
 
     protected function checkEndpointSecretKey()
     {
@@ -72,8 +73,9 @@ class Index extends \Magento\Framework\View\Element\Template
         $correctKey = $this->checkEndpointSecretKey();
         if ($correctKey)
         {
-            $messageObject = $this->createMessageObject();
-            $result = $this->messageHandler($messageObject);
+//            $messageObject = $this->createMessageObject();
+//            $result = $this->messageHandler($messageObject);
+            $result = $this->processRequest();
         }
         else
             $result = $this->getJsonErrorResponse();
@@ -110,13 +112,13 @@ class Index extends \Magento\Framework\View\Element\Template
         return $this->_helper->getConfigValue($code);
     }
 
-    public function getDefine()
-    {
-        return $this->_define;
-    }
-
     protected function getJsonErrorResponse()
     {
         return $this->_helper->getJsonErrorResponse();
     }
+
+//    public function getDefine()
+//    {
+//        return $this->_define;
+//    }
 }

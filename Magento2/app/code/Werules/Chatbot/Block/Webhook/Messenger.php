@@ -49,6 +49,33 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             return $this->_helper->getJsonErrorResponse();
     }
 
+    protected function processRequest()
+    {
+        $enabled = $this->getConfigValue('werules_chatbot_messenger/general/enable');
+        if ($enabled == $this->_define::ENABLED)
+        {
+            $challenge_hub = $this->getConfigValue('werules_chatbot_messenger/general/enable_hub_challenge');
+            if ($challenge_hub == $this->_define::ENABLED)
+            {
+                $hub_token = $this->getConfigValue('werules_chatbot_general/general/custom_key');
+                $verification_hub = $this->getVerificationHub($hub_token);
+                if ($verification_hub)
+                    $result =  $verification_hub;
+                else
+                    $result =  __("Please check your Hub Verify Token.");
+            }
+            else // process message
+            {
+                $messageObject = $this->createMessageObject();
+                $result = $this->messageHandler($messageObject);
+            }
+        }
+        else
+            $result =  $this->getJsonErrorResponse();
+
+        return $result;
+    }
+
     protected function createMessageObject()
     {
         $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
