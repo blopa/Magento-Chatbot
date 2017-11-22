@@ -28,6 +28,7 @@ class Index extends \Magento\Framework\View\Element\Template
     protected $_messageModel;
     protected $_objectManager;
     protected $_define;
+    protected $_request;
 //    protected $_cronWorker;
 
     public function __construct(
@@ -35,17 +36,45 @@ class Index extends \Magento\Framework\View\Element\Template
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Werules\Chatbot\Helper\Data $helperData,
         \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
+        \Magento\Framework\App\Request\Http $request,
         \Werules\Chatbot\Model\MessageFactory $message
 //        \Werules\Chatbot\Cron\Worker $cronWorker
     )
     {
         $this->_helper = $helperData;
         $this->_chatbotAPI = $chatbotAPI;
+        $this->_request = $request;
         $this->_messageModel = $message;
         $this->_objectManager = $objectManager;
         $this->_define = new \Werules\Chatbot\Helper\Define;
 //        $this->_cronWorker = $cronWorker;
         parent::__construct($context);
+    }
+
+    protected function createMessageObject(){} // TODO
+
+    protected function checkEndpointSecretKey()
+    {
+        $urlKey = $this->_request->getParam('endpoint');
+        $customKey = $this->getConfigValue('werules_chatbot_general/general/custom_key');
+        if ($urlKey == $customKey)
+            return true;
+
+        return false;
+    }
+
+    public function requestHandler()
+    {
+        $correctKey = $this->checkEndpointSecretKey();
+        if ($correctKey)
+        {
+            $messageObject = $this->createMessageObject();
+            $result = $this->messageHandler($messageObject);
+        }
+        else
+            $result = $this->_helper->getJsonErrorResponse();
+
+        return $result;
     }
 
     protected function messageHandler($messageObject)
