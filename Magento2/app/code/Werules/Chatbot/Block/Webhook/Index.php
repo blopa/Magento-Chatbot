@@ -67,7 +67,7 @@ class Index extends \Magento\Framework\View\Element\Template
     {
         $enabled = $this->getConfigValue('werules_chatbot_general/general/enable');
         if ($enabled != $this->_define::ENABLED)
-            return $this->_helper->getJsonErrorResponse();
+            return $this->getJsonErrorResponse();
 
         $correctKey = $this->checkEndpointSecretKey();
         if ($correctKey)
@@ -76,7 +76,7 @@ class Index extends \Magento\Framework\View\Element\Template
             $result = $this->messageHandler($messageObject);
         }
         else
-            $result = $this->_helper->getJsonErrorResponse();
+            $result = $this->getJsonErrorResponse();
 
         return $result;
     }
@@ -108,5 +108,15 @@ class Index extends \Magento\Framework\View\Element\Template
     public function getConfigValue($code)
     {
         return $this->_helper->getConfigValue($code);
+    }
+
+    public function getDefine()
+    {
+        return $this->_define;
+    }
+
+    protected function getJsonErrorResponse()
+    {
+        return $this->_helper->getJsonErrorResponse();
     }
 }
