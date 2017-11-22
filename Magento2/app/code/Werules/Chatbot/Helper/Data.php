@@ -194,7 +194,7 @@ class Data extends AbstractHelper
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
 
-        $result = false;
+        $result = array();
         if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
             $result = $chatbotAPI->sendMessage($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
@@ -218,10 +218,11 @@ class Data extends AbstractHelper
     {
         //$messageContent = $message->getContent();
         $responseContent = array();
-        $commandResponses = false;
-        $conversationStateResponses = false;
-        $NLPResponses = false;
+        $commandResponses = array();
+        $conversationStateResponses = array();
+        $NLPResponses = array();
 
+        // first of all must check if it's a cancel command
         $command = $this->getCurrentCommand($message->getContent());
         $cancelResponses = $this->checkCancelCommand($command, $message->getSenderId());
         if ($cancelResponses)
@@ -272,7 +273,7 @@ class Data extends AbstractHelper
     {
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
-        $result = false;
+        $result = array();
         $parameterValue = false;
         $parameter = false;
 
@@ -368,11 +369,11 @@ class Data extends AbstractHelper
             {
                 if ($entity['command_id'] == $commandCode)
                 {
-                    $confidence = 0.7; // TODO default module confidence
+                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
                     $extraText = '';
                     if (isset($entity['enable_reply']))
                     {
-                        if ($entity['enable_reply'] == '1')
+                        if ($entity['enable_reply'] == $this->_define::ENABLED)
                         {
                             if (isset($entity['confidence']))
                                 $confidence = (float)$entity['confidence'] / 100;
@@ -396,7 +397,7 @@ class Data extends AbstractHelper
     {
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
-        $result = false;
+        $result = array();
         if ($keyword)
             $messageContent = $keyword;
         else
@@ -595,7 +596,7 @@ class Data extends AbstractHelper
         $commandsList = array();
         foreach ($commands as $command)
         {
-            if ($command['enable_command'] == '1')
+            if ($command['enable_command'] == $this->_define::ENABLED)
             {
                 $command_id = $command['command_id'];
                 $commandsList[$command_id] = array(
@@ -642,7 +643,7 @@ class Data extends AbstractHelper
     private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false)
     {
 //        $messageContent = $message->getContent();
-        $result = false;
+        $result = array();
         $state = false;
         if (!$command)
             $command = $this->getCurrentCommand($messageContent);
@@ -737,22 +738,24 @@ class Data extends AbstractHelper
                 if (!$setStateOnly)
                     $result = $this->processRegisterCommand();
             }
-            else
+            else // should never fall in here
             {
-                // TODO add error handler here
+                $result = $this->getErrorMessage();
             }
         }
-        if ($state && (($result) || $setStateOnly))
+        if ($state && (($result) || $setStateOnly)) // TODO
             $this->updateConversationState($senderId, $state);
 
         return $result;
     }
 
-    private function handleCommandsWithParameters($message, $command, $keyword, $commandCode = false)
+    private function handleCommandsWithParameters($message, $command, $keyword, $commandCode)
     {
-        $this->processCommands($command, $message->getSenderId(), true, $commandCode); // ignore output
-        $result = $this->handleConversationState($message, $keyword);
+        $result = $this->processCommands($command, $message->getSenderId(), true, $commandCode); // should return empty array
+        if ($result)
+            return $result;
 
+        $result = $this->handleConversationState($message, $keyword);
         return $result;
     }
 
@@ -856,6 +859,17 @@ class Data extends AbstractHelper
     private function getMediaURL($path)
     {
         return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+    }
+
+    private function getErrorMessage()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => __("Sorry, I didn't understand that.")
+        );
+        array_push($result, $responseMessage);
+        return $result;
     }
 
     // COMMANDS FUNCTIONS

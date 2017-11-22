@@ -34,6 +34,7 @@ class Define
     const DISABLED = 0;
     const ENABLED = 1;
     const SECONDS_IN_HOUR = 3600;
+    const DEFAULT_MIN_CONFIDENCE = 0.7;
 
     // commands
     const START_COMMAND_ID = 0;
