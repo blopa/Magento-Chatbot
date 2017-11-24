@@ -4,7 +4,7 @@
         <referenceBlock name="customer_account_navigation">
             <block class="Magento\Framework\View\Element\Html\Link\Current" name="customer-account-navigation-chatbot">
                 <arguments>
-                    <argument name="path" xsi:type="string">chatbot/customer/index</argument>
+                    <argument name="path" xsi:type="string">chatbot/customer</argument>
                     <argument name="label" xsi:type="string">Chatbot</argument>
                 </arguments>
             </block>
