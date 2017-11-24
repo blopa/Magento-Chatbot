@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <body>
+        <referenceBlock name="page.main.title">
+            <action method="setPageTitle">
+                <argument translate="true" name="title" xsi:type="string">Chatbot</argument>
+            </action>
+        </referenceBlock>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template" name="chatbot_settings" template="Werules_Chatbot::customer/chatbot_settings.phtml">
+
+            </block>
+        </referenceContainer>
+    </body>
+</page>
