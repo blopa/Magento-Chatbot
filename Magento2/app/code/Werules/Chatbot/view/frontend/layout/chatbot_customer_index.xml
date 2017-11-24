@@ -8,7 +8,7 @@
             </action>
         </referenceBlock>
         <referenceContainer name="content">
-            <block class="Magento\Framework\View\Element\Template" name="chatbot_settings" template="Werules_Chatbot::customer/chatbot_settings.phtml">
+            <block class="Werules\Chatbot\Block\Customer\Index" name="chatbot_settings" template="Werules_Chatbot::customer/chatbot_settings.phtml">
 
             </block>
         </referenceContainer>

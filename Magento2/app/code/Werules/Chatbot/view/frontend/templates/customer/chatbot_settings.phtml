@@ -1,3 +1,33 @@
-<?php
-    echo 'Hello World!';
-?>
+<form class="form" action="<?php /* @escapeNotVerified */ echo $this->getPostActionUrl() ?>" method="post" id="form-validate" enctype="multipart/form-data" autocomplete="off">
+    <fieldset class="fieldset">
+        <legend class="legend">
+            <span><?php echo __("Chatbot Settings") ?></span>
+        </legend>
+        <br>
+        <div class="field choice">
+            <input type="checkbox" name="enable_promotion" id="enable_promotion" value="1" title="<?php echo __("Receive Promotional Messages?") ?>" class="checkbox">
+            <label for="enable_promotion" class="label">
+                <span><?php echo __("Receive Promotional Messages?") ?></span>
+            </label>
+        </div>
+        <div class="field choice">
+            <input type="checkbox" name="enable_messenger" id="enable_messenger" value="1" title="<?php echo __("Enable Messenger?") ?>" class="checkbox">
+            <label for="enable_messenger" class="label">
+                <span><?php echo __("Enable Messenger?") ?></span>
+            </label>
+        </div>
+    </fieldset>
+    <div class="actions-toolbar">
+        <div class="primary">
+            <button type="submit" class="action submit primary" title="<?php /* @escapeNotVerified */ echo __("Save") ?>">
+                <span><?php /* @escapeNotVerified */ echo __("Save") ?></span>
+            </button>
+        </div>
+        <div class="secondary">
+            <a class="action back" href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>">
+                <span><?php /* @escapeNotVerified */ echo __("Back") ?>
+                </span>
+            </a>
+        </div>
+    </div>
+</form>
