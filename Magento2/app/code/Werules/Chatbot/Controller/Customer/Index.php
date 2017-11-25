@@ -21,14 +21,25 @@
 
 namespace Werules\Chatbot\Controller\Customer;
 
-use Magento\Framework\App\ResponseInterface;
-use Magento\Framework\Controller\ResultFactory;
-
 class Index extends \Magento\Framework\App\Action\Action
 {
-    public function __construct(\Magento\Framework\App\Action\Context $context)
+    protected $_customerSession;
+
+    public function __construct(
+        \Magento\Framework\App\Action\Context $context,
+        \Magento\Customer\Model\Session $customerSession
+    )
     {
+        $this->_customerSession = $customerSession;
         parent::__construct($context);
+    }
+
+    public function dispatch(\Magento\Framework\App\RequestInterface $request)
+    {
+        if (!$this->_customerSession->authenticate()) {
+            $this->_actionFlag->set('', self::FLAG_NO_DISPATCH, true);
+        }
+        return parent::dispatch($request);
     }
 
     public function execute()
