@@ -34,6 +34,8 @@ class Define
     const DISABLED = 0;
     const ENABLED = 1;
     const NOT_LOGGED = 0;
+    const NOT_ADMIN = 0;
+    const ADMIN = 1;
     const LOGGED = 1;
     const SECONDS_IN_HOUR = 3600;
     const DEFAULT_MIN_CONFIDENCE = 0.7;

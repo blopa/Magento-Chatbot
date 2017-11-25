@@ -1000,10 +1000,38 @@ class Data extends AbstractHelper
         return $result;
     }
 
+    private function generateRandomHashKey($len = 32)
+    {
+        // max length = 32
+        return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
+    }
+
+    private function createChatbotUser($hashKey)
+    {
+        $chatbotUser = $this->_chatbotUser->create();
+        $chatbotUser->setHashKey($hashKey);
+//        $chatbotUser->setCustomerId();
+//        $chatbotUser->setQuoteId();
+//        $chatbotUser->setSessionId();
+        $chatbotUser->setEnablePromotionalMessages($this->_define::ENABLED);
+        $chatbotUser->setEnableSupport($this->_define::ENABLED);
+        $chatbotUser->setLogged($this->_define::NOT_LOGGED);
+        $chatbotUser->setAdmin($this->_define::NOT_ADMIN);
+        $datetime = date('Y-m-d H:i:s');
+        $chatbotUser->setCreatedAt($datetime);
+        $chatbotUser->setUpdatedAt($datetime);
+
+        $chatbotUser->save();
+
+        return $chatbotUser;
+    }
+
     private function processLoginCommand()
     {
         $result = array();
-        $loginUrl = $this->getStoreURL('chatbot/customer/login');
+        $hash = $this->generateRandomHashKey();
+        $chatbotUser = $this->createChatbotUser($hash);
+        $loginUrl = $this->getStoreURL('chatbot/customer/login/hash' . $chatbotUser->getHashKey());
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("To link your account to this Chatbot, access %1", $loginUrl)

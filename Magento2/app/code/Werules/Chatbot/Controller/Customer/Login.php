@@ -26,15 +26,18 @@ use Magento\Framework\Controller\ResultFactory;
 class Login extends \Magento\Framework\App\Action\Action
 {
     protected $_urlBuilder;
+    protected $_request;
     protected $_customerSession;
 
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\UrlInterface $urlBuilder,
+        \Magento\Framework\App\Request\Http $request,
         \Magento\Customer\Model\Session $customerSession
     )
     {
         $this->_urlBuilder = $urlBuilder;
+        $this->_request = $request;
         $this->_customerSession = $customerSession;
         parent::__construct($context);
     }
@@ -49,6 +52,12 @@ class Login extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
+        $hashKey = $this->_request->getParam('hash');
+        if ($hashKey)
+        {
+            // TODO
+        }
+
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         $resultRedirect->setUrl($this->getReturnUrl());
 
