@@ -55,7 +55,6 @@ class Save extends \Magento\Framework\App\Action\Action
         if (!empty($post))
         {
             $saved = false;
-            // Retrieve your form data
             $enableMessenger = 0;
             $enablePromotion = 0;
             if (isset($post['enable_promotion']))
@@ -68,7 +67,6 @@ class Save extends \Magento\Framework\App\Action\Action
 
             if ($chatbotUser->getChatbotuserId())
             {
-                // Doing-something with post data
                 if ($chatbotUser->getEnablePromotionalMessages() != $enablePromotion)
                 {
                     $chatbotUser->setEnablePromotionalMessages($enablePromotion);
@@ -89,7 +87,6 @@ class Save extends \Magento\Framework\App\Action\Action
 
                 // TODO add other chatbots apis here
 
-                // Display the success form validation message
                 if ($saved)
                     $this->messageManager->addSuccessMessage(__("Chatbot settings saved successfully."));
                 else
@@ -101,13 +98,11 @@ class Save extends \Magento\Framework\App\Action\Action
         else
             $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
 
-        // Redirect to your form page (or anywhere you want...)
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         $resultRedirect->setUrl($this->getReturnUrl());
 
         return $resultRedirect;
 
-        // Render the page
 //        $this->_view->loadLayout();
 //        $this->_view->renderLayout();
     }

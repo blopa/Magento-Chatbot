@@ -21,15 +21,20 @@
 
 namespace Werules\Chatbot\Controller\Customer;
 
-class Index extends \Magento\Framework\App\Action\Action
+use Magento\Framework\Controller\ResultFactory;
+
+class Login extends \Magento\Framework\App\Action\Action
 {
+    protected $_urlBuilder;
     protected $_customerSession;
 
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
+        \Magento\Framework\UrlInterface $urlBuilder,
         \Magento\Customer\Model\Session $customerSession
     )
     {
+        $this->_urlBuilder = $urlBuilder;
         $this->_customerSession = $customerSession;
         parent::__construct($context);
     }
@@ -42,9 +47,21 @@ class Index extends \Magento\Framework\App\Action\Action
         return parent::dispatch($request);
     }
 
-    public function execute() // TODO find a way to use abstract class
+    public function execute()
     {
-        $this->_view->loadLayout();
-        $this->_view->renderLayout();
+        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $resultRedirect->setUrl($this->getReturnUrl());
+
+        return $resultRedirect;
+    }
+
+    public function getUrl($route = '', $params = [])
+    {
+        return $this->_urlBuilder->getUrl($route, $params);
+    }
+
+    public function getReturnUrl()
+    {
+        return $this->getUrl('chatbot/customer/index');
     }
 }

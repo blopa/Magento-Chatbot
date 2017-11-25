@@ -1003,9 +1003,10 @@ class Data extends AbstractHelper
     private function processLoginCommand()
     {
         $result = array();
+        $loginUrl = $this->getStoreURL('chatbot/customer/login');
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LOGIN command!' // TODO
+            'content' => __("To link your account to this Chatbot, access %1", $loginUrl)
         );
         array_push($result, $responseMessage);
         return $result;
