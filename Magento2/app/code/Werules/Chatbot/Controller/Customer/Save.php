@@ -35,7 +35,8 @@ class Save extends \Magento\Framework\App\Action\Action
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\UrlInterface $urlBuilder,
         \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
-        \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
+        \Werules\Chatbot\Model\ResourceModel\ChatbotAPI\CollectionFactory $chatbotAPI,
+//        \Werules\Chatbot\Model\ChatbotUser $chatbotAPI,
         \Magento\Customer\Model\Session $customerSession
     )
     {
@@ -123,8 +124,6 @@ class Save extends \Magento\Framework\App\Action\Action
 //        $chatbotAPI->load($chatbotUserId, 'chatbotuser_id'); // TODO
         $chatbotAPI = $this->_chatbotAPI
             ->create()
-            ->getResource()
-            ->getCollection()
             ->addFieldToFilter('chatbotuser_id', $chatbotUserId)
             ->addFieldToFilter('chatbot_type', $chatType)
             ->getFirstItem()

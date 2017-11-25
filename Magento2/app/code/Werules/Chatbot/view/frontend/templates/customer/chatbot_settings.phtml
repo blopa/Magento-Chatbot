@@ -1,5 +1,15 @@
 <?php
     $startedChatbot = $this->checkStartedChat();
+    if ($startedChatbot)
+    {
+        $enablePromotion = $this->checkEnabledPromotion();
+        $enableMessenger = $this->checkEnabledMessenger();
+    }
+    else
+    {
+        $enablePromotion = false;
+        $enableMessenger = false;
+    }
 ?>
 <form class="form" action="<?php /* @escapeNotVerified */ echo $this->getPostActionUrl() ?>" method="post" id="form-validate" enctype="multipart/form-data" autocomplete="off">
     <fieldset class="fieldset">
@@ -15,13 +25,13 @@
             </div>
         <?php endif; ?>
         <div class="field choice">
-            <input type="checkbox" name="enable_promotion" id="enable_promotion" value="1" title="<?php echo __("Receive Promotional Messages?") ?>" class="checkbox" <?php if (!$startedChatbot) echo 'disabled' ?>>
+            <input type="checkbox" name="enable_promotion" id="enable_promotion" value="1" title="<?php echo __("Receive Promotional Messages?") ?>" class="checkbox" <?php if (!$startedChatbot) echo 'disabled'; else if ($enablePromotion) echo 'checked'; ?>>
             <label for="enable_promotion" class="label">
                 <span><?php echo __("Receive Promotional Messages?") ?></span>
             </label>
         </div>
         <div class="field choice">
-            <input type="checkbox" name="enable_messenger" id="enable_messenger" value="1" title="<?php echo __("Enable Messenger?") ?>" class="checkbox" <?php if (!$startedChatbot) echo 'disabled' ?>>
+            <input type="checkbox" name="enable_messenger" id="enable_messenger" value="1" title="<?php echo __("Enable Messenger?") ?>" class="checkbox" <?php if (!$startedChatbot) echo 'disabled'; else if ($enableMessenger) echo 'checked'; ?>>
             <label for="enable_messenger" class="label">
                 <span><?php echo __("Enable Messenger?") ?></span>
             </label>
