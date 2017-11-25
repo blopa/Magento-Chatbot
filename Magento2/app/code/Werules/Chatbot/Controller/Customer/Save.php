@@ -56,6 +56,8 @@ class Save extends \Magento\Framework\App\Action\Action
         {
             $saved = false;
             // Retrieve your form data
+            $enableMessenger = 0;
+            $enablePromotion = 0;
             if (isset($post['enable_promotion']))
                     $enablePromotion = $post['enable_promotion'];
             if (isset($post['enable_messenger']))
@@ -67,20 +69,20 @@ class Save extends \Magento\Framework\App\Action\Action
             if ($chatbotUser->getChatbotuserId())
             {
                 // Doing-something with post data
-                if (isset($enablePromotion))
+                if ($chatbotUser->getEnablePromotionalMessages() != $enablePromotion)
                 {
                     $chatbotUser->setEnablePromotionalMessages($enablePromotion);
                     $chatbotUser->save();
                     $saved = true;
                 }
 
-                if (isset($enableMessenger))
+                $messengerChatbotAPI = $this->getChatbotAPIByChatbotuserIdAndChatType($chatbotUser->getChatbotuserId(), $this->_define::MESSENGER_INT);
+                if ($messengerChatbotAPI->getChatbotapiId())
                 {
-                    $chatbotAPI = $this->getChatbotAPIByChatbotuserIdAndChatType($chatbotUser->getChatbotuserId(), $this->_define::MESSENGER_INT);
-                    if ($chatbotAPI->getChatbotapiId())
+                    if ($messengerChatbotAPI->getEnabled() != $enableMessenger)
                     {
-                        $chatbotAPI->setEnabled($enableMessenger);
-                        $chatbotAPI->save();
+                        $messengerChatbotAPI->setEnabled($enableMessenger);
+                        $messengerChatbotAPI->save();
                         $saved = true;
                     }
                 }
@@ -91,21 +93,23 @@ class Save extends \Magento\Framework\App\Action\Action
                 if ($saved)
                     $this->messageManager->addSuccessMessage(__("Chatbot settings saved successfully."));
                 else
-                    $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
+                    $this->messageManager->addWarning(__("You haven't changed any data in the settings."));
             }
             else
                 $this->messageManager->addErrorMessage(__("You still haven't chat with our Chatbot."));
-
-
-            // Redirect to your form page (or anywhere you want...)
-            $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
-            $resultRedirect->setUrl($this->getReturnUrl());
-
-            return $resultRedirect;
         }
+        else
+            $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
+
+        // Redirect to your form page (or anywhere you want...)
+        $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
+        $resultRedirect->setUrl($this->getReturnUrl());
+
+        return $resultRedirect;
+
         // Render the page
-        $this->_view->loadLayout();
-        $this->_view->renderLayout();
+//        $this->_view->loadLayout();
+//        $this->_view->renderLayout();
     }
 
     public function getUrl($route = '', $params = [])

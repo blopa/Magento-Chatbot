@@ -12,6 +12,7 @@
     }
 ?>
 <form class="form" action="<?php /* @escapeNotVerified */ echo $this->getPostActionUrl() ?>" method="post" id="form-validate" enctype="multipart/form-data" autocomplete="off">
+    <input type="hidden" name="form_key" value="<?php echo $this->getFormKey();?>" />
     <fieldset class="fieldset">
         <legend class="legend">
             <span><?php echo __("Chatbot Settings") ?></span>
