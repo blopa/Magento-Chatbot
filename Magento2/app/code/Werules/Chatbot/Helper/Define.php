@@ -33,6 +33,8 @@ class Define
     const OUTGOING = 1;
     const DISABLED = 0;
     const ENABLED = 1;
+    const NOT_LOGGED = 0;
+    const LOGGED = 1;
     const SECONDS_IN_HOUR = 3600;
     const DEFAULT_MIN_CONFIDENCE = 0.7;
 

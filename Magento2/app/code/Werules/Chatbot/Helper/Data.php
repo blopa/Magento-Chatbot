@@ -33,6 +33,7 @@ class Data extends AbstractHelper
     protected $objectManager;
     protected $_messageModel;
     protected $_chatbotAPI;
+    protected $_chatbotUser;
     protected $_define;
     protected $_configPrefix;
     protected $_serializer;
@@ -50,6 +51,7 @@ class Data extends AbstractHelper
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
+        \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
         \Werules\Chatbot\Model\MessageFactory $message,
         \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
@@ -63,6 +65,7 @@ class Data extends AbstractHelper
         $this->storeManager  = $storeManager;
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
+        $this->_chatbotUser  = $chatbotUser;
         $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_categoryHelper = $categoryHelper;
@@ -640,6 +643,22 @@ class Data extends AbstractHelper
         return $result;
     }
 
+    public function getChatbotuserBySenderId($senderId)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotUser = $this->_chatbotUser->create();
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotUser->load($chatbotAPI->getChatbotuserId(), 'chatbotuser_id'); // TODO
+//            if ($chatbotUser->getChatbotuserId())
+//                return $chatbotUser;
+        }
+
+        return $chatbotUser;
+    }
+
     private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false)
     {
 //        $messageContent = $message->getContent();
@@ -670,17 +689,38 @@ class Data extends AbstractHelper
             else if ($command == $this->_define::LOGIN_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processLoginCommand();
+                {
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
+                        $result = $this->processLoginCommand();
+                    else
+                    {
+                        $text = __("You are already logged.");
+                        $result = $this->getTextMessageArray($text);
+                    }
+                }
             }
             else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processListOrdersCommand();
+                {
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                        $result = $this->processListOrdersCommand();
+                    else
+                        $result = $this->getNotLoggedMessage();
+                }
             }
             else if ($command == $this->_define::REORDER_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processReorderCommand();
+                {
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                        $result = $this->processReorderCommand();
+                    else
+                        $result = $this->getNotLoggedMessage();
+                }
             }
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
@@ -700,7 +740,13 @@ class Data extends AbstractHelper
             else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processTrackOrderCommand();
+                {
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                        $result = $this->processTrackOrderCommand();
+                    else
+                        $result = $this->getNotLoggedMessage();
+                }
             }
             else if ($command == $this->_define::SUPPORT_COMMAND_ID)
             {
@@ -731,12 +777,27 @@ class Data extends AbstractHelper
             else if ($command == $this->_define::LOGOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processLogoutCommand();
+                {
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                        $result = $this->processLogoutCommand();
+                    else
+                        $result = $this->getNotLoggedMessage();
+                }
             }
             else if ($command == $this->_define::REGISTER_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processRegisterCommand();
+                {
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
+                        $result = $this->processRegisterCommand();
+                    else
+                    {
+                        $text = __("You are already registered.");
+                        $result = $this->getTextMessageArray($text);
+                    }
+                }
             }
             else // should never fall in here
             {
@@ -861,15 +922,27 @@ class Data extends AbstractHelper
         return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
     }
 
-    private function getErrorMessage()
+    private function getTextMessageArray($text)
     {
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("Sorry, I didn't understand that.")
+            'content' => $text
         );
         array_push($result, $responseMessage);
         return $result;
+    }
+
+    private function getNotLoggedMessage()
+    {
+        $text = __("You have to be logged to do that.");
+        return $this->getTextMessageArray($text);
+    }
+
+    private function getErrorMessage()
+    {
+        $text = __("Sorry, I didn't understand that.");
+        return $this->getTextMessageArray($text);
     }
 
     // COMMANDS FUNCTIONS
