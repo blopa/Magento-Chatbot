@@ -23,12 +23,18 @@ namespace Werules\Chatbot\Block\Customer;
 
 class Index extends \Magento\Framework\View\Element\Template
 {
+    protected $_customerSession;
     protected $_urlBuilder;
+    protected $_chatbotUser;
 
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context
+        \Magento\Framework\View\Element\Template\Context $context,
+        \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
+        \Magento\Customer\Model\Session $customerSession
     )
     {
+        $this->_customerSession = $customerSession;
+        $this->_chatbotUser  = $chatbotUser;
         $this->_urlBuilder = $context->getUrlBuilder();
 //        $this->_isScopePrivate = true;
         parent::__construct($context);
@@ -53,5 +59,23 @@ class Index extends \Magento\Framework\View\Element\Template
     public function getBackUrl()
     {
         return $this->getUrl('*/*/'); // get last accessed tab
+    }
+
+    public function getChatbotuserByCustomerId($customerId) // TODO find a better place for this function
+    {
+        $chatbotUser = $this->_chatbotUser->create();
+        $chatbotUser->load($customerId, 'customer_id'); // TODO
+
+        return $chatbotUser;
+    }
+
+    public function checkStartedChat()
+    {
+        $customerId = $this->_customerSession->getCustomer()->getId();
+        $chatbotUser = $this->getChatbotuserByCustomerId($customerId);
+        if ($chatbotUser->getChatbotuserId())
+            return true;
+
+        return false;
     }
 }
