@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="customer_account"/>
     <body>
         <referenceBlock name="page.main.title">
@@ -8,7 +8,7 @@
             </action>
         </referenceBlock>
         <referenceContainer name="content">
-            <block class="Werules\Chatbot\Block\Customer\Index" name="chatbot_settings" template="Werules_Chatbot::customer/chatbot_settings.phtml">
+            <block class="Werules\Chatbot\Block\Customer\Index" cacheable="false" name="chatbot_settings" template="Werules_Chatbot::customer/chatbot_settings.phtml">
 
             </block>
         </referenceContainer>

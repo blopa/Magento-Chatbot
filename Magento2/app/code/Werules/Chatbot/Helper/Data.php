@@ -690,16 +690,13 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    if (!$setStateOnly)
+                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
+                    if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
+                        $result = $this->processLoginCommand();
+                    else
                     {
-                        $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                        if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
-                            $result = $this->processLoginCommand();
-                        else
-                        {
-                            $text = __("You are already logged.");
-                            $result = $this->getTextMessageArray($text);
-                        }
+                        $text = __("You are already logged.");
+                        $result = $this->getTextMessageArray($text);
                     }
                 }
             }

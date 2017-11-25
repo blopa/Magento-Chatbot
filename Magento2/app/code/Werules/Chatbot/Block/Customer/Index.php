@@ -30,6 +30,7 @@ class Index extends \Magento\Framework\View\Element\Template
     )
     {
         $this->_urlBuilder = $context->getUrlBuilder();
+//        $this->_isScopePrivate = true;
         parent::__construct($context);
     }
 
