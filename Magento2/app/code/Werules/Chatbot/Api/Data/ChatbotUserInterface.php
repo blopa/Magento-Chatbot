@@ -30,7 +30,6 @@ interface ChatbotUserInterface
     const LOGGED = 'logged';
     const SESSION_ID = 'session_id';
     const ENABLE_SUPPORT = 'enable_support';
-    const HASH_KEY = 'hash_key';
     const QUOTE_ID = 'quote_id';
     const ADMIN = 'admin';
     const UPDATED_AT = 'updated_at';
@@ -62,19 +61,6 @@ interface ChatbotUserInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotUserInterface
      */
     public function setCustomerId($customer_id);
-
-    /**
-     * Get hash_key
-     * @return string|null
-     */
-    public function getHashKey();
-
-    /**
-     * Set hash_key
-     * @param string $hash_key
-     * @return \Werules\Chatbot\Api\Data\ChatbotUserInterface
-     */
-    public function setHashKey($hash_key);
 
     /**
      * Get quote_id

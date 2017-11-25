@@ -73,25 +73,6 @@ class ChatbotUser extends \Magento\Framework\Model\AbstractModel implements Chat
     }
 
     /**
-     * Get hash_key
-     * @return string
-     */
-    public function getHashKey()
-    {
-        return $this->getData(self::HASH_KEY);
-    }
-
-    /**
-     * Set hash_key
-     * @param string $hash_key
-     * @return \Werules\Chatbot\Api\Data\ChatbotUserInterface
-     */
-    public function setHashKey($hash_key)
-    {
-        return $this->setData(self::HASH_KEY, $hash_key);
-    }
-
-    /**
      * Get quote_id
      * @return string
      */
