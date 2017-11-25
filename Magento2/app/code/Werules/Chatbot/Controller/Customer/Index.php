@@ -42,8 +42,9 @@ class Index extends \Magento\Framework\App\Action\Action
         return parent::dispatch($request);
     }
 
-    public function execute()
+    public function execute() // TODO find a way to use abstract class
     {
+        // Render the page
         $this->_view->loadLayout();
         $this->_view->renderLayout();
     }
