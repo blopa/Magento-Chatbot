@@ -27,18 +27,26 @@ class Login extends \Magento\Framework\App\Action\Action
 {
     protected $_urlBuilder;
     protected $_request;
+    protected $_chatbotUser;
+    protected $_chatbotAPI;
     protected $_customerSession;
+    protected $_define;
 
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\UrlInterface $urlBuilder,
         \Magento\Framework\App\Request\Http $request,
+        \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
+        \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Magento\Customer\Model\Session $customerSession
     )
     {
         $this->_urlBuilder = $urlBuilder;
         $this->_request = $request;
+        $this->_chatbotUser  = $chatbotUser;
+        $this->_chatbotAPI  = $chatbotAPI;
         $this->_customerSession = $customerSession;
+        $this->_define = new \Werules\Chatbot\Helper\Define;
         parent::__construct($context);
     }
 
@@ -55,8 +63,44 @@ class Login extends \Magento\Framework\App\Action\Action
         $hashKey = $this->_request->getParam('hash');
         if ($hashKey)
         {
-            // TODO
+            $chatbotAPI = $this->_chatbotAPI->create();
+            $chatbotAPI->load($hashKey, 'hash_key'); // TODO
+            if ($chatbotAPI->getChatbotapiId())
+            {
+                $customerId = $this->_customerSession->getCustomer()->getId();
+                $chatbotUser = $this->getChatbotuserByCustomerId($customerId);
+
+                if ($chatbotUser->getChatbotuserId())
+                {
+                    $chatbotAPI->setChatbotuserId($chatbotUser->getChatbotuserId());
+                    $chatbotAPI->setLogged($this->_define::LOGGED);
+                    $chatbotAPI->save();
+                }
+                else
+                {
+                    $chatbotUser->setCustomerId($customerId);
+//                $chatbotUser->setQuoteId();
+//                $chatbotUser->setSessionId();
+                    $chatbotUser->setEnablePromotionalMessages($this->_define::ENABLED);
+                    $chatbotUser->setEnableSupport($this->_define::ENABLED);
+                    $chatbotUser->setLogged($this->_define::NOT_LOGGED);
+                    $chatbotUser->setAdmin($this->_define::NOT_ADMIN);
+                    $datetime = date('Y-m-d H:i:s');
+                    $chatbotUser->setCreatedAt($datetime);
+                    $chatbotUser->setUpdatedAt($datetime);
+                    $chatbotUser->save();
+
+                    $chatbotAPI->setChatbotuserId($chatbotUser->getChatbotuserId());
+                    $chatbotAPI->setLogged($this->_define::LOGGED);
+                    $chatbotAPI->save();
+                }
+                $this->messageManager->addSuccessMessage(__("Chatbot settings saved successfully."));
+            }
+            else
+                $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
         }
+        else
+            $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
 
         $resultRedirect = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);
         $resultRedirect->setUrl($this->getReturnUrl());
@@ -72,5 +116,13 @@ class Login extends \Magento\Framework\App\Action\Action
     public function getReturnUrl()
     {
         return $this->getUrl('chatbot/customer/index');
+    }
+
+    public function getChatbotuserByCustomerId($customerId) // TODO find a better place for this function
+    {
+        $chatbotUser = $this->_chatbotUser->create();
+        $chatbotUser->load($customerId, 'customer_id'); // TODO
+
+        return $chatbotUser;
     }
 }

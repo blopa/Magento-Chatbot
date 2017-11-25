@@ -91,6 +91,12 @@ class Data extends AbstractHelper
         $logger->info(var_export($message, true));
     }
 
+    private function generateRandomHashKey($len = 32)
+    {
+        // max length = 32
+        return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
+    }
+
     protected function getJsonResponse($success)
     {
         header_remove('Content-Type'); // TODO
@@ -141,6 +147,8 @@ class Data extends AbstractHelper
             $chatbotAPI->setChatId($message->getSenderId());
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setFallbackQty(0);
+            $hash = $this->generateRandomHashKey();
+            $chatbotAPI->setHashKey($hash);
             $datetime = date('Y-m-d H:i:s');
             $chatbotAPI->setCreatedAt($datetime);
             $chatbotAPI->setUpdatedAt($datetime);
@@ -692,7 +700,7 @@ class Data extends AbstractHelper
                 {
                     $chatbotuser = $this->getChatbotuserBySenderId($senderId);
                     if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
-                        $result = $this->processLoginCommand();
+                        $result = $this->processLoginCommand($senderId);
                     else
                     {
                         $text = __("You are already logged.");
@@ -1000,38 +1008,13 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function generateRandomHashKey($len = 32)
+    private function processLoginCommand($senderId)
     {
-        // max length = 32
-        return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
-    }
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
 
-    private function createChatbotUser($hashKey)
-    {
-        $chatbotUser = $this->_chatbotUser->create();
-        $chatbotUser->setHashKey($hashKey);
-//        $chatbotUser->setCustomerId();
-//        $chatbotUser->setQuoteId();
-//        $chatbotUser->setSessionId();
-        $chatbotUser->setEnablePromotionalMessages($this->_define::ENABLED);
-        $chatbotUser->setEnableSupport($this->_define::ENABLED);
-        $chatbotUser->setLogged($this->_define::NOT_LOGGED);
-        $chatbotUser->setAdmin($this->_define::NOT_ADMIN);
-        $datetime = date('Y-m-d H:i:s');
-        $chatbotUser->setCreatedAt($datetime);
-        $chatbotUser->setUpdatedAt($datetime);
-
-        $chatbotUser->save();
-
-        return $chatbotUser;
-    }
-
-    private function processLoginCommand()
-    {
         $result = array();
-        $hash = $this->generateRandomHashKey();
-        $chatbotUser = $this->createChatbotUser($hash);
-        $loginUrl = $this->getStoreURL('chatbot/customer/login/hash' . $chatbotUser->getHashKey());
+        $loginUrl = $this->getStoreURL('chatbot/customer/login/hash/' . $chatbotAPI->getHashKey());
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("To link your account to this Chatbot, access %1", $loginUrl)
