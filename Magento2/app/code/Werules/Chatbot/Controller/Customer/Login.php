@@ -67,34 +67,39 @@ class Login extends \Magento\Framework\App\Action\Action
             $chatbotAPI->load($hashKey, 'hash_key'); // TODO
             if ($chatbotAPI->getChatbotapiId())
             {
-                $customerId = $this->_customerSession->getCustomer()->getId();
-                $chatbotUser = $this->getChatbotuserByCustomerId($customerId);
+                if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
+                {
+                    $customerId = $this->_customerSession->getCustomer()->getId();
+                    $chatbotUser = $this->getChatbotuserByCustomerId($customerId);
 
-                if ($chatbotUser->getChatbotuserId())
-                {
-                    $chatbotAPI->setChatbotuserId($chatbotUser->getChatbotuserId());
-                    $chatbotAPI->setLogged($this->_define::LOGGED);
-                    $chatbotAPI->save();
-                }
-                else
-                {
-                    $chatbotUser->setCustomerId($customerId);
+                    if ($chatbotUser->getChatbotuserId())
+                    {
+                        $chatbotAPI->setChatbotuserId($chatbotUser->getChatbotuserId());
+                        $chatbotAPI->setLogged($this->_define::LOGGED);
+                        $chatbotAPI->save();
+                    }
+                    else
+                    {
+                        $chatbotUser->setCustomerId($customerId);
 //                $chatbotUser->setQuoteId();
 //                $chatbotUser->setSessionId();
-                    $chatbotUser->setEnablePromotionalMessages($this->_define::ENABLED);
-                    $chatbotUser->setEnableSupport($this->_define::ENABLED);
-                    $chatbotUser->setLogged($this->_define::NOT_LOGGED);
-                    $chatbotUser->setAdmin($this->_define::NOT_ADMIN);
-                    $datetime = date('Y-m-d H:i:s');
-                    $chatbotUser->setCreatedAt($datetime);
-                    $chatbotUser->setUpdatedAt($datetime);
-                    $chatbotUser->save();
+                        $chatbotUser->setEnablePromotionalMessages($this->_define::ENABLED);
+                        $chatbotUser->setEnableSupport($this->_define::ENABLED);
+                        $chatbotUser->setLogged($this->_define::NOT_LOGGED);
+                        $chatbotUser->setAdmin($this->_define::NOT_ADMIN);
+                        $datetime = date('Y-m-d H:i:s');
+                        $chatbotUser->setCreatedAt($datetime);
+                        $chatbotUser->setUpdatedAt($datetime);
+                        $chatbotUser->save();
 
-                    $chatbotAPI->setChatbotuserId($chatbotUser->getChatbotuserId());
-                    $chatbotAPI->setLogged($this->_define::LOGGED);
-                    $chatbotAPI->save();
+                        $chatbotAPI->setChatbotuserId($chatbotUser->getChatbotuserId());
+                        $chatbotAPI->setLogged($this->_define::LOGGED);
+                        $chatbotAPI->save();
+                    }
+                    $this->messageManager->addSuccessMessage(__("Chatbot settings saved successfully."));
                 }
-                $this->messageManager->addSuccessMessage(__("Chatbot settings saved successfully."));
+                else
+                    $this->messageManager->addWarning(__("You are already logged."));
             }
             else
                 $this->messageManager->addErrorMessage(__("Invalid URL hash, please try again."));
