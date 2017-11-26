@@ -42,6 +42,7 @@ class Data extends AbstractHelper
     protected $_categoryCollectionFactory;
     protected $_storeManagerInterface;
     protected $_commandsList;
+    protected $_orderCollectionFactory;
     protected $_productCollection;
     protected $_currentCommand;
 
@@ -57,6 +58,7 @@ class Data extends AbstractHelper
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -72,6 +74,7 @@ class Data extends AbstractHelper
         $this->_categoryFactory = $categoryFactory;
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
         $this->_storeManagerInterface = $storeManagerInterface;
+        $this->_orderCollectionFactory = $orderCollectionFactory;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -95,6 +98,17 @@ class Data extends AbstractHelper
     {
         // max length = 32
         return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
+    }
+
+    public function getOrdersFromCustomerId($customerId)
+    {
+        $orders = $this->_orderCollectionFactory->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->setOrder('created_at', 'desc')
+        ;
+
+        return $orders;
     }
 
     protected function getJsonResponse($success)
@@ -212,6 +226,8 @@ class Data extends AbstractHelper
             $result = $chatbotAPI->sendQuickReply($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
             $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
+            $result = $chatbotAPI->sendReceipt($outgoingMessage);
 
         if ($result)
         {
@@ -472,10 +488,85 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    public function getProductCollectionByName($searchString)
+    private function getOrderDetailsObject($order) // TODO add link to product name
+    {
+        $detailedOrderObject = array();
+        if ($order->getId())
+        {
+            $orderNumber = $order->getIncrementId();
+            $customerName = $order->getCustomerName();
+            $orderUrl = $this->getStoreURL('sales/order/view/order_id/' . $order->getId());
+            $currency = $order->getOrderCurrencyCode();
+            $createdAt = strtotime($order->getCreatedAt());
+            $elements = array();
+            $items = $order->getAllVisibleItems();
+            foreach ($items as $item)
+            {
+                $productCollection = $this->getProductCollection();
+                $productCollection->addFieldToFilter('entity_id', $item->getProductId());
+                $product = $productCollection->getFirstItem();
+                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+
+                $element = array(
+                    'title' => $item->getName(),
+                    'subtitle' => $this->excerpt($item->getShortDescription(), 30),
+                    'quantity' => (int)$item->getQtyOrdered(),
+                    'price' => $item->getPrice(),
+                    'currency' => $currency,
+                    'image_url' => $productImage
+                );
+                array_push($elements, $element);
+            }
+
+            $shippingAddress = $order->getShippingAddress();
+            $streetOne = $shippingAddress->getStreet()[0];
+            $streetTwo = '';
+            if (count($shippingAddress->getStreet()) > 1)
+                $streetTwo = $shippingAddress->getStreet()[1];
+            $address = array(
+                'street_1' => $streetOne,
+                'street_2' => $streetTwo,
+                'city' => $shippingAddress->getCity(),
+                'postal_code' => $shippingAddress->getPostcode(),
+                'state' => $shippingAddress->getRegion(),
+                'country' => $shippingAddress->getCountryId()
+            );
+
+            $summary = array(
+                'subtotal' => $order->getSubtotal(),
+                'shipping_cost' => $order->getShippingAmount(),
+                'total_tax' => $order->getTaxAmount(),
+                'total_cost' => $order->getGrandTotal()
+            );
+
+            $detailedOrderObject = array(
+                'template_type' => 'receipt',
+                'recipient_name' => $customerName,
+                'order_number' => $orderNumber,
+                'currency' => $currency,
+                'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
+                'order_url' => $orderUrl,
+                'timestamp' => $createdAt,
+                'elements' => $elements,
+                'address' => $address,
+                'summary' => $summary
+            );
+        }
+
+        return $detailedOrderObject;
+    }
+
+    private function getProductCollection()
     {
         $collection = $this->_productCollection->create();
-        $collection->addAttributeToSelect('*'); // ['name', 'sku']
+        $collection->addAttributeToSelect('*');
+
+        return $collection;
+    }
+
+    public function getProductCollectionByName($searchString)
+    {
+        $collection = $this->getProductCollection();
         $collection->addAttributeToFilter(array(
             array('attribute' => 'name', 'like' => '%' . $searchString . '%'),
             array('attribute' => 'sku', 'like' => '%' . $searchString . '%'),
@@ -732,7 +823,7 @@ class Data extends AbstractHelper
                     $chatbotAPI = $this->_chatbotAPI->create();
                     $chatbotAPI->load($senderId, 'chat_id'); // TODO
                     if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                        $result = $this->processListOrdersCommand();
+                        $result = $this->processListOrdersCommand($senderId);
                     else
                         $result = $this->getNotLoggedMessage();
                 }
@@ -1075,14 +1166,38 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function processListOrdersCommand()
+    private function processListOrdersCommand($senderId)
     {
+        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+        $ordersCollection = $this->getOrdersFromCustomerId($chatbotUser->getCustomerId());
         $result = array();
+        $orderList = array();
+
+        foreach ($ordersCollection as $order)
+        {
+            $orderObject = $this->getOrderDetailsObject($order);
+//            $this->logger(json_encode($productObject));
+            if (count($orderList) < 10) // TODO
+                array_push($orderList, $orderObject);
+        }
+
+        if (count($orderList) > 0)
+        {
+            $contentType = $this->_define::RECEIPT_LAYOUT;
+            $content = json_encode($orderList);
+        }
+        else
+        {
+            $content = __("This account has no orders.");
+            $contentType = $this->_define::CONTENT_TEXT;
+        }
+
         $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LIST_ORDERS command!' // TODO
+            'content_type' => $contentType,
+            'content' => $content
         );
         array_push($result, $responseMessage);
+
         return $result;
     }
 

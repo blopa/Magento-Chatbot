@@ -322,6 +322,16 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
     }
 
+    public function sendReceipt($message)
+    {
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
+        {
+            $this->sendReceiptToMessenger($message);
+        }
+
+        return true;
+    }
+
     public function sendImageWithOptions($message)
     {
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
@@ -330,6 +340,63 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         }
 
         return true;
+    }
+
+    public function sendReceiptToMessenger($message)
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($api_token);
+
+        $messageContent = $message->getContent();
+        $decodedContent = json_decode($messageContent);
+        $receiptPaylod = array();
+
+        foreach ($decodedContent as $decodedObject)
+        {
+            $address = $decodedObject->address;
+            $summary = $decodedObject->summary;
+            $elements = array();
+            foreach ($decodedObject->elements as $element)
+            {
+                $productDetails = array(
+                    'title' => $element->title,
+                    'subtitle' => $element->subtitle,
+                    'quantity' => $element->quantity,
+                    'price' => $element->price,
+                    'currency' => $element->currency,
+                    'image_url' => $element->image_url
+                );
+                array_push($elements, $productDetails);
+            }
+            $addressDetails = array(
+                'street_1' => $address->street_1,
+                'street_2' => $address->street_2,
+                'city' => $address->city,
+                'postal_code' => $address->postal_code,
+                'state' => $address->state,
+                'country' => $address->country
+            );
+            $summaryDetails = array(
+                'subtotal' => $summary->subtotal,
+                'shipping_cost' => $summary->shipping_cost,
+                'total_tax' => $summary->total_tax,
+                'total_cost' => $summary->total_cost,
+            );
+
+            $receiptPaylod = array(
+                'template_type' => $decodedObject->template_type,
+                'recipient_name' => $decodedObject->recipient_name,
+                'order_number' => $decodedObject->order_number,
+                'currency' => $decodedObject->currency,
+                'payment_method' => $decodedObject->payment_method,
+                'order_url' => $decodedObject->order_url,
+                'timestamp' => $decodedObject->timestamp,
+                'elements' => $elements,
+                'address' => $addressDetails,
+                'summary' => $summaryDetails
+            );
+        }
+        $this->_apiModel->sendReceiptTemplate($message->getSenderId(), $receiptPaylod);
     }
 
     public function sendImageWithOptionsToMessenger($message)

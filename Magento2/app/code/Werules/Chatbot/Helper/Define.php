@@ -64,6 +64,7 @@ class Define
     const QUICK_REPLY = 1;
     const IMAGE_WITH_TEXT = 2;
     const IMAGE_WITH_OPTIONS = 3;
+    const RECEIPT_LAYOUT = 4;
 
     // conversation states
     const CONVERSATION_STARTED = 0;
