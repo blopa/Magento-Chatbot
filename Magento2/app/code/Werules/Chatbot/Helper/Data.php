@@ -602,6 +602,22 @@ class Data extends AbstractHelper
         return $text;
     }
 
+    private function logOutChatbotCustomer($senderId)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setChatbotuserId(null);
+            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
+            $chatbotAPI->save();
+            return true;
+        }
+
+        return false;
+    }
+
     private function prepareCommandsList($commands)
     {
         $commandsList = array();
@@ -793,7 +809,7 @@ class Data extends AbstractHelper
                     $chatbotAPI = $this->_chatbotAPI->create();
                     $chatbotAPI->load($senderId, 'chat_id'); // TODO
                     if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                        $result = $this->processLogoutCommand();
+                        $result = $this->processLogoutCommand($senderId);
                     else
                         $result = $this->getNotLoggedMessage();
                 }
@@ -1029,14 +1045,21 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function processLogoutCommand()
+    private function processLogoutCommand($senderId)
     {
+        $response = $this->logOutChatbotCustomer($senderId);
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LOGOUT command!' // TODO
-        );
-        array_push($result, $responseMessage);
+        if ($response)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Ok, you're logged out.")
+            );
+            array_push($result, $responseMessage);
+        }
+        else
+            $result = $this->getErrorMessage();
+
         return $result;
     }
 
