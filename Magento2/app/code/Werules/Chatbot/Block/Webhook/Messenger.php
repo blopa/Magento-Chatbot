@@ -49,6 +49,15 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             return $this->_helper->getJsonErrorResponse();
     }
 
+    protected function getMessengerPayload($messenger)
+    {
+        $payload = $messenger->getPayload();
+        if (!$payload)
+            $payload = $messenger->getQuickReplyPayload();
+
+        return $payload;
+    }
+
     protected function processRequest()
     {
         $enabled = $this->getConfigValue('werules_chatbot_messenger/general/enable');
@@ -87,11 +96,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $messageObject->direction = $this->_define::INCOMING;
         $messageObject->chatType = $this->_define::MESSENGER_INT; // TODO
         $messageObject->contentType = $this->_define::CONTENT_TEXT; // TODO
-
-        $payload = $messenger->getPayload();
-        if (!$payload)
-            $payload = $messenger->getQuickReplyPayload();
-        $messageObject->messagePayload = $payload; // TODO
+        $messageObject->messagePayload = $this->getMessengerPayload($messenger); // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
         $datetime = date('Y-m-d H:i:s');
         $messageObject->createdAt = $datetime;

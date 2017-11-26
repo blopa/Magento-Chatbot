@@ -34,18 +34,20 @@ class Data extends AbstractHelper
     protected $_messageModel;
     protected $_chatbotAPI;
     protected $_chatbotUser;
-    protected $_define;
-    protected $_configPrefix;
     protected $_serializer;
     protected $_categoryHelper;
     protected $_categoryFactory;
     protected $_categoryCollectionFactory;
     protected $_storeManagerInterface;
-    protected $_commandsList;
     protected $_orderCollectionFactory;
     protected $_productCollection;
     protected $_customerRepositoryInterface;
     protected $_quoteModel;
+
+    protected $_define;
+    protected $_configPrefix;
+    protected $_commandsList;
+    protected $_completeCommandsList;
     protected $_currentCommand;
     protected $_messagePayload;
 
@@ -155,9 +157,6 @@ class Data extends AbstractHelper
 
     private function processIncomingMessage($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
-            $this->_configPrefix = 'werules_chatbot_messenger';
-
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
 
@@ -255,6 +254,7 @@ class Data extends AbstractHelper
         $commandResponses = array();
         $conversationStateResponses = array();
         $NLPResponses = array();
+        $this->setHelperMessageAttributes($message);
 
         // first of all must check if it's a cancel command
         $command = $this->getCurrentCommand($message->getContent());
@@ -702,7 +702,7 @@ class Data extends AbstractHelper
             $options = array(
                 array(
                     'type' => 'postback',
-                    'title' => __("Add to cart"),
+                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
                     'payload' => $product->getId()
                 ),
                 array(
@@ -753,33 +753,97 @@ class Data extends AbstractHelper
         return false;
     }
 
-    private function prepareCommandsList($commands)
+    private function setCommandsList($commandsList)
     {
-        $commandsList = array();
-        foreach ($commands as $command)
-        {
-            if ($command['enable_command'] == $this->_define::ENABLED)
-            {
-                $command_id = $command['command_id'];
-                $commandsList[$command_id] = array(
-                    'command_code' => $command['command_code'],
-                    'command_alias_list' => explode(',', $command['command_alias_list'])
-                );
-            }
-        }
-        return $commandsList;
+        $this->_commandsList = $commandsList;
     }
 
-    private function getCurrentCommand($messageContent)
+    private function setCompleteCommandsList($completeCommandsList)
     {
-        if (isset($this->_currentCommand))
-            return $this->_currentCommand;
+        $this->_completeCommandsList = $completeCommandsList;
+    }
 
+    private function getCommandText($commandId)
+    {
+        $commands = $this->getCompleteCommandsList();
+        if (isset($commands[$commandId]['command_code']))
+            return $commands[$commandId]['command_code'];
+
+        return '';
+    }
+
+    private function getCommandsList()
+    {
+        if (isset($this->_commandsList))
+            return $this->_commandsList;
+
+        // should never get here
+        $this->prepareCommandsList();
+        return $this->_commandsList;
+    }
+
+    private function getCompleteCommandsList()
+    {
+        if (isset($this->_completeCommandsList))
+            return $this->_completeCommandsList;
+
+        // should never get here
+        $this->prepareCommandsList();
+        return $this->_completeCommandsList;
+    }
+
+    private function prepareCommandsList()
+    {
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
-        $commandsList = $this->_serializer->unserialize($serializedCommands);
-        $this->_commandsList = $this->prepareCommandsList($commandsList);
-        if (!is_array($this->_commandsList))
-            return false;
+        $commands = $this->_serializer->unserialize($serializedCommands);
+        $commandsList = array();
+        $completeCommandsList = array();
+        foreach ($commands as $command)
+        {
+            $command_id = $command['command_id'];
+            $completeCommandsList[$command_id] = array(
+                'command_code' => $command['command_code'],
+                'command_alias_list' => explode(',', $command['command_alias_list'])
+            );
+
+            if ($command['enable_command'] == $this->_define::ENABLED)
+                $commandsList[$command_id] = $completeCommandsList[$command_id];
+        }
+        $this->setCommandsList($commandsList);
+        $this->setCompleteCommandsList($completeCommandsList);
+//        return $commandsList;
+    }
+
+    private function setHelperMessageAttributes($message)
+    {
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            $this->_configPrefix = 'werules_chatbot_messenger';
+
+        $this->setCurrentMessagePayload($message->getMessagePayload());
+        $this->setCurrentCommand($message->getContent()); // ignore output
+        $this->prepareCommandsList();
+    }
+
+    private function setCurrentMessagePayload($messagePayload)
+    {
+        if ($messagePayload)
+            $this->_messagePayload = $messagePayload;
+
+        return false;
+    }
+
+    private function getCurrentMessagePayload()
+    {
+        if (isset($this->_messagePayload))
+            return $this->_messagePayload;
+
+        return false;
+    }
+
+    private function setCurrentCommand($messageContent)
+    {
+        if (!isset($this->_commandsList))
+            $this->_commandsList = $this->getCommandsList();
 
         foreach ($this->_commandsList as $key => $command)
         {
@@ -791,6 +855,14 @@ class Data extends AbstractHelper
         }
 
         return false;
+    }
+
+    private function getCurrentCommand($messageContent)
+    {
+        if (isset($this->_currentCommand))
+            return $this->_currentCommand;
+
+        return $this->setCurrentCommand($messageContent);
     }
 
     private function checkCancelCommand($command, $senderId)
@@ -818,7 +890,7 @@ class Data extends AbstractHelper
         return $chatbotUser;
     }
 
-    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false)
+    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false, $payload = false)
     {
 //        $messageContent = $message->getContent();
         $result = array();
@@ -826,9 +898,8 @@ class Data extends AbstractHelper
         if (!$command)
             $command = $this->getCurrentCommand($messageContent);
 
-        $payload = '';
-        if (isset($this->_messagePayload))
-            $payload = $this->_messagePayload;
+        if (!$payload)
+            $payload = $this->getCurrentMessagePayload();
 
         if ($command)
         {
@@ -890,8 +961,20 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
-                if (!$setStateOnly)
-                    $result = $this->processAddToCartCommand($senderId, $payload);
+                $chatbotAPI = $this->_chatbotAPI->create();
+                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                    {
+                        if ($payload)
+                            $result = $this->processAddToCartCommand($senderId, $payload);
+                        else
+                            $result = $this->getErrorMessage();
+                    }
+                }
+                else
+                    $result = $this->getNotLoggedMessage();
             }
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
@@ -992,11 +1075,6 @@ class Data extends AbstractHelper
 
     private function handleCommands($message)
     {
-//        $this->logger($serializedCommands);
-//        $this->logger($this->_commandsList);
-        $payload = $message->getMessagePayload();
-        if ($payload)
-            $this->_messagePayload = $payload;
         $result = $this->processCommands($message->getContent(), $message->getSenderId());
 
         return $result;
@@ -1279,7 +1357,7 @@ class Data extends AbstractHelper
             $quote->setStoreId($this->storeManager->getStore()->getId());
         }
 
-        $quote->addProduct($product, 1);
+        $quote->addProduct($product, 1); // TODO
         $quote->collectTotals()->save();
     }
 
@@ -1290,7 +1368,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The ADD_TO_CART command is still under development' // TODO
+            'content' => __("Ok, I just add the product to your cart, to checkout send '%1'", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
         );
         array_push($result, $responseMessage);
         return $result;
