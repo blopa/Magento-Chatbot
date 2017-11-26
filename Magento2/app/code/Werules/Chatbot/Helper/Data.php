@@ -103,10 +103,10 @@ class Data extends AbstractHelper
         return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
     }
 
-    public function processMessage($message_id)
+    public function processMessage($messageId)
     {
         $message = $this->_messageModel->create();
-        $message->load($message_id);
+        $message->load($messageId);
 
         if ($message->getMessageId())
         {
@@ -181,10 +181,10 @@ class Data extends AbstractHelper
         }
     }
 
-    private function processOutgoingMessage($message_id)
+    private function processOutgoingMessage($messageId)
     {
         $outgoingMessage = $this->_messageModel->create();
-        $outgoingMessage->load($message_id);
+        $outgoingMessage->load($messageId);
 
         $chatbotAPI = $this->getChatbotAPIModel($outgoingMessage->getSenderId());
 
@@ -536,14 +536,14 @@ class Data extends AbstractHelper
         $completeCommandsList = array();
         foreach ($commands as $command)
         {
-            $command_id = $command['command_id'];
-            $completeCommandsList[$command_id] = array(
+            $commandId = $command['command_id'];
+            $completeCommandsList[$commandId] = array(
                 'command_code' => $command['command_code'],
                 'command_alias_list' => explode(',', $command['command_alias_list'])
             );
 
             if ($command['enable_command'] == $this->_define::ENABLED)
-                $commandsList[$command_id] = $completeCommandsList[$command_id];
+                $commandsList[$commandId] = $completeCommandsList[$commandId];
         }
         $this->setCommandsList($commandsList);
         $this->setCompleteCommandsList($completeCommandsList);
@@ -1013,10 +1013,10 @@ class Data extends AbstractHelper
         return $collection;
     }
 
-    public function getCategoryById($category_id)
+    public function getCategoryById($categoryId)
     {
         $category = $this->_categoryFactory->create();
-        $category->load($category_id);
+        $category->load($categoryId);
 
         return $category;
     }
@@ -1034,9 +1034,9 @@ class Data extends AbstractHelper
         return $categoryCollection;
     }
 
-    public function getProductsFromCategoryId($category_id)
+    public function getProductsFromCategoryId($categoryId)
     {
-        $productCollection = $this->getCategoryById($category_id)->getProductCollection();
+        $productCollection = $this->getCategoryById($categoryId)->getProductCollection();
         $productCollection->addAttributeToSelect('*');
 
         return $productCollection;
