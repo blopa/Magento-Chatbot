@@ -72,4 +72,7 @@ class Define
     const CONVERSATION_SEARCH = 2;
     const CONVERSATION_EMAIL = 3;
     const CONVERSATION_TRACK_ORDER = 4;
+
+    // API
+    const MAX_MESSAGE_ELEMENTS = 10;
 }
