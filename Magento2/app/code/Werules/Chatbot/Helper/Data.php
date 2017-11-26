@@ -973,7 +973,7 @@ class Data extends AbstractHelper
     {
         $result = $this->processCommands($command, $message->getSenderId(), true, $commandCode); // should return empty array
         if ($result)
-            return $result;
+            return $result; // if this happens, means there's an error message
 
         $result = $this->handleConversationState($message, $keyword);
         return $result;
