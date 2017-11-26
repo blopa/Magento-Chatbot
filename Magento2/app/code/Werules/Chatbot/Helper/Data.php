@@ -50,6 +50,7 @@ class Data extends AbstractHelper
     protected $_completeCommandsList;
     protected $_currentCommand;
     protected $_messagePayload;
+    protected $_chatbotAPIModel;
 
     public function __construct(
         Context $context,
@@ -175,6 +176,8 @@ class Data extends AbstractHelper
             $chatbotAPI->save();
         }
 
+        $this->setChatbotAPIModel($chatbotAPI);
+
         $this->logger("Message ID -> " . $message->getMessageId());
         $this->logger("Message Content -> " . $message->getContent());
         $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
@@ -222,8 +225,7 @@ class Data extends AbstractHelper
         $outgoingMessage = $this->_messageModel->create();
         $outgoingMessage->load($message_id);
 
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($outgoingMessage->getSenderId());
 
         $result = array();
         if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
@@ -305,8 +307,7 @@ class Data extends AbstractHelper
 
     private function handleNaturalLanguageProcessor($message)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
         $result = array();
         $parameterValue = false;
         $parameter = false;
@@ -429,8 +430,7 @@ class Data extends AbstractHelper
 
     private function handleConversationState($message, $keyword = false)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
         $result = array();
         if ($keyword)
             $messageContent = $keyword;
@@ -458,6 +458,7 @@ class Data extends AbstractHelper
         {
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
         }
 
         return $result;
@@ -648,7 +649,7 @@ class Data extends AbstractHelper
         return $productCollection;
     }
 
-    private function listProductsFromCategory($messageContent, $messagePayload = false)
+    private function listProductsFromCategory($messageContent, $messagePayload = '')
     {
         $result = array();
         $productList = array();
@@ -739,14 +740,14 @@ class Data extends AbstractHelper
 
     private function logOutChatbotCustomer($senderId)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
 
         if ($chatbotAPI->getChatbotapiId())
         {
             $chatbotAPI->setChatbotuserId(null);
             $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
             $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
             return true;
         }
 
@@ -814,6 +815,24 @@ class Data extends AbstractHelper
 //        return $commandsList;
     }
 
+    private function getChatbotAPIModel($senderId)
+    {
+        if (isset($this->_chatbotAPIModel))
+            return $this->_chatbotAPIModel;
+
+        // should never get here
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $this->setChatbotAPIModel($chatbotAPI);
+
+        return $chatbotAPI;
+    }
+
+    private function setChatbotAPIModel($chatbotAPI)
+    {
+        $this->_chatbotAPIModel = $chatbotAPI;
+    }
+
     private function setHelperMessageAttributes($message)
     {
         if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
@@ -876,8 +895,7 @@ class Data extends AbstractHelper
 
     public function getChatbotuserBySenderId($senderId)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
         $chatbotUser = $this->_chatbotUser->create();
 
         if ($chatbotAPI->getChatbotapiId())
@@ -924,8 +942,7 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    $chatbotAPI = $this->getChatbotAPIModel($senderId);
                     if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
                         $result = $this->processLoginCommand($senderId);
                     else
@@ -937,8 +954,7 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -949,8 +965,7 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::REORDER_COMMAND_ID)
             {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -961,8 +976,7 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -988,8 +1002,7 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -1027,8 +1040,7 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::LOGOUT_COMMAND_ID)
             {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -1039,8 +1051,7 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::REGISTER_COMMAND_ID)
             {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
                 {
                     if (!$setStateOnly)
@@ -1082,8 +1093,7 @@ class Data extends AbstractHelper
 
     private function updateConversationState($senderId, $state)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
 
         if ($chatbotAPI->getChatbotapiId())
         {
@@ -1091,6 +1101,7 @@ class Data extends AbstractHelper
             $datetime = date('Y-m-d H:i:s');
             $chatbotAPI->setUpdatedAt($datetime);
             $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
 
             return true;
         }
@@ -1253,8 +1264,7 @@ class Data extends AbstractHelper
 
     private function processLoginCommand($senderId)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
 
         $result = array();
         $loginUrl = $this->getStoreURL('chatbot/customer/login/hash/' . $chatbotAPI->getHashKey());
