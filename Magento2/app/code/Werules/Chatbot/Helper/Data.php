@@ -89,13 +89,6 @@ class Data extends AbstractHelper
         parent::__construct($context);
     }
 
-    public function getConfigValue($field, $storeId = null)
-    {
-        return $this->scopeConfig->getValue(
-            $field, ScopeInterface::SCOPE_STORE, $storeId
-        );
-    }
-
     public function logger($message) // TODO find a better way to to this
     {
         $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
@@ -108,38 +101,6 @@ class Data extends AbstractHelper
     {
         // max length = 32
         return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
-    }
-
-    public function getOrdersFromCustomerId($customerId)
-    {
-        $orders = $this->_orderCollectionFactory->create()
-            ->addFieldToSelect('*')
-            ->addFieldToFilter('customer_id', $customerId)
-            ->setOrder('created_at', 'desc')
-        ;
-
-        return $orders;
-    }
-
-    protected function getJsonResponse($success)
-    {
-        header_remove('Content-Type'); // TODO
-        header('Content-Type: application/json'); // TODO
-        if ($success)
-            $arr = array("status" => "success", "success" => true);
-        else
-            $arr = array("status" => "error", "success" => false);
-        return json_encode($arr);
-    }
-
-    public function getJsonSuccessResponse()
-    {
-        return $this->getJsonResponse(true);
-    }
-
-    public function getJsonErrorResponse()
-    {
-        return $this->getJsonResponse(false);
     }
 
     public function processMessage($message_id)
@@ -392,42 +353,6 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function getCommandNLPEntityData($commandCode)
-    {
-        $result = array();
-        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
-        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
-
-        foreach ($NLPEntitiesList as $key => $entity)
-        {
-            if (isset($entity['command_id']))
-            {
-                if ($entity['command_id'] == $commandCode)
-                {
-                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
-                    $extraText = '';
-                    if (isset($entity['enable_reply']))
-                    {
-                        if ($entity['enable_reply'] == $this->_define::ENABLED)
-                        {
-                            if (isset($entity['confidence']))
-                                $confidence = (float)$entity['confidence'] / 100;
-                            if (isset($entity['reply_text']))
-                                $extraText = $entity['reply_text'];
-
-                            $result = array(
-                                'confidence' => $confidence,
-                                'reply_text' => $extraText
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        return $result;
-    }
-
     private function handleConversationState($message, $keyword = false)
     {
         $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
@@ -533,122 +458,6 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function getOrderDetailsObject($order) // TODO add link to product name
-    {
-        $detailedOrderObject = array();
-        if ($order->getId())
-        {
-            $orderNumber = $order->getIncrementId();
-            $customerName = $order->getCustomerName();
-            $orderUrl = $this->getStoreURL('sales/order/view/order_id/' . $order->getId());
-            $currency = $order->getOrderCurrencyCode();
-            $createdAt = strtotime($order->getCreatedAt());
-            $elements = array();
-            $items = $order->getAllVisibleItems();
-            foreach ($items as $item)
-            {
-                $productCollection = $this->getProductCollection();
-                $productCollection->addFieldToFilter('entity_id', $item->getProductId());
-                $product = $productCollection->getFirstItem();
-                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-
-                $element = array(
-                    'title' => $item->getName(),
-                    'subtitle' => $this->excerpt($item->getShortDescription(), 30),
-                    'quantity' => (int)$item->getQtyOrdered(),
-                    'price' => $item->getPrice(),
-                    'currency' => $currency,
-                    'image_url' => $productImage
-                );
-                array_push($elements, $element);
-            }
-
-            $shippingAddress = $order->getShippingAddress();
-            $streetOne = $shippingAddress->getStreet()[0];
-            $streetTwo = '';
-            if (count($shippingAddress->getStreet()) > 1)
-                $streetTwo = $shippingAddress->getStreet()[1];
-            $address = array(
-                'street_1' => $streetOne,
-                'street_2' => $streetTwo,
-                'city' => $shippingAddress->getCity(),
-                'postal_code' => $shippingAddress->getPostcode(),
-                'state' => $shippingAddress->getRegion(),
-                'country' => $shippingAddress->getCountryId()
-            );
-
-            $summary = array(
-                'subtotal' => $order->getSubtotal(),
-                'shipping_cost' => $order->getShippingAmount(),
-                'total_tax' => $order->getTaxAmount(),
-                'total_cost' => $order->getGrandTotal()
-            );
-
-            $detailedOrderObject = array(
-                'template_type' => 'receipt',
-                'recipient_name' => $customerName,
-                'order_number' => $orderNumber,
-                'currency' => $currency,
-                'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
-                'order_url' => $orderUrl,
-                'timestamp' => $createdAt,
-                'elements' => $elements,
-                'address' => $address,
-                'summary' => $summary
-            );
-        }
-
-        return $detailedOrderObject;
-    }
-
-    private function getProductCollection()
-    {
-        $collection = $this->_productCollection->create();
-        $collection->addAttributeToSelect('*');
-
-        return $collection;
-    }
-
-    public function getProductCollectionByName($searchString)
-    {
-        $collection = $this->getProductCollection();
-        $collection->addAttributeToFilter(array(
-            array('attribute' => 'name', 'like' => '%' . $searchString . '%'),
-            array('attribute' => 'sku', 'like' => '%' . $searchString . '%'),
-        ));
-//        $collection->setPageSize(3); // fetching only 3 products
-        return $collection;
-    }
-
-    public function getCategoryById($category_id)
-    {
-        $category = $this->_categoryFactory->create();
-        $category->load($category_id);
-
-        return $category;
-    }
-
-    public function getCategoryByName($name)
-    {
-        return $this->getCategoriesByName($name)->getFirstItem();
-    }
-
-    public function getCategoriesByName($name)
-    {
-        $categoryCollection = $this->_categoryCollectionFactory->create();
-        $categoryCollection = $categoryCollection->addAttributeToFilter('name', $name);
-
-        return $categoryCollection;
-    }
-
-    public function getProductsFromCategoryId($category_id)
-    {
-        $productCollection = $this->getCategoryById($category_id)->getProductCollection();
-        $productCollection->addAttributeToSelect('*');
-
-        return $productCollection;
-    }
-
     private function listProductsFromCategory($messageContent, $messagePayload = '')
     {
         $result = array();
@@ -690,41 +499,6 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function getProductDetailsObject($product)
-    {
-        $element = array();
-        if ($product->getId())
-        {
-            $productName = $product->getName();
-            $productUrl = $product->getProductUrl();
-//            $productImage = $product->getImage();
-            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-            // TODO add placeholder
-            $options = array(
-                array(
-                    'type' => 'postback',
-                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                    'payload' => $product->getId()
-                ),
-                array(
-                    'type' => 'web_url',
-                    'title' => __("Visit product's page"),
-                    'url' => $productUrl
-                )
-            );
-            $element = array(
-                'title' => $productName,
-                'item_url' => $productUrl,
-                'image_url' => $productImage,
-                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
-                'buttons' => $options
-            );
-            //array_push($result, $element);
-        }
-
-        return $element;
-    }
-
     public function excerpt($text, $size)
     {
         if (strlen($text) > $size)
@@ -754,45 +528,6 @@ class Data extends AbstractHelper
         return false;
     }
 
-    private function setCommandsList($commandsList)
-    {
-        $this->_commandsList = $commandsList;
-    }
-
-    private function setCompleteCommandsList($completeCommandsList)
-    {
-        $this->_completeCommandsList = $completeCommandsList;
-    }
-
-    private function getCommandText($commandId)
-    {
-        $commands = $this->getCompleteCommandsList();
-        if (isset($commands[$commandId]['command_code']))
-            return $commands[$commandId]['command_code'];
-
-        return '';
-    }
-
-    private function getCommandsList()
-    {
-        if (isset($this->_commandsList))
-            return $this->_commandsList;
-
-        // should never get here
-        $this->prepareCommandsList();
-        return $this->_commandsList;
-    }
-
-    private function getCompleteCommandsList()
-    {
-        if (isset($this->_completeCommandsList))
-            return $this->_completeCommandsList;
-
-        // should never get here
-        $this->prepareCommandsList();
-        return $this->_completeCommandsList;
-    }
-
     private function prepareCommandsList()
     {
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
@@ -815,75 +550,6 @@ class Data extends AbstractHelper
 //        return $commandsList;
     }
 
-    private function getChatbotAPIModel($senderId)
-    {
-        if (isset($this->_chatbotAPIModel))
-            return $this->_chatbotAPIModel;
-
-        // should never get here
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
-        $this->setChatbotAPIModel($chatbotAPI);
-
-        return $chatbotAPI;
-    }
-
-    private function setChatbotAPIModel($chatbotAPI)
-    {
-        $this->_chatbotAPIModel = $chatbotAPI;
-    }
-
-    private function setHelperMessageAttributes($message)
-    {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
-            $this->_configPrefix = 'werules_chatbot_messenger';
-
-        $this->setCurrentMessagePayload($message->getMessagePayload());
-        $this->setCurrentCommand($message->getContent()); // ignore output
-        $this->prepareCommandsList();
-    }
-
-    private function setCurrentMessagePayload($messagePayload)
-    {
-        if ($messagePayload)
-            $this->_messagePayload = $messagePayload;
-
-        return false;
-    }
-
-    private function getCurrentMessagePayload()
-    {
-        if (isset($this->_messagePayload))
-            return $this->_messagePayload;
-
-        return false;
-    }
-
-    private function setCurrentCommand($messageContent)
-    {
-        if (!isset($this->_commandsList))
-            $this->_commandsList = $this->getCommandsList();
-
-        foreach ($this->_commandsList as $key => $command)
-        {
-            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
-            {
-                $this->_currentCommand = $key;
-                return $key;
-            }
-        }
-
-        return false;
-    }
-
-    private function getCurrentCommand($messageContent)
-    {
-        if (isset($this->_currentCommand))
-            return $this->_currentCommand;
-
-        return $this->setCurrentCommand($messageContent);
-    }
-
     private function checkCancelCommand($command, $senderId)
     {
         $result = array();
@@ -891,21 +557,6 @@ class Data extends AbstractHelper
             $result = $this->processCancelCommand($senderId);
 
         return $result;
-    }
-
-    public function getChatbotuserBySenderId($senderId)
-    {
-        $chatbotAPI = $this->getChatbotAPIModel($senderId);
-        $chatbotUser = $this->_chatbotUser->create();
-
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotUser->load($chatbotAPI->getChatbotuserId(), 'chatbotuser_id'); // TODO
-//            if ($chatbotUser->getChatbotuserId())
-//                return $chatbotUser;
-        }
-
-        return $chatbotUser;
     }
 
     private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false, $payload = false)
@@ -1166,9 +817,92 @@ class Data extends AbstractHelper
         }
     }
 
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    // SETS
+    private function setCommandsList($commandsList)
     {
-        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+        $this->_commandsList = $commandsList;
+    }
+
+    private function setCompleteCommandsList($completeCommandsList)
+    {
+        $this->_completeCommandsList = $completeCommandsList;
+    }
+
+    private function setChatbotAPIModel($chatbotAPI)
+    {
+        $this->_chatbotAPIModel = $chatbotAPI;
+    }
+
+    private function setHelperMessageAttributes($message)
+    {
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            $this->_configPrefix = 'werules_chatbot_messenger';
+
+        $this->setCurrentMessagePayload($message->getMessagePayload());
+        $this->setCurrentCommand($message->getContent()); // ignore output
+        $this->prepareCommandsList();
+    }
+
+    private function setCurrentMessagePayload($messagePayload)
+    {
+        if ($messagePayload)
+            $this->_messagePayload = $messagePayload;
+
+        return false;
+    }
+
+    private function setCurrentCommand($messageContent)
+    {
+        if (!isset($this->_commandsList))
+            $this->_commandsList = $this->getCommandsList();
+
+        foreach ($this->_commandsList as $key => $command)
+        {
+            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
+            {
+                $this->_currentCommand = $key;
+                return $key;
+            }
+        }
+
+        return false;
+    }
+
+    // GETS
+    private function getCurrentMessagePayload()
+    {
+        if (isset($this->_messagePayload))
+            return $this->_messagePayload;
+
+        return false;
+    }
+
+    private function getCurrentCommand($messageContent)
+    {
+        if (isset($this->_currentCommand))
+            return $this->_currentCommand;
+
+        return $this->setCurrentCommand($messageContent);
+    }
+
+    private function getCommandsList()
+    {
+        if (isset($this->_commandsList))
+            return $this->_commandsList;
+
+        // should never get here
+        $this->prepareCommandsList();
+        return $this->_commandsList;
+    }
+
+    private function getCompleteCommandsList()
+    {
+        if (isset($this->_completeCommandsList))
+            return $this->_completeCommandsList;
+
+        // should never get here
+        $this->prepareCommandsList();
+        return $this->_completeCommandsList;
     }
 
     private function getStoreURL($extraPath, $path = false)
@@ -1205,6 +939,273 @@ class Data extends AbstractHelper
     {
         $text = __("Sorry, I didn't understand that.");
         return $this->getTextMessageArray($text);
+    }
+
+    protected function getJsonResponse($success)
+    {
+        header_remove('Content-Type'); // TODO
+        header('Content-Type: application/json'); // TODO
+        if ($success)
+            $arr = array("status" => "success", "success" => true);
+        else
+            $arr = array("status" => "error", "success" => false);
+        return json_encode($arr);
+    }
+
+    public function getJsonSuccessResponse()
+    {
+        return $this->getJsonResponse(true);
+    }
+
+    public function getJsonErrorResponse()
+    {
+        return $this->getJsonResponse(false);
+    }
+
+    private function getCommandText($commandId)
+    {
+        $commands = $this->getCompleteCommandsList();
+        if (isset($commands[$commandId]['command_code']))
+            return $commands[$commandId]['command_code'];
+
+        return '';
+    }
+
+    public function getConfigValue($field, $storeId = null)
+    {
+        return $this->scopeConfig->getValue(
+            $field, ScopeInterface::SCOPE_STORE, $storeId
+        );
+    }
+
+    public function getOrdersFromCustomerId($customerId)
+    {
+        $orders = $this->_orderCollectionFactory->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->setOrder('created_at', 'desc')
+        ;
+
+        return $orders;
+    }
+
+    private function getProductCollection()
+    {
+        $collection = $this->_productCollection->create();
+        $collection->addAttributeToSelect('*');
+
+        return $collection;
+    }
+
+    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    {
+        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+    }
+
+    public function getProductCollectionByName($searchString)
+    {
+        $collection = $this->getProductCollection();
+        $collection->addAttributeToFilter(array(
+            array('attribute' => 'name', 'like' => '%' . $searchString . '%'),
+            array('attribute' => 'sku', 'like' => '%' . $searchString . '%'),
+        ));
+//        $collection->setPageSize(3); // fetching only 3 products
+        return $collection;
+    }
+
+    public function getCategoryById($category_id)
+    {
+        $category = $this->_categoryFactory->create();
+        $category->load($category_id);
+
+        return $category;
+    }
+
+    public function getCategoryByName($name)
+    {
+        return $this->getCategoriesByName($name)->getFirstItem();
+    }
+
+    public function getCategoriesByName($name)
+    {
+        $categoryCollection = $this->_categoryCollectionFactory->create();
+        $categoryCollection = $categoryCollection->addAttributeToFilter('name', $name);
+
+        return $categoryCollection;
+    }
+
+    public function getProductsFromCategoryId($category_id)
+    {
+        $productCollection = $this->getCategoryById($category_id)->getProductCollection();
+        $productCollection->addAttributeToSelect('*');
+
+        return $productCollection;
+    }
+
+    private function getProductDetailsObject($product)
+    {
+        $element = array();
+        if ($product->getId())
+        {
+            $productName = $product->getName();
+            $productUrl = $product->getProductUrl();
+//            $productImage = $product->getImage();
+            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+            // TODO add placeholder
+            $options = array(
+                array(
+                    'type' => 'postback',
+                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                    'payload' => $product->getId()
+                ),
+                array(
+                    'type' => 'web_url',
+                    'title' => __("Visit product's page"),
+                    'url' => $productUrl
+                )
+            );
+            $element = array(
+                'title' => $productName,
+                'item_url' => $productUrl,
+                'image_url' => $productImage,
+                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+                'buttons' => $options
+            );
+            //array_push($result, $element);
+        }
+
+        return $element;
+    }
+
+    private function getCommandNLPEntityData($commandCode)
+    {
+        $result = array();
+        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
+        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
+
+        foreach ($NLPEntitiesList as $key => $entity)
+        {
+            if (isset($entity['command_id']))
+            {
+                if ($entity['command_id'] == $commandCode)
+                {
+                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
+                    $extraText = '';
+                    if (isset($entity['enable_reply']))
+                    {
+                        if ($entity['enable_reply'] == $this->_define::ENABLED)
+                        {
+                            if (isset($entity['confidence']))
+                                $confidence = (float)$entity['confidence'] / 100;
+                            if (isset($entity['reply_text']))
+                                $extraText = $entity['reply_text'];
+
+                            $result = array(
+                                'confidence' => $confidence,
+                                'reply_text' => $extraText
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    private function getOrderDetailsObject($order) // TODO add link to product name
+    {
+        $detailedOrderObject = array();
+        if ($order->getId())
+        {
+            $orderNumber = $order->getIncrementId();
+            $customerName = $order->getCustomerName();
+            $orderUrl = $this->getStoreURL('sales/order/view/order_id/' . $order->getId());
+            $currency = $order->getOrderCurrencyCode();
+            $createdAt = strtotime($order->getCreatedAt());
+            $elements = array();
+            $items = $order->getAllVisibleItems();
+            foreach ($items as $item)
+            {
+                $productCollection = $this->getProductCollection();
+                $productCollection->addFieldToFilter('entity_id', $item->getProductId());
+                $product = $productCollection->getFirstItem();
+                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+
+                $element = array(
+                    'title' => $item->getName(),
+                    'subtitle' => $this->excerpt($item->getShortDescription(), 30),
+                    'quantity' => (int)$item->getQtyOrdered(),
+                    'price' => $item->getPrice(),
+                    'currency' => $currency,
+                    'image_url' => $productImage
+                );
+                array_push($elements, $element);
+            }
+
+            $shippingAddress = $order->getShippingAddress();
+            $streetOne = $shippingAddress->getStreet()[0];
+            $streetTwo = '';
+            if (count($shippingAddress->getStreet()) > 1)
+                $streetTwo = $shippingAddress->getStreet()[1];
+            $address = array(
+                'street_1' => $streetOne,
+                'street_2' => $streetTwo,
+                'city' => $shippingAddress->getCity(),
+                'postal_code' => $shippingAddress->getPostcode(),
+                'state' => $shippingAddress->getRegion(),
+                'country' => $shippingAddress->getCountryId()
+            );
+
+            $summary = array(
+                'subtotal' => $order->getSubtotal(),
+                'shipping_cost' => $order->getShippingAmount(),
+                'total_tax' => $order->getTaxAmount(),
+                'total_cost' => $order->getGrandTotal()
+            );
+
+            $detailedOrderObject = array(
+                'template_type' => 'receipt',
+                'recipient_name' => $customerName,
+                'order_number' => $orderNumber,
+                'currency' => $currency,
+                'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
+                'order_url' => $orderUrl,
+                'timestamp' => $createdAt,
+                'elements' => $elements,
+                'address' => $address,
+                'summary' => $summary
+            );
+        }
+
+        return $detailedOrderObject;
+    }
+    private function getChatbotAPIModel($senderId)
+    {
+        if (isset($this->_chatbotAPIModel))
+            return $this->_chatbotAPIModel;
+
+        // should never get here
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $this->setChatbotAPIModel($chatbotAPI);
+
+        return $chatbotAPI;
+    }
+
+    public function getChatbotuserBySenderId($senderId)
+    {
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+        $chatbotUser = $this->_chatbotUser->create();
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotUser->load($chatbotAPI->getChatbotuserId(), 'chatbotuser_id'); // TODO
+//            if ($chatbotUser->getChatbotuserId())
+//                return $chatbotUser;
+        }
+
+        return $chatbotUser;
     }
 
     // COMMANDS FUNCTIONS
