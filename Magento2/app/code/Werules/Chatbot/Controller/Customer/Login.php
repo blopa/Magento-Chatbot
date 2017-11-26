@@ -97,7 +97,7 @@ class Login extends \Magento\Framework\App\Action\Action
                 $this->messageManager->addSuccessMessage(__("Chatbot settings saved successfully."));
             }
             else
-                $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
+                $this->messageManager->addErrorMessage(__("Invalid URL hash, please try again."));
         }
         else
             $this->messageManager->addErrorMessage(__("Something went wrong, please try again."));
