@@ -1598,7 +1598,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The REORDER command is still under development' // TODO
+            'content' => 'The CHECKOUT command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
