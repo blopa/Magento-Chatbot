@@ -71,4 +71,5 @@ class Define
     const CONVERSATION_LIST_CATEGORIES = 1;
     const CONVERSATION_SEARCH = 2;
     const CONVERSATION_EMAIL = 3;
+    const CONVERSATION_TRACK_ORDER = 4;
 }
