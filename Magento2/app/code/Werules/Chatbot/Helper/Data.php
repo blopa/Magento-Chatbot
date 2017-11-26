@@ -50,6 +50,7 @@ class Data extends AbstractHelper
     protected $_completeCommandsList;
     protected $_currentCommand;
     protected $_messagePayload;
+    protected $_chatbotAPIModel;
 
     public function __construct(
         Context $context,
@@ -88,13 +89,6 @@ class Data extends AbstractHelper
         parent::__construct($context);
     }
 
-    public function getConfigValue($field, $storeId = null)
-    {
-        return $this->scopeConfig->getValue(
-            $field, ScopeInterface::SCOPE_STORE, $storeId
-        );
-    }
-
     public function logger($message) // TODO find a better way to to this
     {
         $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
@@ -109,42 +103,10 @@ class Data extends AbstractHelper
         return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
     }
 
-    public function getOrdersFromCustomerId($customerId)
-    {
-        $orders = $this->_orderCollectionFactory->create()
-            ->addFieldToSelect('*')
-            ->addFieldToFilter('customer_id', $customerId)
-            ->setOrder('created_at', 'desc')
-        ;
-
-        return $orders;
-    }
-
-    protected function getJsonResponse($success)
-    {
-        header_remove('Content-Type'); // TODO
-        header('Content-Type: application/json'); // TODO
-        if ($success)
-            $arr = array("status" => "success", "success" => true);
-        else
-            $arr = array("status" => "error", "success" => false);
-        return json_encode($arr);
-    }
-
-    public function getJsonSuccessResponse()
-    {
-        return $this->getJsonResponse(true);
-    }
-
-    public function getJsonErrorResponse()
-    {
-        return $this->getJsonResponse(false);
-    }
-
-    public function processMessage($message_id)
+    public function processMessage($messageId)
     {
         $message = $this->_messageModel->create();
-        $message->load($message_id);
+        $message->load($messageId);
 
         if ($message->getMessageId())
         {
@@ -174,6 +136,8 @@ class Data extends AbstractHelper
             $chatbotAPI->setUpdatedAt($datetime);
             $chatbotAPI->save();
         }
+
+        $this->setChatbotAPIModel($chatbotAPI);
 
         $this->logger("Message ID -> " . $message->getMessageId());
         $this->logger("Message Content -> " . $message->getContent());
@@ -217,13 +181,12 @@ class Data extends AbstractHelper
         }
     }
 
-    private function processOutgoingMessage($message_id)
+    private function processOutgoingMessage($messageId)
     {
         $outgoingMessage = $this->_messageModel->create();
-        $outgoingMessage->load($message_id);
+        $outgoingMessage->load($messageId);
 
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($outgoingMessage->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($outgoingMessage->getSenderId());
 
         $result = array();
         if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
@@ -305,8 +268,7 @@ class Data extends AbstractHelper
 
     private function handleNaturalLanguageProcessor($message)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
         $result = array();
         $parameterValue = false;
         $parameter = false;
@@ -391,46 +353,9 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function getCommandNLPEntityData($commandCode)
-    {
-        $result = array();
-        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
-        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
-
-        foreach ($NLPEntitiesList as $key => $entity)
-        {
-            if (isset($entity['command_id']))
-            {
-                if ($entity['command_id'] == $commandCode)
-                {
-                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
-                    $extraText = '';
-                    if (isset($entity['enable_reply']))
-                    {
-                        if ($entity['enable_reply'] == $this->_define::ENABLED)
-                        {
-                            if (isset($entity['confidence']))
-                                $confidence = (float)$entity['confidence'] / 100;
-                            if (isset($entity['reply_text']))
-                                $extraText = $entity['reply_text'];
-
-                            $result = array(
-                                'confidence' => $confidence,
-                                'reply_text' => $extraText
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        return $result;
-    }
-
     private function handleConversationState($message, $keyword = false)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
         $result = array();
         if ($keyword)
             $messageContent = $keyword;
@@ -458,6 +383,7 @@ class Data extends AbstractHelper
         {
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
         }
 
         return $result;
@@ -532,6 +458,661 @@ class Data extends AbstractHelper
         return $result;
     }
 
+    private function listProductsFromCategory($messageContent, $messagePayload = '')
+    {
+        $result = array();
+        $productList = array();
+        if ($messagePayload)
+            $category = $this->getCategoryById($messagePayload);
+        else
+            $category = $this->getCategoryByName($messageContent);
+
+        $productCollection = $this->getProductsFromCategoryId($category->getId());
+
+        foreach ($productCollection as $product)
+        {
+            $productObject = $this->getProductDetailsObject($product);
+            if (count($productList) < 10) // TODO
+                array_push($productList, $productObject);
+        }
+
+        if (count($productList) > 0)
+        {
+            $contentType = $this->_define::IMAGE_WITH_OPTIONS;
+            $content = json_encode($productList);
+        }
+        else
+        {
+            $content = __("Sorry, no products found in this category.");
+            $contentType = $this->_define::CONTENT_TEXT;
+        }
+
+//        $responseMessage = array();
+//        $responseMessage['content_type'] = $contentType;
+//        $responseMessage['content'] = $content;
+        $responseMessage = array(
+            'content_type' => $contentType,
+            'content' => $content
+        );
+        array_push($result, $responseMessage);
+
+        return $result;
+    }
+
+    public function excerpt($text, $size)
+    {
+        if (strlen($text) > $size)
+        {
+            $text = substr($text, 0, $size);
+            $text = substr($text, 0, strrpos($text, " "));
+            $etc = " ...";
+            $text = $text . $etc;
+        }
+
+        return $text;
+    }
+
+    private function logOutChatbotCustomer($senderId)
+    {
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setChatbotuserId(null);
+            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
+            $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
+            return true;
+        }
+
+        return false;
+    }
+
+    private function prepareCommandsList()
+    {
+        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
+        $commands = $this->_serializer->unserialize($serializedCommands);
+        $commandsList = array();
+        $completeCommandsList = array();
+        foreach ($commands as $command)
+        {
+            $commandId = $command['command_id'];
+            $completeCommandsList[$commandId] = array(
+                'command_code' => $command['command_code'],
+                'command_alias_list' => explode(',', $command['command_alias_list'])
+            );
+
+            if ($command['enable_command'] == $this->_define::ENABLED)
+                $commandsList[$commandId] = $completeCommandsList[$commandId];
+        }
+        $this->setCommandsList($commandsList);
+        $this->setCompleteCommandsList($completeCommandsList);
+//        return $commandsList;
+    }
+
+    private function checkCancelCommand($command, $senderId)
+    {
+        $result = array();
+        if ($command == $this->_define::CANCEL_COMMAND_ID)
+            $result = $this->processCancelCommand($senderId);
+
+        return $result;
+    }
+
+    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false, $payload = false)
+    {
+//        $messageContent = $message->getContent();
+        $result = array();
+        $state = false;
+        if (!$command)
+            $command = $this->getCurrentCommand($messageContent);
+
+        if (!$payload)
+            $payload = $this->getCurrentMessagePayload();
+
+        if ($command)
+        {
+            if ($command == $this->_define::START_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processStartCommand();
+            }
+            else if ($command == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processListCategoriesCommand();
+                $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
+            }
+            else if ($command == $this->_define::SEARCH_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processSearchCommand();
+                $state = $this->_define::CONVERSATION_SEARCH;
+            }
+            else if ($command == $this->_define::LOGIN_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                {
+                    $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                    if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
+                        $result = $this->processLoginCommand($senderId);
+                    else
+                    {
+                        $text = __("You are already logged.");
+                        $result = $this->getTextMessageArray($text);
+                    }
+                }
+            }
+            else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                        $result = $this->processListOrdersCommand($senderId);
+                }
+                else
+                    $result = $this->getNotLoggedMessage();
+            }
+            else if ($command == $this->_define::REORDER_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                        $result = $this->processReorderCommand();
+                }
+                else
+                        $result = $this->getNotLoggedMessage();
+            }
+            else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                    {
+                        if ($payload)
+                            $result = $this->processAddToCartCommand($senderId, $payload);
+                        else
+                            $result = $this->getErrorMessage();
+                    }
+                }
+                else
+                    $result = $this->getNotLoggedMessage();
+            }
+            else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processCheckoutCommand();
+            }
+            else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processClearCartCommand();
+            }
+            else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                        $result = $this->processTrackOrderCommand();
+                    $state = $this->_define::CONVERSATION_TRACK_ORDER;
+                }
+                else
+                    $result = $this->getNotLoggedMessage();
+            }
+            else if ($command == $this->_define::SUPPORT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processSupportCommand();
+            }
+            else if ($command == $this->_define::SEND_EMAIL_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processSendEmailCommand();
+                $state = $this->_define::CONVERSATION_EMAIL;
+            }
+            else if ($command == $this->_define::CANCEL_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processCancelCommand($senderId);
+            }
+            else if ($command == $this->_define::HELP_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processHelpCommand();
+            }
+            else if ($command == $this->_define::ABOUT_COMMAND_ID)
+            {
+                if (!$setStateOnly)
+                    $result = $this->processAboutCommand();
+            }
+            else if ($command == $this->_define::LOGOUT_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                        $result = $this->processLogoutCommand($senderId);
+                }
+                else
+                    $result = $this->getNotLoggedMessage();
+            }
+            else if ($command == $this->_define::REGISTER_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
+                {
+                    if (!$setStateOnly)
+                        $result = $this->processRegisterCommand();
+                }
+                else
+                {
+                    $text = __("You are already registered.");
+                    $result = $this->getTextMessageArray($text);
+                }
+            }
+            else // should never fall in here
+            {
+                $result = $this->getErrorMessage();
+            }
+        }
+        if ($state && (($result) || $setStateOnly)) // TODO
+            $this->updateConversationState($senderId, $state);
+
+        return $result;
+    }
+
+    private function handleCommandsWithParameters($message, $command, $keyword, $commandCode)
+    {
+        $result = $this->processCommands($command, $message->getSenderId(), true, $commandCode); // should return empty array
+        if ($result)
+            return $result; // if this happens, means there's an error message
+
+        $result = $this->handleConversationState($message, $keyword);
+        return $result;
+    }
+
+    private function handleCommands($message)
+    {
+        $result = $this->processCommands($message->getContent(), $message->getSenderId());
+
+        return $result;
+    }
+
+    private function updateConversationState($senderId, $state)
+    {
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setConversationState($state);
+            $datetime = date('Y-m-d H:i:s');
+            $chatbotAPI->setUpdatedAt($datetime);
+            $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function sendEmailFromMessage($text)
+    {
+        $result = array();
+        $response = $this->sendZendEmail($text);
+        if ($response)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Email sent.")
+            );
+        }
+        else
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Sorry, I wasn't able to send an email this time. Please try again later.")
+            );
+        }
+
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function sendZendEmail($text) // TODO TODO TODO
+    {
+        $storeName = 'store_name';
+        $storeEmail = 'sample@sample.com';// TODO
+
+        $url = __("Not informed");
+        $customerEmail = __("Not informed");
+        $customerName = __("Not informed");
+
+        $mail = new \Zend_Mail('UTF-8');
+
+        $emailBody =
+            __("Message from chatbot customer") . "<br><br>" .
+            __("Customer name") . ": " .
+            $customerName . "<br>" .
+            __("Message") . ":<br>" .
+            $text . "<br><br>" .
+            __("Contacts") . ":<br>" .
+            __("Chatbot") . ": " . $url . "<br>" .
+            __("Email") . ": " . $customerEmail . "<br>";
+
+        $mail->setBodyHtml($emailBody);
+        $mail->setFrom($storeEmail, $storeName);
+        $mail->addTo($storeEmail, $storeName);
+        $mail->setSubject(__("Contact from chatbot"));
+
+        try {
+            $mail->send();
+            return true;
+        } catch (\Exception $exception) {
+            return false;
+        }
+    }
+
+    // SETS
+    private function setCommandsList($commandsList)
+    {
+        $this->_commandsList = $commandsList;
+    }
+
+    private function setCompleteCommandsList($completeCommandsList)
+    {
+        $this->_completeCommandsList = $completeCommandsList;
+    }
+
+    private function setChatbotAPIModel($chatbotAPI)
+    {
+        $this->_chatbotAPIModel = $chatbotAPI;
+    }
+
+    private function setHelperMessageAttributes($message)
+    {
+        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            $this->_configPrefix = 'werules_chatbot_messenger';
+
+        $this->setCurrentMessagePayload($message->getMessagePayload());
+        $this->setCurrentCommand($message->getContent()); // ignore output
+        $this->prepareCommandsList();
+    }
+
+    private function setCurrentMessagePayload($messagePayload)
+    {
+        if ($messagePayload)
+            $this->_messagePayload = $messagePayload;
+
+        return false;
+    }
+
+    private function setCurrentCommand($messageContent)
+    {
+        if (!isset($this->_commandsList))
+            $this->_commandsList = $this->getCommandsList();
+
+        foreach ($this->_commandsList as $key => $command)
+        {
+            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
+            {
+                $this->_currentCommand = $key;
+                return $key;
+            }
+        }
+
+        return false;
+    }
+
+    // GETS
+    private function getCurrentMessagePayload()
+    {
+        if (isset($this->_messagePayload))
+            return $this->_messagePayload;
+
+        return false;
+    }
+
+    private function getCurrentCommand($messageContent)
+    {
+        if (isset($this->_currentCommand))
+            return $this->_currentCommand;
+
+        return $this->setCurrentCommand($messageContent);
+    }
+
+    private function getCommandsList()
+    {
+        if (isset($this->_commandsList))
+            return $this->_commandsList;
+
+        // should never get here
+        $this->prepareCommandsList();
+        return $this->_commandsList;
+    }
+
+    private function getCompleteCommandsList()
+    {
+        if (isset($this->_completeCommandsList))
+            return $this->_completeCommandsList;
+
+        // should never get here
+        $this->prepareCommandsList();
+        return $this->_completeCommandsList;
+    }
+
+    private function getStoreURL($extraPath, $path = false)
+    {
+        if ($path)
+            return $this->_storeManagerInterface->getStore()->getBaseUrl($path) . $extraPath;
+
+        return $this->_storeManagerInterface->getStore()->getBaseUrl() . $extraPath;
+    }
+
+    private function getMediaURL($path)
+    {
+        return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+    }
+
+    private function getTextMessageArray($text)
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => $text
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
+    private function getNotLoggedMessage()
+    {
+        $text = __("You have to be logged to do that.");
+        return $this->getTextMessageArray($text);
+    }
+
+    private function getErrorMessage()
+    {
+        $text = __("Sorry, I didn't understand that.");
+        return $this->getTextMessageArray($text);
+    }
+
+    protected function getJsonResponse($success)
+    {
+        header_remove('Content-Type'); // TODO
+        header('Content-Type: application/json'); // TODO
+        if ($success)
+            $arr = array("status" => "success", "success" => true);
+        else
+            $arr = array("status" => "error", "success" => false);
+        return json_encode($arr);
+    }
+
+    public function getJsonSuccessResponse()
+    {
+        return $this->getJsonResponse(true);
+    }
+
+    public function getJsonErrorResponse()
+    {
+        return $this->getJsonResponse(false);
+    }
+
+    private function getCommandText($commandId)
+    {
+        $commands = $this->getCompleteCommandsList();
+        if (isset($commands[$commandId]['command_code']))
+            return $commands[$commandId]['command_code'];
+
+        return '';
+    }
+
+    public function getConfigValue($field, $storeId = null)
+    {
+        return $this->scopeConfig->getValue(
+            $field, ScopeInterface::SCOPE_STORE, $storeId
+        );
+    }
+
+    public function getOrdersFromCustomerId($customerId)
+    {
+        $orders = $this->_orderCollectionFactory->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->setOrder('created_at', 'desc')
+        ;
+
+        return $orders;
+    }
+
+    private function getProductCollection()
+    {
+        $collection = $this->_productCollection->create();
+        $collection->addAttributeToSelect('*');
+
+        return $collection;
+    }
+
+    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    {
+        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
+    }
+
+    public function getProductCollectionByName($searchString)
+    {
+        $collection = $this->getProductCollection();
+        $collection->addAttributeToFilter(array(
+            array('attribute' => 'name', 'like' => '%' . $searchString . '%'),
+            array('attribute' => 'sku', 'like' => '%' . $searchString . '%'),
+        ));
+//        $collection->setPageSize(3); // fetching only 3 products
+        return $collection;
+    }
+
+    public function getCategoryById($categoryId)
+    {
+        $category = $this->_categoryFactory->create();
+        $category->load($categoryId);
+
+        return $category;
+    }
+
+    public function getCategoryByName($name)
+    {
+        return $this->getCategoriesByName($name)->getFirstItem();
+    }
+
+    public function getCategoriesByName($name)
+    {
+        $categoryCollection = $this->_categoryCollectionFactory->create();
+        $categoryCollection = $categoryCollection->addAttributeToFilter('name', $name);
+
+        return $categoryCollection;
+    }
+
+    public function getProductsFromCategoryId($categoryId)
+    {
+        $productCollection = $this->getCategoryById($categoryId)->getProductCollection();
+        $productCollection->addAttributeToSelect('*');
+
+        return $productCollection;
+    }
+
+    private function getProductDetailsObject($product)
+    {
+        $element = array();
+        if ($product->getId())
+        {
+            $productName = $product->getName();
+            $productUrl = $product->getProductUrl();
+//            $productImage = $product->getImage();
+            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+            // TODO add placeholder
+            $options = array(
+                array(
+                    'type' => 'postback',
+                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                    'payload' => $product->getId()
+                ),
+                array(
+                    'type' => 'web_url',
+                    'title' => __("Visit product's page"),
+                    'url' => $productUrl
+                )
+            );
+            $element = array(
+                'title' => $productName,
+                'item_url' => $productUrl,
+                'image_url' => $productImage,
+                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+                'buttons' => $options
+            );
+            //array_push($result, $element);
+        }
+
+        return $element;
+    }
+
+    private function getCommandNLPEntityData($commandCode)
+    {
+        $result = array();
+        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
+        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
+
+        foreach ($NLPEntitiesList as $key => $entity)
+        {
+            if (isset($entity['command_id']))
+            {
+                if ($entity['command_id'] == $commandCode)
+                {
+                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
+                    $extraText = '';
+                    if (isset($entity['enable_reply']))
+                    {
+                        if ($entity['enable_reply'] == $this->_define::ENABLED)
+                        {
+                            if (isset($entity['confidence']))
+                                $confidence = (float)$entity['confidence'] / 100;
+                            if (isset($entity['reply_text']))
+                                $extraText = $entity['reply_text'];
+
+                            $result = array(
+                                'confidence' => $confidence,
+                                'reply_text' => $extraText
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
     private function getOrderDetailsObject($order) // TODO add link to product name
     {
         $detailedOrderObject = array();
@@ -599,285 +1180,22 @@ class Data extends AbstractHelper
 
         return $detailedOrderObject;
     }
-
-    private function getProductCollection()
+    private function getChatbotAPIModel($senderId)
     {
-        $collection = $this->_productCollection->create();
-        $collection->addAttributeToSelect('*');
+        if (isset($this->_chatbotAPIModel))
+            return $this->_chatbotAPIModel;
 
-        return $collection;
-    }
-
-    public function getProductCollectionByName($searchString)
-    {
-        $collection = $this->getProductCollection();
-        $collection->addAttributeToFilter(array(
-            array('attribute' => 'name', 'like' => '%' . $searchString . '%'),
-            array('attribute' => 'sku', 'like' => '%' . $searchString . '%'),
-        ));
-//        $collection->setPageSize(3); // fetching only 3 products
-        return $collection;
-    }
-
-    public function getCategoryById($category_id)
-    {
-        $category = $this->_categoryFactory->create();
-        $category->load($category_id);
-
-        return $category;
-    }
-
-    public function getCategoryByName($name)
-    {
-        return $this->getCategoriesByName($name)->getFirstItem();
-    }
-
-    public function getCategoriesByName($name)
-    {
-        $categoryCollection = $this->_categoryCollectionFactory->create();
-        $categoryCollection = $categoryCollection->addAttributeToFilter('name', $name);
-
-        return $categoryCollection;
-    }
-
-    public function getProductsFromCategoryId($category_id)
-    {
-        $productCollection = $this->getCategoryById($category_id)->getProductCollection();
-        $productCollection->addAttributeToSelect('*');
-
-        return $productCollection;
-    }
-
-    private function listProductsFromCategory($messageContent, $messagePayload = false)
-    {
-        $result = array();
-        $productList = array();
-        if ($messagePayload)
-            $category = $this->getCategoryById($messagePayload);
-        else
-            $category = $this->getCategoryByName($messageContent);
-
-        $productCollection = $this->getProductsFromCategoryId($category->getId());
-
-        foreach ($productCollection as $product)
-        {
-            $productObject = $this->getProductDetailsObject($product);
-            if (count($productList) < 10) // TODO
-                array_push($productList, $productObject);
-        }
-
-        if (count($productList) > 0)
-        {
-            $contentType = $this->_define::IMAGE_WITH_OPTIONS;
-            $content = json_encode($productList);
-        }
-        else
-        {
-            $content = __("Sorry, no products found in this category.");
-            $contentType = $this->_define::CONTENT_TEXT;
-        }
-
-//        $responseMessage = array();
-//        $responseMessage['content_type'] = $contentType;
-//        $responseMessage['content'] = $content;
-        $responseMessage = array(
-            'content_type' => $contentType,
-            'content' => $content
-        );
-        array_push($result, $responseMessage);
-
-        return $result;
-    }
-
-    private function getProductDetailsObject($product)
-    {
-        $element = array();
-        if ($product->getId())
-        {
-            $productName = $product->getName();
-            $productUrl = $product->getProductUrl();
-//            $productImage = $product->getImage();
-            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-            // TODO add placeholder
-            $options = array(
-                array(
-                    'type' => 'postback',
-                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                    'payload' => $product->getId()
-                ),
-                array(
-                    'type' => 'web_url',
-                    'title' => __("Visit product's page"),
-                    'url' => $productUrl
-                )
-            );
-            $element = array(
-                'title' => $productName,
-                'item_url' => $productUrl,
-                'image_url' => $productImage,
-                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
-                'buttons' => $options
-            );
-            //array_push($result, $element);
-        }
-
-        return $element;
-    }
-
-    public function excerpt($text, $size)
-    {
-        if (strlen($text) > $size)
-        {
-            $text = substr($text, 0, $size);
-            $text = substr($text, 0, strrpos($text, " "));
-            $etc = " ...";
-            $text = $text . $etc;
-        }
-
-        return $text;
-    }
-
-    private function logOutChatbotCustomer($senderId)
-    {
+        // should never get here
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $this->setChatbotAPIModel($chatbotAPI);
 
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setChatbotuserId(null);
-            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
-            $chatbotAPI->save();
-            return true;
-        }
-
-        return false;
-    }
-
-    private function setCommandsList($commandsList)
-    {
-        $this->_commandsList = $commandsList;
-    }
-
-    private function setCompleteCommandsList($completeCommandsList)
-    {
-        $this->_completeCommandsList = $completeCommandsList;
-    }
-
-    private function getCommandText($commandId)
-    {
-        $commands = $this->getCompleteCommandsList();
-        if (isset($commands[$commandId]['command_code']))
-            return $commands[$commandId]['command_code'];
-
-        return '';
-    }
-
-    private function getCommandsList()
-    {
-        if (isset($this->_commandsList))
-            return $this->_commandsList;
-
-        // should never get here
-        $this->prepareCommandsList();
-        return $this->_commandsList;
-    }
-
-    private function getCompleteCommandsList()
-    {
-        if (isset($this->_completeCommandsList))
-            return $this->_completeCommandsList;
-
-        // should never get here
-        $this->prepareCommandsList();
-        return $this->_completeCommandsList;
-    }
-
-    private function prepareCommandsList()
-    {
-        $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
-        $commands = $this->_serializer->unserialize($serializedCommands);
-        $commandsList = array();
-        $completeCommandsList = array();
-        foreach ($commands as $command)
-        {
-            $command_id = $command['command_id'];
-            $completeCommandsList[$command_id] = array(
-                'command_code' => $command['command_code'],
-                'command_alias_list' => explode(',', $command['command_alias_list'])
-            );
-
-            if ($command['enable_command'] == $this->_define::ENABLED)
-                $commandsList[$command_id] = $completeCommandsList[$command_id];
-        }
-        $this->setCommandsList($commandsList);
-        $this->setCompleteCommandsList($completeCommandsList);
-//        return $commandsList;
-    }
-
-    private function setHelperMessageAttributes($message)
-    {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
-            $this->_configPrefix = 'werules_chatbot_messenger';
-
-        $this->setCurrentMessagePayload($message->getMessagePayload());
-        $this->setCurrentCommand($message->getContent()); // ignore output
-        $this->prepareCommandsList();
-    }
-
-    private function setCurrentMessagePayload($messagePayload)
-    {
-        if ($messagePayload)
-            $this->_messagePayload = $messagePayload;
-
-        return false;
-    }
-
-    private function getCurrentMessagePayload()
-    {
-        if (isset($this->_messagePayload))
-            return $this->_messagePayload;
-
-        return false;
-    }
-
-    private function setCurrentCommand($messageContent)
-    {
-        if (!isset($this->_commandsList))
-            $this->_commandsList = $this->getCommandsList();
-
-        foreach ($this->_commandsList as $key => $command)
-        {
-            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
-            {
-                $this->_currentCommand = $key;
-                return $key;
-            }
-        }
-
-        return false;
-    }
-
-    private function getCurrentCommand($messageContent)
-    {
-        if (isset($this->_currentCommand))
-            return $this->_currentCommand;
-
-        return $this->setCurrentCommand($messageContent);
-    }
-
-    private function checkCancelCommand($command, $senderId)
-    {
-        $result = array();
-        if ($command == $this->_define::CANCEL_COMMAND_ID)
-            $result = $this->processCancelCommand($senderId);
-
-        return $result;
+        return $chatbotAPI;
     }
 
     public function getChatbotuserBySenderId($senderId)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
         $chatbotUser = $this->_chatbotUser->create();
 
         if ($chatbotAPI->getChatbotapiId())
@@ -888,312 +1206,6 @@ class Data extends AbstractHelper
         }
 
         return $chatbotUser;
-    }
-
-    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = false, $payload = false)
-    {
-//        $messageContent = $message->getContent();
-        $result = array();
-        $state = false;
-        if (!$command)
-            $command = $this->getCurrentCommand($messageContent);
-
-        if (!$payload)
-            $payload = $this->getCurrentMessagePayload();
-
-        if ($command)
-        {
-            if ($command == $this->_define::START_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processStartCommand();
-            }
-            else if ($command == $this->_define::LIST_CATEGORIES_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processListCategoriesCommand();
-                $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
-            }
-            else if ($command == $this->_define::SEARCH_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processSearchCommand();
-                $state = $this->_define::CONVERSATION_SEARCH;
-            }
-            else if ($command == $this->_define::LOGIN_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                    if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
-                        $result = $this->processLoginCommand($senderId);
-                    else
-                    {
-                        $text = __("You are already logged.");
-                        $result = $this->getTextMessageArray($text);
-                    }
-                }
-            }
-            else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
-            {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processListOrdersCommand($senderId);
-                }
-                else
-                    $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::REORDER_COMMAND_ID)
-            {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processReorderCommand();
-                }
-                else
-                        $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
-            {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                    {
-                        if ($payload)
-                            $result = $this->processAddToCartCommand($senderId, $payload);
-                        else
-                            $result = $this->getErrorMessage();
-                    }
-                }
-                else
-                    $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processCheckoutCommand();
-            }
-            else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processClearCartCommand();
-            }
-            else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
-            {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processTrackOrderCommand();
-                    $state = $this->_define::CONVERSATION_TRACK_ORDER;
-                }
-                else
-                    $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::SUPPORT_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processSupportCommand();
-            }
-            else if ($command == $this->_define::SEND_EMAIL_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processSendEmailCommand();
-                $state = $this->_define::CONVERSATION_EMAIL;
-            }
-            else if ($command == $this->_define::CANCEL_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processCancelCommand($senderId);
-            }
-            else if ($command == $this->_define::HELP_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processHelpCommand();
-            }
-            else if ($command == $this->_define::ABOUT_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processAboutCommand();
-            }
-            else if ($command == $this->_define::LOGOUT_COMMAND_ID)
-            {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processLogoutCommand($senderId);
-                }
-                else
-                    $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::REGISTER_COMMAND_ID)
-            {
-                $chatbotAPI = $this->_chatbotAPI->create();
-                $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processRegisterCommand();
-                }
-                else
-                {
-                    $text = __("You are already registered.");
-                    $result = $this->getTextMessageArray($text);
-                }
-            }
-            else // should never fall in here
-            {
-                $result = $this->getErrorMessage();
-            }
-        }
-        if ($state && (($result) || $setStateOnly)) // TODO
-            $this->updateConversationState($senderId, $state);
-
-        return $result;
-    }
-
-    private function handleCommandsWithParameters($message, $command, $keyword, $commandCode)
-    {
-        $result = $this->processCommands($command, $message->getSenderId(), true, $commandCode); // should return empty array
-        if ($result)
-            return $result; // if this happens, means there's an error message
-
-        $result = $this->handleConversationState($message, $keyword);
-        return $result;
-    }
-
-    private function handleCommands($message)
-    {
-        $result = $this->processCommands($message->getContent(), $message->getSenderId());
-
-        return $result;
-    }
-
-    private function updateConversationState($senderId, $state)
-    {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
-
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setConversationState($state);
-            $datetime = date('Y-m-d H:i:s');
-            $chatbotAPI->setUpdatedAt($datetime);
-            $chatbotAPI->save();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    private function sendEmailFromMessage($text)
-    {
-        $result = array();
-        $response = $this->sendZendEmail($text);
-        if ($response)
-        {
-            $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Email sent.")
-            );
-        }
-        else
-        {
-            $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Sorry, I wasn't able to send an email this time. Please try again later.")
-            );
-        }
-
-        array_push($result, $responseMessage);
-        return $result;
-    }
-
-    private function sendZendEmail($text) // TODO TODO TODO
-    {
-        $storeName = 'store_name';
-        $storeEmail = 'sample@sample.com';// TODO
-
-        $url = __("Not informed");
-        $customerEmail = __("Not informed");
-        $customerName = __("Not informed");
-
-        $mail = new \Zend_Mail('UTF-8');
-
-        $emailBody =
-            __("Message from chatbot customer") . "<br><br>" .
-            __("Customer name") . ": " .
-            $customerName . "<br>" .
-            __("Message") . ":<br>" .
-            $text . "<br><br>" .
-            __("Contacts") . ":<br>" .
-            __("Chatbot") . ": " . $url . "<br>" .
-            __("Email") . ": " . $customerEmail . "<br>";
-
-        $mail->setBodyHtml($emailBody);
-        $mail->setFrom($storeEmail, $storeName);
-        $mail->addTo($storeEmail, $storeName);
-        $mail->setSubject(__("Contact from chatbot"));
-
-        try {
-            $mail->send();
-            return true;
-        } catch (\Exception $exception) {
-            return false;
-        }
-    }
-
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
-    {
-        return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
-    }
-
-    private function getStoreURL($extraPath, $path = false)
-    {
-        if ($path)
-            return $this->_storeManagerInterface->getStore()->getBaseUrl($path) . $extraPath;
-
-        return $this->_storeManagerInterface->getStore()->getBaseUrl() . $extraPath;
-    }
-
-    private function getMediaURL($path)
-    {
-        return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
-    }
-
-    private function getTextMessageArray($text)
-    {
-        $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => $text
-        );
-        array_push($result, $responseMessage);
-        return $result;
-    }
-
-    private function getNotLoggedMessage()
-    {
-        $text = __("You have to be logged to do that.");
-        return $this->getTextMessageArray($text);
-    }
-
-    private function getErrorMessage()
-    {
-        $text = __("Sorry, I didn't understand that.");
-        return $this->getTextMessageArray($text);
     }
 
     // COMMANDS FUNCTIONS
@@ -1253,8 +1265,7 @@ class Data extends AbstractHelper
 
     private function processLoginCommand($senderId)
     {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIModel($senderId);
 
         $result = array();
         $loginUrl = $this->getStoreURL('chatbot/customer/login/hash/' . $chatbotAPI->getHashKey());
