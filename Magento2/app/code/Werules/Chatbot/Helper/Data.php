@@ -602,6 +602,22 @@ class Data extends AbstractHelper
         return $text;
     }
 
+    private function logOutChatbotCustomer($senderId)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setChatbotuserId(null);
+            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
+            $chatbotAPI->save();
+            return true;
+        }
+
+        return false;
+    }
+
     private function prepareCommandsList($commands)
     {
         $commandsList = array();
@@ -1029,25 +1045,9 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function logChatbotCustomerOut($senderId)
-    {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
-
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setChatbotuserId(null);
-            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
-            $chatbotAPI->save();
-            return true;
-        }
-
-        return false;
-    }
-
     private function processLogoutCommand($senderId)
     {
-        $response = $this->logChatbotCustomerOut($senderId);
+        $response = $this->logOutChatbotCustomer($senderId);
         $result = array();
         if ($response)
         {
