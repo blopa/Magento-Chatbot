@@ -38,6 +38,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_productCollection;
     protected $_customerRepositoryInterface;
     protected $_quoteModel;
+    protected $_imageHelper;
+//    protected $_storeConfig;
 //    protected $_cartModel;
 //    protected $_cartManagementInterface;
 //    protected $_cartRepositoryInterface;
@@ -67,6 +69,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        \Magento\Checkout\Model\Cart $cartModel,
 //        \Magento\Quote\Api\CartManagementInterface $cartManagementInterface,
 //        \Magento\Quote\Api\CartRepositoryInterface $cartRepositoryInterface,
+//        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -87,6 +91,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $this->_cartModel = $cartModel;
 //        $this->_cartManagementInterface = $cartManagementInterface;
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
+//        $this->_storeConfig = $scopeConfig;
+        $this->_imageHelper = $imageHelper;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -975,6 +981,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->storeManager->getStore()->getBaseUrl() . $extraPath;
     }
 
+    private function getPlaceholderImage()
+    {
+        return $this->_imageHelper->getDefaultPlaceholderUrl('image');
+    }
+
     private function getMediaURL($path)
     {
         return $this->getStoreURL($path, \Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
@@ -1117,9 +1128,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $productName = $product->getName();
             $productUrl = $product->getProductUrl();
-//            $productImage = $product->getImage();
-            $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-            // TODO add placeholder
+            if ($product->getImage())
+                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+            else
+                $productImage = $this->getPlaceholderImage();
+
             $options = array(
                 array(
                     'type' => 'web_url',
@@ -1127,7 +1140,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     'url' => $productUrl
                 )
             );
-            if (($product->getTypeId() == 'simple') && (!$product->hasCustomOptions())) // TODO remove this to add any type of product
+            if (($product->getTypeId() != 'simple') && ($product->hasCustomOptions())) // TODO remove this to add any type of product
             {
 
                 $addToCartOption  = array(
