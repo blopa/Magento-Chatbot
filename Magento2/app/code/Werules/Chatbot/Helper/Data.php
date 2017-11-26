@@ -1429,6 +1429,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $quote->setStoreId($this->storeManager->getStore()->getId());
         }
 
+//        $allItems = $quote->getItemsCollection(); // returns all the items in quote
+//        foreach ($allItems as $item)
+//        {
+//            $quote->deleteItem($item); // deletes the item
+//            $quote->save();
+//        }
+//        return true;
+
         $quote->removeAllItems();
         $quote->save();
 
