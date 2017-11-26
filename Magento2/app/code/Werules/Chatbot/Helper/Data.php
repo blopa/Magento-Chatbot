@@ -39,6 +39,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_customerRepositoryInterface;
     protected $_quoteModel;
     protected $_imageHelper;
+    protected $_stockRegistry;
 //    protected $_storeConfig;
 //    protected $_cartModel;
 //    protected $_cartManagementInterface;
@@ -71,6 +72,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        \Magento\Quote\Api\CartRepositoryInterface $cartRepositoryInterface,
 //        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Catalog\Helper\Image $imageHelper,
+        \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -88,6 +90,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_orderCollectionFactory = $orderCollectionFactory;
         $this->_customerRepositoryInterface = $customerRepositoryInterface;
         $this->_quoteModel = $quoteModel;
+        $this->_stockRegistry = $stockRegistry;
 //        $this->_cartModel = $cartModel;
 //        $this->_cartManagementInterface = $cartManagementInterface;
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
@@ -441,6 +444,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
+    private function getStockQuantityByProductId($productId)
+    {
+        $stockQty = $this->_stockRegistry->getStockItem($productId);
+        if ($stockQty)
+            return $stockQty;
+
+        return 0;
+    }
+
     private function listProductsFromSearch($messageContent)
     {
         $result = array();
@@ -586,10 +598,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if ($payload->command == $this->_define::REORDER_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
+                $senderId = $message->getSenderId();
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    $result = $this->processReorderCommand($payload->parameter);
+                    $result = $this->processReorderCommand($payload->parameter, $senderId);
                 }
                 else
                     $result = $this->getNotLoggedMessage();
@@ -864,25 +877,31 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function addProductToCustomerCart($productId, $customerId, $qty = 1) // TODO simple products only for now
     {
-        $productCollection = $this->getProductCollection();
-        $productCollection->addFieldToFilter('entity_id', $productId);
-        $product = $productCollection->getFirstItem();
-
-        if ($product->getId())
+        $stockQty = $this->getStockQuantityByProductId($productId);
+        if ($stockQty > 0)
         {
-            $customer = $this->_customerRepositoryInterface->getById($customerId);
-            $quote = $this->_quoteModel->loadByCustomer($customer);
-            if (!$quote->getId())
+            if ($stockQty < $qty)
+                $qty = $stockQty;
+            $productCollection = $this->getProductCollection();
+            $productCollection->addFieldToFilter('entity_id', $productId);
+            $product = $productCollection->getFirstItem();
+
+            if ($product->getId())
             {
-                $quote->setCustomer($customer);
-                $quote->setIsActive(1);
-                $quote->setStoreId($this->storeManager->getStore()->getId());
+                $customer = $this->_customerRepositoryInterface->getById($customerId);
+                $quote = $this->_quoteModel->loadByCustomer($customer);
+                if (!$quote->getId())
+                {
+                    $quote->setCustomer($customer);
+                    $quote->setIsActive(1);
+                    $quote->setStoreId($this->storeManager->getStore()->getId());
+                }
+
+                $quote->addProduct($product, $qty); // TODO
+                $quote->collectTotals()->save();
+
+                return true;
             }
-
-            $quote->addProduct($product, $qty); // TODO
-            $quote->collectTotals()->save();
-
-            return true;
         }
 
         return false;
@@ -1106,6 +1125,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         ;
 
         return $orders;
+    }
+
+    private function getOrderFromOrderId($orderId)
+    {
+        $orders = $this->_orderCollectionFactory->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('entity_id', $orderId)
+            ->setOrder('created_at', 'desc')
+        ;
+
+        return $orders->getFirstItem();
     }
 
     private function getProductCollection()
@@ -1500,14 +1530,39 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function processReorderCommand($orderId)
+    private function processReorderCommand($orderId, $senderId)
     {
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The REORDER command is still under development' // TODO
-        );
-        array_push($result, $responseMessage);
+        $order = $this->getOrderFromOrderId($orderId);
+        if ($order->getId())
+        {
+            $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+            $orderItems = $order->getAllItems();
+            $response = false;
+            foreach ($orderItems as $orderItem)
+            {
+                $productId = $orderItem->getProductId();
+                $qty = $orderItem->getQtyOrdered();
+                $response = $this->addProductToCustomerCart($productId, $chatbotUser->getCustomerId(), $qty);
+
+                if (!$response)
+                    break;
+            }
+
+            if ($response)
+            {
+                $responseMessage = array(
+                    'content_type' => $this->_define::CONTENT_TEXT,
+                    'content' => __("All products from order %1 that are in stock were added to your cart.", $orderId)
+                );
+                array_push($result, $responseMessage);
+            }
+            else
+                $result = $this->getErrorMessage();
+        }
+        else
+            $result = $this->getErrorMessage();
+
         return $result;
     }
 
