@@ -283,7 +283,10 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 
     /// Get quickreply payload
     public function getQuickReplyPayload() {
-        return $this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"];
+        if (isset($this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"]))
+            return $this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"];
+
+        return false;
     }
 
     /// Get message timestamp

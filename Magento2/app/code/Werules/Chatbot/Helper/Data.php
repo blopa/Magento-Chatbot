@@ -47,6 +47,7 @@ class Data extends AbstractHelper
     protected $_customerRepositoryInterface;
     protected $_quoteModel;
     protected $_currentCommand;
+    protected $_messagePayload;
 
     public function __construct(
         Context $context,
@@ -438,7 +439,7 @@ class Data extends AbstractHelper
 
         if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
         {
-            $result = $this->listProductsFromCategory($messageContent, $message->getPayload());
+            $result = $this->listProductsFromCategory($messageContent, $message->getMessagePayload());
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SEARCH)
         {
@@ -702,7 +703,7 @@ class Data extends AbstractHelper
                 array(
                     'type' => 'postback',
                     'title' => __("Add to cart"),
-                    'payload' => 'todo_here'
+                    'payload' => $product->getId()
                 ),
                 array(
                     'type' => 'web_url',
@@ -825,6 +826,10 @@ class Data extends AbstractHelper
         if (!$command)
             $command = $this->getCurrentCommand($messageContent);
 
+        $payload = '';
+        if (isset($this->_messagePayload))
+            $payload = $this->_messagePayload;
+
         if ($command)
         {
             if ($command == $this->_define::START_COMMAND_ID)
@@ -886,7 +891,7 @@ class Data extends AbstractHelper
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processAddToCartCommand($senderId);
+                    $result = $this->processAddToCartCommand($senderId, $payload);
             }
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
@@ -989,6 +994,9 @@ class Data extends AbstractHelper
     {
 //        $this->logger($serializedCommands);
 //        $this->logger($this->_commandsList);
+        $payload = $message->getMessagePayload();
+        if ($payload)
+            $this->_messagePayload = $payload;
         $result = $this->processCommands($message->getContent(), $message->getSenderId());
 
         return $result;
@@ -1275,10 +1283,10 @@ class Data extends AbstractHelper
         $quote->collectTotals()->save();
     }
 
-    private function processAddToCartCommand($senderId)
+    private function processAddToCartCommand($senderId, $productId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
-        $this->addProductToCustomerCart(3, $chatbotUser->getCustomerId());
+        $this->addProductToCustomerCart($productId, $chatbotUser->getCustomerId());
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
