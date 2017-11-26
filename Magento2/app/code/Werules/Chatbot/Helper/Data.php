@@ -442,12 +442,49 @@ class Data extends AbstractHelper
         {
             $result = $this->sendEmailFromMessage($messageContent);
         }
+        else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_TRACK_ORDER)
+        {
+            $result = $this->listOrderFromOrderId($messageContent, $message->getSenderId());
+        }
 
         if ($result)
         {
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->save();
         }
+
+        return $result;
+    }
+
+    public function listOrderFromOrderId($messageContent, $senderId)
+    {
+        $result = array();
+        $orderList = array();
+        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+        $ordersCollection = $this->getOrdersFromCustomerId($chatbotUser->getCustomerId());
+        $ordersCollection->addFieldToFilter('increment_id', $messageContent);
+        if (count($ordersCollection) > 0)
+        {
+            $orderObject = $this->getOrderDetailsObject($ordersCollection->getFirstItem());
+            array_push($orderList, $orderObject);
+        }
+
+        if (count($orderList) > 0)
+        {
+            $contentType = $this->_define::RECEIPT_LAYOUT;
+            $content = json_encode($orderList);
+        }
+        else
+        {
+            $content = __("Sorry, we couldn't find any order with this information.");
+            $contentType = $this->_define::CONTENT_TEXT;
+        }
+
+        $responseMessage = array(
+            'content_type' => $contentType,
+            'content' => $content
+        );
+        array_push($result, $responseMessage);
 
         return $result;
     }
@@ -818,27 +855,27 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
-                if (!$setStateOnly)
+                $chatbotAPI = $this->_chatbotAPI->create();
+                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                    if (!$setStateOnly)
                         $result = $this->processListOrdersCommand($senderId);
-                    else
-                        $result = $this->getNotLoggedMessage();
                 }
+                else
+                    $result = $this->getNotLoggedMessage();
             }
             else if ($command == $this->_define::REORDER_COMMAND_ID)
             {
-                if (!$setStateOnly)
+                $chatbotAPI = $this->_chatbotAPI->create();
+                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                    if (!$setStateOnly)
                         $result = $this->processReorderCommand();
-                    else
-                        $result = $this->getNotLoggedMessage();
                 }
+                else
+                        $result = $this->getNotLoggedMessage();
             }
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
@@ -857,15 +894,16 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
-                if (!$setStateOnly)
+                $chatbotAPI = $this->_chatbotAPI->create();
+                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                    if (!$setStateOnly)
                         $result = $this->processTrackOrderCommand();
-                    else
-                        $result = $this->getNotLoggedMessage();
+                    $state = $this->_define::CONVERSATION_TRACK_ORDER;
                 }
+                else
+                    $result = $this->getNotLoggedMessage();
             }
             else if ($command == $this->_define::SUPPORT_COMMAND_ID)
             {
@@ -895,29 +933,29 @@ class Data extends AbstractHelper
             }
             else if ($command == $this->_define::LOGOUT_COMMAND_ID)
             {
-                if (!$setStateOnly)
+                $chatbotAPI = $this->_chatbotAPI->create();
+                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                    if (!$setStateOnly)
                         $result = $this->processLogoutCommand($senderId);
-                    else
-                        $result = $this->getNotLoggedMessage();
                 }
+                else
+                    $result = $this->getNotLoggedMessage();
             }
             else if ($command == $this->_define::REGISTER_COMMAND_ID)
             {
-                if (!$setStateOnly)
+                $chatbotAPI = $this->_chatbotAPI->create();
+                $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
                 {
-                    $chatbotAPI = $this->_chatbotAPI->create();
-                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
-                    if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
+                    if (!$setStateOnly)
                         $result = $this->processRegisterCommand();
-                    else
-                    {
-                        $text = __("You are already registered.");
-                        $result = $this->getTextMessageArray($text);
-                    }
+                }
+                else
+                {
+                    $text = __("You are already registered.");
+                    $result = $this->getTextMessageArray($text);
                 }
             }
             else // should never fall in here
@@ -935,7 +973,7 @@ class Data extends AbstractHelper
     {
         $result = $this->processCommands($command, $message->getSenderId(), true, $commandCode); // should return empty array
         if ($result)
-            return $result;
+            return $result; // if this happens, means there's an error message
 
         $result = $this->handleConversationState($message, $keyword);
         return $result;
@@ -1206,7 +1244,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the REORDER command!' // TODO
+            'content' => 'The REORDER command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1217,7 +1255,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the ADD_TO_CART command!' // TODO
+            'content' => 'The ADD_TO_CART command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1228,7 +1266,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the CHECKOUT command!' // TODO
+            'content' => 'The REORDER command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1239,7 +1277,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the CLEAR_CART command!' // TODO
+            'content' => 'The CLEAR_CART command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1250,7 +1288,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the TRACK_ORDER command!' // TODO
+            'content' => __("Ok, send me the order number you're looking for.")
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1261,7 +1299,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the SUPPORT command!' // TODO
+            'content' => 'The SUPPORT command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
