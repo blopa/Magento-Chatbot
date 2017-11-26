@@ -77,6 +77,25 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::HASH_KEY, $hash_key);
     }
+    
+    /**
+     * Get logged
+     * @return string
+     */
+    public function getLogged()
+    {
+        return $this->getData(self::LOGGED);
+    }
+    
+    /**
+     * Set logged
+     * @param string $logged
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setLogged($logged)
+    {
+        return $this->setData(self::LOGGED, $logged);
+    }
 
     /**
      * Get enabled

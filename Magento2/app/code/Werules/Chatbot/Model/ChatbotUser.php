@@ -149,25 +149,6 @@ class ChatbotUser extends \Magento\Framework\Model\AbstractModel implements Chat
     }
 
     /**
-     * Get logged
-     * @return string
-     */
-    public function getLogged()
-    {
-        return $this->getData(self::LOGGED);
-    }
-
-    /**
-     * Set logged
-     * @param string $logged
-     * @return \Werules\Chatbot\Api\Data\ChatbotUserInterface
-     */
-    public function setLogged($logged)
-    {
-        return $this->setData(self::LOGGED, $logged);
-    }
-
-    /**
      * Get admin
      * @return string
      */

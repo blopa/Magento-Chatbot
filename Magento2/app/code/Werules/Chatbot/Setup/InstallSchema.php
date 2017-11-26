@@ -202,7 +202,7 @@ class InstallSchema implements InstallSchemaInterface
         
 
         
-        $table_werules_chatbot_chatbotuser->addColumn(
+        $table_werules_chatbot_chatbotapi->addColumn(
             'logged',
             \Magento\Framework\DB\Ddl\Table::TYPE_BOOLEAN,
             null,

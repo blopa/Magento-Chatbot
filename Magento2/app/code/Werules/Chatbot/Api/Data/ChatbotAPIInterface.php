@@ -28,6 +28,7 @@ interface ChatbotAPIInterface
     const FALLBACK_QTY = 'fallback_qty';
     const CHATBOTAPI_ID = 'chatbotapi_id';
     const CREATED_AT = 'created_at';
+    const LOGGED = 'logged';
     const CONVERSATION_STATE = 'conversation_state';
     const HASH_KEY = 'hash_key';
     const CHATBOT_TYPE = 'chatbot_type';
@@ -61,6 +62,19 @@ interface ChatbotAPIInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setHashKey($hash_key);
+    
+    /**
+     * Get logged
+     * @return string|null
+     */
+    public function getLogged();
+    
+    /**
+     * Set logged
+     * @param string $logged
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setLogged($logged);
 
     /**
      * Get enabled
