@@ -1206,7 +1206,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the REORDER command!' // TODO
+            'content' => 'The REORDER command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1217,7 +1217,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the ADD_TO_CART command!' // TODO
+            'content' => 'The ADD_TO_CART command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1228,7 +1228,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the CHECKOUT command!' // TODO
+            'content' => 'The REORDER command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1239,7 +1239,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the CLEAR_CART command!' // TODO
+            'content' => 'The CLEAR_CART command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1250,7 +1250,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the TRACK_ORDER command!' // TODO
+            'content' => 'The TRACK_ORDER command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1261,7 +1261,7 @@ class Data extends AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the SUPPORT command!' // TODO
+            'content' => 'The SUPPORT command is still under development' // TODO
         );
         array_push($result, $responseMessage);
         return $result;
