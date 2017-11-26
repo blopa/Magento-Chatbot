@@ -488,6 +488,74 @@ class Data extends AbstractHelper
         return $result;
     }
 
+    private function getOrderDetailsObject($order) // TODO add link to product name
+    {
+        $detailedOrderObject = array();
+        if ($order->getId())
+        {
+            $orderNumber = $order->getIncrementId();
+            $customerName = $order->getCustomerName();
+            $orderUrl = $this->getStoreURL('sales/order/view/order_id/' . $order->getId());
+            $currency = $order->getOrderCurrencyCode();
+            $createdAt = strtotime($order->getCreatedAt());
+            $elements = array();
+            $items = $order->getAllVisibleItems();
+            foreach ($items as $item)
+            {
+                $productCollection = $this->getProductCollection();
+                $productCollection->addFieldToFilter('entity_id', $item->getProductId());
+                $product = $productCollection->getFirstItem();
+                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+
+                $element = array(
+                    'title' => $item->getName(),
+                    'subtitle' => $this->excerpt($item->getShortDescription(), 30),
+                    'quantity' => (int)$item->getQtyOrdered(),
+                    'price' => $item->getPrice(),
+                    'currency' => $currency,
+                    'image_url' => $productImage
+                );
+                array_push($elements, $element);
+            }
+
+            $shippingAddress = $order->getShippingAddress();
+            $streetOne = $shippingAddress->getStreet()[0];
+            $streetTwo = '';
+            if (count($shippingAddress->getStreet()) > 1)
+                $streetTwo = $shippingAddress->getStreet()[1];
+            $address = array(
+                'street_1' => $streetOne,
+                'street_2' => $streetTwo,
+                'city' => $shippingAddress->getCity(),
+                'postal_code' => $shippingAddress->getPostcode(),
+                'state' => $shippingAddress->getRegion(),
+                'country' => $shippingAddress->getCountryId()
+            );
+
+            $summary = array(
+                'subtotal' => $order->getSubtotal(),
+                'shipping_cost' => $order->getShippingAmount(),
+                'total_tax' => $order->getTaxAmount(),
+                'total_cost' => $order->getGrandTotal()
+            );
+
+            $detailedOrderObject = array(
+                'template_type' => 'receipt',
+                'recipient_name' => $customerName,
+                'order_number' => $orderNumber,
+                'currency' => $currency,
+                'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
+                'order_url' => $orderUrl,
+                'timestamp' => $createdAt,
+                'elements' => $elements,
+                'address' => $address,
+                'summary' => $summary
+            );
+        }
+
+        return $detailedOrderObject;
+    }
+
     private function getProductCollection()
     {
         $collection = $this->_productCollection->create();
@@ -1096,74 +1164,6 @@ class Data extends AbstractHelper
         );
         array_push($result, $responseMessage);
         return $result;
-    }
-
-    private function getOrderDetailsObject($order) // TODO add link to product name
-    {
-        $detailedOrderObject = array();
-        if ($order->getId())
-        {
-            $orderNumber = $order->getIncrementId();
-            $customerName = $order->getCustomerName();
-            $orderUrl = $this->getStoreURL('sales/order/view/order_id/' . $order->getId());
-            $currency = $order->getOrderCurrencyCode();
-            $createdAt = strtotime($order->getCreatedAt());
-            $elements = array();
-            $items = $order->getAllVisibleItems();
-            foreach ($items as $item)
-            {
-                $productCollection = $this->getProductCollection();
-                $productCollection->addFieldToFilter('entity_id', $item->getProductId());
-                $product = $productCollection->getFirstItem();
-                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-
-                $element = array(
-                    'title' => $item->getName(),
-                    'subtitle' => $this->excerpt($item->getShortDescription(), 30),
-                    'quantity' => (int)$item->getQtyOrdered(),
-                    'price' => $item->getPrice(),
-                    'currency' => $currency,
-                    'image_url' => $productImage
-                );
-                array_push($elements, $element);
-            }
-
-            $shippingAddress = $order->getShippingAddress();
-            $streetOne = $shippingAddress->getStreet()[0];
-            $streetTwo = '';
-            if (count($shippingAddress->getStreet()) > 1)
-                $streetTwo = $shippingAddress->getStreet()[1];
-            $address = array(
-                'street_1' => $streetOne,
-                'street_2' => $streetTwo,
-                'city' => $shippingAddress->getCity(),
-                'postal_code' => $shippingAddress->getPostcode(),
-                'state' => $shippingAddress->getRegion(),
-                'country' => $shippingAddress->getCountryId()
-            );
-
-            $summary = array(
-                'subtotal' => $order->getSubtotal(),
-                'shipping_cost' => $order->getShippingAmount(),
-                'total_tax' => $order->getTaxAmount(),
-                'total_cost' => $order->getGrandTotal()
-            );
-
-            $detailedOrderObject = array(
-                'template_type' => 'receipt',
-                'recipient_name' => $customerName,
-                'order_number' => $orderNumber,
-                'currency' => $currency,
-                'payment_method' => $order->getPayment()->getMethodInstance()->getTitle(),
-                'order_url' => $orderUrl,
-                'timestamp' => $createdAt,
-                'elements' => $elements,
-                'address' => $address,
-                'summary' => $summary
-            );
-        }
-
-        return $detailedOrderObject;
     }
 
     private function processListOrdersCommand($senderId)
