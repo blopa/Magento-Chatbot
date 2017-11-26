@@ -21,13 +21,9 @@
 
 namespace Werules\Chatbot\Helper;
 
-use Magento\Framework\App\Helper\AbstractHelper;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\ObjectManagerInterface;
-use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
 
-class Data extends AbstractHelper
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
     protected $storeManager;
     protected $objectManager;
@@ -38,7 +34,6 @@ class Data extends AbstractHelper
     protected $_categoryHelper;
     protected $_categoryFactory;
     protected $_categoryCollectionFactory;
-    protected $_storeManagerInterface;
     protected $_orderCollectionFactory;
     protected $_productCollection;
     protected $_customerRepositoryInterface;
@@ -53,17 +48,16 @@ class Data extends AbstractHelper
     protected $_chatbotAPIModel;
 
     public function __construct(
-        Context $context,
-        ObjectManagerInterface $objectManager,
+        \Magento\Framework\App\Helper\Context $context,
+        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
-        StoreManagerInterface $storeManager,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
         \Werules\Chatbot\Model\MessageFactory $message,
         \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
-        \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
         \Magento\Quote\Model\Quote $quoteModel,
@@ -81,7 +75,6 @@ class Data extends AbstractHelper
         $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
-        $this->_storeManagerInterface = $storeManagerInterface;
         $this->_orderCollectionFactory = $orderCollectionFactory;
         $this->_customerRepositoryInterface = $customerRepositoryInterface;
         $this->_quoteModel = $quoteModel;
@@ -908,9 +901,9 @@ class Data extends AbstractHelper
     private function getStoreURL($extraPath, $path = false)
     {
         if ($path)
-            return $this->_storeManagerInterface->getStore()->getBaseUrl($path) . $extraPath;
+            return $this->storeManager->getStore()->getBaseUrl($path) . $extraPath;
 
-        return $this->_storeManagerInterface->getStore()->getBaseUrl() . $extraPath;
+        return $this->storeManager->getStore()->getBaseUrl() . $extraPath;
     }
 
     private function getMediaURL($path)
