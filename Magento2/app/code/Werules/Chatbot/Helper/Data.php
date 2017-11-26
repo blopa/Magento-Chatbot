@@ -444,7 +444,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function getStockQuantityByProductId($productId)
+    private function getStockByProductId($productId)
     {
         $stockQty = $this->_stockRegistry->getStockItem($productId);
         if ($stockQty)
@@ -877,7 +877,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function addProductToCustomerCart($productId, $customerId, $qty = 1) // TODO simple products only for now
     {
-        $stock = $this->getStockQuantityByProductId($productId);
+        $stock = $this->getStockByProductId($productId);
         if ($stock->getId())
         {
             $stockQty = (int)$stock->getQty();
@@ -1485,7 +1485,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $orderList = array();
         $quickReplies = array();
 
-        $this->logger(count($ordersCollection));
         foreach ($ordersCollection as $order)
         {
             $orderObject = $this->getOrderDetailsObject($order);
