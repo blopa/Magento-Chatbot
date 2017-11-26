@@ -439,7 +439,7 @@ class Data extends AbstractHelper
 
         if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
         {
-            $result = $this->listProductsFromCategory($messageContent, $message->getMessagePayload());
+            $result = $this->listProductsFromCategory($messageContent, $this->_messagePayload); // $message->getMessagePayload()
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SEARCH)
         {
