@@ -1216,7 +1216,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $productCollection = $this->getProductCollection();
                 $productCollection->addFieldToFilter('entity_id', $item->getProductId());
                 $product = $productCollection->getFirstItem();
-                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+                if ($product->getImage())
+                    $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+                else
+                    $productImage = $this->getPlaceholderImage();
 
                 $element = array(
                     'title' => $item->getName(),
