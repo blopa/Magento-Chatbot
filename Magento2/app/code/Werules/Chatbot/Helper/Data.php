@@ -1342,7 +1342,7 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function addProductToCustomerCart($productId, $customerId)
+    private function addProductToCustomerCart($productId, $customerId) // TODO simple products only for now
     {
         $productCollection = $this->getProductCollection();
         $productCollection->addFieldToFilter('entity_id', $productId);
