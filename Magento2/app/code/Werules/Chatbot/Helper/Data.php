@@ -819,6 +819,66 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
+    private function addProductToCustomerCart($productId, $customerId) // TODO simple products only for now
+    {
+        $productCollection = $this->getProductCollection();
+        $productCollection->addFieldToFilter('entity_id', $productId);
+        $product = $productCollection->getFirstItem();
+
+        if ($product->getId())
+        {
+            $customer = $this->_customerRepositoryInterface->getById($customerId);
+            $quote = $this->_quoteModel->loadByCustomer($customer);
+            if (!$quote->getId())
+            {
+                $quote->setCustomer($customer);
+                $quote->setIsActive(1);
+                $quote->setStoreId($this->storeManager->getStore()->getId());
+            }
+
+            $quote->addProduct($product, 1); // TODO
+            $quote->collectTotals()->save();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function clearCustomerCart($customerId)
+    {
+        // TODO find a way to update mini cart
+        $customer = $this->_customerRepositoryInterface->getById($customerId);
+        if ($customer->getId())
+        {
+            $quote = $this->_quoteModel->loadByCustomer($customer);
+            if (!$quote->getId())
+            {
+                $quote->setCustomer($customer);
+                $quote->setIsActive(1);
+                $quote->setStoreId($this->storeManager->getStore()->getId());
+            }
+
+//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
+//            foreach ($allItems as $item)
+//            {
+//                $quote->deleteItem($item); // deletes the item
+//                $quote->save();
+//            }
+//            return true;
+
+            $quote->removeAllItems();
+//            $quote->setIsActive(false);
+//            $quote->clearInstance();
+            $quote->setItemsCount(0);
+            $quote->save();
+
+            return true;
+        }
+
+        return false;
+    }
+
     // SETS
     private function setCommandsList($commandsList)
     {
@@ -1361,32 +1421,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function addProductToCustomerCart($productId, $customerId) // TODO simple products only for now
-    {
-        $productCollection = $this->getProductCollection();
-        $productCollection->addFieldToFilter('entity_id', $productId);
-        $product = $productCollection->getFirstItem();
-
-        if ($product->getId())
-        {
-            $customer = $this->_customerRepositoryInterface->getById($customerId);
-            $quote = $this->_quoteModel->loadByCustomer($customer);
-            if (!$quote->getId())
-            {
-                $quote->setCustomer($customer);
-                $quote->setIsActive(1);
-                $quote->setStoreId($this->storeManager->getStore()->getId());
-            }
-
-            $quote->addProduct($product, 1); // TODO
-            $quote->collectTotals()->save();
-
-            return true;
-        }
-
-        return false;
-    }
-
     private function processAddToCartCommand($senderId, $productId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
@@ -1415,40 +1449,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
         array_push($result, $responseMessage);
         return $result;
-    }
-
-    private function clearCustomerCart($customerId)
-    {
-        // TODO find a way to update mini cart
-        $customer = $this->_customerRepositoryInterface->getById($customerId);
-        if ($customer->getId())
-        {
-            $quote = $this->_quoteModel->loadByCustomer($customer);
-            if (!$quote->getId())
-            {
-                $quote->setCustomer($customer);
-                $quote->setIsActive(1);
-                $quote->setStoreId($this->storeManager->getStore()->getId());
-            }
-
-//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
-//            foreach ($allItems as $item)
-//            {
-//                $quote->deleteItem($item); // deletes the item
-//                $quote->save();
-//            }
-//            return true;
-
-            $quote->removeAllItems();
-//            $quote->setIsActive(false);
-//            $quote->clearInstance();
-            $quote->setItemsCount(0);
-            $quote->save();
-
-            return true;
-        }
-
-        return false;
     }
 
     private function processClearCartCommand($senderId)
