@@ -709,7 +709,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else // should never fall in here
             {
-                $result = $this->getErrorMessage();
+                $result = $this->getConfusedMessage();
             }
         }
         if ($state && (($result) || $setStateOnly)) // TODO
@@ -929,6 +929,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     private function getErrorMessage()
+    {
+        $text = __("Something went wrong, please try again.");
+        return $this->getTextMessageArray($text);
+    }
+
+    private function getConfusedMessage()
     {
         $text = __("Sorry, I didn't understand that.");
         return $this->getTextMessageArray($text);
