@@ -1352,29 +1352,42 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $productCollection->addFieldToFilter('entity_id', $productId);
         $product = $productCollection->getFirstItem();
 
-        $customer = $this->_customerRepositoryInterface->getById($customerId);
-        $quote = $this->_quoteModel->loadByCustomer($customer);
-        if (!$quote->getId())
+        if ($product->getId())
         {
-            $quote->setCustomer($customer);
-            $quote->setIsActive(1);
-            $quote->setStoreId($this->storeManager->getStore()->getId());
+            $customer = $this->_customerRepositoryInterface->getById($customerId);
+            $quote = $this->_quoteModel->loadByCustomer($customer);
+            if (!$quote->getId())
+            {
+                $quote->setCustomer($customer);
+                $quote->setIsActive(1);
+                $quote->setStoreId($this->storeManager->getStore()->getId());
+            }
+
+            $quote->addProduct($product, 1); // TODO
+            $quote->collectTotals()->save();
+
+            return true;
         }
 
-        $quote->addProduct($product, 1); // TODO
-        $quote->collectTotals()->save();
+        return false;
     }
 
     private function processAddToCartCommand($senderId, $productId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
-        $this->addProductToCustomerCart($productId, $chatbotUser->getCustomerId());
+        $response = $this->addProductToCustomerCart($productId, $chatbotUser->getCustomerId());
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("Ok, I just add the product to your cart, to checkout send '%1'", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
-        );
-        array_push($result, $responseMessage);
+        if ($response)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
+            );
+            array_push($result, $responseMessage);
+        }
+        else
+            $result = $this->getErrorMessage();
+
         return $result;
     }
 
