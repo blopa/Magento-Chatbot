@@ -1122,16 +1122,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             // TODO add placeholder
             $options = array(
                 array(
-                    'type' => 'postback',
-                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                    'payload' => $product->getId()
-                ),
-                array(
                     'type' => 'web_url',
                     'title' => __("Visit product's page"),
                     'url' => $productUrl
                 )
             );
+            if (($product->getTypeId() == 'simple') && (!$product->hasCustomOptions())) // TODO remove this to add any type of product
+            {
+
+                $addToCartOption  = array(
+                    'type' => 'postback',
+                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                    'payload' => $product->getId()
+                );
+                array_push($options, $addToCartOption);
+            }
             $element = array(
                 'title' => $productName,
                 'item_url' => $productUrl,
