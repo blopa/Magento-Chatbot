@@ -91,6 +91,12 @@ class Data extends AbstractHelper
         $logger->info(var_export($message, true));
     }
 
+    private function generateRandomHashKey($len = 32)
+    {
+        // max length = 32
+        return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
+    }
+
     protected function getJsonResponse($success)
     {
         header_remove('Content-Type'); // TODO
@@ -136,11 +142,13 @@ class Data extends AbstractHelper
 
         if (!($chatbotAPI->getChatbotapiId()))
         {
-            $chatbotAPI->setEnabled($this->_define::DISABLED);
+            $chatbotAPI->setEnabled($this->_define::ENABLED);
             $chatbotAPI->setChatbotType($message->getChatbotType()); // TODO
             $chatbotAPI->setChatId($message->getSenderId());
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setFallbackQty(0);
+            $hash = $this->generateRandomHashKey();
+            $chatbotAPI->setHashKey($hash);
             $datetime = date('Y-m-d H:i:s');
             $chatbotAPI->setCreatedAt($datetime);
             $chatbotAPI->setUpdatedAt($datetime);
@@ -690,9 +698,10 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                    if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
-                        $result = $this->processLoginCommand();
+                    $chatbotAPI = $this->_chatbotAPI->create();
+                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
+                        $result = $this->processLoginCommand($senderId);
                     else
                     {
                         $text = __("You are already logged.");
@@ -704,8 +713,9 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                    $chatbotAPI = $this->_chatbotAPI->create();
+                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                         $result = $this->processListOrdersCommand();
                     else
                         $result = $this->getNotLoggedMessage();
@@ -715,8 +725,9 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                    $chatbotAPI = $this->_chatbotAPI->create();
+                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                         $result = $this->processReorderCommand();
                     else
                         $result = $this->getNotLoggedMessage();
@@ -741,8 +752,9 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                    $chatbotAPI = $this->_chatbotAPI->create();
+                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                         $result = $this->processTrackOrderCommand();
                     else
                         $result = $this->getNotLoggedMessage();
@@ -778,8 +790,9 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                    if ($chatbotuser->getLogged() == $this->_define::LOGGED)
+                    $chatbotAPI = $this->_chatbotAPI->create();
+                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                         $result = $this->processLogoutCommand();
                     else
                         $result = $this->getNotLoggedMessage();
@@ -789,8 +802,9 @@ class Data extends AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotuser = $this->getChatbotuserBySenderId($senderId);
-                    if ($chatbotuser->getLogged() == $this->_define::NOT_LOGGED)
+                    $chatbotAPI = $this->_chatbotAPI->create();
+                    $chatbotAPI->load($senderId, 'chat_id'); // TODO
+                    if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
                         $result = $this->processRegisterCommand();
                     else
                     {
@@ -1000,12 +1014,16 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function processLoginCommand()
+    private function processLoginCommand($senderId)
     {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+
         $result = array();
+        $loginUrl = $this->getStoreURL('chatbot/customer/login/hash/' . $chatbotAPI->getHashKey());
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the LOGIN command!' // TODO
+            'content' => __("To link your account to this Chatbot, access %1", $loginUrl)
         );
         array_push($result, $responseMessage);
         return $result;

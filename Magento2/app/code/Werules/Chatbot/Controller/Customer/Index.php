@@ -44,7 +44,6 @@ class Index extends \Magento\Framework\App\Action\Action
 
     public function execute() // TODO find a way to use abstract class
     {
-        // Render the page
         $this->_view->loadLayout();
         $this->_view->renderLayout();
     }

@@ -73,25 +73,6 @@ class ChatbotUser extends \Magento\Framework\Model\AbstractModel implements Chat
     }
 
     /**
-     * Get hash_key
-     * @return string
-     */
-    public function getHashKey()
-    {
-        return $this->getData(self::HASH_KEY);
-    }
-
-    /**
-     * Set hash_key
-     * @param string $hash_key
-     * @return \Werules\Chatbot\Api\Data\ChatbotUserInterface
-     */
-    public function setHashKey($hash_key)
-    {
-        return $this->setData(self::HASH_KEY, $hash_key);
-    }
-
-    /**
      * Get quote_id
      * @return string
      */
@@ -165,25 +146,6 @@ class ChatbotUser extends \Magento\Framework\Model\AbstractModel implements Chat
     public function setEnableSupport($enable_support)
     {
         return $this->setData(self::ENABLE_SUPPORT, $enable_support);
-    }
-
-    /**
-     * Get logged
-     * @return string
-     */
-    public function getLogged()
-    {
-        return $this->getData(self::LOGGED);
-    }
-
-    /**
-     * Set logged
-     * @param string $logged
-     * @return \Werules\Chatbot\Api\Data\ChatbotUserInterface
-     */
-    public function setLogged($logged)
-    {
-        return $this->setData(self::LOGGED, $logged);
     }
 
     /**

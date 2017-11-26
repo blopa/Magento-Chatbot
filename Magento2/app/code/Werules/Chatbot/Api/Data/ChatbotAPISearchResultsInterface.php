@@ -32,7 +32,7 @@ interface ChatbotAPISearchResultsInterface extends \Magento\Framework\Api\Search
     public function getItems();
 
     /**
-     * Set enabled list.
+     * Set hash_key list.
      * @param \Werules\Chatbot\Api\Data\ChatbotAPIInterface[] $items
      * @return $this
      */

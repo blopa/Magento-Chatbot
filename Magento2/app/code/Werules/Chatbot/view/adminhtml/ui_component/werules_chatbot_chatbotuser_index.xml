@@ -65,14 +65,6 @@
 				</item>
 			</argument>
 		</column>
-		<column name="hash_key">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">Hash Key</item>
-				</item>
-			</argument>
-		</column>
 		<column name="enable_promotional_messages">
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
@@ -86,14 +78,6 @@
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
 					<item name="label" translate="true" xsi:type="string">Enable Support</item>
-				</item>
-			</argument>
-		</column>
-		<column name="logged">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">Is Logged?</item>
 				</item>
 			</argument>
 		</column>
