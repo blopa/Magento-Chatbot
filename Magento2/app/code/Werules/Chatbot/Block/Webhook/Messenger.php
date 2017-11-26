@@ -55,7 +55,8 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         if (!$payload)
             $payload = $messenger->getQuickReplyPayload();
 
-        return json_encode($payload);
+//        return json_encode($payload);
+        return $payload;
     }
 
     protected function processRequest()

@@ -877,30 +877,34 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function addProductToCustomerCart($productId, $customerId, $qty = 1) // TODO simple products only for now
     {
-        $stockQty = $this->getStockQuantityByProductId($productId);
-        if ($stockQty > 0)
+        $stock = $this->getStockQuantityByProductId($productId);
+        if ($stock->getId())
         {
-            if ($stockQty < $qty)
-                $qty = $stockQty;
-            $productCollection = $this->getProductCollection();
-            $productCollection->addFieldToFilter('entity_id', $productId);
-            $product = $productCollection->getFirstItem();
-
-            if ($product->getId())
+            $stockQty = (int)$stock->getQty();
+            if ($stockQty > 0)
             {
-                $customer = $this->_customerRepositoryInterface->getById($customerId);
-                $quote = $this->_quoteModel->loadByCustomer($customer);
-                if (!$quote->getId())
+                if ($stockQty < $qty)
+                    $qty = $stockQty;
+                $productCollection = $this->getProductCollection();
+                $productCollection->addFieldToFilter('entity_id', $productId);
+                $product = $productCollection->getFirstItem();
+
+                if ($product->getId())
                 {
-                    $quote->setCustomer($customer);
-                    $quote->setIsActive(1);
-                    $quote->setStoreId($this->storeManager->getStore()->getId());
+                    $customer = $this->_customerRepositoryInterface->getById($customerId);
+                    $quote = $this->_quoteModel->loadByCustomer($customer);
+                    if (!$quote->getId())
+                    {
+                        $quote->setCustomer($customer);
+                        $quote->setIsActive(1);
+                        $quote->setStoreId($this->storeManager->getStore()->getId());
+                    }
+
+                    $quote->addProduct($product, $qty); // TODO
+                    $quote->collectTotals()->save();
+
+                    return true;
                 }
-
-                $quote->addProduct($product, $qty); // TODO
-                $quote->collectTotals()->save();
-
-                return true;
             }
         }
 
@@ -1212,13 +1216,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             );
             if (($product->getTypeId() != 'simple') && ($product->hasCustomOptions())) // TODO remove this to add any type of product
             {
+                $payload = array(
+                    'command' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                    'parameter' => $product->getId()
+                );
                 $addToCartOption  = array(
                     'type' => 'postback',
                     'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                    'payload' => array(
-                        'command' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                        'parameter' => $product->getId()
-                    )
+                    'payload' => json_encode($payload)
                 );
                 array_push($options, $addToCartOption);
             }
@@ -1380,13 +1385,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $categoryName = $category->getName();
             if ($categoryName)
             {
+                $payload = array(
+                    'command' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID),
+                    'parameter' => $category->getId()
+                );
                 $quickReply = array(
                     'content_type' => 'text', // TODO messenger pattern
                     'title' => $categoryName,
-                    'payload' => array(
-                        'command' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID),
-                        'parameter' => $category->getId()
-                    )
+                    'payload' => json_encode($payload)
                 );
                 array_push($quickReplies, $quickReply);
             }
@@ -1479,6 +1485,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $orderList = array();
         $quickReplies = array();
 
+        $this->logger(count($ordersCollection));
         foreach ($ordersCollection as $order)
         {
             $orderObject = $this->getOrderDetailsObject($order);
@@ -1486,13 +1493,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if (count($orderList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
             {
                 array_push($orderList, $orderObject);
+                $payload = array(
+                    'command' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
+                    'parameter' => $order->getId()
+                );
                 $reply = array(
                     'content_type' => 'text',
                     'title' => $order->getIncrementId(),
-                    'payload' => array(
-                        'command' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
-                        'parameter' => $order->getId()
-                    )
+                    'payload' => json_encode($payload)
                 );
                 array_push($quickReplies, $reply);
             }
@@ -1553,7 +1561,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 $responseMessage = array(
                     'content_type' => $this->_define::CONTENT_TEXT,
-                    'content' => __("All products from order %1 that are in stock were added to your cart.", $orderId)
+                    'content' => __("All products from order %1 that are in stock were added to your cart.", $order->getIncrementId())
                 );
                 array_push($result, $responseMessage);
             }
