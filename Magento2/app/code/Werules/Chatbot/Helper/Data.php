@@ -44,6 +44,8 @@ class Data extends AbstractHelper
     protected $_commandsList;
     protected $_orderCollectionFactory;
     protected $_productCollection;
+    protected $_cart;
+    protected $_formKey;
     protected $_currentCommand;
 
     public function __construct(
@@ -59,6 +61,8 @@ class Data extends AbstractHelper
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
+        \Magento\Checkout\Model\Cart $cart,
+        \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -75,6 +79,8 @@ class Data extends AbstractHelper
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
         $this->_storeManagerInterface = $storeManagerInterface;
         $this->_orderCollectionFactory = $orderCollectionFactory;
+        $this->_cart = $cart;
+        $this->_formKey = $formKey;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -1248,6 +1254,21 @@ class Data extends AbstractHelper
         );
         array_push($result, $responseMessage);
         return $result;
+    }
+
+    private function addProductToCart($productId)
+    {
+        $productCollection = $this->getProductCollection();
+        $productCollection->addFieldToFilter('entity_id', $productId);
+        $params = array(
+            'form_key' => $this->_formKey->getFormKey(),
+            'product' => $productId,
+            'qty' => 1
+        );
+
+        $product = $productCollection->getFirstItem();
+        $this->_cart->addProduct($product, $params);
+        $this->_cart->save();
     }
 
     private function processAddToCartCommand()
