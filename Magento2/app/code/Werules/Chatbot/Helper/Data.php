@@ -44,8 +44,8 @@ class Data extends AbstractHelper
     protected $_commandsList;
     protected $_orderCollectionFactory;
     protected $_productCollection;
-    protected $_cart;
-    protected $_formKey;
+    protected $_customerRepositoryInterface;
+    protected $_quoteModel;
     protected $_currentCommand;
 
     public function __construct(
@@ -61,8 +61,8 @@ class Data extends AbstractHelper
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
-        \Magento\Checkout\Model\Cart $cart,
-        \Magento\Framework\Data\Form\FormKey $formKey,
+        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
+        \Magento\Quote\Model\Quote $quoteModel,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -79,8 +79,8 @@ class Data extends AbstractHelper
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
         $this->_storeManagerInterface = $storeManagerInterface;
         $this->_orderCollectionFactory = $orderCollectionFactory;
-        $this->_cart = $cart;
-        $this->_formKey = $formKey;
+        $this->_customerRepositoryInterface = $customerRepositoryInterface;
+        $this->_quoteModel = $quoteModel;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -886,7 +886,7 @@ class Data extends AbstractHelper
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processAddToCartCommand();
+                    $result = $this->processAddToCartCommand($senderId);
             }
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
@@ -1256,23 +1256,29 @@ class Data extends AbstractHelper
         return $result;
     }
 
-    private function addProductToCart($productId)
+    private function addProductToCustomerCart($productId, $customerId)
     {
         $productCollection = $this->getProductCollection();
         $productCollection->addFieldToFilter('entity_id', $productId);
-        $params = array(
-            'form_key' => $this->_formKey->getFormKey(),
-            'product' => $productId,
-            'qty' => 1
-        );
-
         $product = $productCollection->getFirstItem();
-        $this->_cart->addProduct($product, $params);
-        $this->_cart->save();
+
+        $customer = $this->_customerRepositoryInterface->getById($customerId);
+        $quote = $this->_quoteModel->loadByCustomer($customer);
+        if (!$quote->getId())
+        {
+            $quote->setCustomer($customer);
+            $quote->setIsActive(1);
+            $quote->setStoreId($this->storeManager->getStore()->getId());
+        }
+
+        $quote->addProduct($product, 1);
+        $quote->collectTotals()->save();
     }
 
-    private function processAddToCartCommand()
+    private function processAddToCartCommand($senderId)
     {
+        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+        $this->addProductToCustomerCart(3, $chatbotUser->getCustomerId());
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
