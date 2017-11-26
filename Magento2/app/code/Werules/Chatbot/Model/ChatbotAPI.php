@@ -349,7 +349,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
         $messageContent = $message->getContent();
         $decodedContent = json_decode($messageContent);
-        $receiptPaylod = array();
+//        $receiptPaylod = array();
 
         foreach ($decodedContent as $decodedObject)
         {
@@ -395,8 +395,9 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                 'address' => $addressDetails,
                 'summary' => $summaryDetails
             );
+
+            $this->_apiModel->sendReceiptTemplate($message->getSenderId(), $receiptPaylod);
         }
-        $this->_apiModel->sendReceiptTemplate($message->getSenderId(), $receiptPaylod);
     }
 
     public function sendImageWithOptionsToMessenger($message)
