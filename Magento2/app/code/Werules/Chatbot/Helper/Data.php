@@ -38,6 +38,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_productCollection;
     protected $_customerRepositoryInterface;
     protected $_quoteModel;
+//    protected $_cartModel;
+//    protected $_cartManagementInterface;
+//    protected $_cartRepositoryInterface;
 
     protected $_define;
     protected $_configPrefix;
@@ -61,6 +64,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
         \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
         \Magento\Quote\Model\Quote $quoteModel,
+//        \Magento\Checkout\Model\Cart $cartModel,
+//        \Magento\Quote\Api\CartManagementInterface $cartManagementInterface,
+//        \Magento\Quote\Api\CartRepositoryInterface $cartRepositoryInterface,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -78,6 +84,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_orderCollectionFactory = $orderCollectionFactory;
         $this->_customerRepositoryInterface = $customerRepositoryInterface;
         $this->_quoteModel = $quoteModel;
+//        $this->_cartModel = $cartModel;
+//        $this->_cartManagementInterface = $cartManagementInterface;
+//        $this->_cartRepositoryInterface = $cartRepositoryInterface;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -642,7 +651,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processClearCartCommand();
+                    $result = $this->processClearCartCommand($senderId);
             }
             else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
@@ -1408,8 +1417,28 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function processClearCartCommand()
+    private function clearCustomerCart($customerId)
     {
+        $customer = $this->_customerRepositoryInterface->getById($customerId);
+
+        $quote = $this->_quoteModel->loadByCustomer($customer);
+        if (!$quote->getId())
+        {
+            $quote->setCustomer($customer);
+            $quote->setIsActive(1);
+            $quote->setStoreId($this->storeManager->getStore()->getId());
+        }
+
+        $quote->removeAllItems();
+        $quote->save();
+
+        return true;
+    }
+
+    private function processClearCartCommand($senderId)
+    {
+        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+        $response = $this->clearCustomerCart($chatbotUser->getCustomerId());
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
