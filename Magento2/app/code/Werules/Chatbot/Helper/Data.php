@@ -397,7 +397,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    public function listOrderFromOrderId($messageContent, $senderId)
+    private function listOrderFromOrderId($messageContent, $senderId)
     {
         $result = array();
         $orderList = array();
@@ -430,7 +430,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    public function listProductsFromSearch($messageContent)
+    private function listProductsFromSearch($messageContent)
     {
         $result = array();
         $productList = array();
@@ -439,7 +439,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach ($productCollection as $product)
         {
             $productObject = $this->getProductDetailsObject($product);
-            if (count($productList) < 10) // TODO
+            if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
                 array_push($productList, $productObject);
         }
 
@@ -480,7 +480,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach ($productCollection as $product)
         {
             $productObject = $this->getProductDetailsObject($product);
-            if (count($productList) < 10) // TODO
+            if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
                 array_push($productList, $productObject);
         }
 
@@ -825,7 +825,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
 
-    private function addProductToCustomerCart($productId, $customerId) // TODO simple products only for now
+    private function addProductToCustomerCart($productId, $customerId, $qty = 1) // TODO simple products only for now
     {
         $productCollection = $this->getProductCollection();
         $productCollection->addFieldToFilter('entity_id', $productId);
@@ -842,7 +842,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $quote->setStoreId($this->storeManager->getStore()->getId());
             }
 
-            $quote->addProduct($product, 1); // TODO
+            $quote->addProduct($product, $qty); // TODO
             $quote->collectTotals()->save();
 
             return true;
@@ -926,7 +926,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($this->_commandsList as $key => $command)
         {
-            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this
+            if (strtolower($messageContent) == strtolower($command['command_code'])) // TODO add configuration for this?
             {
                 $this->_currentCommand = $key;
                 return $key;
@@ -1020,7 +1020,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->getTextMessageArray($text);
     }
 
-    protected function getJsonResponse($success)
+    private function getJsonResponse($success)
     {
         header_remove('Content-Type'); // TODO
         header('Content-Type: application/json'); // TODO
@@ -1057,7 +1057,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         );
     }
 
-    public function getOrdersFromCustomerId($customerId)
+    private function getOrdersFromCustomerId($customerId)
     {
         $orders = $this->_orderCollectionFactory->create()
             ->addFieldToSelect('*')
@@ -1076,12 +1076,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $collection;
     }
 
-    public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
+    private function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
         return $this->_categoryHelper->getStoreCategories($sorted , $asCollection, $toLoad);
     }
 
-    public function getProductCollectionByName($searchString)
+    private function getProductCollectionByName($searchString)
     {
         $collection = $this->getProductCollection();
         $collection->addAttributeToFilter(array(
@@ -1092,7 +1092,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $collection;
     }
 
-    public function getCategoryById($categoryId)
+    private function getCategoryById($categoryId)
     {
         $category = $this->_categoryFactory->create();
         $category->load($categoryId);
@@ -1100,12 +1100,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $category;
     }
 
-    public function getCategoryByName($name)
+    private function getCategoryByName($name)
     {
         return $this->getCategoriesByName($name)->getFirstItem();
     }
 
-    public function getCategoriesByName($name)
+    private function getCategoriesByName($name)
     {
         $categoryCollection = $this->_categoryCollectionFactory->create();
         $categoryCollection = $categoryCollection->addAttributeToFilter('name', $name);
@@ -1113,7 +1113,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $categoryCollection;
     }
 
-    public function getProductsFromCategoryId($categoryId)
+    private function getProductsFromCategoryId($categoryId)
     {
         $productCollection = $this->getCategoryById($categoryId)->getProductCollection();
         $productCollection->addAttributeToSelect('*');
@@ -1199,7 +1199,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function getOrderDetailsObject($order) // TODO add link to product name
+    private function getOrderDetailsObject($order)
     {
         $detailedOrderObject = array();
         if ($order->getId())
@@ -1282,7 +1282,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $chatbotAPI;
     }
 
-    public function getChatbotuserBySenderId($senderId)
+    private function getChatbotuserBySenderId($senderId)
     {
         $chatbotAPI = $this->getChatbotAPIModel($senderId);
         $chatbotUser = $this->_chatbotUser->create();
@@ -1407,7 +1407,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $orderObject = $this->getOrderDetailsObject($order);
 //            $this->logger(json_encode($productObject));
-            if (count($orderList) < 10) // TODO
+            if (count($orderList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
                 array_push($orderList, $orderObject);
         }
 
