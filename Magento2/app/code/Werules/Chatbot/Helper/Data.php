@@ -1419,28 +1419,36 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function clearCustomerCart($customerId)
     {
+        // TODO find a way to update mini cart
         $customer = $this->_customerRepositoryInterface->getById($customerId);
-
-        $quote = $this->_quoteModel->loadByCustomer($customer);
-        if (!$quote->getId())
+        if ($customer->getId())
         {
-            $quote->setCustomer($customer);
-            $quote->setIsActive(1);
-            $quote->setStoreId($this->storeManager->getStore()->getId());
+            $quote = $this->_quoteModel->loadByCustomer($customer);
+            if (!$quote->getId())
+            {
+                $quote->setCustomer($customer);
+                $quote->setIsActive(1);
+                $quote->setStoreId($this->storeManager->getStore()->getId());
+            }
+
+//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
+//            foreach ($allItems as $item)
+//            {
+//                $quote->deleteItem($item); // deletes the item
+//                $quote->save();
+//            }
+//            return true;
+
+            $quote->removeAllItems();
+//            $quote->setIsActive(false);
+//            $quote->clearInstance();
+            $quote->setItemsCount(0);
+            $quote->save();
+
+            return true;
         }
 
-//        $allItems = $quote->getItemsCollection(); // returns all the items in quote
-//        foreach ($allItems as $item)
-//        {
-//            $quote->deleteItem($item); // deletes the item
-//            $quote->save();
-//        }
-//        return true;
-
-        $quote->removeAllItems();
-        $quote->save();
-
-        return true;
+        return false;
     }
 
     private function processClearCartCommand($senderId)
@@ -1448,11 +1456,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $response = $this->clearCustomerCart($chatbotUser->getCustomerId());
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The CLEAR_CART command is still under development' // TODO
-        );
-        array_push($result, $responseMessage);
+        if ($response)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("Cart cleared.")
+            );
+            array_push($result, $responseMessage);
+        }
+        else
+            $result = $this->getErrorMessage();
+
         return $result;
     }
 
