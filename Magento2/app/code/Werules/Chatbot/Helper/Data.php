@@ -1606,6 +1606,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $element = array();
         if ($product->getId())
         {
+            if ($product->getShortDescription())
+                $description = $this->excerpt($product->getShortDescription(), 60);
+            else
+                $description = '';
+
             if ($product->getImage())
                 $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
             else
@@ -1615,22 +1620,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $element = array(
                 'title' => $product->getName(),
                 'image_url' => $productImage,
-                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+                'subtitle' => $description,
                 'default_action' => array(
                     'type' => 'web_url',
-                    'url' => $productUrl,
-                    'messenger_extensions' => false,
-                    'webview_height_ratio' => 'tall',
-                    'fallback_url' => $productUrl,
+                    'url' => $productUrl
                 ),
                 'buttons' => array(
                     array(
                         'title' => __("Visit product's page"),
                         'type' => 'web_url',
-                        'url' => $productUrl,
-                        'messenger_extensions' => false,
-                        'webview_height_ratio' => 'tall',
-                        'fallback_url' => $productUrl
+                        'url' => $productUrl
                     )
                 )
             );

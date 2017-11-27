@@ -154,10 +154,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 //                    array(
 //                        'title' => 'View',
 //                        'type' => 'web_url',
-//                        'url' => 'https://mysite.com/',
-//                        'messenger_extensions' => true,
-//                        'webview_height_ratio' => 'tall',
-//                        'fallback_url' => 'https://mysite.com/',
+//                        'url' => 'https://mysite.com/'
 //                    )
 //                )
 //            ),
@@ -166,10 +163,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 //                'subtitle' => 'See all our colors',
 //                'default_action' => array(
 //                    'type' => 'web_url',
-//                    'url' => 'https://mysite.com/',
-//                    'messenger_extensions' => true,
-//                    'webview_height_ratio' => 'tall',
-//                    'fallback_url' => 'https://mysite.com/'
+//                    'url' => 'https://mysite.com/'
 //                )
 //            ),
 //            array(
@@ -178,19 +172,13 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 //                'subtitle' => '100% Cotton, 200% Comfortable',
 //                'default_action' => array(
 //                    'type' => 'web_url',
-//                    'url' => 'https://mysite.com/',
-//                    'messenger_extensions' => true,
-//                    'webview_height_ratio' => 'tall',
-//                    'fallback_url' => 'https://mysite.com/',
+//                    'url' => 'https://mysite.com/'
 //                ),
 //                'buttons' => array(
 //                    array(
 //                        'title' => 'Shop Now',
 //                        'type' => 'web_url',
-//                        'url' => 'https://mysite.com/',
-//                        'messenger_extensions' => true,
-//                        'webview_height_ratio' => 'tall',
-//                        'fallback_url' => 'https://mysite.com/'
+//                        'url' => 'https://mysite.com/'
 //                    )
 //                )
 //            )

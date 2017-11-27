@@ -356,10 +356,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             $itemDefaultAction = $item->default_action;
             $defaultAction = array(
                 'type' => $itemDefaultAction->type,
-                'url' => $itemDefaultAction->url,
-                'messenger_extensions' => $itemDefaultAction->messenger_extensions,
-                'webview_height_ratio' => $itemDefaultAction->webview_height_ratio,
-                'fallback_url' => $itemDefaultAction->fallback_url,
+                'url' => $itemDefaultAction->url
             );
 
             $itemListButtons = $item->buttons;
@@ -369,10 +366,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                 $auxArr = array(
                     'title' => $listButtom->title,
                     'type' => $listButtom->type,
-                    'url' => $listButtom->url,
-                    'messenger_extensions' => $listButtom->messenger_extensions,
-                    'webview_height_ratio' => $listButtom->webview_height_ratio,
-                    'fallback_url' => $listButtom->fallback_url
+                    'url' => $listButtom->url
                 );
 
                 array_push($listButtons, $auxArr);
@@ -399,10 +393,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             array_push($options, $btn);
         }
 
-        $this->_helper->logger($elements);
-        $this->_helper->logger($options);
         $result = $this->_apiModel->sendListTemplate($message->getSenderId(), $elements, $options);
-        $this->_helper->logger($result);
+
         return $result;
     }
 
