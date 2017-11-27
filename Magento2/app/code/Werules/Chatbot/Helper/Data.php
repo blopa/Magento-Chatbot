@@ -207,7 +207,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
             $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
-            $result = $chatbotAPI->sendReceipt($outgoingMessage);
+            $result = $chatbotAPI->sendReceiptList($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::LIST_WITH_IMAGE)
+            $result = $chatbotAPI->sendList($outgoingMessage);
 
         if ($result)
         {
@@ -461,9 +463,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $productObject = $this->getProductDetailsObject($product);
+            $imageWithOptionsProdObj = $this->getImageWithOptionsProductObject($product);
             if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
-                array_push($productList, $productObject);
+                array_push($productList, $imageWithOptionsProdObj);
         }
 
         if (count($productList) > 0)
@@ -492,7 +494,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromCategory($messageContent, \stdClass $messagePayload = null)
     {
         $result = array();
-        $productList = array();
+        $productCarousel = array();
         if ($messagePayload)
             $category = $this->getCategoryById($messagePayload->parameter);
         else
@@ -502,15 +504,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $productObject = $this->getProductDetailsObject($product);
-            if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
-                array_push($productList, $productObject);
+            $imageWithOptionsProdObj = $this->getImageWithOptionsProductObject($product);
+            if (count($productCarousel) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
+                array_push($productCarousel, $imageWithOptionsProdObj);
         }
 
-        if (count($productList) > 0)
+        if (count($productCarousel) > 0)
         {
             $contentType = $this->_define::IMAGE_WITH_OPTIONS;
-            $content = json_encode($productList);
+            $content = json_encode($productCarousel);
         }
         else
         {
@@ -1169,6 +1171,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $productCollection;
     }
 
+    private function getImageWithOptionsProductObject($product)
+    {
+        return $this->getProductDetailsObject($product);
+    }
+
     private function getProductDetailsObject($product)
     {
         $element = array();
@@ -1581,49 +1588,88 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $quote;
     }
 
-    private function getListDetailsObject($customerId)
-    {
-
-    }
-
     private function getCartItemsByCustomerId($customerId)
     {
         $quote = $this->getQuoteByCustomerId($customerId);
         if ($quote->getId())
         {
             $allItems = $quote->getItemsCollection(); // returns all the items in quote
-            $response = $this->getListDetailsObject($customerId);
-            return true;
+            if (count($allItems) > 0)
+                return $allItems;
         }
 
-        return false;
+        return array();
+    }
+
+    private function getListWithImageProductObject($product)
+    {
+        $element = array();
+        if ($product->getId())
+        {
+            if ($product->getImage())
+                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+            else
+                $productImage = $this->getPlaceholderImage();
+            $productUrl = $product->getProductUrl();
+
+            $element = array(
+                'title' => $product->getName(),
+                'image_url' => $productImage,
+                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+                'default_action' => array(
+                    'type' => 'web_url',
+                    'url' => $productUrl,
+                    'messenger_extensions' => false,
+                    'webview_height_ratio' => 'tall',
+                    'fallback_url' => $productUrl,
+                ),
+                'buttons' => array(
+                    array(
+                        'title' => __("Visit product's page"),
+                        'type' => 'web_url',
+                        'url' => $productUrl,
+                        'messenger_extensions' => false,
+                        'webview_height_ratio' => 'tall',
+                        'fallback_url' => $productUrl
+                    )
+                )
+            );
+        }
+
+        return $element;
     }
 
     private function processCheckoutCommand($senderId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
-        $response = false;
+        $result = array();
+        $listObjectList = array();
         foreach ($orderItems as $orderItem)
         {
-            $productId = $orderItem->getProductId();
-            $qty = $orderItem->getQtyOrdered();
-            $response = $this->addProductToCustomerCart($productId, $chatbotUser->getCustomerId(), $qty);
-
-            if (!$response)
-                break;
+            $listObject = $this->getListWithImageProductObject($orderItem->getProduct());
+            if ($listObject)
+                array_push($listObjectList, $listObject);
         }
+        $buttons = array(
+            array(
+                'type' => 'web_url',
+                'title' => __("Checkout"),
+                'url' => $this->getStoreURL('checkout/cart')
+            )
+        );
 
-        if ($response)
+        if ($listObjectList)
         {
+            $contentObject = new \stdClass();
+            $contentObject->list = $listObjectList;
+            $contentObject->buttons = $buttons;
             $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("All products from order %1 that are in stock were added to your cart.", 'todo_here')
+                'content_type' => $this->_define::LIST_WITH_IMAGE,
+                'content' => json_encode($contentObject)
             );
             array_push($result, $responseMessage);
         }
-        else
-            $result = $this->getErrorMessage();
 
         return $result;
     }

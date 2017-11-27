@@ -145,6 +145,65 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
     }
 
 //        https://developers.facebook.com/docs/messenger-platform/send-messages/template/list#example_request
+//        $elements = array(
+//            array(
+//                'title' => 'Classic T-Shirt Collection',
+//                'subtitle' => 'See all our colors 1',
+//                'image_url' => 'https://mysite.com/image/toy_1.jpg',
+//                'buttons' => array(
+//                    array(
+//                        'title' => 'View',
+//                        'type' => 'web_url',
+//                        'url' => 'https://mysite.com/',
+//                        'messenger_extensions' => true,
+//                        'webview_height_ratio' => 'tall',
+//                        'fallback_url' => 'https://mysite.com/',
+//                    )
+//                )
+//            ),
+//            array(
+//                'title' => 'Classic White T-Shirt',
+//                'subtitle' => 'See all our colors',
+//                'default_action' => array(
+//                    'type' => 'web_url',
+//                    'url' => 'https://mysite.com/',
+//                    'messenger_extensions' => true,
+//                    'webview_height_ratio' => 'tall',
+//                    'fallback_url' => 'https://mysite.com/'
+//                )
+//            ),
+//            array(
+//                'title' => 'Classic Blue T-Shirt',
+//                'image_url' => 'https://mysite.com/image/toy_1.jpg',
+//                'subtitle' => '100% Cotton, 200% Comfortable',
+//                'default_action' => array(
+//                    'type' => 'web_url',
+//                    'url' => 'https://mysite.com/',
+//                    'messenger_extensions' => true,
+//                    'webview_height_ratio' => 'tall',
+//                    'fallback_url' => 'https://mysite.com/',
+//                ),
+//                'buttons' => array(
+//                    array(
+//                        'title' => 'Shop Now',
+//                        'type' => 'web_url',
+//                        'url' => 'https://mysite.com/',
+//                        'messenger_extensions' => true,
+//                        'webview_height_ratio' => 'tall',
+//                        'fallback_url' => 'https://mysite.com/'
+//                    )
+//                )
+//            )
+//        );
+//        $buttons = array(
+//            array(
+//                'title' => 'View More',
+//                'type' => 'postback',
+//                'payload' => 'payload',
+//            )
+
+//        );
+
     public function sendListTemplate($chat_id, array $elements, array $buttons = array()) {
         return $this->endpoint("me/messages", array(
                 'recipient' => array(

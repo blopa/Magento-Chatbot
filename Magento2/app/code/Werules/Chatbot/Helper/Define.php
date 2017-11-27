@@ -65,6 +65,7 @@ class Define
     const IMAGE_WITH_TEXT = 2;
     const IMAGE_WITH_OPTIONS = 3;
     const RECEIPT_LAYOUT = 4;
+    const LIST_WITH_IMAGE = 5;
 
     // conversation states
     const CONVERSATION_STARTED = 0;
