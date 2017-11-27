@@ -697,7 +697,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processCheckoutCommand();
+                    $result = $this->processCheckoutCommand($senderId);
             }
             else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
             {
@@ -891,15 +891,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
                 if ($product->getId())
                 {
-                    $customer = $this->_customerRepositoryInterface->getById($customerId);
-                    $quote = $this->_quoteModel->loadByCustomer($customer);
-                    if (!$quote->getId())
-                    {
-                        $quote->setCustomer($customer);
-                        $quote->setIsActive(1);
-                        $quote->setStoreId($this->storeManager->getStore()->getId());
-                    }
-
+                    $quote = $this->getQuoteByCustomerId($customerId);
                     $quote->addProduct($product, $qty); // TODO
                     $quote->collectTotals()->save();
 
@@ -914,28 +906,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function clearCustomerCart($customerId)
     {
         // TODO find a way to update mini cart
-        $customer = $this->_customerRepositoryInterface->getById($customerId);
-        if ($customer->getId())
+        $quote = $this->getQuoteByCustomerId($customerId);
+        if ($quote->getId())
         {
-            $quote = $this->_quoteModel->loadByCustomer($customer);
-            if (!$quote->getId())
-            {
-                $quote->setCustomer($customer);
-                $quote->setIsActive(1);
-                $quote->setStoreId($this->storeManager->getStore()->getId());
-            }
-
-//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
-//            foreach ($allItems as $item)
-//            {
-//                $quote->deleteItem($item); // deletes the item
-//                $quote->save();
-//            }
-//            return true;
-
             $quote->removeAllItems();
-//            $quote->setIsActive(false);
-//            $quote->clearInstance();
             $quote->setItemsCount(0);
             $quote->save();
 
@@ -1583,7 +1557,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
+                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'.", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
             );
             array_push($result, $responseMessage);
         }
@@ -1593,14 +1567,64 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function processCheckoutCommand()
+    private function getQuoteByCustomerId($customerId)
     {
-        $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The CHECKOUT command is still under development' // TODO
-        );
-        array_push($result, $responseMessage);
+        $customer = $this->_customerRepositoryInterface->getById($customerId);
+        $quote = $this->_quoteModel->loadByCustomer($customer);
+        if (!$quote->getId())
+        {
+            $quote->setCustomer($customer);
+            $quote->setIsActive(1);
+            $quote->setStoreId($this->storeManager->getStore()->getId());
+        }
+
+        return $quote;
+    }
+
+    private function getListDetailsObject($customerId)
+    {
+
+    }
+
+    private function getCartItemsByCustomerId($customerId)
+    {
+        $quote = $this->getQuoteByCustomerId($customerId);
+        if ($quote->getId())
+        {
+            $allItems = $quote->getItemsCollection(); // returns all the items in quote
+            $response = $this->getListDetailsObject($customerId);
+            return true;
+        }
+
+        return false;
+    }
+
+    private function processCheckoutCommand($senderId)
+    {
+        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
+        $response = false;
+        foreach ($orderItems as $orderItem)
+        {
+            $productId = $orderItem->getProductId();
+            $qty = $orderItem->getQtyOrdered();
+            $response = $this->addProductToCustomerCart($productId, $chatbotUser->getCustomerId(), $qty);
+
+            if (!$response)
+                break;
+        }
+
+        if ($response)
+        {
+            $responseMessage = array(
+                'content_type' => $this->_define::CONTENT_TEXT,
+                'content' => __("All products from order %1 that are in stock were added to your cart.", 'todo_here')
+            );
+            array_push($result, $responseMessage);
+        }
+        else
+            $result = $this->getErrorMessage();
+
         return $result;
     }
 

@@ -102,7 +102,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
         );
     }
 
-    // send message
+//        sendGenericTemplate
 //        $button = array(
 //            array(
 //                    'type' => 'web_url',
@@ -137,6 +137,27 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
                         'payload' => array(
                             'template_type' => 'generic',
                             'elements' => $elements
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+//        https://developers.facebook.com/docs/messenger-platform/send-messages/template/list#example_request
+    public function sendListTemplate($chat_id, array $elements, array $buttons = array()) {
+        return $this->endpoint("me/messages", array(
+                'recipient' => array(
+                    'id' => $chat_id
+                ),
+                'message' => array(
+                    'attachment' => array(
+                        'type' => 'template',
+                        'payload' => array(
+                            'template_type' => 'list',
+                            'top_element_style' => 'compact',
+                            'elements' => $elements,
+                            'buttons' => $buttons
                         )
                     )
                 )
