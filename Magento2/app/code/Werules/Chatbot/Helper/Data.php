@@ -209,7 +209,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
             $result = $chatbotAPI->sendReceiptList($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::LIST_WITH_IMAGE)
-            $result = $chatbotAPI->sendList($outgoingMessage);
+            $result = $chatbotAPI->sendGenericList($outgoingMessage);
 
         if ($result)
         {
@@ -1674,7 +1674,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
         $result = array();
         $listObjectList = array();
-        if (count($orderItems) > 0)
+        if (count($orderItems) > 1)
         {
             foreach ($orderItems as $orderItem)
             {
@@ -1714,7 +1714,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             );
             array_push($result, $responseMessage);
         }
-        else
+        else // if (count($orderItems) <= 0)
         {
             $text = __("Your cart is empty.");
             $result = $this->getTextMessageArray($text);

@@ -339,7 +339,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $result;
     }
 
-    public function sendListToMessenger($message)
+    public function sendGenericListToMessenger($message)
     {
         $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
         $this->_apiModel = $this->initMessengerAPI($apiToken);
@@ -398,12 +398,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $result;
     }
 
-    public function sendList($message)
+    public function sendGenericList($message)
     {
         $result = array();
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $result = $this->sendListToMessenger($message);
+            $result = $this->sendGenericListToMessenger($message);
         }
 
         return $result;
