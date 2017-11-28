@@ -1704,7 +1704,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         else if (count($orderItems) == 1)
         {
-            $orderItem = reset($orderItems);
+            $orderItem = $orderItems->getFirstItem();
             $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
             array_push($listObjectList, $imageWithOptionsProdObj);
 
