@@ -207,7 +207,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
             $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
-            $result = $chatbotAPI->sendReceipt($outgoingMessage);
+            $result = $chatbotAPI->sendReceiptList($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::LIST_WITH_IMAGE)
+            $result = $chatbotAPI->sendGenericList($outgoingMessage);
 
         if ($result)
         {
@@ -420,7 +422,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $ordersCollection->addFieldToFilter('increment_id', $messageContent);
         if (count($ordersCollection) > 0)
         {
-            $orderObject = $this->getOrderDetailsObject($ordersCollection->getFirstItem());
+            $orderObject = $this->getImageWithOptionsOrderObject($ordersCollection->getFirstItem());
             array_push($orderList, $orderObject);
         }
 
@@ -461,9 +463,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $productObject = $this->getProductDetailsObject($product);
+            $imageWithOptionsProdObj = $this->getImageWithOptionsProductObject($product);
             if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
-                array_push($productList, $productObject);
+                array_push($productList, $imageWithOptionsProdObj);
         }
 
         if (count($productList) > 0)
@@ -492,7 +494,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromCategory($messageContent, \stdClass $messagePayload = null)
     {
         $result = array();
-        $productList = array();
+        $productCarousel = array();
         if ($messagePayload)
             $category = $this->getCategoryById($messagePayload->parameter);
         else
@@ -502,15 +504,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($productCollection as $product)
         {
-            $productObject = $this->getProductDetailsObject($product);
-            if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
-                array_push($productList, $productObject);
+            $imageWithOptionsProdObj = $this->getImageWithOptionsProductObject($product);
+            if (count($productCarousel) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
+                array_push($productCarousel, $imageWithOptionsProdObj);
         }
 
-        if (count($productList) > 0)
+        if (count($productCarousel) > 0)
         {
             $contentType = $this->_define::IMAGE_WITH_OPTIONS;
-            $content = json_encode($productList);
+            $content = json_encode($productCarousel);
         }
         else
         {
@@ -697,7 +699,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
                 if (!$setStateOnly)
-                    $result = $this->processCheckoutCommand();
+                    $result = $this->processCheckoutCommand($senderId);
             }
             else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
             {
@@ -891,15 +893,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
                 if ($product->getId())
                 {
-                    $customer = $this->_customerRepositoryInterface->getById($customerId);
-                    $quote = $this->_quoteModel->loadByCustomer($customer);
-                    if (!$quote->getId())
-                    {
-                        $quote->setCustomer($customer);
-                        $quote->setIsActive(1);
-                        $quote->setStoreId($this->storeManager->getStore()->getId());
-                    }
-
+                    $quote = $this->getQuoteByCustomerId($customerId);
                     $quote->addProduct($product, $qty); // TODO
                     $quote->collectTotals()->save();
 
@@ -914,28 +908,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function clearCustomerCart($customerId)
     {
         // TODO find a way to update mini cart
-        $customer = $this->_customerRepositoryInterface->getById($customerId);
-        if ($customer->getId())
+        $quote = $this->getQuoteByCustomerId($customerId);
+        if ($quote->getId())
         {
-            $quote = $this->_quoteModel->loadByCustomer($customer);
-            if (!$quote->getId())
-            {
-                $quote->setCustomer($customer);
-                $quote->setIsActive(1);
-                $quote->setStoreId($this->storeManager->getStore()->getId());
-            }
-
-//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
-//            foreach ($allItems as $item)
-//            {
-//                $quote->deleteItem($item); // deletes the item
-//                $quote->save();
-//            }
-//            return true;
-
             $quote->removeAllItems();
-//            $quote->setIsActive(false);
-//            $quote->clearInstance();
             $quote->setItemsCount(0);
             $quote->save();
 
@@ -1195,7 +1171,86 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $productCollection;
     }
 
-    private function getProductDetailsObject($product)
+    private function getQuoteByCustomerId($customerId)
+    {
+        $customer = $this->_customerRepositoryInterface->getById($customerId);
+        $quote = $this->_quoteModel->loadByCustomer($customer);
+        if (!$quote->getId())
+        {
+            $quote->setCustomer($customer);
+            $quote->setIsActive(1);
+            $quote->setStoreId($this->storeManager->getStore()->getId());
+        }
+
+        return $quote;
+    }
+
+    private function getCartItemsByCustomerId($customerId)
+    {
+        $quote = $this->getQuoteByCustomerId($customerId);
+        if ($quote->getId())
+        {
+            $allItems = $quote->getItemsCollection(); // returns all the items in quote
+            if (count($allItems) > 0)
+                return $allItems;
+        }
+
+        return array();
+    }
+
+    private function getListWithImageProductObject($product)
+    {
+        return $this->getListProductDetailsObject($product);
+    }
+
+    private function getListProductDetailsObject($product) // return a single object to be used in a bundled list
+    {
+        $element = array();
+        if ($product->getId())
+        {
+            if ($product->getShortDescription())
+                $description = $this->excerpt($product->getShortDescription(), 60);
+            else
+                $description = '';
+
+            if ($product->getImage())
+                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+            else
+                $productImage = $this->getPlaceholderImage();
+            $productUrl = $product->getProductUrl();
+
+            $element = array(
+                'title' => $product->getName(),
+                'image_url' => $productImage,
+                'subtitle' => $description,
+                'default_action' => array(
+                    'type' => 'web_url',
+                    'url' => $productUrl
+                ),
+                'buttons' => array(
+                    array(
+                        'title' => __("Visit product's page"),
+                        'type' => 'web_url',
+                        'url' => $productUrl
+                    )
+                )
+            );
+        }
+
+        return $element;
+    }
+
+    private function getImageWithOptionsProductObject($product)
+    {
+        return $this->getProductDetailsObject($product);
+    }
+
+    private function getUnitWithImageProductObject($product)
+    {
+        return $this->getProductDetailsObject($product, true);
+    }
+
+    private function getProductDetailsObject($product, $checkout = false) // used to get single object
     {
         $element = array();
         if ($product->getId())
@@ -1214,19 +1269,33 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     'url' => $productUrl
                 )
             );
-            if (($product->getTypeId() != 'simple') && ($product->hasCustomOptions())) // TODO remove this to add any type of product
+
+            if ($checkout)
             {
-                $payload = array(
-                    'command' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                    'parameter' => $product->getId()
+                $checkoutOption = array(
+                    'type' => 'web_url',
+                    'title' => __("Checkout"),
+                    'url' => $this->getStoreURL('checkout/cart')
                 );
-                $addToCartOption  = array(
-                    'type' => 'postback',
-                    'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
-                    'payload' => json_encode($payload)
-                );
-                array_push($options, $addToCartOption);
+                array_push($options, $checkoutOption);
             }
+            else
+            {
+                if (($product->getTypeId() != 'simple') && ($product->hasCustomOptions())) // TODO remove this to add any type of product
+                {
+                    $payload = array(
+                        'command' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                        'parameter' => $product->getId()
+                    );
+                    $addToCartOption  = array(
+                        'type' => 'postback',
+                        'title' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                        'payload' => json_encode($payload)
+                    );
+                    array_push($options, $addToCartOption);
+                }
+            }
+
             $element = array(
                 'title' => $productName,
                 'item_url' => $productUrl,
@@ -1240,43 +1309,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $element;
     }
 
-    private function getCommandNLPEntityData($commandCode)
+    private function getImageWithOptionsOrderObject($order)
     {
-        $result = array();
-        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
-        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
-
-        foreach ($NLPEntitiesList as $key => $entity)
-        {
-            if (isset($entity['command_id']))
-            {
-                if ($entity['command_id'] == $commandCode)
-                {
-                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
-                    $extraText = '';
-                    if (isset($entity['enable_reply']))
-                    {
-                        if ($entity['enable_reply'] == $this->_define::ENABLED)
-                        {
-                            if (isset($entity['confidence']))
-                                $confidence = (float)$entity['confidence'] / 100;
-                            if (isset($entity['reply_text']))
-                                $extraText = $entity['reply_text'];
-
-                            $result = array(
-                                'confidence' => $confidence,
-                                'reply_text' => $extraText
-                            );
-                        }
-                    }
-                }
-            }
-        }
-
-        return $result;
+        return $this->getOrderDetailsObject($order);
     }
 
-    private function getOrderDetailsObject($order)
+    private function getOrderDetailsObject($order) // used to get single order
     {
         $detailedOrderObject = array();
         if ($order->getId())
@@ -1346,6 +1384,43 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         return $detailedOrderObject;
     }
+
+    private function getCommandNLPEntityData($commandCode)
+    {
+        $result = array();
+        $serializedNLPEntities = $this->getConfigValue($this->_configPrefix . '/general/nlp_replies');
+        $NLPEntitiesList = $this->_serializer->unserialize($serializedNLPEntities);
+
+        foreach ($NLPEntitiesList as $key => $entity)
+        {
+            if (isset($entity['command_id']))
+            {
+                if ($entity['command_id'] == $commandCode)
+                {
+                    $confidence = $this->_define::DEFAULT_MIN_CONFIDENCE;
+                    $extraText = '';
+                    if (isset($entity['enable_reply']))
+                    {
+                        if ($entity['enable_reply'] == $this->_define::ENABLED)
+                        {
+                            if (isset($entity['confidence']))
+                                $confidence = (float)$entity['confidence'] / 100;
+                            if (isset($entity['reply_text']))
+                                $extraText = $entity['reply_text'];
+
+                            $result = array(
+                                'confidence' => $confidence,
+                                'reply_text' => $extraText
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
     private function getChatbotAPIModel($senderId)
     {
         if (isset($this->_chatbotAPIModel))
@@ -1487,7 +1562,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($ordersCollection as $order)
         {
-            $orderObject = $this->getOrderDetailsObject($order);
+            $orderObject = $this->getImageWithOptionsOrderObject($order);
 //            $this->logger(json_encode($productObject));
             if (count($orderList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
             {
@@ -1583,7 +1658,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
+                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'.", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
             );
             array_push($result, $responseMessage);
         }
@@ -1593,14 +1668,58 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function processCheckoutCommand()
+    private function processCheckoutCommand($senderId)
     {
+        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
         $result = array();
-        $responseMessage = array(
-            'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The REORDER command is still under development' // TODO
-        );
-        array_push($result, $responseMessage);
+        $listObjectList = array();
+        if (count($orderItems) > 1)
+        {
+            foreach ($orderItems as $orderItem)
+            {
+                $listObject = $this->getListWithImageProductObject($orderItem->getProduct());
+                if ($listObject)
+                    array_push($listObjectList, $listObject);
+            }
+            $buttons = array(
+                array(
+                    'type' => 'web_url',
+                    'title' => __("Checkout"),
+                    'url' => $this->getStoreURL('checkout/cart')
+                )
+            );
+
+            if ($listObjectList)
+            {
+                $contentObject = new \stdClass();
+                $contentObject->list = $listObjectList;
+                $contentObject->buttons = $buttons;
+                $responseMessage = array(
+                    'content_type' => $this->_define::LIST_WITH_IMAGE,
+                    'content' => json_encode($contentObject)
+                );
+                array_push($result, $responseMessage);
+            }
+        }
+        else if (count($orderItems) == 1)
+        {
+            $orderItem = reset($orderItems);
+            $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
+            array_push($listObjectList, $imageWithOptionsProdObj);
+
+            $responseMessage = array(
+                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
+                'content' => json_encode($listObjectList)
+            );
+            array_push($result, $responseMessage);
+        }
+        else // if (count($orderItems) <= 0)
+        {
+            $text = __("Your cart is empty.");
+            $result = $this->getTextMessageArray($text);
+        }
+
         return $result;
     }
 

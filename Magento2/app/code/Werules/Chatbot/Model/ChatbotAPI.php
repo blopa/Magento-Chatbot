@@ -269,49 +269,53 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 //        return 'hello world';//array('status' => 'success');
 //    }
 
-//    public function initChatbotAPI($chatbot_type, $api_token)
+//    public function initChatbotAPI($chatbot_type, $apiToken)
 //    {
 //        $this->setChatbotType($chatbot_type);
 //
 //        if ($chatbot_type == $this->_define::MESSENGER_INT)
 //        {
-//            $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-//            $this->_apiModel = $this->initMessengerAPI($api_token);
+//            $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+//            $this->_apiModel = $this->initMessengerAPI($apiToken);
 //        }
 //    }
 
     public function sendMessage($message)
     {
+        $result = array();
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $this->sendMessageToMessenger($message);
+            $result = $this->sendMessageToMessenger($message);
         }
 
-        return true;
+        return $result;
     }
 
     public function sendMessageToMessenger($message)
     {
-        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-        $this->_apiModel = $this->initMessengerAPI($api_token);
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($apiToken);
 
-        $this->_apiModel->sendMessage($message->getSenderId(), $message->getContent());
+        $result = $this->_apiModel->sendMessage($message->getSenderId(), $message->getContent());
+
+        return $result;
     }
 
     public function sendQuickReply($message)
     {
+        $result = array();
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $this->sendQuickReplyToMessenger($message);
+            $result = $this->sendQuickReplyToMessenger($message);
         }
 
-        return true;
+        return $result;
     }
 
     public function sendQuickReplyToMessenger($message)
     {
-        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-        $this->_apiModel = $this->initMessengerAPI($api_token);
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($apiToken);
 
         $messageContent = $message->getContent();
         $decodedContent = json_decode($messageContent);
@@ -319,34 +323,111 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 //            {
 //                // TODO build quickreplies here for generic
 //            }
-        $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
+        $result = $this->_apiModel->sendQuickReply($message->getSenderId(), $decodedContent->message, $decodedContent->quick_replies);
+
+        return $result;
     }
 
-    public function sendReceipt($message)
+    public function sendReceiptList($message)
     {
+        $result = array();
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $this->sendReceiptToMessenger($message);
+            $result = $this->sendReceiptListToMessenger($message);
         }
 
-        return true;
+        return $result;
+    }
+
+    public function sendGenericListToMessenger($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($apiToken);
+
+        $messageContent = $message->getContent();
+        $decodedContent = json_decode($messageContent);
+        $listItems = $decodedContent->list;
+        $buttons = $decodedContent->buttons;
+        $elements = array();
+        $options = array();
+
+        foreach ($listItems as $item)
+        {
+            $itemDefaultAction = $item->default_action;
+            $defaultAction = array(
+                'type' => $itemDefaultAction->type,
+                'url' => $itemDefaultAction->url
+            );
+
+            $itemListButtons = $item->buttons;
+            $listButtons = array();
+            foreach ($itemListButtons as $listButtom)
+            {
+                $auxArr = array(
+                    'title' => $listButtom->title,
+                    'type' => $listButtom->type,
+                    'url' => $listButtom->url
+                );
+
+                array_push($listButtons, $auxArr);
+            }
+
+            $element = array(
+                'title' => $item->title,
+                'image_url' => $item->image_url,
+                'subtitle' => $item->subtitle,
+                'default_action' => $defaultAction,
+                'buttons' => $listButtons
+            );
+
+            array_push($elements, $element);
+        }
+
+        foreach ($buttons as $buttom)
+        {
+            $btn = array(
+                'type' => $buttom->type,
+                'title' => $buttom->title,
+                'url' => $buttom->url
+            );
+            array_push($options, $btn);
+        }
+
+        $result = $this->_apiModel->sendListTemplate($message->getSenderId(), $elements, $options);
+
+        return $result;
+    }
+
+    public function sendGenericList($message)
+    {
+        $result = array();
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
+        {
+            $result = $this->sendGenericListToMessenger($message);
+        }
+
+        return $result;
     }
 
     public function sendImageWithOptions($message)
     {
+        $result = array();
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
-            $this->sendImageWithOptionsToMessenger($message);
+            $result = $this->sendImageWithOptionsToMessenger($message);
         }
 
-        return true;
+        return $result;
     }
 
-    public function sendReceiptToMessenger($message)
+    public function sendReceiptListToMessenger($message)
     {
-        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-        $this->_apiModel = $this->initMessengerAPI($api_token);
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($apiToken);
 
+        $result = array( // TODO
+            'status' => 'success'
+        );
         $messageContent = $message->getContent();
         $decodedContent = json_decode($messageContent);
 //        $receiptPaylod = array();
@@ -396,14 +477,16 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
                 'summary' => $summaryDetails
             );
 
-            $this->_apiModel->sendReceiptTemplate($message->getSenderId(), $receiptPaylod);
+            $response = $this->_apiModel->sendReceiptTemplate($message->getSenderId(), $receiptPaylod);
         }
+
+        return $result;
     }
 
     public function sendImageWithOptionsToMessenger($message)
     {
-        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-        $this->_apiModel = $this->initMessengerAPI($api_token);
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($apiToken);
 
         $messageContent = $message->getContent();
         $decodedContent = json_decode($messageContent);
@@ -435,7 +518,10 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             );
             array_push($elements, $element);
         }
-        $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
+
+        $result = $this->_apiModel->sendGenericTemplate($message->getSenderId(), $elements);
+
+        return $result;
     }
 
     private function getEntitiesValue($entity, $entitiesAttributes)
@@ -475,8 +561,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function getNLPTextMeaning($text)
     {
-        $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
-        $this->_NLPModel = $this->initWitAIAPI($api_token);
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
+        $this->_NLPModel = $this->initWitAIAPI($apiToken);
 
         $response = $this->_NLPModel->getTextResponse($text);
         $result = array();
@@ -517,8 +603,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function getNLPAudioMeaning($audio)
     {
-        $api_token = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
-        $this->_NLPModel = $this->initWitAIAPI($api_token);
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_general/general/wit_ai_token');
+        $this->_NLPModel = $this->initWitAIAPI($apiToken);
 
         $result = $this->_NLPModel->getAudioResponse($audio);
 
