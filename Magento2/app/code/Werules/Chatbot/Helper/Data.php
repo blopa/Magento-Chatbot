@@ -126,7 +126,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if ($message->getDirection() == $this->_define::INCOMING)
                 $this->processIncomingMessage($message);
-            else //if ($message->getDirection() == 1)
+            else //if ($message->getDirection() == $this->_define::OUTGOING)
                 $this->processOutgoingMessage($message);
         }
     }
@@ -323,9 +323,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $this->setHelperMessageAttributes($message);
         $this->setConfigPrefix($message);
         $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
-        $contentObj = $this->getTextMessageArray($text);
-        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // gets first item of array
-        $this->processOutgoingMessage($outgoingMessage->getMessageId());
+        if ($text != '')
+        {
+            $contentObj = $this->getTextMessageArray($text);
+            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
+            $this->processOutgoingMessage($outgoingMessage->getMessageId());
+        }
     }
 
     private function handleNaturalLanguageProcessor($message)
@@ -602,10 +605,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function prepareCommandsList()
     {
         if (isset($this->_commandsList) || isset($this->_completeCommandsList))
-            return false;
+            return true;
 
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $commands = $this->_serializer->unserialize($serializedCommands);
+        if (!($commands))
+            return false;
+
         $commandsList = array();
         $completeCommandsList = array();
         foreach ($commands as $command)
