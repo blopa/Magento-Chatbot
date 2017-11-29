@@ -339,80 +339,80 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $result;
     }
 
-    public function sendGenericListToMessenger($message)
-    {
-        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
-        $this->_apiModel = $this->initMessengerAPI($apiToken);
+//    public function sendGenericListToMessenger($message)
+//    {
+//        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+//        $this->_apiModel = $this->initMessengerAPI($apiToken);
+//
+//        $messageContent = $message->getContent();
+//        $decodedContent = json_decode($messageContent);
+//        $listItems = $decodedContent->list;
+//        $buttons = $decodedContent->buttons;
+//        $elements = array();
+//        $options = array();
+//
+//        foreach ($listItems as $item)
+//        {
+//            $itemDefaultAction = $item->default_action;
+//            $defaultAction = array(
+//                'type' => $itemDefaultAction->type,
+//                'url' => $itemDefaultAction->url
+//            );
+//
+//            $itemListButtons = $item->buttons;
+//            $listButtons = array();
+//            foreach ($itemListButtons as $listButtom)
+//            {
+//                $auxArr = array(
+//                    'title' => $listButtom->title,
+//                    'type' => $listButtom->type,
+//                    'url' => $listButtom->url
+//                );
+//
+//                array_push($listButtons, $auxArr);
+//            }
+//
+//            $element = array(
+//                'title' => $item->title,
+////                'image_url' => $item->image_url,
+////                'subtitle' => $item->subtitle,
+//                'default_action' => $defaultAction,
+//                'buttons' => $listButtons
+//            );
+//
+//            if (isset($item->subtitle))
+//                $element['subtitle'] = $item->subtitle;
+//            if (isset($item->image_url))
+//                $element['image_url'] = $item->image_url;
+//
+//            array_push($elements, $element);
+//        }
+//
+//        foreach ($buttons as $buttom)
+//        {
+//            $btn = array(
+//                'type' => $buttom->type,
+//                'title' => $buttom->title,
+//                'url' => $buttom->url
+//            );
+//            array_push($options, $btn);
+//        }
+//
+//        $result = $this->_apiModel->sendListTemplate($message->getSenderId(), $elements, $options);
+//
+//        return $result;
+//    }
 
-        $messageContent = $message->getContent();
-        $decodedContent = json_decode($messageContent);
-        $listItems = $decodedContent->list;
-        $buttons = $decodedContent->buttons;
-        $elements = array();
-        $options = array();
-
-        foreach ($listItems as $item)
-        {
-            $itemDefaultAction = $item->default_action;
-            $defaultAction = array(
-                'type' => $itemDefaultAction->type,
-                'url' => $itemDefaultAction->url
-            );
-
-            $itemListButtons = $item->buttons;
-            $listButtons = array();
-            foreach ($itemListButtons as $listButtom)
-            {
-                $auxArr = array(
-                    'title' => $listButtom->title,
-                    'type' => $listButtom->type,
-                    'url' => $listButtom->url
-                );
-
-                array_push($listButtons, $auxArr);
-            }
-
-            $element = array(
-                'title' => $item->title,
-//                'image_url' => $item->image_url,
-//                'subtitle' => $item->subtitle,
-                'default_action' => $defaultAction,
-                'buttons' => $listButtons
-            );
-
-            if (isset($item->subtitle))
-                $element['subtitle'] = $item->subtitle;
-            if (isset($item->image_url))
-                $element['image_url'] = $item->image_url;
-
-            array_push($elements, $element);
-        }
-
-        foreach ($buttons as $buttom)
-        {
-            $btn = array(
-                'type' => $buttom->type,
-                'title' => $buttom->title,
-                'url' => $buttom->url
-            );
-            array_push($options, $btn);
-        }
-
-        $result = $this->_apiModel->sendListTemplate($message->getSenderId(), $elements, $options);
-
-        return $result;
-    }
-
-    public function sendGenericList($message)
-    {
-        $result = array();
-        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
-        {
-            $result = $this->sendGenericListToMessenger($message);
-        }
-
-        return $result;
-    }
+//    public function sendGenericList($message)
+//    {
+//        $result = array();
+//        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
+//        {
+//            $result = $this->sendGenericListToMessenger($message);
+//        }
+//
+//        return $result;
+//    }
 
     public function sendMessageWithOptions($message)
     {

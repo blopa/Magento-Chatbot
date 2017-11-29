@@ -1236,48 +1236,48 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $text;
     }
 
-    private function getListProductDetailsObject($product, $image = true) // return a single object to be used in a bundled list
-    {
-        $element = array();
-        if ($product->getId())
-        {
-            if ($product->getShortDescription())
-                $description = $this->excerpt($product->getShortDescription(), 60);
-            else
-                $description = '';
-
-            $productUrl = $product->getProductUrl();
-
-            $element = array(
-                'title' => $product->getName(),
-//                'image_url' => $productImage,
-                'subtitle' => $description,
-                'default_action' => array(
-                    'type' => 'web_url',
-                    'url' => $productUrl
-                ),
-                'buttons' => array(
-                    array(
-                        'title' => __("Visit product's page"),
-                        'type' => 'web_url',
-                        'url' => $productUrl
-                    )
-                )
-            );
-
-            if ($image)
-            {
-                if ($product->getImage())
-                    $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-                else
-                    $productImage = $this->getPlaceholderImage();
-
-                $element['image_url'] = $productImage;
-            }
-        }
-
-        return $element;
-    }
+//    private function getListProductDetailsObject($product, $image = true) // return a single object to be used in a bundled list
+//    {
+//        $element = array();
+//        if ($product->getId())
+//        {
+//            if ($product->getShortDescription())
+//                $description = $this->excerpt($product->getShortDescription(), 60);
+//            else
+//                $description = '';
+//
+//            $productUrl = $product->getProductUrl();
+//
+//            $element = array(
+//                'title' => $product->getName(),
+////                'image_url' => $productImage,
+//                'subtitle' => $description,
+//                'default_action' => array(
+//                    'type' => 'web_url',
+//                    'url' => $productUrl
+//                ),
+//                'buttons' => array(
+//                    array(
+//                        'title' => __("Visit product's page"),
+//                        'type' => 'web_url',
+//                        'url' => $productUrl
+//                    )
+//                )
+//            );
+//
+//            if ($image)
+//            {
+//                if ($product->getImage())
+//                    $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+//                else
+//                    $productImage = $this->getPlaceholderImage();
+//
+//                $element['image_url'] = $productImage;
+//            }
+//        }
+//
+//        return $element;
+//    }
 
     private function getImageWithOptionsProductObject($product)
     {
