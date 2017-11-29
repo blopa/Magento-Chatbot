@@ -1452,10 +1452,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->getProductDetailsObject($product);
     }
 
-    private function getUnitWithImageProductObject($product)
-    {
-        return $this->getProductDetailsObject($product, true);
-    }
+//    private function getUnitWithImageProductObject($product)
+//    {
+//        return $this->getProductDetailsObject($product, true);
+//    }
 
     private function getProductDetailsObject($product, $checkout = false) // used to get single object
     {
@@ -1488,7 +1488,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else
             {
-                if (($product->getTypeId() != 'simple') && ($product->hasCustomOptions())) // TODO remove this to add any type of product
+                if (($product->getTypeId() == 'simple') && (!$product->hasCustomOptions())) // TODO remove this to add any type of product
                 {
                     $payload = array(
                         'command' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
