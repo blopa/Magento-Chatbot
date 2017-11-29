@@ -61,9 +61,9 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
 
     protected function processRequest()
     {
-        $enabled = $this->getConfigValue('werules_chatbot_messenger/general/enable');
-        if ($enabled == $this->_define::ENABLED)
-        {
+//        $enabled = $this->getConfigValue('werules_chatbot_messenger/general/enable');
+//        if ($enabled == $this->_define::ENABLED)
+//        {
             $challenge_hub = $this->getConfigValue('werules_chatbot_messenger/general/enable_hub_challenge');
             if ($challenge_hub == $this->_define::ENABLED)
             {
@@ -79,9 +79,9 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
                 $messageObject = $this->createMessageObject();
                 $result = $this->messageHandler($messageObject);
             }
-        }
-        else
-            $result = $this->getJsonErrorResponse();
+//        }
+//        else
+//            $result = $this->getJsonErrorResponse();
 
         return $result;
     }
