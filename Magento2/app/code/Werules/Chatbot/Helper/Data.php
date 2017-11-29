@@ -133,7 +133,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processIncomingMessage($message)
     {
-        $this->setConfigPrefix($message);
+        $this->setConfigPrefix($message->getChatbotType());
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
         $result = true;
@@ -1038,18 +1038,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_chatbotAPIModel = $chatbotAPI;
     }
 
-    private function setConfigPrefix($message)
+    private function setConfigPrefix($chatbotType)
     {
         if (!isset($this->_configPrefix))
         {
-            if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            if ($chatbotType == $this->_define::MESSENGER_INT)
                 $this->_configPrefix = 'werules_chatbot_messenger';
         }
     }
 
     private function setHelperMessageAttributes($message)
     {
-//        $this->setConfigPrefix($message);
+//        $this->setConfigPrefix($message->getChatbotType());
         $this->setCurrentMessagePayload($message->getMessagePayload());
         $this->setCurrentCommand($message->getContent()); // ignore output
         $this->prepareCommandsList();
