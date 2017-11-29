@@ -40,11 +40,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_quoteModel;
     protected $_imageHelper;
     protected $_stockRegistry;
+    protected $_priceHelper;
 //    protected $_storeConfig;
 //    protected $_cartModel;
 //    protected $_cartManagementInterface;
 //    protected $_cartRepositoryInterface;
 
+    // not from construct parameters
     protected $_define;
     protected $_configPrefix;
     protected $_commandsList;
@@ -73,6 +75,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
+        \Magento\Framework\Pricing\Helper\Data $priceHelper,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -96,6 +99,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
 //        $this->_storeConfig = $scopeConfig;
         $this->_imageHelper = $imageHelper;
+        $this->_priceHelper = $priceHelper;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -1681,14 +1685,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach ($orderItems as $orderItem)
         {
             $text .= __("Product:") . ' ' . $orderItem->getName() . chr(10);
-            $text .= __("Quantity:") . ' ' . $orderItem->getQtyOrdered() . chr(10);
+            $price = $this->_priceHelper->currency($orderItem->getPrice(), true, false);
+            $text .= __("Price:") . ' ' . $price . chr(10);
+            $text .= __("Quantity:") . ' ' . $orderItem->getQty() . chr(10);
             $text .= chr(10);
         }
         if ($text != '')
         {
-            $text .= __("Subtotal:") . ' ' . $quote->getSubtotal() . chr(10);
+            $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
+            $text .= __("Subtotal:") . ' ' . $price . chr(10);
             if ($includeTax)
-                $text .= __("Subtotal (Tax Incl.):") . ' ' . $quote->getSubtotalInclTax() . chr(10);
+            {
+                if ($quote->getSubtotalInclTax())
+                {
+                    $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
+                    $text .= __("Subtotal (Tax Incl.):") . ' ' . $price . chr(10);
+                }
+            }
         }
 
         return $text;
@@ -1698,7 +1711,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
-//        $orderItems = $quote->getItemsCollection();
         $result = array();
 
         if ($quote->getId())
