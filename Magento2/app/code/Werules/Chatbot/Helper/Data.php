@@ -262,9 +262,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processMessageRequest($message)
     {
-        //$messageContent = $message->getContent();
+        // ORDER -> cancel_command, conversation_state, commands, wit_ai, errors
+
         $responseContent = array();
         $commandResponses = array();
+        $errorMessages = array();
         $conversationStateResponses = array();
         $payloadCommandResponses = array();
         $NLPResponses = array();
@@ -326,31 +328,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         if (count($responseContent) <= 0)
+            $errorMessages = $this->handleUnableToProcessRequest($message);
+        if ($errorMessages)
         {
-            $fallbackLimit = $this->getConfigValue($this->_configPrefix . '/general/fallback_message_quantity');
-            $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
-            if ($chatbotAPI->getFallbackQty())
-                $fallbackQty = (int)$chatbotAPI->getFallbackQty();
-            else
-                $fallbackQty = 0;
-
-            if ($fallbackQty >= (int)$fallbackLimit)
+            foreach ($errorMessages as $errorMessage)
             {
-                $text = $this->getConfigValue($this->_configPrefix . '/general/fallback_message');
-                if ($text != '')
-                {
-                    $contentObj = $this->getTextMessageArray($text);
-                    $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), 0);
-                }
-                else
-                    $contentObj = $this->getErrorMessage();
-
-                array_push($responseContent, $contentObj);
-            }
-            else
-            {
-                $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), $fallbackQty + 1);
-                array_push($responseContent, $this->getTextMessageArray(__("Sorry, I didn't understand that.")));
+                array_push($responseContent, $errorMessage);
             }
         }
 
@@ -389,6 +372,39 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
         $this->processOutgoingMessage($outgoingMessage->getMessageId());
+    }
+
+    private function handleUnableToProcessRequest($message)
+    {
+        $responseContent = array();
+        $fallbackLimit = $this->getConfigValue($this->_configPrefix . '/general/fallback_message_quantity');
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
+
+        if ($chatbotAPI->getFallbackQty())
+            $fallbackQty = (int)$chatbotAPI->getFallbackQty();
+        else
+            $fallbackQty = 0;
+
+        if ($fallbackQty >= (int)$fallbackLimit)
+        {
+            $text = $this->getConfigValue($this->_configPrefix . '/general/fallback_message');
+            if ($text != '')
+            {
+                $contentObj = $this->getTextMessageArray($text);
+                $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), 0);
+            }
+            else
+                $contentObj = $this->getErrorMessage();
+
+            array_push($responseContent, $contentObj);
+        }
+        else
+        {
+            $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), $fallbackQty + 1);
+            array_push($responseContent, $this->getTextMessageArray(__("Sorry, I didn't understand that.")));
+        }
+
+        return $responseContent;
     }
 
     private function handleNaturalLanguageProcessor($message)
