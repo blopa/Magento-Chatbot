@@ -414,6 +414,17 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $result;
     }
 
+    public function sendMessageWithOptions($message)
+    {
+        $result = array();
+        if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
+        {
+            $result = $this->sendMessageWithOptionsToMessenger($message);
+        }
+
+        return $result;
+    }
+
     public function sendImageWithOptions($message)
     {
         $result = array();
@@ -484,6 +495,21 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
             $response = $this->_apiModel->sendReceiptTemplate($message->getSenderId(), $receiptPaylod);
         }
+
+        return $result;
+    }
+
+    public function sendMessageWithOptionsToMessenger($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $this->_apiModel = $this->initMessengerAPI($apiToken);
+
+        $messageContent = $message->getContent();
+        $decodedContent = json_decode($messageContent);
+        $text = $decodedContent->message;
+        $buttons = $decodedContent->buttons;
+
+        $result = $this->_apiModel->sendButtonTemplate($message->getSenderId(), $text, $buttons);
 
         return $result;
     }

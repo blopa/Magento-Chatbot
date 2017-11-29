@@ -208,8 +208,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
             $result = $chatbotAPI->sendReceiptList($outgoingMessage);
-        else if ($outgoingMessage->getContentType() == $this->_define::LIST_WITH_IMAGE)
-            $result = $chatbotAPI->sendGenericList($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
+            $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
 
         if ($result)
         {
@@ -1674,62 +1674,123 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
+    private function getCartItemsList($quote, $includeTax = true)
+    {
+        $orderItems = $quote->getItemsCollection();
+        $text = '';
+        foreach ($orderItems as $orderItem)
+        {
+            $text .= __("Product:") . ' ' . $orderItem->getName() . chr(10);
+            $text .= __("Quantity:") . ' ' . $orderItem->getQtyOrdered() . chr(10);
+            $text .= chr(10);
+        }
+        if ($text != '')
+        {
+            $text .= __("Subtotal:") . ' ' . $quote->getSubtotal() . chr(10);
+            if ($includeTax)
+                $text .= __("Subtotal (Tax Incl.):") . ' ' . $quote->getSubtotalInclTax() . chr(10);
+        }
+
+        return $text;
+    }
+
     private function processCheckoutCommand($senderId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
-        $orderItems = $quote->getItemsCollection();
-//        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
+//        $orderItems = $quote->getItemsCollection();
         $result = array();
-        $listObjectList = array();
-        if (count($orderItems) > 1)
-        {
-            foreach ($orderItems as $orderItem)
-            {
-                $listObject = $this->getItemListImageProductObject($orderItem->getProduct());
-                if ($listObject)
-                    array_push($listObjectList, $listObject);
-            }
-            $buttons = array(
-                array(
-                    'type' => 'web_url',
-                    'title' => __("Checkout"),
-                    'url' => $this->getStoreURL('checkout/cart')
-                )
-            );
 
-            if ($listObjectList)
+        if ($quote->getId())
+        {
+            $checkoutTotalText = $this->getCartItemsList($quote);
+            if ($checkoutTotalText)
             {
+                $buttons = array(
+                    array(
+                        'type' => 'web_url',
+                        'title' => __("Checkout"),
+                        'url' => $this->getStoreURL('checkout/cart')
+                    )
+                );
+
                 $contentObject = new \stdClass();
-                $contentObject->list = $listObjectList;
+                $contentObject->message = $checkoutTotalText;
                 $contentObject->buttons = $buttons;
                 $responseMessage = array(
-                    'content_type' => $this->_define::LIST_WITH_IMAGE,
+                    'content_type' => $this->_define::TEXT_WITH_OPTIONS,
                     'content' => json_encode($contentObject)
                 );
                 array_push($result, $responseMessage);
             }
+            else
+            {
+                $text = __("Your cart is empty.");
+                $result = $this->getTextMessageArray($text);
+            }
         }
-        else if (count($orderItems) == 1)
-        {
-            $orderItem = $orderItems->getFirstItem();
-            $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
-            array_push($listObjectList, $imageWithOptionsProdObj);
-
-            $responseMessage = array(
-                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
-                'content' => json_encode($listObjectList)
-            );
-            array_push($result, $responseMessage);
-        }
-        else // if (count($orderItems) <= 0)
-        {
-            $text = __("Your cart is empty.");
-            $result = $this->getTextMessageArray($text);
-        }
+        else
+            $result = $this->getErrorMessage();
 
         return $result;
     }
+
+//    private function processCheckoutCommand($senderId)
+//    {
+//        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+//        $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
+//        $orderItems = $quote->getItemsCollection();
+////        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
+//        $result = array();
+//        $listObjectList = array();
+//        if (count($orderItems) > 1)
+//        {
+//            foreach ($orderItems as $orderItem)
+//            {
+//                $listObject = $this->getItemListImageProductObject($orderItem->getProduct());
+//                if ($listObject)
+//                    array_push($listObjectList, $listObject);
+//            }
+//            $buttons = array(
+//                array(
+//                    'type' => 'web_url',
+//                    'title' => __("Checkout"),
+//                    'url' => $this->getStoreURL('checkout/cart')
+//                )
+//            );
+//
+//            if ($listObjectList)
+//            {
+//                $contentObject = new \stdClass();
+//                $contentObject->list = $listObjectList;
+//                $contentObject->buttons = $buttons;
+//                $responseMessage = array(
+//                    'content_type' => $this->_define::LIST_WITH_IMAGE,
+//                    'content' => json_encode($contentObject)
+//                );
+//                array_push($result, $responseMessage);
+//            }
+//        }
+//        else if (count($orderItems) == 1)
+//        {
+//            $orderItem = $orderItems->getFirstItem();
+//            $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
+//            array_push($listObjectList, $imageWithOptionsProdObj);
+//
+//            $responseMessage = array(
+//                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
+//                'content' => json_encode($listObjectList)
+//            );
+//            array_push($result, $responseMessage);
+//        }
+//        else // if (count($orderItems) <= 0)
+//        {
+//            $text = __("Your cart is empty.");
+//            $result = $this->getTextMessageArray($text);
+//        }
+//
+//        return $result;
+//    }
 
     private function processClearCartCommand($senderId)
     {
