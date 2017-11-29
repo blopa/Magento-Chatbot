@@ -1202,9 +1202,38 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        return array();
 //    }
 
-    private function getItemListImageProductObject($product)
+//    private function getItemListImageProductObject($product)
+//    {
+//        return $this->getListProductDetailsObject($product);
+//    }
+
+    private function getCartItemsList($quote, $includeTax = true)
     {
-        return $this->getListProductDetailsObject($product);
+        $orderItems = $quote->getItemsCollection();
+        $text = '';
+        foreach ($orderItems as $orderItem)
+        {
+            $text .= __("Product:") . ' ' . $orderItem->getName() . chr(10);
+            $price = $this->_priceHelper->currency($orderItem->getPrice(), true, false);
+            $text .= __("Price:") . ' ' . $price . chr(10);
+            $text .= __("Quantity:") . ' ' . $orderItem->getQty() . chr(10);
+            $text .= chr(10);
+        }
+        if ($text != '')
+        {
+            $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
+            $text .= __("Subtotal:") . ' ' . $price . chr(10);
+            if ($includeTax)
+            {
+                if ($quote->getSubtotalInclTax())
+                {
+                    $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
+                    $text .= __("Subtotal (Tax Incl.):") . ' ' . $price . chr(10);
+                }
+            }
+        }
+
+        return $text;
     }
 
     private function getListProductDetailsObject($product, $image = true) // return a single object to be used in a bundled list
@@ -1676,35 +1705,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $this->getErrorMessage();
 
         return $result;
-    }
-
-    private function getCartItemsList($quote, $includeTax = true)
-    {
-        $orderItems = $quote->getItemsCollection();
-        $text = '';
-        foreach ($orderItems as $orderItem)
-        {
-            $text .= __("Product:") . ' ' . $orderItem->getName() . chr(10);
-            $price = $this->_priceHelper->currency($orderItem->getPrice(), true, false);
-            $text .= __("Price:") . ' ' . $price . chr(10);
-            $text .= __("Quantity:") . ' ' . $orderItem->getQty() . chr(10);
-            $text .= chr(10);
-        }
-        if ($text != '')
-        {
-            $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
-            $text .= __("Subtotal:") . ' ' . $price . chr(10);
-            if ($includeTax)
-            {
-                if ($quote->getSubtotalInclTax())
-                {
-                    $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
-                    $text .= __("Subtotal (Tax Incl.):") . ' ' . $price . chr(10);
-                }
-            }
-        }
-
-        return $text;
     }
 
     private function processCheckoutCommand($senderId)
