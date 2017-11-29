@@ -234,7 +234,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $outgoingMessage = $this->_messageModel->create();
         $outgoingMessage->load($messageId);
 
-        $chatbotAPI = $this->getChatbotAPIModel($outgoingMessage->getSenderId());
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
 
         $result = array();
         if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
@@ -326,7 +326,33 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         if (count($responseContent) <= 0)
-            array_push($responseContent, $this->getTextMessageArray(__("Sorry, I didn't understand that."))); // TODO
+        {
+            $fallbackLimit = $this->getConfigValue($this->_configPrefix . '/general/fallback_message_quantity');
+            $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
+            if ($chatbotAPI->getFallbackQty())
+                $fallbackQty = (int)$chatbotAPI->getFallbackQty();
+            else
+                $fallbackQty = 0;
+
+            if ($fallbackQty >= (int)$fallbackLimit)
+            {
+                $text = $this->getConfigValue($this->_configPrefix . '/general/fallback_message');
+                if ($text != '')
+                {
+                    $contentObj = $this->getTextMessageArray($text);
+                    $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), 0);
+                }
+                else
+                    $contentObj = $this->getErrorMessage();
+
+                array_push($responseContent, $contentObj);
+            }
+            else
+            {
+                $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), $fallbackQty + 1);
+                array_push($responseContent, $this->getTextMessageArray(__("Sorry, I didn't understand that.")));
+            }
+        }
 
         return $responseContent;
     }
@@ -367,7 +393,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function handleNaturalLanguageProcessor($message)
     {
-        $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
         $result = array();
         $parameterValue = false;
         $parameter = false;
@@ -454,7 +480,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function handleConversationState($message, $keyword = false)
     {
-        $chatbotAPI = $this->getChatbotAPIModel($message->getSenderId());
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
         $result = array();
         if ($keyword)
             $messageContent = $keyword;
@@ -519,6 +545,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         array_push($result, $responseMessage);
 
         return $result;
+    }
+
+    private function updateChatbotAPIFallbackQty($chatbotAPIId, $fallbackQty)
+    {
+        $chatbotAPI = $this->_chatbotAPI->create();
+        $chatbotAPI->load($chatbotAPIId, 'chatbotapi_id'); // TODO
+        $chatbotAPI->setFallbackQty($fallbackQty);
+        $chatbotAPI->save();
     }
 
     private function updateIncomingMessageStatus($messageId, $status)
@@ -634,7 +668,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function logOutChatbotCustomer($senderId)
     {
-        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
 
         if ($chatbotAPI->getChatbotapiId())
         {
@@ -696,7 +730,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($payload->command == $this->_define::REORDER_COMMAND_ID)
             {
                 $senderId = $message->getSenderId();
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     $result = $this->processReorderCommand($payload->parameter, $senderId);
@@ -743,7 +777,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 if (!$setStateOnly)
                 {
-                    $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                    $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                     if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
                         $result = $this->processLoginCommand($senderId);
                     else
@@ -755,7 +789,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -766,7 +800,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
 //            else if ($command == $this->_define::REORDER_COMMAND_ID)
 //            {
-//                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+//                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
 //                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
 //                {
 //                    if (!$setStateOnly)
@@ -777,7 +811,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            }
             else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -793,7 +827,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -809,7 +843,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -847,7 +881,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($command == $this->_define::LOGOUT_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
                     if (!$setStateOnly)
@@ -858,7 +892,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($command == $this->_define::REGISTER_COMMAND_ID)
             {
-                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
                 {
                     if (!$setStateOnly)
@@ -905,7 +939,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function updateConversationState($senderId, $state)
     {
-        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
 
         if ($chatbotAPI->getChatbotapiId())
         {
@@ -1567,7 +1601,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function getChatbotAPIModel($senderId)
+    private function getChatbotAPIModelBySenderId($senderId)
     {
         if (isset($this->_chatbotAPIModel))
             return $this->_chatbotAPIModel;
@@ -1583,7 +1617,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function getChatbotuserBySenderId($senderId)
     {
-        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $chatbotUser = $this->_chatbotUser->create();
 
         if ($chatbotAPI->getChatbotapiId())
@@ -1657,7 +1691,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processLoginCommand($senderId)
     {
-        $chatbotAPI = $this->getChatbotAPIModel($senderId);
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
 
         $result = array();
         $loginUrl = $this->getStoreURL('chatbot/customer/login/hash/' . $chatbotAPI->getHashKey());
