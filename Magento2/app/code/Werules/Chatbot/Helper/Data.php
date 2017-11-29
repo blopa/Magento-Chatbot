@@ -40,6 +40,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_quoteModel;
     protected $_imageHelper;
     protected $_stockRegistry;
+    protected $_stockFilter;
     protected $_priceHelper;
 //    protected $_storeConfig;
 //    protected $_cartModel;
@@ -75,6 +76,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
+        \Magento\CatalogInventory\Helper\Stock $stockFilter,
         \Magento\Framework\Pricing\Helper\Data $priceHelper,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
@@ -93,6 +95,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_customerRepositoryInterface = $customerRepositoryInterface;
         $this->_quoteModel = $quoteModel;
         $this->_stockRegistry = $stockRegistry;
+        $this->_stockFilter = $stockFilter;
 //        $this->_cartModel = $cartModel;
 //        $this->_cartManagementInterface = $cartManagementInterface;
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
@@ -505,7 +508,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
         {
-            $result = $this->listProductsFromCategory($messageContent, $this->getCurrentMessagePayload()); // $message->getMessagePayload()
+            $payload = $this->getCurrentMessagePayload();
+            $result = $this->listProductsFromCategory($messageContent, $payload); // $message->getMessagePayload()
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SEARCH)
         {
@@ -628,12 +632,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function listProductsFromCategory($messageContent, \stdClass $messagePayload = null)
+    private function listProductsFromCategory($messageContent, $messagePayload)
     {
         $result = array();
         $productCarousel = array();
         if ($messagePayload)
-            $category = $this->getCategoryById($messagePayload->parameter);
+            $category = $this->getCategoryById($messagePayload->parameter); // instance of \stdClass
         else
             $category = $this->getCategoryByName($messageContent);
 
@@ -759,7 +763,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = '', \stdClass $payload = null)
+    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = '', $payload = false)
     {
 //        $messageContent = $message->getContent();
         $result = array();
@@ -1324,10 +1328,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $categoryCollection;
     }
 
-    private function getProductsFromCategoryId($categoryId)
+    private function getProductsFromCategoryId($categoryId, $filterStatus = true)
     {
         $productCollection = $this->getCategoryById($categoryId)->getProductCollection();
         $productCollection->addAttributeToSelect('*');
+        if ($filterStatus)
+        {
+            $productCollection->addAttributeToFilter(
+                'status', array('eq' => \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
+            );
+            $this->_stockFilter->addInStockFilterToCollection($productCollection);
+        }
 
         return $productCollection;
     }
@@ -1650,10 +1661,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processListCategoriesCommand()
     {
         $result = array();
-        $categories = $this->getStoreCategories(false,false,true);
+        $emptyCategories = ($this->getConfigValue($this->_configPrefix . '/general/list_empty_categories') == $this->_define::ENABLED);
+        $categories = $this->getStoreCategories(false, false, true);
         $quickReplies = array();
         foreach ($categories as $category)
         {
+            if (!$emptyCategories)
+            {
+                $productCollection = $this->getProductsFromCategoryId($category->getId());
+                if (count($productCollection) <= 0)
+                    continue;
+            }
+
             $categoryName = $category->getName();
             if ($categoryName)
             {
