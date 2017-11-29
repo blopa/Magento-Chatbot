@@ -133,8 +133,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processIncomingMessage($message)
     {
+        $this->setConfigPrefix($message->getChatbotType());
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $result = true;
 
         if (!($chatbotAPI->getChatbotapiId()))
         {
@@ -153,13 +155,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->sendWelcomeMessage($message);
         }
 
-        $this->setChatbotAPIModel($chatbotAPI);
+        $enabled = $this->getConfigValue($this->_configPrefix . '/general/enable');
+        if ($enabled == $this->_define::DISABLED)
+            $this->sendDisabledMessage($message);
+        else if ($chatbotAPI->getEnabled() == $this->_define::DISABLED)
+            $this->sendDisabledByCustomerMessage($message);
+        else
+        {
+            $this->setChatbotAPIModel($chatbotAPI);
+            $result = $this->prepareOutgoingMessage($message);
+        }
 
 //        $this->logger("Message ID -> " . $message->getMessageId());
 //        $this->logger("Message Content -> " . $message->getContent());
 //        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
-        $this->prepareOutgoingMessage($message);
+        return $result;
     }
 
     private function createOutgoingMessage($message, $content)
@@ -183,6 +194,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function prepareOutgoingMessage($message)
     {
         $responseContents = $this->processMessageRequest($message);
+        $result = false;
 
         if ($responseContents)
         {
@@ -205,15 +217,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $this->processOutgoingMessage($outgoingMessage->getMessageId());
             }
 
-            $incomingMessage = $this->_messageModel->create();
-            $incomingMessage->load($message->getMessageId()); // TODO
-            $incomingMessage->setStatus($this->_define::PROCESSED);
-            $datetime = date('Y-m-d H:i:s');
-            $incomingMessage->setUpdatedAt($datetime);
-            $incomingMessage->save();
-
-//        $this->processOutgoingMessage($outgoingMessage);
+//            $incomingMessage = $this->_messageModel->create();
+//            $incomingMessage->load($message->getMessageId()); // TODO
+//            $incomingMessage->setStatus($this->_define::PROCESSED);
+//            $datetime = date('Y-m-d H:i:s');
+//            $incomingMessage->setUpdatedAt($datetime);
+//            $incomingMessage->save();
+            $result = $this->updateIncomingMessageStatus($message->getMessageId(), $this->_define::PROCESSED);
         }
+
+        return $result;
     }
 
     private function processOutgoingMessage($messageId)
@@ -321,7 +334,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function sendWelcomeMessage($message)
     {
 //        $this->setHelperMessageAttributes($message);
-        $this->setConfigPrefix($message);
         $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
         if ($text != '')
         {
@@ -329,6 +341,28 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
             $this->processOutgoingMessage($outgoingMessage->getMessageId());
         }
+    }
+
+    private function sendDisabledByCustomerMessage($message)
+    {
+        $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
+        $contentObj = $this->getTextMessageArray($text);
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
+        $this->processOutgoingMessage($outgoingMessage->getMessageId());
+    }
+
+    private function sendDisabledMessage($message)
+    {
+//        $this->setHelperMessageAttributes($message);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/disabled_message');
+
+        if ($text != '')
+            $contentObj = $this->getTextMessageArray($text);
+        else
+            $contentObj = $this->getErrorMessage();
+
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
+        $this->processOutgoingMessage($outgoingMessage->getMessageId());
     }
 
     private function handleNaturalLanguageProcessor($message)
@@ -485,6 +519,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         array_push($result, $responseMessage);
 
         return $result;
+    }
+
+    private function updateIncomingMessageStatus($messageId, $status)
+    {
+        $incomingMessage = $this->_messageModel->create();
+        $incomingMessage->load($messageId); // TODO
+        $incomingMessage->setStatus($status);
+        $datetime = date('Y-m-d H:i:s');
+        $incomingMessage->setUpdatedAt($datetime);
+        $incomingMessage->save();
+
+        return true;
     }
 
     private function getStockByProductId($productId)
@@ -992,18 +1038,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_chatbotAPIModel = $chatbotAPI;
     }
 
-    private function setConfigPrefix($message)
+    private function setConfigPrefix($chatbotType)
     {
         if (!isset($this->_configPrefix))
         {
-            if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+            if ($chatbotType == $this->_define::MESSENGER_INT)
                 $this->_configPrefix = 'werules_chatbot_messenger';
         }
     }
 
     private function setHelperMessageAttributes($message)
     {
-        $this->setConfigPrefix($message);
+//        $this->setConfigPrefix($message->getChatbotType());
         $this->setCurrentMessagePayload($message->getMessagePayload());
         $this->setCurrentCommand($message->getContent()); // ignore output
         $this->prepareCommandsList();
@@ -1527,6 +1573,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return $this->_chatbotAPIModel;
 
         // should never get here
+        // because it's already set
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($senderId, 'chat_id'); // TODO
         $this->setChatbotAPIModel($chatbotAPI);
