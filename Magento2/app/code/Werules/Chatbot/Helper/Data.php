@@ -85,7 +85,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_messageModel  = $message;
         $this->_chatbotAPI  = $chatbotAPI;
         $this->_chatbotUser  = $chatbotUser;
-        $this->_configPrefix = '';
         $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
@@ -125,9 +124,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($message->getMessageId())
         {
-            if ($message->getDirection() == 0)
+            if ($message->getDirection() == $this->_define::INCOMING)
                 $this->processIncomingMessage($message);
-            else //if ($message->getDirection() == 1)
+            else //if ($message->getDirection() == $this->_define::OUTGOING)
                 $this->processOutgoingMessage($message);
         }
     }
@@ -150,15 +149,35 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI->setCreatedAt($datetime);
             $chatbotAPI->setUpdatedAt($datetime);
             $chatbotAPI->save();
+
+            $this->sendWelcomeMessage($message);
         }
 
         $this->setChatbotAPIModel($chatbotAPI);
 
-        $this->logger("Message ID -> " . $message->getMessageId());
-        $this->logger("Message Content -> " . $message->getContent());
-        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
+//        $this->logger("Message ID -> " . $message->getMessageId());
+//        $this->logger("Message Content -> " . $message->getContent());
+//        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
         $this->prepareOutgoingMessage($message);
+    }
+
+    private function createOutgoingMessage($message, $content)
+    {
+        $outgoingMessage = $this->_messageModel->create();
+        $outgoingMessage->setSenderId($message->getSenderId());
+        $outgoingMessage->setContent($content['content']);
+        $outgoingMessage->setContentType($content['content_type']); // TODO
+        $outgoingMessage->setStatus($this->_define::PROCESSING);
+        $outgoingMessage->setDirection($this->_define::OUTGOING);
+        $outgoingMessage->setChatMessageId($message->getChatMessageId());
+        $outgoingMessage->setChatbotType($message->getChatbotType());
+        $datetime = date('Y-m-d H:i:s');
+        $outgoingMessage->setCreatedAt($datetime);
+        $outgoingMessage->setUpdatedAt($datetime);
+        $outgoingMessage->save();
+
+        return $outgoingMessage;
     }
 
     private function prepareOutgoingMessage($message)
@@ -169,19 +188,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             foreach ($responseContents as $content)
             {
-                $outgoingMessage = $this->_messageModel->create();
-                $outgoingMessage->setSenderId($message->getSenderId());
-                $outgoingMessage->setContent($content['content']);
-                $outgoingMessage->setContentType($content['content_type']); // TODO
-                $outgoingMessage->setStatus($this->_define::PROCESSING);
-                $outgoingMessage->setDirection($this->_define::OUTGOING);
-                $outgoingMessage->setChatMessageId($message->getChatMessageId());
-                $outgoingMessage->setChatbotType($message->getChatbotType());
-                $datetime = date('Y-m-d H:i:s');
-                $outgoingMessage->setCreatedAt($datetime);
-                $outgoingMessage->setUpdatedAt($datetime);
-                $outgoingMessage->save();
+//                $outgoingMessage = $this->_messageModel->create();
+//                $outgoingMessage->setSenderId($message->getSenderId());
+//                $outgoingMessage->setContent($content['content']);
+//                $outgoingMessage->setContentType($content['content_type']); // TODO
+//                $outgoingMessage->setStatus($this->_define::PROCESSING);
+//                $outgoingMessage->setDirection($this->_define::OUTGOING);
+//                $outgoingMessage->setChatMessageId($message->getChatMessageId());
+//                $outgoingMessage->setChatbotType($message->getChatbotType());
+//                $datetime = date('Y-m-d H:i:s');
+//                $outgoingMessage->setCreatedAt($datetime);
+//                $outgoingMessage->setUpdatedAt($datetime);
+//                $outgoingMessage->save();
 
+                $outgoingMessage = $this->createOutgoingMessage($message, $content);
                 $this->processOutgoingMessage($outgoingMessage->getMessageId());
             }
 
@@ -223,8 +243,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $outgoingMessage->save();
         }
 
-        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
-        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
+//        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
+//        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
     }
 
     private function processMessageRequest($message)
@@ -278,20 +298,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
 
-        if (count($responseContent) <= 0)
-            $NLPResponses = $this->handleNaturalLanguageProcessor($message); // getNLPTextMeaning
-        if ($NLPResponses)
+        $enableNLPwitAI = $this->getConfigValue('werules_chatbot_general/general/enable_wit_ai');
+        if ($enableNLPwitAI == $this->_define::ENABLED)
         {
-            foreach ($NLPResponses as $NLPResponse)
+            if (count($responseContent) <= 0)
+                $NLPResponses = $this->handleNaturalLanguageProcessor($message); // getNLPTextMeaning
+            if ($NLPResponses)
             {
-                array_push($responseContent, $NLPResponse);
+                foreach ($NLPResponses as $NLPResponse)
+                {
+                    array_push($responseContent, $NLPResponse);
+                }
             }
         }
 
-//        if (count($responseContent) <= 0)
-//            array_push($responseContent, 'Sorry, I didnt get that'); // TODO
+        if (count($responseContent) <= 0)
+            array_push($responseContent, $this->getTextMessageArray(__("Sorry, I didn't understand that."))); // TODO
 
         return $responseContent;
+    }
+
+    private function sendWelcomeMessage($message)
+    {
+//        $this->setHelperMessageAttributes($message);
+        $this->setConfigPrefix($message);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
+        if ($text != '')
+        {
+            $contentObj = $this->getTextMessageArray($text);
+            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
+            $this->processOutgoingMessage($outgoingMessage->getMessageId());
+        }
     }
 
     private function handleNaturalLanguageProcessor($message)
@@ -567,8 +604,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function prepareCommandsList()
     {
+        if (isset($this->_commandsList) || isset($this->_completeCommandsList))
+            return true;
+
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
         $commands = $this->_serializer->unserialize($serializedCommands);
+        if (!($commands))
+            return false;
+
         $commandsList = array();
         $completeCommandsList = array();
         foreach ($commands as $command)
@@ -585,6 +628,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->setCommandsList($commandsList);
         $this->setCompleteCommandsList($completeCommandsList);
 //        return $commandsList;
+
+        return true;
     }
 
     private function checkCancelCommand($command, $senderId)
@@ -702,8 +747,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
             {
-                if (!$setStateOnly)
-                    $result = $this->processCheckoutCommand($senderId);
+                $chatbotAPI = $this->getChatbotAPIModel($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                {
+                    if (!$setStateOnly)
+                        $result = $this->processCheckoutCommand($senderId);
+                }
+                else
+                    $result = $this->getNotLoggedMessage();
             }
             else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
             {
@@ -941,11 +992,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_chatbotAPIModel = $chatbotAPI;
     }
 
+    private function setConfigPrefix($message)
+    {
+        if (!isset($this->_configPrefix))
+        {
+            if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
+                $this->_configPrefix = 'werules_chatbot_messenger';
+        }
+    }
+
     private function setHelperMessageAttributes($message)
     {
-        if ($message->getChatbotType() == $this->_define::MESSENGER_INT)
-            $this->_configPrefix = 'werules_chatbot_messenger';
-
+        $this->setConfigPrefix($message);
         $this->setCurrentMessagePayload($message->getMessagePayload());
         $this->setCurrentCommand($message->getContent()); // ignore output
         $this->prepareCommandsList();
@@ -953,10 +1011,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function setCurrentMessagePayload($messagePayload)
     {
-        if ($messagePayload)
+        if (!isset($this->_messagePayload))
         {
-            $this->_messagePayload = json_decode($messagePayload);
-            return true;
+            if ($messagePayload)
+            {
+                $this->_messagePayload = json_decode($messagePayload);
+                return true;
+            }
         }
 
         return false;
