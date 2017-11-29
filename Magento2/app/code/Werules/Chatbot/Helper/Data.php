@@ -153,13 +153,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->sendWelcomeMessage($message);
         }
 
-        $this->setChatbotAPIModel($chatbotAPI);
+        if ($chatbotAPI->getEnabled() == $this->_define::DISABLED)
+            $this->sendDisabledByCustomerMessage($message);
+        else
+        {
+            $this->setChatbotAPIModel($chatbotAPI);
 
 //        $this->logger("Message ID -> " . $message->getMessageId());
 //        $this->logger("Message Content -> " . $message->getContent());
 //        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
 
-        $this->prepareOutgoingMessage($message);
+            $this->prepareOutgoingMessage($message);
+        }
+
     }
 
     private function createOutgoingMessage($message, $content)
@@ -329,6 +335,30 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
             $this->processOutgoingMessage($outgoingMessage->getMessageId());
         }
+    }
+
+    private function sendDisabledByCustomerMessage($message)
+    {
+        $this->setConfigPrefix($message);
+        $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
+        $contentObj = $this->getTextMessageArray($text);
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
+        $this->processOutgoingMessage($outgoingMessage->getMessageId());
+    }
+
+    private function sendDisabledMessage($message)
+    {
+//        $this->setHelperMessageAttributes($message);
+        $this->setConfigPrefix($message);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/disabled_message');
+
+        if ($text != '')
+            $contentObj = $this->getTextMessageArray($text);
+        else
+            $contentObj = $this->getErrorMessage();
+
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // reset -> gets first item of array
+        $this->processOutgoingMessage($outgoingMessage->getMessageId());
     }
 
     private function handleNaturalLanguageProcessor($message)
@@ -1527,6 +1557,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return $this->_chatbotAPIModel;
 
         // should never get here
+        // because it's already set
         $chatbotAPI = $this->_chatbotAPI->create();
         $chatbotAPI->load($senderId, 'chat_id'); // TODO
         $this->setChatbotAPIModel($chatbotAPI);
