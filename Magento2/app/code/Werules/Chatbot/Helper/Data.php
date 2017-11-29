@@ -1185,25 +1185,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $quote;
     }
 
-    private function getCartItemsByCustomerId($customerId)
-    {
-        $quote = $this->getQuoteByCustomerId($customerId);
-        if ($quote->getId())
-        {
-            $allItems = $quote->getItemsCollection(); // returns all the items in quote
-            if (count($allItems) > 0)
-                return $allItems;
-        }
+//    private function getCartItemsByCustomerId($customerId)
+//    {
+//        $quote = $this->getQuoteByCustomerId($customerId);
+//        if ($quote->getId())
+//        {
+//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
+//            if (count($allItems) > 0)
+//                return $allItems;
+//        }
+//
+//        return array();
+//    }
 
-        return array();
-    }
-
-    private function getListWithImageProductObject($product)
+    private function getItemListImageProductObject($product)
     {
         return $this->getListProductDetailsObject($product);
     }
 
-    private function getListProductDetailsObject($product) // return a single object to be used in a bundled list
+    private function getListProductDetailsObject($product, $image = true) // return a single object to be used in a bundled list
     {
         $element = array();
         if ($product->getId())
@@ -1213,15 +1213,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             else
                 $description = '';
 
-            if ($product->getImage())
-                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-            else
-                $productImage = $this->getPlaceholderImage();
             $productUrl = $product->getProductUrl();
 
             $element = array(
                 'title' => $product->getName(),
-                'image_url' => $productImage,
+//                'image_url' => $productImage,
                 'subtitle' => $description,
                 'default_action' => array(
                     'type' => 'web_url',
@@ -1235,6 +1231,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     )
                 )
             );
+
+            if ($image)
+            {
+                if ($product->getImage())
+                    $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+                else
+                    $productImage = $this->getPlaceholderImage();
+
+                $element['image_url'] = $productImage;
+            }
         }
 
         return $element;
@@ -1671,14 +1677,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processCheckoutCommand($senderId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
-        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
+        $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
+        $orderItems = $quote->getItemsCollection();
+//        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
         $result = array();
         $listObjectList = array();
         if (count($orderItems) > 1)
         {
             foreach ($orderItems as $orderItem)
             {
-                $listObject = $this->getListWithImageProductObject($orderItem->getProduct());
+                $listObject = $this->getItemListImageProductObject($orderItem->getProduct());
                 if ($listObject)
                     array_push($listObjectList, $listObject);
             }

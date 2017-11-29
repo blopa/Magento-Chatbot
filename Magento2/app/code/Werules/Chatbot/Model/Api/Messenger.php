@@ -192,7 +192,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 
 //        );
 
-    public function sendListTemplate($chat_id, array $elements, array $buttons = array()) {
+    public function sendListTemplate($chat_id, array $elements, array $buttons = array(), $top_element = 'compact') {
         return $this->endpoint("me/messages", array(
                 'recipient' => array(
                     'id' => $chat_id
@@ -202,7 +202,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
                         'type' => 'template',
                         'payload' => array(
                             'template_type' => 'list',
-                            'top_element_style' => 'compact',
+                            'top_element_style' => $top_element,
                             'elements' => $elements,
                             'buttons' => $buttons
                         )

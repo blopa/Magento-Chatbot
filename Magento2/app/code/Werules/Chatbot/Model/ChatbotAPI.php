@@ -374,11 +374,16 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
             $element = array(
                 'title' => $item->title,
-                'image_url' => $item->image_url,
-                'subtitle' => $item->subtitle,
+//                'image_url' => $item->image_url,
+//                'subtitle' => $item->subtitle,
                 'default_action' => $defaultAction,
                 'buttons' => $listButtons
             );
+
+            if (isset($item->subtitle))
+                $element['subtitle'] = $item->subtitle;
+            if (isset($item->image_url))
+                $element['image_url'] = $item->image_url;
 
             array_push($elements, $element);
         }
