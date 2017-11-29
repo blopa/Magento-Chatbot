@@ -40,11 +40,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_quoteModel;
     protected $_imageHelper;
     protected $_stockRegistry;
+    protected $_priceHelper;
 //    protected $_storeConfig;
 //    protected $_cartModel;
 //    protected $_cartManagementInterface;
 //    protected $_cartRepositoryInterface;
 
+    // not from construct parameters
     protected $_define;
     protected $_configPrefix;
     protected $_commandsList;
@@ -73,6 +75,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
+        \Magento\Framework\Pricing\Helper\Data $priceHelper,
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
@@ -96,6 +99,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
 //        $this->_storeConfig = $scopeConfig;
         $this->_imageHelper = $imageHelper;
+        $this->_priceHelper = $priceHelper;
         $this->_productCollection = $productCollection;
         parent::__construct($context);
     }
@@ -208,8 +212,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
             $result = $chatbotAPI->sendReceiptList($outgoingMessage);
-        else if ($outgoingMessage->getContentType() == $this->_define::LIST_WITH_IMAGE)
-            $result = $chatbotAPI->sendGenericList($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
+            $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
 
         if ($result)
         {
@@ -1185,60 +1189,95 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $quote;
     }
 
-    private function getCartItemsByCustomerId($customerId)
+//    private function getCartItemsByCustomerId($customerId)
+//    {
+//        $quote = $this->getQuoteByCustomerId($customerId);
+//        if ($quote->getId())
+//        {
+//            $allItems = $quote->getItemsCollection(); // returns all the items in quote
+//            if (count($allItems) > 0)
+//                return $allItems;
+//        }
+//
+//        return array();
+//    }
+
+//    private function getItemListImageProductObject($product)
+//    {
+//        return $this->getListProductDetailsObject($product);
+//    }
+
+    private function getCartItemsList($quote, $includeTax = true)
     {
-        $quote = $this->getQuoteByCustomerId($customerId);
-        if ($quote->getId())
+        $orderItems = $quote->getItemsCollection();
+        $text = '';
+        foreach ($orderItems as $orderItem)
         {
-            $allItems = $quote->getItemsCollection(); // returns all the items in quote
-            if (count($allItems) > 0)
-                return $allItems;
+            $text .= __("Product:") . ' ' . $orderItem->getName() . chr(10);
+            $price = $this->_priceHelper->currency($orderItem->getPrice(), true, false);
+            $text .= __("Price:") . ' ' . $price . chr(10);
+            $text .= __("Quantity:") . ' ' . $orderItem->getQty() . chr(10);
+            $text .= chr(10);
+        }
+        if ($text != '')
+        {
+            $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
+            $text .= __("Subtotal:") . ' ' . $price . chr(10);
+            if ($includeTax)
+            {
+                if ($quote->getSubtotalInclTax())
+                {
+                    $price = $this->_priceHelper->currency($quote->getSubtotal(), true, false);
+                    $text .= __("Subtotal (Tax Incl.):") . ' ' . $price . chr(10);
+                }
+            }
         }
 
-        return array();
+        return $text;
     }
 
-    private function getListWithImageProductObject($product)
-    {
-        return $this->getListProductDetailsObject($product);
-    }
-
-    private function getListProductDetailsObject($product) // return a single object to be used in a bundled list
-    {
-        $element = array();
-        if ($product->getId())
-        {
-            if ($product->getShortDescription())
-                $description = $this->excerpt($product->getShortDescription(), 60);
-            else
-                $description = '';
-
-            if ($product->getImage())
-                $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
-            else
-                $productImage = $this->getPlaceholderImage();
-            $productUrl = $product->getProductUrl();
-
-            $element = array(
-                'title' => $product->getName(),
-                'image_url' => $productImage,
-                'subtitle' => $description,
-                'default_action' => array(
-                    'type' => 'web_url',
-                    'url' => $productUrl
-                ),
-                'buttons' => array(
-                    array(
-                        'title' => __("Visit product's page"),
-                        'type' => 'web_url',
-                        'url' => $productUrl
-                    )
-                )
-            );
-        }
-
-        return $element;
-    }
+//    private function getListProductDetailsObject($product, $image = true) // return a single object to be used in a bundled list
+//    {
+//        $element = array();
+//        if ($product->getId())
+//        {
+//            if ($product->getShortDescription())
+//                $description = $this->excerpt($product->getShortDescription(), 60);
+//            else
+//                $description = '';
+//
+//            $productUrl = $product->getProductUrl();
+//
+//            $element = array(
+//                'title' => $product->getName(),
+////                'image_url' => $productImage,
+//                'subtitle' => $description,
+//                'default_action' => array(
+//                    'type' => 'web_url',
+//                    'url' => $productUrl
+//                ),
+//                'buttons' => array(
+//                    array(
+//                        'title' => __("Visit product's page"),
+//                        'type' => 'web_url',
+//                        'url' => $productUrl
+//                    )
+//                )
+//            );
+//
+//            if ($image)
+//            {
+//                if ($product->getImage())
+//                    $productImage = $this->getMediaURL('catalog/product') . $product->getImage();
+//                else
+//                    $productImage = $this->getPlaceholderImage();
+//
+//                $element['image_url'] = $productImage;
+//            }
+//        }
+//
+//        return $element;
+//    }
 
     private function getImageWithOptionsProductObject($product)
     {
@@ -1671,57 +1710,99 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processCheckoutCommand($senderId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
-        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
+        $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
         $result = array();
-        $listObjectList = array();
-        if (count($orderItems) > 1)
-        {
-            foreach ($orderItems as $orderItem)
-            {
-                $listObject = $this->getListWithImageProductObject($orderItem->getProduct());
-                if ($listObject)
-                    array_push($listObjectList, $listObject);
-            }
-            $buttons = array(
-                array(
-                    'type' => 'web_url',
-                    'title' => __("Checkout"),
-                    'url' => $this->getStoreURL('checkout/cart')
-                )
-            );
 
-            if ($listObjectList)
+        if ($quote->getId())
+        {
+            $checkoutTotalText = $this->getCartItemsList($quote);
+            if ($checkoutTotalText)
             {
+                $buttons = array(
+                    array(
+                        'type' => 'web_url',
+                        'title' => __("Checkout"),
+                        'url' => $this->getStoreURL('checkout/cart')
+                    )
+                );
+
                 $contentObject = new \stdClass();
-                $contentObject->list = $listObjectList;
+                $contentObject->message = $checkoutTotalText;
                 $contentObject->buttons = $buttons;
                 $responseMessage = array(
-                    'content_type' => $this->_define::LIST_WITH_IMAGE,
+                    'content_type' => $this->_define::TEXT_WITH_OPTIONS,
                     'content' => json_encode($contentObject)
                 );
                 array_push($result, $responseMessage);
             }
+            else
+            {
+                $text = __("Your cart is empty.");
+                $result = $this->getTextMessageArray($text);
+            }
         }
-        else if (count($orderItems) == 1)
-        {
-            $orderItem = $orderItems->getFirstItem();
-            $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
-            array_push($listObjectList, $imageWithOptionsProdObj);
-
-            $responseMessage = array(
-                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
-                'content' => json_encode($listObjectList)
-            );
-            array_push($result, $responseMessage);
-        }
-        else // if (count($orderItems) <= 0)
-        {
-            $text = __("Your cart is empty.");
-            $result = $this->getTextMessageArray($text);
-        }
+        else
+            $result = $this->getErrorMessage();
 
         return $result;
     }
+
+//    private function processCheckoutCommand($senderId)
+//    {
+//        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
+//        $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
+//        $orderItems = $quote->getItemsCollection();
+////        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
+//        $result = array();
+//        $listObjectList = array();
+//        if (count($orderItems) > 1)
+//        {
+//            foreach ($orderItems as $orderItem)
+//            {
+//                $listObject = $this->getItemListImageProductObject($orderItem->getProduct());
+//                if ($listObject)
+//                    array_push($listObjectList, $listObject);
+//            }
+//            $buttons = array(
+//                array(
+//                    'type' => 'web_url',
+//                    'title' => __("Checkout"),
+//                    'url' => $this->getStoreURL('checkout/cart')
+//                )
+//            );
+//
+//            if ($listObjectList)
+//            {
+//                $contentObject = new \stdClass();
+//                $contentObject->list = $listObjectList;
+//                $contentObject->buttons = $buttons;
+//                $responseMessage = array(
+//                    'content_type' => $this->_define::LIST_WITH_IMAGE,
+//                    'content' => json_encode($contentObject)
+//                );
+//                array_push($result, $responseMessage);
+//            }
+//        }
+//        else if (count($orderItems) == 1)
+//        {
+//            $orderItem = $orderItems->getFirstItem();
+//            $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
+//            array_push($listObjectList, $imageWithOptionsProdObj);
+//
+//            $responseMessage = array(
+//                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
+//                'content' => json_encode($listObjectList)
+//            );
+//            array_push($result, $responseMessage);
+//        }
+//        else // if (count($orderItems) <= 0)
+//        {
+//            $text = __("Your cart is empty.");
+//            $result = $this->getTextMessageArray($text);
+//        }
+//
+//        return $result;
+//    }
 
     private function processClearCartCommand($senderId)
     {
