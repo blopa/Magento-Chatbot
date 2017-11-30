@@ -2,7 +2,8 @@
 // settings controller, used to save all data from customer configurations
 // and also "links" a chatbot to the customer in the function loginFromChatbot
 class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Action {
-	public function preDispatch() // function that makes the settings page only available when the user is logged in
+	// function that makes the settings page only available when the user is logged in
+	public function preDispatch()
 	{
 		parent::preDispatch();
 		$loginUrl = Mage::helper('customer')->getLoginUrl();
@@ -11,7 +12,9 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 			$this->setFlag('', self::FLAG_NO_DISPATCH, true);
 		}
 	}
-	public function indexAction() // main action, sets layout and page title
+
+	// main action, sets layout and page title
+	public function indexAction()
 	{
 		$this->loadLayout();
 		// some code
@@ -21,6 +24,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$this->renderLayout();
 	}
 
+	// save settings
 	public function saveAction()
 	{
 		$mageHelper = Mage::helper('core');
@@ -63,6 +67,7 @@ class Werules_Chatbot_SettingsController extends Mage_Core_Controller_Front_Acti
 		$this->_redirect('chatbot/settings/index'); // redirect customer to settings page
 	}
 
+	// handle requests with hash
 	private function requestHandler()
 	{
 		$hash = Mage::app()->getRequest()->getParam('hash');

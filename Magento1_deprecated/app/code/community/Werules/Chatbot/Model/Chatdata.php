@@ -6,6 +6,7 @@
 //	require_once("Api/WeChat/Handler.php");
 	require_once("Api/witAI/witAI.php");
 
+// main class of the module
 class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 	{
 		//APIs
@@ -25,6 +26,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		}
 
 		// GENERAL FUNCTIONS
+		// handle all requests
 		public function requestHandler($action, $webhook) // handle request
 		{
 			// handle webhook configuration
@@ -86,6 +88,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 				return json_encode(array("status" => "error")); // TODO
 		}
 
+		// respond success after handling the request
 		protected function respondSuccess()
 		{
 //			$chatbotHelper = $this->_chatbotHelper;
@@ -102,6 +105,8 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			http_response_code(200);
 			return json_encode(array("status" => "success"));
 		}
+
+		// function to send email using Zend framework
 		protected function sendEmail($text, $username)
 		{
 			$storeName = Mage::app()->getStore()->getName();
@@ -164,6 +169,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			}
 		}
 
+		// add product to the cart. Currently only works with simple products
 		protected function addProd2Cart($prodId) // TODO add expiration date for sessions
 		{
 			$stock = Mage::getModel('cataloginventory/stock_item')
@@ -227,6 +233,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return true;
 		}
 
+		// get command string from backend settings
 		protected function getCommandString($cmdId)
 		{
 			$chatbotHelper = $this->_chatbotHelper;
@@ -295,6 +302,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return array('command' => null, 'alias' => null);
 		}
 
+		// clear cart
 		protected function clearCart()
 		{
 			try
@@ -327,6 +335,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return true;
 		}
 
+		// update data from this class
 		public function updateChatdata($dataType, $state)
 		{
 			try
@@ -350,6 +359,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		}
 
 		// TELEGRAM FUNCTIONS
+		// handle all messages from other chats other than Telegram to Telegram
 		public function foreignMessageToTelegramSupport($foreignChatId, $text, $apiName, $customerName)
 		{
 			//$chatdata = Mage::getModel('chatbot/chatdata');
@@ -405,6 +415,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 			return false;
 		}
 
+		// function that list all Telegram enabled commands
 		protected function listTelegramCommandsMessage()
 		{
 			$chatbotHelper = $this->_chatbotHelper;
@@ -432,6 +443,7 @@ class Werules_Chatbot_Model_Chatdata extends Mage_Core_Model_Abstract
 		}
 
 		// FACEBOOK FUNCTIONS
+		// function that list all Facebook enabled commands
 		protected function listFacebookCommandsMessage()
 		{
 			$chatbotHelper = $this->_chatbotHelper;

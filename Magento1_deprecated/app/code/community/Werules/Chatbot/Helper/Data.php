@@ -1,4 +1,7 @@
 <?php
+// this is the helper class of the module
+// it contains all the constans and most of the generic functions
+// and some parts of the bussiness logic
 class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 {
 	// ----- CONSTANTS ----------
@@ -130,6 +133,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 //		return json_decode($result, true);
 //	}
 
+	// gets content from a given URL
 	public function getContent($url)
 	{
 		$ch = curl_init();
@@ -143,6 +147,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return null;
 	}
 
+	// converts ogg files to mp3
 	public function convertOggToMp3($filePath, $fileName)
 	{
 		// install ffmpeg by typoing sudo apt-get install ffmpeg
@@ -160,7 +165,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		return $output;
 	}
 
-	// excerpt text
+	// excerpt a given text
 	public function excerpt($text, $size)
 	{
 		if (strlen($text) > $size)
@@ -250,7 +255,7 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 		$productCollection = Mage::getResourceModel('catalog/product_collection')
 			->addAttributeToSelect('*')
 			->addAttributeToFilter('visibility', 4)
-			->addAttributeToFilter('type_id', 'simple')
+			//->addAttributeToFilter('type_id', 'simple')
 			->addAttributeToFilter(
 				array(
 					array('attribute' => 'sku', 'like' => '%' . $searchString .'%'),

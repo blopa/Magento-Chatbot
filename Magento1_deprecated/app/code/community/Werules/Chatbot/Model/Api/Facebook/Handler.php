@@ -15,6 +15,7 @@
 			$this->_chatbotHelper = Mage::helper('werules_chatbot');
 		}
 
+		// handle messages sent from chats other than Facebook Messenger
 		public function foreignMessageFromSupport($chatId, $text)
 		{
 			// helpers
@@ -42,6 +43,7 @@
 			return false;
 		}
 
+		// start handling Facebook API request
 		public function facebookHandler()
 		{
 			// Instances the Facebook class
@@ -49,6 +51,10 @@
 
 			if (!isset($facebook)) // if no apiKey available, break process
 				return json_encode(array("status" => "error"));
+
+			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
+			if ($enableLog == "1") // log all posts
+				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
 
 			// hub challenge
 			$hubToken = Mage::getStoreConfig('chatbot_enable/general_config/your_custom_key');
@@ -64,10 +70,6 @@
 
 			// helper
 			$mageHelper = Mage::helper('core');
-
-			$enableLog = Mage::getStoreConfig('chatbot_enable/general_config/enable_post_log');
-			if ($enableLog == "1") // log all posts
-				Mage::log("Post Data:\n" . var_export($facebook->RawData(), true) . "\n\n", null, 'chatbot_facebook.log');
 
 			$appId = $facebook->getAppId();
 			$canDisableBot = Mage::getStoreConfig('chatbot_enable/facebook_config/option_disable_bot');
@@ -116,6 +118,7 @@
 			return $facebook->respondSuccess();
 		}
 
+		// after handle, process text message
 		public function processText()
 		{
 			// configs
@@ -685,8 +688,8 @@
 						$noProductFlag = false;
 						$productCollection = $_category->getProductCollection()
 							->addAttributeToSelect('*')
-							->addAttributeToFilter('visibility', 4)
-							->addAttributeToFilter('type_id', 'simple');
+							->addAttributeToFilter('visibility', 4);
+							//->addAttributeToFilter('type_id', 'simple');
 						Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($productCollection);
 						$productIDs = $productCollection->getAllIds();
 
@@ -719,16 +722,19 @@
 
 										$button = array(
 											array(
-												'type' => 'postback',
-												'title' => $mageHelper->__("Add to cart"),
-												'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
-											),
-											array(
 												'type' => 'web_url',
 												'url' => $productUrl,
 												'title' => $mageHelper->__("Visit product's page")
 											)
 										);
+										if ($product->getTypeId() == "simple")
+											array_push($button,
+												array(
+													'type' => 'postback',
+													'title' => $mageHelper->__("Add to cart"),
+													'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
+												)
+											);
 										$element = array(
 											'title' => $product->getName(),
 											'item_url' => $productUrl,
@@ -738,7 +744,7 @@
 										);
 										array_push($elements, $element);
 
-										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 										{
 											// TODO add option to list more products
 											$button = array(
@@ -845,16 +851,19 @@
 
 									$button = array(
 										array(
-											'type' => 'postback',
-											'title' => $mageHelper->__("Add to cart"),
-											'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
-										),
-										array(
 											'type' => 'web_url',
 											'url' => $productUrl,
 											'title' => $mageHelper->__("Visit product's page")
 										)
 									);
+									if ($product->getTypeId() == "simple")
+										array_push($button,
+											array(
+												'type' => 'postback',
+												'title' => $mageHelper->__("Add to cart"),
+												'payload' => $chatbotHelper->_add2CartCmd['command'] . $productID
+											)
+										);
 									$element = array(
 										'title' => $product->getName(),
 										'item_url' => $productUrl,
@@ -864,7 +873,7 @@
 									);
 									array_push($elements, $element);
 
-									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+									if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 									{
 										// TODO add option to list more products
 										$button = array(
@@ -1041,7 +1050,7 @@
 							$productIDs = $category->getProductCollection()
 								->addAttributeToSelect('*')
 								->addAttributeToFilter('visibility', 4)
-								->addAttributeToFilter('type_id', 'simple')
+								//->addAttributeToFilter('type_id', 'simple')
 								->getAllIds()
 							;
 						}
@@ -1278,7 +1287,7 @@
 									array_push($replies, $reply);
 									if ($i >= $showMore)
 									{
-										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($show_more)
+										if (($i + 1) != $total && $i >= ($showMore + $listingLimit)) // if isn't the 'last but one' and $i is bigger than listing limit + what was shown last time ($showMore)
 										{
 											$reply = array(
 												'content_type' => 'text',

@@ -35,7 +35,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - List store categories
 - List products from category
 - Search for products
-- Add product to cart
+- Add product to cart (Currently not working with Configurable Products and products with custom options)
 - Clear cart
 - Login/Logout to your account
 - List orders
@@ -50,8 +50,6 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 - Use Telegram to receive and reply messages from Facebook
 - Set custom reply messages for predetermined text or regex
 - Custom fallback messages
-
-**Currently not working with Configurable Products and products with custom options**
 
 ## Languages
 - English (US)
@@ -142,6 +140,10 @@ Conversation
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
+- **v0.0.17:**
+	- Add Abandoned Cart messages
+	- Enable all types of products to be listed
+	- Update module license for MIT license
 - **v0.0.16:**
 	- Code improvements
 	- Fix flood of messages when disabling bot for human respond
@@ -252,6 +254,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Microsoft Bot Framework / Skype
 	- ???
 - **Features:**
+	- Add message queueing
 	- Documentation / Tutorials / Videos
 	- Add a custom in-store message chat app
 	- Save support history
@@ -260,9 +263,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 	- Force a command for a customer
 	- Integrate checkout to Facebook Payment API
 	- Save messages on database before sending to make sure it will be sent eventually
-	- Add compatibility with configurable products
-	- Add compatibility with products with custom options
-	- Add "abandoned cart" messages
+	- Add "Add to cart" feature for configurable products and products with custom options
+	- Better approach for Abandoned Carts
 	- Add `CDATA` and `<tooltip>` to configuration descriptions
 
 ## License
