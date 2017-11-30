@@ -51,7 +51,7 @@ class Index extends \Magento\Framework\View\Element\Template
         parent::__construct($context);
     }
 
-    protected function createMessageObject(){} // TODO
+    protected function createMessageObject($apiModel){} // TODO
     protected function processRequest(){} // TODO
 
     protected function checkEndpointSecretKey()

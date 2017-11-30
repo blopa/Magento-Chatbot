@@ -326,11 +326,6 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
         return $this->data['entry'][0]['messaging'][0]['recipient']['id'];
     }
 
-    /// Get raw data
-    public function RawData() {
-        return $this->data;
-    }
-
     /// Get m.me ref type
     public function getReferralType() {
         return $this->data["entry"][0]["messaging"][0]["referral"]["type"];
