@@ -1,0 +1,81 @@
+<?xml version="1.0" ?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+	<route method="POST" url="/V1/werules-chatbot/message">
+		<service class="Werules\Chatbot\Api\MessageRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::Message_save"/>
+		</resources>
+	</route>
+	<route method="GET" url="/V1/werules-chatbot/search">
+		<service class="Werules\Chatbot\Api\MessageRepositoryInterface" method="getList"/>
+		<resources>
+			<resource ref="Werules_Chatbot::Message_view"/>
+		</resources>
+	</route>
+	<route method="GET" url="/V1/werules-chatbot/:messageId">
+		<service class="Werules\Chatbot\Api\MessageRepositoryInterface" method="getById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::Message_view"/>
+		</resources>
+	</route>
+	<route method="PUT" url="/V1/werules-chatbot/:messageId">
+		<service class="Werules\Chatbot\Api\MessageRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::Message_update"/>
+		</resources>
+	</route>
+	<route method="DELETE" url="/V1/werules-chatbot/:messageId">
+		<service class="Werules\Chatbot\Api\MessageRepositoryInterface" method="deleteById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::Message_delete"/>
+		</resources>
+	</route>
+	<route method="POST" url="/V1/werules-chatbot/chatbotapi">
+		<service class="Werules\Chatbot\Api\ChatbotAPIRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotAPI_save"/>
+		</resources>
+	</route>
+	<route method="GET" url="/V1/werules-chatbot/:chatbotapiId">
+		<service class="Werules\Chatbot\Api\ChatbotAPIRepositoryInterface" method="getById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotAPI_view"/>
+		</resources>
+	</route>
+	<route method="PUT" url="/V1/werules-chatbot/:chatbotapiId">
+		<service class="Werules\Chatbot\Api\ChatbotAPIRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotAPI_update"/>
+		</resources>
+	</route>
+	<route method="DELETE" url="/V1/werules-chatbot/:chatbotapiId">
+		<service class="Werules\Chatbot\Api\ChatbotAPIRepositoryInterface" method="deleteById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotAPI_delete"/>
+		</resources>
+	</route>
+	<route method="POST" url="/V1/werules-chatbot/chatbotuser">
+		<service class="Werules\Chatbot\Api\ChatbotUserRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotUser_save"/>
+		</resources>
+	</route>
+	<route method="GET" url="/V1/werules-chatbot/:chatbotuserId">
+		<service class="Werules\Chatbot\Api\ChatbotUserRepositoryInterface" method="getById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotUser_view"/>
+		</resources>
+	</route>
+	<route method="PUT" url="/V1/werules-chatbot/:chatbotuserId">
+		<service class="Werules\Chatbot\Api\ChatbotUserRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotUser_update"/>
+		</resources>
+	</route>
+	<route method="DELETE" url="/V1/werules-chatbot/:chatbotuserId">
+		<service class="Werules\Chatbot\Api\ChatbotUserRepositoryInterface" method="deleteById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::ChatbotUser_delete"/>
+		</resources>
+	</route>
+</routes>

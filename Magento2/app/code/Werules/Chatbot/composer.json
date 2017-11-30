@@ -1,0 +1,25 @@
+{
+    "name": "werules/module-chatbot",
+    "description": "Magento Chatbot Integration",
+    "license": "MIT",
+    "authors": [
+        {
+            "email": "info@mage2gen.com",
+            "name": "Mage2Gen"
+        },
+        {
+            "email": "contact@pablomontenegro.com.br",
+            "name": "Pablo Montenegro"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Werules\\Chatbot\\": ""
+        }
+    }
+}
