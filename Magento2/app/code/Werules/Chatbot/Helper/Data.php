@@ -106,12 +106,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         parent::__construct($context);
     }
 
-    public function logger($message) // TODO find a better way to to this
+    public function logger($text, $file = 'werules_chatbot.log') // TODO find a better way to to this
     {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/werules_chatbot.log');
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/' . $file);
         $logger = new \Zend\Log\Logger();
         $logger->addWriter($writer);
-        $logger->info(var_export($message, true));
+        $logger->info(var_export($text, true));
     }
 
     private function generateRandomHashKey($len = 32)

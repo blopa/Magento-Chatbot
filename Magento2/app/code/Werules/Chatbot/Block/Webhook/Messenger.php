@@ -76,7 +76,11 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             }
             else // process message
             {
-                $messageObject = $this->createMessageObject();
+                $messengerInstance = $this->getMessengerInstance();
+                $postLog = ($this->getConfigValue('werules_chatbot_general/general/enable_post_log') == $this->_define::ENABLED);
+                if ($postLog)
+                    $this->_helper->logger($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
+                $messageObject = $this->createMessageObject($messengerInstance);
                 $result = $this->messageHandler($messageObject);
             }
 //        }
@@ -86,10 +90,15 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         return $result;
     }
 
-    protected function createMessageObject()
+    protected function getMessengerInstance()
     {
         $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
         $messenger = $this->_chatbotAPI->initMessengerAPI($api_token);
+        return $messenger;
+    }
+
+    protected function createMessageObject($messenger)
+    {
         $messageObject = new \stdClass();
         $messageObject->senderId = $messenger->ChatID();
         $messageObject->content = $messenger->Text();
