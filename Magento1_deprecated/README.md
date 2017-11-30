@@ -1,7 +1,9 @@
 # Magento Chatbot Module (Telegram, Messenger, Whatsapp, WeChat and Skype)
 
+
 # IMPORTANT
 ### THIS VERSION IS DEPECRATED, YOU CAN FIND THE NEW MAGENTO1 VERSION [HERE](https://github.com/blopa/Magento-Chatbot/tree/master/Magento1) OR MAGENTO2 [HERE](https://github.com/blopa/Magento-Chatbot/tree/master/Magento2)
+
 **Chatbots!** They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
 <img src="/screenshots/chat.gif?raw=true" width="550px">

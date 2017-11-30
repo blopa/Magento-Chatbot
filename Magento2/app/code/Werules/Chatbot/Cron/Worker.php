@@ -61,24 +61,24 @@ class Worker
 //                    ->addFieldToFilter('status', array('eq' => '0'));
 //            }
 //        }
-//        $processingLimit = $this->_define::SECONDS_IN_HOUR;
-//        $messageCollection = $this->_messageModel->getCollection()
-//            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED));
-//        foreach ($messageCollection as $message) {
-//            //$this->_logger->addInfo(var_export($m->getContent(), true));
-//            $datetime = date('Y-m-d H:i:s');
-//            if ($message->getStatus() == $this->_define::NOT_PROCESSED)
-//            {
-//                $message->setStatus($this->_define::PROCESSING); // processing
-//                $message->setUpdatedAt($datetime);
-//                $message->save();
-//                $this->_helper->processMessage($message->getMessageId());
-//            }
-//            else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
-//            {
-//                $this->_helper->processMessage($message->getMessageId());
-//            }
-//        }
-//        $this->_logger->addInfo("Cronjob Worker is executed.");
+        $processingLimit = $this->_define::SECONDS_IN_HOUR;
+        $messageCollection = $this->_messageModel->getCollection()
+            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED));
+        foreach ($messageCollection as $message) {
+            //$this->_logger->addInfo(var_export($m->getContent(), true));
+            $datetime = date('Y-m-d H:i:s');
+            if ($message->getStatus() == $this->_define::NOT_PROCESSED)
+            {
+                $message->setStatus($this->_define::PROCESSING); // processing
+                $message->setUpdatedAt($datetime);
+                $message->save();
+                $this->_helper->processMessage($message->getMessageId());
+            }
+            else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
+            {
+                $this->_helper->processMessage($message->getMessageId());
+            }
+        }
+        $this->_logger->addInfo("Cronjob Worker is executed.");
     }
 }
