@@ -90,15 +90,12 @@ Go to **System > General Settings  > Chatbot Settings**
 - Natural Language Processor Replies: Replies to be send to the customer whenever matches one of the requirements.
 
 ## Screenshot
-
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/facebook_configuration.jpg)
-
-Conversation
+#### Conversation
 
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
 ## Release Notes
-#### Magento2
+### Magento2
 - **v1.0.0:**
     - First working version
     - Messenger integration
@@ -115,8 +112,8 @@ Conversation
     - Send email
     - Custom fallback messages
     - Much more
-#### Magento1
-##### Deprecated versions
+### Magento1
+#### Deprecated versions
 - **v0.0.16:**
     - Code improvements
     - Fix flood of messages when disabling bot for human respond
