@@ -96,6 +96,9 @@
 					<comment>Facebook Messenger box size.</comment>
 				</field>
 				<field id="enable_referral" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="select">
+					<depends>
+						<field id="werules_chatbot_messenger/general/enable_messenger_box">1</field>
+					</depends>
 					<label>Enable Referral</label>
 					<comment>Enable referral.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
