@@ -23,7 +23,7 @@
 					<show_in_default>1</show_in_default>
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
-					<comment><![CDATA[<h3>Magento Chatbot v0.0.16</h3><p>To Use This Module You'll Need to Have SSL Enabled in Your Store.</p>]]></comment>
+					<comment><![CDATA[<h3>Magento Chatbot v0.0.18</h3><p>To Use This Module You'll Need to Have SSL Enabled in Your Store.</p>]]></comment>
 					<fields>
 						<your_custom_key>
 							<label>Your Secret Key</label>
