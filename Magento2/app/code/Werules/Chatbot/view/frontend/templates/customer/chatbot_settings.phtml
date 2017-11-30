@@ -25,7 +25,7 @@
                 </p>
             </div>
         <?php endif; ?>
-        <div class="field choice">
+        <div class="field choice" style="display: none;">
             <input type="checkbox" name="enable_promotion" id="enable_promotion" value="1" title="<?php echo __("Receive Promotional Messages?") ?>" class="checkbox" <?php if (!$startedChatbot) echo 'disabled'; else if ($enablePromotion) echo 'checked'; ?>>
             <label for="enable_promotion" class="label">
                 <span><?php echo __("Receive Promotional Messages?") ?></span>
