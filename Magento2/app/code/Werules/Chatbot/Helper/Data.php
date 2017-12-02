@@ -204,32 +204,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($responseContents)
         {
+            $result = $this->updateIncomingMessageStatus($message->getMessageId(), $this->_define::PROCESSED);
+
+            $outgoingMessages = array();
             foreach ($responseContents as $content)
             {
-//                $outgoingMessage = $this->_messageModel->create();
-//                $outgoingMessage->setSenderId($message->getSenderId());
-//                $outgoingMessage->setContent($content['content']);
-//                $outgoingMessage->setContentType($content['content_type']); // TODO
-//                $outgoingMessage->setStatus($this->_define::PROCESSING);
-//                $outgoingMessage->setDirection($this->_define::OUTGOING);
-//                $outgoingMessage->setChatMessageId($message->getChatMessageId());
-//                $outgoingMessage->setChatbotType($message->getChatbotType());
-//                $datetime = date('Y-m-d H:i:s');
-//                $outgoingMessage->setCreatedAt($datetime);
-//                $outgoingMessage->setUpdatedAt($datetime);
-//                $outgoingMessage->save();
-
+                // first guarantee outgoing message is saved
                 $outgoingMessage = $this->createOutgoingMessage($message, $content);
-                $this->processOutgoingMessage($outgoingMessage->getMessageId());
+                array_push($outgoingMessages, $outgoingMessage);
             }
 
-//            $incomingMessage = $this->_messageModel->create();
-//            $incomingMessage->load($message->getMessageId()); // TODO
-//            $incomingMessage->setStatus($this->_define::PROCESSED);
-//            $datetime = date('Y-m-d H:i:s');
-//            $incomingMessage->setUpdatedAt($datetime);
-//            $incomingMessage->save();
-            $result = $this->updateIncomingMessageStatus($message->getMessageId(), $this->_define::PROCESSED);
+            foreach ($outgoingMessages as $outMessage)
+            {
+                // then process outgoing message
+                $this->processOutgoingMessage($outMessage->getMessageId()); // ignore output
+            }
         }
 
         return $result;
