@@ -63,21 +63,32 @@ class Worker
 //        }
         $processingLimit = $this->_define::SECONDS_IN_HOUR;
         $messageCollection = $this->_messageModel->getCollection()
-            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED));
+            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+        ;
         foreach ($messageCollection as $message) {
-            //$this->_logger->addInfo(var_export($m->getContent(), true));
+            $result = false;
             $datetime = date('Y-m-d H:i:s');
             if ($message->getStatus() == $this->_define::NOT_PROCESSED)
             {
                 $message->setStatus($this->_define::PROCESSING); // processing
                 $message->setUpdatedAt($datetime);
                 $message->save();
-                $this->_helper->processMessage($message->getMessageId());
+                $result = $this->_helper->processMessage($message->getMessageId());
             }
             else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
             {
-                $this->_helper->processMessage($message->getMessageId());
+                $message->setStatus($this->_define::PROCESSING); // processing
+                $message->setUpdatedAt($datetime);
+                $message->save();
+                $result = $this->_helper->processMessage($message->getMessageId());
             }
+            if (!$result)
+            {
+                $message->setStatus($this->_define::NOT_PROCESSED); // processing
+                $message->setUpdatedAt($datetime);
+                $message->save();
+            }
+            $this->_logger->addInfo('Result: ' . var_export($result, true));
         }
         $this->_logger->addInfo("Cronjob Worker is executed.");
     }
