@@ -38,6 +38,7 @@ class Define
     const ADMIN = 1;
     const LOGGED = 1;
     const SECONDS_IN_HOUR = 3600;
+    const SECONDS_IN_MINUTE = 60;
     const DEFAULT_MIN_CONFIDENCE = 0.7;
 
     // commands

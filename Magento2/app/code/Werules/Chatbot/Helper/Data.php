@@ -124,14 +124,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $message = $this->_messageModel->create();
         $message->load($messageId);
+        $result = array();
 
         if ($message->getMessageId())
         {
             if ($message->getDirection() == $this->_define::INCOMING)
-                $this->processIncomingMessage($message);
+                $result = $this->processIncomingMessage($message);
             else //if ($message->getDirection() == $this->_define::OUTGOING)
-                $this->processOutgoingMessage($message);
+                $result = $this->processOutgoingMessage($message->getMessageId());
         }
+
+        return $result;
     }
 
     private function processIncomingMessage($message)
@@ -201,32 +204,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($responseContents)
         {
+            $result = $this->updateIncomingMessageStatus($message->getMessageId(), $this->_define::PROCESSED);
+
+            $outgoingMessages = array();
             foreach ($responseContents as $content)
             {
-//                $outgoingMessage = $this->_messageModel->create();
-//                $outgoingMessage->setSenderId($message->getSenderId());
-//                $outgoingMessage->setContent($content['content']);
-//                $outgoingMessage->setContentType($content['content_type']); // TODO
-//                $outgoingMessage->setStatus($this->_define::PROCESSING);
-//                $outgoingMessage->setDirection($this->_define::OUTGOING);
-//                $outgoingMessage->setChatMessageId($message->getChatMessageId());
-//                $outgoingMessage->setChatbotType($message->getChatbotType());
-//                $datetime = date('Y-m-d H:i:s');
-//                $outgoingMessage->setCreatedAt($datetime);
-//                $outgoingMessage->setUpdatedAt($datetime);
-//                $outgoingMessage->save();
-
+                // first guarantee outgoing message is saved
                 $outgoingMessage = $this->createOutgoingMessage($message, $content);
-                $this->processOutgoingMessage($outgoingMessage->getMessageId());
+                array_push($outgoingMessages, $outgoingMessage);
             }
 
-//            $incomingMessage = $this->_messageModel->create();
-//            $incomingMessage->load($message->getMessageId()); // TODO
-//            $incomingMessage->setStatus($this->_define::PROCESSED);
-//            $datetime = date('Y-m-d H:i:s');
-//            $incomingMessage->setUpdatedAt($datetime);
-//            $incomingMessage->save();
-            $result = $this->updateIncomingMessageStatus($message->getMessageId(), $this->_define::PROCESSED);
+            foreach ($outgoingMessages as $outMessage)
+            {
+                // then process outgoing message
+                $this->processOutgoingMessage($outMessage->getMessageId()); // ignore output
+            }
         }
 
         return $result;
@@ -253,14 +245,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($result)
         {
-            $outgoingMessage->setStatus($this->_define::PROCESSED);
-            $datetime = date('Y-m-d H:i:s');
-            $outgoingMessage->setUpdatedAt($datetime);
-            $outgoingMessage->save();
+//            $outgoingMessage->setStatus($this->_define::PROCESSED);
+//            $datetime = date('Y-m-d H:i:s');
+//            $outgoingMessage->setUpdatedAt($datetime);
+//            $outgoingMessage->save();
+            $this->updateOutgoingMessageStatus($outgoingMessage->getMessageId(), $this->_define::PROCESSED);
         }
 
 //        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
 //        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
+        return $result;
     }
 
     private function processMessageRequest($message)
@@ -416,6 +410,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $parameterValue = false;
         $parameter = false;
+        if ($message->getContent() == '')
+            return $result;
 
         $entity = $chatbotAPI->getNLPTextMeaning($message->getContent());
 
@@ -577,12 +573,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function updateIncomingMessageStatus($messageId, $status)
     {
-        $incomingMessage = $this->_messageModel->create();
-        $incomingMessage->load($messageId); // TODO
-        $incomingMessage->setStatus($status);
+        return $this->updateMessageStatus($messageId, $status);
+    }
+
+    private function updateOutgoingMessageStatus($messageId, $status)
+    {
+        return $this->updateMessageStatus($messageId, $status);
+    }
+
+    private function updateMessageStatus($messageId, $status)
+    {
+        $message = $this->_messageModel->create();
+        $message->load($messageId); // TODO
+        $message->setStatus($status);
         $datetime = date('Y-m-d H:i:s');
-        $incomingMessage->setUpdatedAt($datetime);
-        $incomingMessage->save();
+        $message->setUpdatedAt($datetime);
+        $message->save();
 
         return true;
     }

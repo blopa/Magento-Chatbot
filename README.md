@@ -37,6 +37,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 **PLEASE REPORT ALL BUGS that you find. It's hard to do QA only by myself**
 
 ## Features
+- Messages Queue
 - wit.ai integration for NLP
 - List store categories
 - List products from category
