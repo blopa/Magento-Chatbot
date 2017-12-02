@@ -76,7 +76,7 @@ class Worker
             else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
             {
                 // if a message is in 'processing' status for more than 3 minutes, try to reprocess it
-                $this->updateMessageStatus($message->getMessageId(), $this->_define::PROCESSING);
+//                $this->updateMessageStatus($message->getMessageId(), $this->_define::PROCESSING); // already on 'processing' status
                 $result = $this->_helper->processMessage($message->getMessageId());
             }
 
