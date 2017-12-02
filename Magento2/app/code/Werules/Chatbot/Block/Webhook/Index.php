@@ -33,11 +33,13 @@ class Index extends \Magento\Framework\View\Element\Template
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
+//        \Magento\Framework\Registry $registry,
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Werules\Chatbot\Helper\Data $helperData,
         \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
         \Magento\Framework\App\Request\Http $request,
-        \Werules\Chatbot\Model\MessageFactory $message
+        \Werules\Chatbot\Model\MessageFactory $message,
+        array $data = array()
 //        \Werules\Chatbot\Cron\Worker $cronWorker
     )
     {
@@ -48,7 +50,7 @@ class Index extends \Magento\Framework\View\Element\Template
         $this->_objectManager = $objectManager;
         $this->_define = new \Werules\Chatbot\Helper\Define;
 //        $this->_cronWorker = $cronWorker;
-        parent::__construct($context);
+        parent::__construct($context, $data);
     }
 
     protected function createMessageObject($apiModel){} // TODO

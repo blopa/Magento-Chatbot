@@ -55,7 +55,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
             }
         }
 
-        return false;
+        return '';
     }
 
     /// Do requests to Messenger Bot API
@@ -308,7 +308,7 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
         if (isset($this->data["entry"][0]["messaging"][0]["message"]["text"]))
             return $this->data["entry"][0]["messaging"][0]["message"]["text"];
 
-        return false;
+        return '';
     }
 
     /// Get the userdata who sent the message
@@ -318,30 +318,50 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
 
     /// Get the chat_id of the current message
     public function ChatID() {
-        return $this->data['entry'][0]['messaging'][0]['sender']['id'];
+        if (isset($this->data["entry"][0]['messaging'][0]['sender']['id']))
+            return $this->data['entry'][0]['messaging'][0]['sender']['id'];
+
+        return '';
     }
 
     /// Get the recipient_id of the current message
     public function RecipientID() {
-        return $this->data['entry'][0]['messaging'][0]['recipient']['id'];
+        if (isset($this->data["entry"][0]['messaging'][0]['recipient']['id']))
+            return $this->data['entry'][0]['messaging'][0]['recipient']['id'];
+
+        return '';
     }
 
     /// Get m.me ref type
     public function getReferralType() {
-        return $this->data["entry"][0]["messaging"][0]["referral"]["type"];
+        if (isset($this->data["entry"][0]["messaging"][0]["referral"]["type"]))
+            return $this->data["entry"][0]["messaging"][0]["referral"]["type"];
+
+        return '';
     }
 
     /// Get m.me ref data
     public function getReferralRef() {
-        return $this->data["entry"][0]["messaging"][0]["referral"]["ref"];
+        if (isset($this->data["entry"][0]["messaging"][0]["referral"]["ref"]))
+            return $this->data["entry"][0]["messaging"][0]["referral"]["ref"];
+
+        return '';
     }
 
-    /// Get payload
-    public function getPayload() {
+    /// Get postback payload
+    public function getPostbackPayload() {
         if (isset($this->data["entry"][0]["messaging"][0]["postback"]["payload"]))
             return $this->data["entry"][0]["messaging"][0]["postback"]["payload"];
 
-        return false;
+        return '';
+    }
+
+    /// Get postback title
+    public function getPostbackTitle() {
+        if (isset($this->data["entry"][0]["messaging"][0]["postback"]["title"]))
+            return $this->data["entry"][0]["messaging"][0]["postback"]["title"];
+
+        return '';
     }
 
     /// Get quickreply payload
@@ -349,27 +369,39 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
         if (isset($this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"]))
             return $this->data["entry"][0]["messaging"][0]["message"]["quick_reply"]["payload"];
 
-        return false;
+        return '';
     }
 
     /// Get message timestamp
     public function getMessageTimestamp() {
-        return $this->data["entry"][0]["time"];
+        if (isset($this->data["entry"][0]["time"]))
+            return $this->data["entry"][0]["time"];
+
+        return '';
     }
 
     /// Get the message_id of the current message
     public function MessageID() {
-        return $this->data["entry"][0]["messaging"][0]["message"]["mid"];
+        if (isset($this->data["entry"][0]["messaging"][0]["message"]["mid"]))
+            return $this->data["entry"][0]["messaging"][0]["message"]["mid"];
+
+        return '';
     }
 
     /// Get the is_echo of the current message
     public function getEcho() {
-        return $this->data["entry"][0]["messaging"][0]["message"]["is_echo"];
+        if (isset($this->data["entry"][0]["messaging"][0]["message"]["is_echo"]))
+            return $this->data["entry"][0]["messaging"][0]["message"]["is_echo"];
+
+        return '';
     }
 
     /// Get the app_id of the current message
     public function getAppId() {
-        return $this->data["entry"][0]["messaging"][0]["message"]["app_id"];
+        if (isset($this->data["entry"][0]["messaging"][0]["message"]["app_id"]))
+            return $this->data["entry"][0]["messaging"][0]["message"]["app_id"];
+
+        return '';
     }
 
     private function sendAPIRequest($url, array $content, $post = true, $response = true) {

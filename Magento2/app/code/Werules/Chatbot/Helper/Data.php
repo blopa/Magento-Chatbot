@@ -752,9 +752,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $senderId = $message->getSenderId();
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
                     $result = $this->processReorderCommand($payload->parameter, $senderId);
-                }
                 else
                     $result = $this->getNotLoggedMessage();
             }

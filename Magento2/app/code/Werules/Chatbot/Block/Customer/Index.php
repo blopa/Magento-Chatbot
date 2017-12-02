@@ -35,7 +35,8 @@ class Index extends \Magento\Framework\View\Element\Template
         \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
         \Werules\Chatbot\Model\ResourceModel\ChatbotAPI\CollectionFactory $chatbotAPI,
 //        \Werules\Chatbot\Model\ChatbotUser $chatbotAPI,
-        \Magento\Customer\Model\Session $customerSession
+        \Magento\Customer\Model\Session $customerSession,
+        array $data = array()
     )
     {
         $this->_customerSession = $customerSession;
@@ -45,7 +46,7 @@ class Index extends \Magento\Framework\View\Element\Template
         $this->_chatbotAPI  = $chatbotAPI;
         $this->_define = new \Werules\Chatbot\Helper\Define;
 //        $this->_isScopePrivate = true;
-        parent::__construct($context);
+        parent::__construct($context, $data);
     }
 
     public function _prepareLayout()
