@@ -641,6 +641,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else
             $category = $this->getCategoryByName($messageContent);
 
+        if (!($category->getId()))
+        {
+            $text = __("This category doesn't seems to exist. Please try again.");
+            return $this->getTextMessageArray($text);
+        }
+
         $productCollection = $this->getProductsFromCategoryId($category->getId());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
