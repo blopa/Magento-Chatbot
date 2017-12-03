@@ -158,10 +158,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!($chatbotAPI->getChatbotapiId()))
         {
             $chatbotAPI->setEnabled($this->_define::ENABLED);
-            $chatbotAPI->setChatbotType($message->getChatbotType()); // TODO
+            $chatbotAPI->setChatbotType($message->getChatbotType());
             $chatbotAPI->setChatId($message->getSenderId());
             $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setFallbackQty(0);
+            $chatbotAPI->setLastCommandDetails($this->_define::LAST_COMMAND_DETAILS_DEFAULT); // TODO
             $hash = $this->generateRandomHashKey();
             $chatbotAPI->setHashKey($hash);
             $datetime = date('Y-m-d H:i:s');
@@ -569,7 +570,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $productList = array();
         $productCollection = $this->getProductCollectionByName($messageContent);
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-        $startAt = $chatbotAPI->getLastCommandDetails();
+        $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        $startAt = $lastCommandObject->last_listed_quantity;
         $count = 0;
 
         foreach ($productCollection as $product)
@@ -626,7 +628,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $productCollection = $this->getProductsFromCategoryId($category->getId());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-        $startAt = $chatbotAPI->getLastCommandDetails();
+        $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        $startAt = $lastCommandObject->last_listed_quantity;
         $count = 0;
 
         foreach ($productCollection as $product)
@@ -891,6 +894,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $text = __("You are already registered.");
                     $result = $this->getTextMessageArray($text);
                 }
+            }
+            else if ($command == $this->_define::LIST_MORE_COMMAND)
+            {
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+                $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+
+                if (!$setStateOnly)
+                    $result = $this->processListMore($lastCommandObject);
             }
             else // should never fall in here
             {
@@ -1767,7 +1778,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $orderList = array();
         $quickReplies = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-        $startAt = $chatbotAPI->getLastCommandDetails();
+        $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        $startAt = $lastCommandObject->last_listed_quantity;
         $count = 0;
 
         foreach ($ordersCollection as $order)
@@ -2093,6 +2105,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else
             $result = $this->getErrorMessage();
 
+        return $result;
+    }
+
+    private function processListMore()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => 'The LIST_MORE command is still under development' // TODO
+        );
+        array_push($result, $responseMessage);
         return $result;
     }
 }
