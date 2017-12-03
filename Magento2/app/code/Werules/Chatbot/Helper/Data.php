@@ -1561,7 +1561,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 if (($product->getTypeId() == 'simple') && (!$product->hasCustomOptions())) // TODO remove this to add any type of product
                 {
                     $payload = array(
-                        'command' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID),
+                        'command' => $this->_define::ADD_TO_CART_COMMAND_ID,
                         'parameter' => $product->getId()
                     );
                     $addToCartOption  = array(
@@ -1762,7 +1762,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($categoryName)
             {
                 $payload = array(
-                    'command' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID),
+                    'command' => $this->_define::LIST_CATEGORIES_COMMAND_ID,
                     'parameter' => $category->getId()
                 );
                 $quickReply = array(
@@ -1863,6 +1863,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $quickReplies = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        $listMoreCommand = $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID);
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
@@ -1887,7 +1888,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 array_push($orderList, $orderObject);
                 $payload = array(
-                    'command' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
+                    'command' => $this->_define::LIST_ORDERS_COMMAND_ID,
                     'parameter' => $order->getId()
                 );
                 $reply = array(
@@ -1903,13 +1904,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($ordersCollection) > $totalListCount)
         {
-            $listMoreCommand = $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID); // TODO
             $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, $totalListCount);
             $this->setChatbotAPIModel($chatbotAPI);
             if ($listCount > 0)
             {
                 $payload = array(
-                    'command' => $listMoreCommand,
+                    'command' => $this->_define::LIST_ORDERS_COMMAND_ID,
                     'parameter' => ''
                 );
                 $reply = array(
@@ -1923,7 +1923,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else
         {
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
+            $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, 0);
             $this->setChatbotAPIModel($chatbotAPI);
         }
 
