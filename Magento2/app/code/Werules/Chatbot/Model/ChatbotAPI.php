@@ -60,6 +60,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::CHATBOTAPI_ID, $chatbotapiId);
     }
+
     /**
      * Get hash_key
      * @return string
@@ -68,6 +69,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->getData(self::HASH_KEY);
     }
+
     /**
      * Set hash_key
      * @param string $hash_key
@@ -77,7 +79,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::HASH_KEY, $hash_key);
     }
-    
+
     /**
      * Get logged
      * @return string
@@ -86,7 +88,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->getData(self::LOGGED);
     }
-    
+
     /**
      * Set logged
      * @param string $logged
@@ -247,6 +249,25 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     public function setChatbotuserId($chatbotuser_id)
     {
         return $this->setData(self::CHATBOTUSER_ID, $chatbotuser_id);
+    }
+
+    /**
+     * Get listed_items_qty
+     * @return string
+     */
+    public function getListedItemsQty()
+    {
+        return $this->getData(self::LISTED_ITEMS_QTY);
+    }
+
+    /**
+     * Set listed_items_qty
+     * @param string $listed_items_qty
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setListedItemsQty($listed_items_qty)
+    {
+        return $this->setData(self::LISTED_ITEMS_QTY, $listed_items_qty);
     }
 
     public function initMessengerAPI($bot_token) // TODO TODO TODO

@@ -34,6 +34,7 @@ interface ChatbotAPIInterface
     const CHATBOT_TYPE = 'chatbot_type';
     const UPDATED_AT = 'updated_at';
     const ENABLED = 'enabled';
+    const LISTED_ITEMS_QTY = 'listed_items_qty';
     const CHAT_ID = 'chat_id';
 
 
@@ -49,26 +50,26 @@ interface ChatbotAPIInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setChatbotapiId($chatbotapiId);
-    
+
     /**
      * Get hash_key
      * @return string|null
      */
     public function getHashKey();
-    
+
     /**
      * Set hash_key
      * @param string $hash_key
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setHashKey($hash_key);
-    
+
     /**
      * Get logged
      * @return string|null
      */
     public function getLogged();
-    
+
     /**
      * Set logged
      * @param string $logged
@@ -179,4 +180,17 @@ interface ChatbotAPIInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setChatbotuserId($chatbotuser_id);
+
+    /**
+     * Get listed_items_qty
+     * @return string|null
+     */
+    public function getListedItemsQty();
+
+    /**
+     * Set listed_items_qty
+     * @param string $listed_items_qty
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setListedItemsQty($listed_items_qty);
 }
