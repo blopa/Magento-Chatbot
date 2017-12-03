@@ -381,7 +381,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($text != '')
             {
                 $contentObj = $this->getTextMessageArray($text);
-                $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), 0);
+                $this->_chatbotAPI->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), 0);
             }
             else
                 $contentObj = $this->getErrorMessage();
@@ -390,7 +390,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         else
         {
-            $this->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), $fallbackQty + 1);
+            $this->_chatbotAPI->updateChatbotAPIFallbackQty($chatbotAPI->getChatbotapiId(), $fallbackQty + 1);
             array_push($responseContent, $this->getTextMessageArray(__("Sorry, I didn't understand that.")));
         }
 
@@ -556,14 +556,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function updateChatbotAPIFallbackQty($chatbotAPIId, $fallbackQty) // TODO send to chatbotAPI model
-    {
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($chatbotAPIId, 'chatbotapi_id'); // TODO
-        $chatbotAPI->setFallbackQty($fallbackQty);
-        $chatbotAPI->save();
-    }
-
     private function getStockByProductId($productId)
     {
         $stockQty = $this->_stockRegistry->getStockItem($productId);
@@ -648,22 +640,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         array_push($result, $responseMessage);
 
         return $result;
-    }
-
-    private function logOutChatbotCustomer($senderId) // TODO send to chatbotAPI model
-    {
-        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setChatbotuserId(null);
-            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
-            $chatbotAPI->save();
-            $this->setChatbotAPIModel($chatbotAPI);
-            return true;
-        }
-
-        return false;
     }
 
     private function prepareCommandsList()
@@ -892,7 +868,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
         if ($state && (($result) || $setStateOnly)) // TODO
-            $this->updateConversationState($senderId, $state);
+            $this->_chatbotAPI->updateConversationState($senderId, $state);
 
         return $result;
     }
@@ -917,24 +893,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = $this->processCommands($message->getContent(), $message->getSenderId());
 
         return $result;
-    }
-
-    private function updateConversationState($senderId, $state) // TODO send to chatbotAPI model
-    {
-        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setConversationState($state);
-            $datetime = date('Y-m-d H:i:s');
-            $chatbotAPI->setUpdatedAt($datetime);
-            $chatbotAPI->save();
-            $this->setChatbotAPIModel($chatbotAPI);
-
-            return true;
-        }
-
-        return false;
     }
 
     private function sendEmailFromMessage($text)
@@ -1590,21 +1548,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function getChatbotAPIModelBySenderId($senderId) // TODO send to chatbotAPI model
+    private function getChatbotAPIModelBySenderId($senderId)
     {
         if (isset($this->_chatbotAPIModel))
             return $this->_chatbotAPIModel;
 
         // should never get here
         // because it's already set
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $chatbotAPI = $this->_chatbotAPI->getChatbotAPIBySenderId($senderId);
         $this->setChatbotAPIModel($chatbotAPI);
 
         return $chatbotAPI;
     }
 
-    private function getChatbotuserBySenderId($senderId) // TODO send to chatbotuser model
+    private function getChatbotuserBySenderId($senderId)
     {
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $chatbotUser = $this->_chatbotUser->create();
@@ -1702,7 +1659,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processLogoutCommand($senderId)
     {
-        $response = $this->logOutChatbotCustomer($senderId);
+        $response = $this->_chatbotAPI->logOutChatbotCustomer($senderId);
         $result = array();
         if ($response)
         {
@@ -1998,7 +1955,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processCancelCommand($senderId)
     {
         $result = array();
-        $response = $this->updateConversationState($senderId, $this->_define::CONVERSATION_STARTED);
+        $response = $this->_chatbotAPI->updateConversationState($senderId, $this->_define::CONVERSATION_STARTED);
         if ($response)
         {
             $responseMessage = array(

@@ -259,7 +259,60 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\witAI', array('token' => $token)); // TODO find a better way to to this
     }
 
-    // custom methods
+    // CUSTOM METHODS
+
+    public function updateChatbotAPIFallbackQty($chatbotAPIId, $fallbackQty)
+    {
+        $chatbotAPI = $this->create();
+        $chatbotAPI->load($chatbotAPIId, 'chatbotapi_id'); // TODO
+        $chatbotAPI->setFallbackQty($fallbackQty);
+        $chatbotAPI->save();
+    }
+
+    public function logOutChatbotCustomer($senderId) // ->_chatbotAPI
+    {
+        $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setChatbotuserId(null);
+            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
+            $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
+            return true;
+        }
+
+        return false;
+    }
+
+    public function updateConversationState($senderId, $state)
+    {
+        $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+
+        if ($chatbotAPI->getChatbotapiId())
+        {
+            $chatbotAPI->setConversationState($state);
+            $datetime = date('Y-m-d H:i:s');
+            $chatbotAPI->setUpdatedAt($datetime);
+            $chatbotAPI->save();
+            $this->setChatbotAPIModel($chatbotAPI);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getChatbotAPIBySenderId($senderId)
+    {
+        $chatbotAPI = $this->create();
+        $chatbotAPI->load($senderId, 'chat_id'); // TODO
+        $this->setChatbotAPIModel($chatbotAPI);
+
+        return $chatbotAPI;
+    }
+
+    // API RELATED
 //    public function requestHandler($api_name)
 //    {
 //        $this->initChatbotAPI($this->_define::MESSENGER_INT, 'needed_TODO');

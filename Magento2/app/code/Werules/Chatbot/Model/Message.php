@@ -244,7 +244,7 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::MESSAGE_PAYLOAD, $message_payload);
     }
 
-    // custom methods
+    // CUSTOM METHODS
 
     public function getMessageById($messageId)
     {
