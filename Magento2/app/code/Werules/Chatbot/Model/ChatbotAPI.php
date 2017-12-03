@@ -319,6 +319,23 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return true;
     }
 
+    public function setChatbotAPILastCommandDetails($messageContent, $lastListQuantity = null)
+    {
+        // sets current command details for next call
+        if ($lastListQuantity === null)
+        {
+            $lastCommandObject = json_decode($this->getLastCommandDetails());
+            $lastListQuantity = $lastCommandObject->last_listed_quantity;
+        }
+
+        $lastCommandNewObject = array(
+            'last_message_content' => $messageContent,
+            'last_conversation_state' => $this->getConversationState(),
+            'last_listed_quantity' => $lastListQuantity,
+        );
+        $this->updateLastCommandDetails($lastCommandNewObject);
+    }
+
     // API RELATED
 //    public function requestHandler($api_name)
 //    {
