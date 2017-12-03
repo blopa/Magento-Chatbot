@@ -211,17 +211,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             foreach ($outgoingMessages as $outMessage)
             {
                 // then process outgoing message
-                $this->processOutgoingMessage($outMessage->getMessageId()); // ignore output
+                $this->processOutgoingMessage($outMessage); // ignore output
             }
         }
 
         return $result;
     }
 
-    private function processOutgoingMessage($messageId)
+    private function processOutgoingMessage($outgoingMessage)
     {
-        $outgoingMessage = $this->getMessageModelById($messageId);
-
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
 
         $result = array();
