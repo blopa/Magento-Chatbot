@@ -59,7 +59,7 @@ class Define
     const ABOUT_COMMAND_ID = 14;
     const LOGOUT_COMMAND_ID = 15;
     const REGISTER_COMMAND_ID = 16;
-    const LIST_MORE_COMMAND = 17;
+    const LIST_MORE_COMMAND_ID = 17;
     const LAST_COMMAND_DETAILS_DEFAULT = '{"last_message_content":"","last_conversation_state":0,"last_listed_quantity":0}';
 //    array(
 //        'last_message_content' => '',
@@ -84,5 +84,5 @@ class Define
     const CONVERSATION_TRACK_ORDER = 4;
 
     // API
-    const MAX_MESSAGE_ELEMENTS = 5;
+    const MAX_MESSAGE_ELEMENTS = 7;
 }
