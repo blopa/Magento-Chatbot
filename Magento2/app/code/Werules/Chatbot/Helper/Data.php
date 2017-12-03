@@ -596,14 +596,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         else
         {
+            if (($listCount > 0) && ($startAt != 0))
+                    $extraListMessage = $this->getLastListItemMessage();
+
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
             $this->setChatbotAPIModel($chatbotAPI);
-            if ($listCount > 0)
-            {
-                if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_SEARCH)
-                    $extraListMessage = $this->getLastListItemMessage();
-            }
         }
 
         if ($listCount > 0)
@@ -684,14 +682,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         else
         {
+            if (($listCount > 0) && ($startAt != 0))
+                    $extraListMessage = $this->getLastListItemMessage();
+
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
             $this->setChatbotAPIModel($chatbotAPI);
-            if ($listCount > 0)
-            {
-                if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_LIST_CATEGORIES)
-                    $extraListMessage = $this->getLastListItemMessage();
-            }
         }
 
         if ($listCount > 0)
