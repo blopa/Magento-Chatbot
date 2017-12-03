@@ -600,7 +600,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
             $this->setChatbotAPIModel($chatbotAPI);
             if ($listCount > 0)
-                $extraListMessage = $this->getLastListItemMessage();
+            {
+                if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_SEARCH)
+                    $extraListMessage = $this->getLastListItemMessage();
+            }
         }
 
         if ($listCount > 0)
@@ -644,7 +647,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
-        if ($lastCommandObject->last_message_content == $this->_define::CONVERSATION_LIST_CATEGORIES)
+        if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_LIST_CATEGORIES)
             $startAt = $lastCommandObject->last_listed_quantity;
         else
             $startAt = 0;
@@ -679,7 +682,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
             $this->setChatbotAPIModel($chatbotAPI);
             if ($listCount > 0)
-                $extraListMessage = $this->getLastListItemMessage();
+            {
+                if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_LIST_CATEGORIES)
+                    $extraListMessage = $this->getLastListItemMessage();
+            }
         }
 
         if ($listCount > 0)
@@ -1272,7 +1278,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function getLastListItemMessage()
     {
-        $text = __("And that was the last one.");
+        $text = __("No more items to list.");
         return $this->getTextMessageArray($text);
     }
 
