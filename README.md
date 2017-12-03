@@ -99,6 +99,10 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.2:**
+    - Add Messages Queue
+    - Add List More command
+    - Small code improvements
 - **v1.0.1:**
     - Fix missing parameter on CLI installation
     - Fix get on Messenger payload message

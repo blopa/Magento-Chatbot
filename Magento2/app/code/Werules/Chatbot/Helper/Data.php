@@ -157,19 +157,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if (!($chatbotAPI->getChatbotapiId()))
         {
-            $chatbotAPI->setEnabled($this->_define::ENABLED);
-            $chatbotAPI->setChatbotType($message->getChatbotType());
-            $chatbotAPI->setChatId($message->getSenderId());
-            $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setFallbackQty(0);
-            $chatbotAPI->setLastCommandDetails($this->_define::LAST_COMMAND_DETAILS_DEFAULT); // TODO
-            $hash = $this->generateRandomHashKey();
-            $chatbotAPI->setHashKey($hash);
-            $datetime = date('Y-m-d H:i:s');
-            $chatbotAPI->setCreatedAt($datetime);
-            $chatbotAPI->setUpdatedAt($datetime);
-            $chatbotAPI->save();
-
+            $chatbotAPI = $this->createChatbotAPI($chatbotAPI, $message);
             $this->sendWelcomeMessage($message);
         }
 
@@ -570,10 +558,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $result = array();
         $productList = array();
-        $extraListMessage = array();
+//        $extraListMessage = array();
         $productCollection = $this->getProductCollectionByName($messageContent);
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        if (!isset($lastCommandObject->last_listed_quantity))
+            return $result;
+
         $startAt = $lastCommandObject->last_listed_quantity;
         $count = 0;
 
@@ -634,7 +625,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromCategory($messageContent, $messagePayload, $senderId)
     {
         $result = array();
-        $extraListMessage = array();
+//        $extraListMessage = array();
         $productCarousel = array();
         if ($messagePayload)
             $category = $this->getCategoryById($messagePayload->parameter); // instance of \stdClass
@@ -644,6 +635,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $productCollection = $this->getProductsFromCategoryId($category->getId());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        if (!isset($lastCommandObject->last_listed_quantity))
+            return $result;
+
         $startAt = $lastCommandObject->last_listed_quantity;
         $count = 0;
 
@@ -1068,6 +1062,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // CREATE
+
+    public function createChatbotAPI($chatbotAPI, $message)
+    {
+        $chatbotAPI->setEnabled($this->_define::ENABLED);
+        $chatbotAPI->setChatbotType($message->getChatbotType());
+        $chatbotAPI->setChatId($message->getSenderId());
+        $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
+        $chatbotAPI->setFallbackQty(0);
+        $chatbotAPI->setLastCommandDetails($this->_define::LAST_COMMAND_DETAILS_DEFAULT); // TODO
+        $hash = $this->generateRandomHashKey();
+        $chatbotAPI->setHashKey($hash);
+        $datetime = date('Y-m-d H:i:s');
+        $chatbotAPI->setCreatedAt($datetime);
+        $chatbotAPI->setUpdatedAt($datetime);
+        $chatbotAPI->save();
+
+        return $chatbotAPI;
+    }
 
     public function createOutgoingMessage($message, $content)
     {
@@ -1840,6 +1852,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $quickReplies = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        if (!isset($lastCommandObject->last_listed_quantity))
+            return $result;
+
         $startAt = $lastCommandObject->last_listed_quantity;
         $count = 0;
         $currentCommand = $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID); // TODO
@@ -2191,6 +2206,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $result = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+        if (!isset($lastCommandObject->last_listed_quantity))
+            return $result;
+
         $listedQuantity = $lastCommandObject->last_listed_quantity;
 
         if ($listedQuantity > 0)
