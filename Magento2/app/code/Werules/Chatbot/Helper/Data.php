@@ -1863,11 +1863,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $quickReplies = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+        $listOrdersCommand = $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID);
         $listMoreCommand = $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID);
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
-        if ($lastCommandObject->last_message_content == $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID))
+        if ($lastCommandObject->last_message_content == $listOrdersCommand)
             $startAt = $lastCommandObject->last_listed_quantity;
         else
             $startAt = 0;
@@ -1904,7 +1905,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($ordersCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, $totalListCount);
+            $chatbotAPI->setChatbotAPILastCommandDetails($listOrdersCommand, $totalListCount);
             $this->setChatbotAPIModel($chatbotAPI);
             if ($listCount > 0)
             {
