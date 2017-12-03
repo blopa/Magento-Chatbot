@@ -36,9 +36,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         ModuleContextInterface $context
     ) {
         $setup->startSetup();
-        $this->logger('debug 1');
         if (version_compare($context->getVersion(), "1.0.2", "<")) {
-            $this->logger('debug 2');
         //Your upgrade script
             // Get module table
             $tableName = $setup->getTable('werules_chatbot_chatbotapi');
@@ -46,25 +44,19 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
             // Check if the table already exists
             if ($connection->isTableExists($tableName) == true) {
-                $this->logger('debug 3');
                 $connection->addColumn(
+                    $tableName,
                     'listed_items_qty',
-                    \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
-                    null,
-                    ['default' => '0','nullable' => False],
-                    'Listed Items Quantity'
+                    array(
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                        'length' => null,
+                        'comment' => 'Listed Items Quantity',
+                        'default'  => '0',
+                        'nullable' => false
+                    )
                 );
             }
         }
-        $this->logger('debug 4');
         $setup->endSetup();
-    }
-
-    public function logger($text, $file = 'werules_install.log')
-    {
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/' . $file);
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info(var_export($text, true));
     }
 }
