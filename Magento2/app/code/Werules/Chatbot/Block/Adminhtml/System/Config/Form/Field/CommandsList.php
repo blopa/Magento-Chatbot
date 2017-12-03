@@ -68,7 +68,8 @@ class CommandsList implements \Magento\Framework\Option\ArrayInterface
             13 => __("Help"),
             14 => __("About"),
             15 => __("Logout"),
-            16 => __("Register")
+            16 => __("Register"),
+            17 => __("List More")
         );
     }
 }

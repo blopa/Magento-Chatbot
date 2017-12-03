@@ -36,28 +36,25 @@ class UpgradeSchema implements UpgradeSchemaInterface
         ModuleContextInterface $context
     ) {
         $setup->startSetup();
-        if (version_compare($context->getVersion(), "1.0.0", "<")) {
+        if (version_compare($context->getVersion(), "1.0.2", "<")) {
         //Your upgrade script
             // Get module table
-//            $tableName = $setup->getTable('table_name');
-//
-//            // Check if the table already exists
-//            if ($setup->getConnection()->isTableExists($tableName) == true) {
-//                // Declare data
-//                $columns = [
-//                    'imagename' => [
-//                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-//                        'nullable' => false,
-//                        'comment' => 'image name',
-//                    ],
-//                ];
-//
-//                $connection = $setup->getConnection();
-//                foreach ($columns as $name => $definition) {
-//                    $connection->addColumn($tableName, $name, $definition);
-//                }
-//
-//            }
+            $tableName = $setup->getTable('werules_chatbot_chatbotapi');
+            $connection = $setup->getConnection();
+
+            // Check if the table already exists
+            if ($connection->isTableExists($tableName) == true) {
+                $connection->addColumn(
+                    $tableName,
+                    'last_command_details',
+                    array(
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                        'length' => null,
+                        'comment' => 'Last Command Details',
+                        'nullable' => true
+                    )
+                );
+            }
         }
         $setup->endSetup();
     }

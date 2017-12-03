@@ -99,6 +99,14 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.2:**
+    - Add Messages Queue
+    - Add List More command
+    - Add error message when trying to list product from a nonexistent category
+    - Fix problem when trying to reorder
+    - Fix problem when trying to add a product to cart
+    - Fix other payload problems
+    - Small code improvements
 - **v1.0.1:**
     - Fix missing parameter on CLI installation
     - Fix get on Messenger payload message
