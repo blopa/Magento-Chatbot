@@ -257,7 +257,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
      */
     public function getLastCommandDetails()
     {
-        return $this->getData(self::LISTED_ITEMS_QTY);
+        return $this->getData(self::LAST_COMMAND_DETAILS);
     }
 
     /**
@@ -309,9 +309,9 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return true;
     }
 
-    public function updateListedItemsQuantity($quantity)
+    public function updateLastCommandDetails($lastCommandObject)
     {
-        $this->setListedItemsQty($quantity);
+        $this->setLastCommandDetails(json_encode($lastCommandObject));
         $datetime = date('Y-m-d H:i:s');
         $this->setUpdatedAt($datetime);
         $this->save();
