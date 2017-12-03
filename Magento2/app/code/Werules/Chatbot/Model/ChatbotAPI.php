@@ -309,6 +309,16 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return true;
     }
 
+    public function updateListedItemsQuantity($quantity)
+    {
+        $this->setListedItemsQty($quantity);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
+
     // API RELATED
 //    public function requestHandler($api_name)
 //    {

@@ -586,8 +586,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 array_push($productList, $imageWithOptionsProdObj);
         }
 
-        if (count($productList) > 0)
+        $listCount = count($productList);
+        if ($listCount > 0)
         {
+            if (count($productCollection) > $listCount)
+            {
+                $chatbotApi->updateListedItemsQuantity($listCount);
+            }
+
             $contentType = $this->_define::IMAGE_WITH_OPTIONS;
             $content = json_encode($productList);
         }
@@ -636,8 +642,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 array_push($productCarousel, $imageWithOptionsProdObj);
         }
 
-        if (count($productCarousel) > 0)
+        $listCount = count($productCarousel);
+        if ($listCount > 0)
         {
+            if (count($productCollection) > $listCount)
+            {
+                $chatbotApi->updateListedItemsQuantity($listCount);
+            }
+
             $contentType = $this->_define::IMAGE_WITH_OPTIONS;
             $content = json_encode($productCarousel);
         }
@@ -1782,8 +1794,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
 
-        if (count($orderList) > 0)
+        $listCount = count($orderList);
+        if ($listCount > 0)
         {
+            if (count($ordersCollection) > $listCount)
+            {
+                $chatbotApi->updateListedItemsQuantity($listCount);
+            }
+
             $contentType = $this->_define::RECEIPT_LAYOUT;
             $content = json_encode($orderList);
         }

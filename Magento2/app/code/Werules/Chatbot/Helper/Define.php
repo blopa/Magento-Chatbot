@@ -77,5 +77,5 @@ class Define
     const CONVERSATION_TRACK_ORDER = 4;
 
     // API
-    const MAX_MESSAGE_ELEMENTS = 10;
+    const MAX_MESSAGE_ELEMENTS = 9;
 }
