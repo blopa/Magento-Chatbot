@@ -243,4 +243,26 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
     {
         return $this->setData(self::MESSAGE_PAYLOAD, $message_payload);
     }
+
+    // CUSTOM METHODS
+
+    public function updateIncomingMessageStatus($status)
+    {
+        return $this->updateMessageStatus($status);
+    }
+
+    public function updateOutgoingMessageStatus($status)
+    {
+        return $this->updateMessageStatus($status);
+    }
+
+    private function updateMessageStatus($status)
+    {
+        $this->setStatus($status);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
 }

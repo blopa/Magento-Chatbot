@@ -93,6 +93,10 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
+#### Queue Workflow
+
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/chatbot_queue.png)
+
 ## Release Notes
 ### Magento2
 - **v1.0.1:**

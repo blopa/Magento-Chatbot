@@ -204,4 +204,6 @@ class ChatbotUser extends \Magento\Framework\Model\AbstractModel implements Chat
     {
         return $this->setData(self::UPDATED_AT, $updated_at);
     }
+
+    // CUSTOM METHODS
 }

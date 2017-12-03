@@ -259,7 +259,36 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\witAI', array('token' => $token)); // TODO find a better way to to this
     }
 
-    // custom methods
+    // CUSTOM METHODS
+
+    public function updateChatbotAPIFallbackQty($fallbackQty)
+    {
+        $this->setFallbackQty($fallbackQty);
+        $this->save();
+
+        return true;
+    }
+
+    public function logOutChatbotCustomer()
+    {
+        $this->setChatbotuserId(null);
+        $this->setLogged($this->_define::NOT_LOGGED);
+        $this->save();
+
+        return true;
+    }
+
+    public function updateConversationState($state)
+    {
+        $this->setConversationState($state);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
+
+    // API RELATED
 //    public function requestHandler($api_name)
 //    {
 //        $this->initChatbotAPI($this->_define::MESSENGER_INT, 'needed_TODO');
