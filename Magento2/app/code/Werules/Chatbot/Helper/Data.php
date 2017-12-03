@@ -152,8 +152,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processIncomingMessage($message)
     {
         $this->setConfigPrefix($message->getChatbotType());
-        $chatbotAPI = $this->_chatbotAPI->create();
-        $chatbotAPI->load($message->getSenderId(), 'chat_id'); // TODO
+        $chatbotAPI = $this->getChatbotAPIBySenderId($message->getSenderId());
         $result = true;
 
         if (!($chatbotAPI->getChatbotapiId()))
