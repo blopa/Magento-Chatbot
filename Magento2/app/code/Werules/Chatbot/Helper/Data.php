@@ -585,15 +585,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($productCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $senderId, $totalListCount);
-            $this->setChatbotAPIModel($this);
+            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
+            $this->setChatbotAPIModel($chatbotAPI);
             $extraListMessage = $this->getListMoreMessage();
         }
         else
         {
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND), $senderId, 0);
-            $this->setChatbotAPIModel($this);
+            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND), 0);
+            $this->setChatbotAPIModel($chatbotAPI);
             $extraListMessage = $this->getLastListItemMessage();
         }
 
@@ -658,15 +658,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($productCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $senderId, $totalListCount);
-            $this->setChatbotAPIModel($this);
+            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
+            $this->setChatbotAPIModel($chatbotAPI);
             $extraListMessage = $this->getListMoreMessage();
         }
         else
         {
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND), $senderId, 0);
-            $this->setChatbotAPIModel($this);
+            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND), 0);
+            $this->setChatbotAPIModel($chatbotAPI);
             $extraListMessage = $this->getLastListItemMessage();
         }
 
@@ -1118,7 +1118,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 if (!(in_array($lastCommandObject->last_conversation_state, $listingConversationStates)))
                 {
                     $chatbotAPI->setChatbotAPILastCommandDetails($currentMessage->getContent(), $currentMessage->getSenderId());
-                    $this->setChatbotAPIModel($this);
+                    $this->setChatbotAPIModel($chatbotAPI);
                 }
             }
         }
@@ -1889,8 +1889,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($ordersCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($currentCommand, $senderId, $totalListCount);
-            $this->setChatbotAPIModel($this);
+            $chatbotAPI->setChatbotAPILastCommandDetails($currentCommand, $totalListCount);
+            $this->setChatbotAPIModel($chatbotAPI);
             $payload = array(
                 'command' => $currentCommand,
                 'parameter' => ''
@@ -1905,8 +1905,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else
         {
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND), $senderId, 0);
-            $this->setChatbotAPIModel($this);
+            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND), 0);
+            $this->setChatbotAPIModel($chatbotAPI);
         }
 
         if ($listCount > 0)
