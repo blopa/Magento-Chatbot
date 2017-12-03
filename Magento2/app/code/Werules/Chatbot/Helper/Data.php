@@ -497,11 +497,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_LIST_CATEGORIES)
         {
             $payload = $this->getCurrentMessagePayload();
-            $result = $this->listProductsFromCategory($messageContent, $payload); // $message->getMessagePayload()
+            $result = $this->listProductsFromCategory($messageContent, $payload, $message->getSenderId()); // $message->getMessagePayload()
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SEARCH)
         {
-            $result = $this->listProductsFromSearch($messageContent);
+            $result = $this->listProductsFromSearch($messageContent, $message->getSenderId());
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_EMAIL)
         {
@@ -564,14 +564,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return 0;
     }
 
-    private function listProductsFromSearch($messageContent)
+    private function listProductsFromSearch($messageContent, $senderId)
     {
         $result = array();
         $productList = array();
         $productCollection = $this->getProductCollectionByName($messageContent);
+        $chatbotApi = $this->getChatbotAPIModelBySenderId($senderId);
+        $startAt = $chatbotApi->getListedItemsQty();
+        $count = 0;
 
         foreach ($productCollection as $product)
         {
+            if ($count <= $startAt)
+            {
+                $count++;
+                continue;
+            }
+
             $imageWithOptionsProdObj = $this->getImageWithOptionsProductObject($product);
             if (count($productList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
                 array_push($productList, $imageWithOptionsProdObj);
@@ -600,7 +609,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function listProductsFromCategory($messageContent, $messagePayload)
+    private function listProductsFromCategory($messageContent, $messagePayload, $senderId)
     {
         $result = array();
         $productCarousel = array();
@@ -610,9 +619,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $category = $this->getCategoryByName($messageContent);
 
         $productCollection = $this->getProductsFromCategoryId($category->getId());
+        $chatbotApi = $this->getChatbotAPIModelBySenderId($senderId);
+        $startAt = $chatbotApi->getListedItemsQty();
+        $count = 0;
 
         foreach ($productCollection as $product)
         {
+            if ($count <= $startAt)
+            {
+                $count++;
+                continue;
+            }
+
             $imageWithOptionsProdObj = $this->getImageWithOptionsProductObject($product);
             if (count($productCarousel) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
                 array_push($productCarousel, $imageWithOptionsProdObj);
@@ -1734,9 +1752,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $orderList = array();
         $quickReplies = array();
+        $chatbotApi = $this->getChatbotAPIModelBySenderId($senderId);
+        $startAt = $chatbotApi->getListedItemsQty();
+        $count = 0;
 
         foreach ($ordersCollection as $order)
         {
+            if ($count <= $startAt)
+            {
+                $count++;
+                continue;
+            }
+
             $orderObject = $this->getImageWithOptionsOrderObject($order);
 //            $this->logger(json_encode($productObject));
             if (count($orderList) < $this->_define::MAX_MESSAGE_ELEMENTS) // TODO
