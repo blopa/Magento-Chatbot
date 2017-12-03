@@ -243,4 +243,54 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
     {
         return $this->setData(self::MESSAGE_PAYLOAD, $message_payload);
     }
+
+    // custom methods
+
+    public function getMessageById($messageId)
+    {
+        $message = $this->create();
+        $message->load($messageId);
+
+        return $message;
+    }
+
+    public function createOutgoingMessage($message, $content)
+    {
+        $outgoingMessage = $this->create();
+        $outgoingMessage->setSenderId($message->getSenderId());
+        $outgoingMessage->setContent($content['content']);
+        $outgoingMessage->setContentType($content['content_type']); // TODO
+        $outgoingMessage->setStatus($this->_define::PROCESSING);
+        $outgoingMessage->setDirection($this->_define::OUTGOING);
+        $outgoingMessage->setChatMessageId($message->getChatMessageId());
+        $outgoingMessage->setChatbotType($message->getChatbotType());
+        $datetime = date('Y-m-d H:i:s');
+        $outgoingMessage->setCreatedAt($datetime);
+        $outgoingMessage->setUpdatedAt($datetime);
+        $outgoingMessage->save();
+
+        return $outgoingMessage;
+    }
+
+    public function updateIncomingMessageStatus($messageId, $status)
+    {
+        return $this->updateMessageStatus($messageId, $status);
+    }
+
+    public function updateOutgoingMessageStatus($messageId, $status)
+    {
+        return $this->updateMessageStatus($messageId, $status);
+    }
+
+    public function updateMessageStatus($messageId, $status)
+    {
+        $message = $this->create();
+        $message->load($messageId); // TODO
+        $message->setStatus($status);
+        $datetime = date('Y-m-d H:i:s');
+        $message->setUpdatedAt($datetime);
+        $message->save();
+
+        return true;
+    }
 }
