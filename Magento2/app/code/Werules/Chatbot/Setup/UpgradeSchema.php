@@ -51,7 +51,6 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
                         'length' => null,
                         'comment' => 'Last Command Details',
-                        'default'  => '0',
                         'nullable' => false
                     )
                 );
