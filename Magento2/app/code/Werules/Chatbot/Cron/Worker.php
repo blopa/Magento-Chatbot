@@ -70,33 +70,21 @@ class Worker
             $datetime = date('Y-m-d H:i:s');
             if ($message->getStatus() == $this->_define::NOT_PROCESSED)
             {
-                $this->updateMessageStatus($message->getMessageId(), $this->_define::PROCESSING);
+                $message->updateMessageStatus($this->_define::PROCESSING);
                 $result = $this->_helper->processMessage($message->getMessageId());
             }
             else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
             {
                 // if a message is in 'processing' status for more than 3 minutes, try to reprocess it
-//                $this->updateMessageStatus($message->getMessageId(), $this->_define::PROCESSING); // already on 'processing' status
+//                $message->updateMessageStatus($this->_define::PROCESSING); // already on 'processing' status
                 $result = $this->_helper->processMessage($message->getMessageId());
             }
 
             if (!$result)
-                $this->updateMessageStatus($message->getMessageId(), $this->_define::NOT_PROCESSED);
-            else
-                $this->_logger->addInfo('Result of MessageID ' . $message->getMessageId() . ':\n' . var_export($result, true));
+                $message->updateMessageStatus($this->_define::NOT_PROCESSED);
+//            else
+//                $this->_logger->addInfo('Result of MessageID ' . $message->getMessageId() . ':\n' . var_export($result, true));
         }
-        $this->_logger->addInfo("Chatbot Cronjob was executed.");
-    }
-
-    private function updateMessageStatus($messageId, $status)
-    {
-        $message = $this->_messageModel->create();
-        $message->load($messageId); // TODO
-        $message->setStatus($status);
-        $datetime = date('Y-m-d H:i:s');
-        $message->setUpdatedAt($datetime);
-        $message->save();
-
-        return true;
+//        $this->_logger->addInfo("Chatbot Cronjob was executed.");
     }
 }
