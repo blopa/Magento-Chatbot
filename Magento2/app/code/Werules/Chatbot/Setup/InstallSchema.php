@@ -371,7 +371,7 @@ class InstallSchema implements InstallSchemaInterface
         
         $table_werules_chatbot_chatbotapi->addColumn(
             'listed_items_qty',
-            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
             null,
             ['default' => '0','nullable' => False],
             'Listed Items Quantity'

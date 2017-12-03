@@ -34,7 +34,7 @@ interface ChatbotAPIInterface
     const CHATBOT_TYPE = 'chatbot_type';
     const UPDATED_AT = 'updated_at';
     const ENABLED = 'enabled';
-    const LISTED_ITEMS_QTY = 'listed_items_qty';
+    const LAST_COMMAND_DETAILS = 'last_command_details';
     const CHAT_ID = 'chat_id';
 
 
@@ -182,15 +182,15 @@ interface ChatbotAPIInterface
     public function setChatbotuserId($chatbotuser_id);
 
     /**
-     * Get listed_items_qty
+     * Get last_command_details
      * @return string|null
      */
-    public function getListedItemsQty();
+    public function getLastCommandDetails();
 
     /**
-     * Set listed_items_qty
-     * @param string $listed_items_qty
+     * Set last_command_details
+     * @param string $last_command_details
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
-    public function setListedItemsQty($listed_items_qty);
+    public function setLastCommandDetails($last_command_details);
 }

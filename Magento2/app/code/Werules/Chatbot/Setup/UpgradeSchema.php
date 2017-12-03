@@ -46,11 +46,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
             if ($connection->isTableExists($tableName) == true) {
                 $connection->addColumn(
                     $tableName,
-                    'listed_items_qty',
+                    'last_command_details',
                     array(
                         'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
                         'length' => null,
-                        'comment' => 'Listed Items Quantity',
+                        'comment' => 'Last Command Details',
                         'default'  => '0',
                         'nullable' => false
                     )

@@ -514,8 +514,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($result)
         {
-            $chatbotAPI->setConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->save();
+            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
             $this->setChatbotAPIModel($chatbotAPI);
         }
 
@@ -569,13 +568,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $productList = array();
         $productCollection = $this->getProductCollectionByName($messageContent);
-        $chatbotApi = $this->getChatbotAPIModelBySenderId($senderId);
-        $startAt = $chatbotApi->getListedItemsQty();
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+        $startAt = $chatbotAPI->getLastCommandDetails();
         $count = 0;
 
         foreach ($productCollection as $product)
         {
-            if ($count <= $startAt)
+            if ($count < $startAt)
             {
                 $count++;
                 continue;
@@ -591,7 +590,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if (count($productCollection) > $listCount)
             {
-                $chatbotApi->updateListedItemsQuantity($listCount);
+                $chatbotAPI->updateListedItemsQuantity($listCount);
+                $this->setChatbotAPIModel($chatbotAPI);
             }
 
             $contentType = $this->_define::IMAGE_WITH_OPTIONS;
@@ -625,13 +625,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $category = $this->getCategoryByName($messageContent);
 
         $productCollection = $this->getProductsFromCategoryId($category->getId());
-        $chatbotApi = $this->getChatbotAPIModelBySenderId($senderId);
-        $startAt = $chatbotApi->getListedItemsQty();
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+        $startAt = $chatbotAPI->getLastCommandDetails();
         $count = 0;
 
         foreach ($productCollection as $product)
         {
-            if ($count <= $startAt)
+            if ($count < $startAt)
             {
                 $count++;
                 continue;
@@ -647,7 +647,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if (count($productCollection) > $listCount)
             {
-                $chatbotApi->updateListedItemsQuantity($listCount);
+                $chatbotAPI->updateListedItemsQuantity($listCount);
+                $this->setChatbotAPIModel($chatbotAPI);
             }
 
             $contentType = $this->_define::IMAGE_WITH_OPTIONS;
@@ -900,6 +901,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
             $chatbotAPI->updateConversationState($state);
+            $this->setChatbotAPIModel($chatbotAPI);
         }
 
         return $result;
@@ -1764,13 +1766,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $orderList = array();
         $quickReplies = array();
-        $chatbotApi = $this->getChatbotAPIModelBySenderId($senderId);
-        $startAt = $chatbotApi->getListedItemsQty();
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+        $startAt = $chatbotAPI->getLastCommandDetails();
         $count = 0;
 
         foreach ($ordersCollection as $order)
         {
-            if ($count <= $startAt)
+            if ($count < $startAt)
             {
                 $count++;
                 continue;
@@ -1799,7 +1801,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if (count($ordersCollection) > $listCount)
             {
-                $chatbotApi->updateListedItemsQuantity($listCount);
+                $chatbotAPI->updateListedItemsQuantity($listCount);
+                $this->setChatbotAPIModel($chatbotAPI);
             }
 
             $contentType = $this->_define::RECEIPT_LAYOUT;
@@ -2042,6 +2045,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $response = $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
+        $this->setChatbotAPIModel($chatbotAPI);
         if ($response)
         {
             $responseMessage = array(

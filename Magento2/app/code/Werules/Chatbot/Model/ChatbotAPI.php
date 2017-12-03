@@ -252,22 +252,22 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     }
 
     /**
-     * Get listed_items_qty
+     * Get last_command_details
      * @return string
      */
-    public function getListedItemsQty()
+    public function getLastCommandDetails()
     {
         return $this->getData(self::LISTED_ITEMS_QTY);
     }
 
     /**
-     * Set listed_items_qty
-     * @param string $listed_items_qty
+     * Set last_command_details
+     * @param string $last_command_details
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
-    public function setListedItemsQty($listed_items_qty)
+    public function setLastCommandDetails($last_command_details)
     {
-        return $this->setData(self::LISTED_ITEMS_QTY, $listed_items_qty);
+        return $this->setData(self::LAST_COMMAND_DETAILS, $last_command_details);
     }
 
     public function initMessengerAPI($bot_token) // TODO TODO TODO
