@@ -152,7 +152,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processIncomingMessage($message)
     {
         $this->setConfigPrefix($message->getChatbotType());
-        $chatbotAPI = $this->getChatbotAPIBySenderId($message->getSenderId());
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
         $result = true;
 
         if (!($chatbotAPI->getChatbotapiId()))
@@ -868,7 +868,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         if ($state && (($result) || $setStateOnly)) // TODO
         {
-            $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+            $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
             $chatbotAPI->updateConversationState($state);
         }
 
@@ -1698,9 +1698,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processLogoutCommand($senderId)
     {
-        $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $response = $chatbotAPI->logOutChatbotCustomer();
-        $this->setChatbotAPIModel($chatbotAPI);
         $result = array();
         if ($response)
         {
@@ -1996,9 +1995,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processCancelCommand($senderId)
     {
         $result = array();
-        $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $response = $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-        $this->setChatbotAPIModel($chatbotAPI);
         if ($response)
         {
             $responseMessage = array(
