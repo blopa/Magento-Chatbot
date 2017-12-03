@@ -37,7 +37,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
     ) {
         $setup->startSetup();
         $this->logger('debug 1');
-        if (version_compare($context->getVersion(), "1.0.1", "<")) {
+        if (version_compare($context->getVersion(), "1.0.2", "<")) {
             $this->logger('debug 2');
         //Your upgrade script
             // Get module table
