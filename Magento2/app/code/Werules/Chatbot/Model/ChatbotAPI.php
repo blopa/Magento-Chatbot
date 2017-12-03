@@ -261,55 +261,31 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     // CUSTOM METHODS
 
-    public function updateChatbotAPIFallbackQty($chatbotAPIId, $fallbackQty)
+    public function updateChatbotAPIFallbackQty($fallbackQty)
     {
-        $chatbotAPI = $this->create();
-        $chatbotAPI->load($chatbotAPIId, 'chatbotapi_id'); // TODO
-        $chatbotAPI->setFallbackQty($fallbackQty);
-        $chatbotAPI->save();
+        $this->setFallbackQty($fallbackQty);
+        $this->save();
+
+        return true;
     }
 
-    public function logOutChatbotCustomer($senderId) // ->_chatbotAPI
+    public function logOutChatbotCustomer()
     {
-        $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+        $this->setChatbotuserId(null);
+        $this->setLogged($this->_define::NOT_LOGGED);
+        $this->save();
 
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setChatbotuserId(null);
-            $chatbotAPI->setLogged($this->_define::NOT_LOGGED);
-            $chatbotAPI->save();
-            $this->setChatbotAPIModel($chatbotAPI);
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
-    public function updateConversationState($senderId, $state)
+    public function updateConversationState($state)
     {
-        $chatbotAPI = $this->getChatbotAPIBySenderId($senderId);
+        $this->setConversationState($state);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
 
-        if ($chatbotAPI->getChatbotapiId())
-        {
-            $chatbotAPI->setConversationState($state);
-            $datetime = date('Y-m-d H:i:s');
-            $chatbotAPI->setUpdatedAt($datetime);
-            $chatbotAPI->save();
-            $this->setChatbotAPIModel($chatbotAPI);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public function getChatbotAPIBySenderId($senderId)
-    {
-        $chatbotAPI = $this->create();
-        $chatbotAPI->load($senderId, 'chat_id'); // TODO
-        $this->setChatbotAPIModel($chatbotAPI);
-
-        return $chatbotAPI;
+        return true;
     }
 
     // API RELATED

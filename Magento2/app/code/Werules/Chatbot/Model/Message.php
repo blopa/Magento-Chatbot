@@ -246,50 +246,22 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
 
     // CUSTOM METHODS
 
-    public function getMessageById($messageId)
+    public function updateIncomingMessageStatus($status)
     {
-        $message = $this->create();
-        $message->load($messageId);
-
-        return $message;
+        return $this->updateMessageStatus($status);
     }
 
-    public function createOutgoingMessage($message, $content)
+    public function updateOutgoingMessageStatus($status)
     {
-        $outgoingMessage = $this->create();
-        $outgoingMessage->setSenderId($message->getSenderId());
-        $outgoingMessage->setContent($content['content']);
-        $outgoingMessage->setContentType($content['content_type']); // TODO
-        $outgoingMessage->setStatus($this->_define::PROCESSING);
-        $outgoingMessage->setDirection($this->_define::OUTGOING);
-        $outgoingMessage->setChatMessageId($message->getChatMessageId());
-        $outgoingMessage->setChatbotType($message->getChatbotType());
+        return $this->updateMessageStatus($status);
+    }
+
+    private function updateMessageStatus($status)
+    {
+        $this->setStatus($status);
         $datetime = date('Y-m-d H:i:s');
-        $outgoingMessage->setCreatedAt($datetime);
-        $outgoingMessage->setUpdatedAt($datetime);
-        $outgoingMessage->save();
-
-        return $outgoingMessage;
-    }
-
-    public function updateIncomingMessageStatus($messageId, $status)
-    {
-        return $this->updateMessageStatus($messageId, $status);
-    }
-
-    public function updateOutgoingMessageStatus($messageId, $status)
-    {
-        return $this->updateMessageStatus($messageId, $status);
-    }
-
-    public function updateMessageStatus($messageId, $status)
-    {
-        $message = $this->create();
-        $message->load($messageId); // TODO
-        $message->setStatus($status);
-        $datetime = date('Y-m-d H:i:s');
-        $message->setUpdatedAt($datetime);
-        $message->save();
+        $this->setUpdatedAt($datetime);
+        $this->save();
 
         return true;
     }
