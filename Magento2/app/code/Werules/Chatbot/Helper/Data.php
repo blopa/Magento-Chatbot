@@ -565,10 +565,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
-//        if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_SEARCH)
+        if ($lastCommandObject->last_conversation_state == $this->_define::CONVERSATION_SEARCH)
             $startAt = $lastCommandObject->last_listed_quantity;
-//        else
-//            $startAt = 0;
+        else
+            $startAt = 0;
 
         $count = 0;
 
@@ -644,10 +644,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
-//        if ($lastCommandObject->last_message_content == $this->_define::CONVERSATION_LIST_CATEGORIES)
+        if ($lastCommandObject->last_message_content == $this->_define::CONVERSATION_LIST_CATEGORIES)
             $startAt = $lastCommandObject->last_listed_quantity;
-//        else
-//            $startAt = 0;
+        else
+            $startAt = 0;
 
         $count = 0;
 
@@ -1872,7 +1872,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $startAt = 0;
 
         $count = 0;
-        $currentCommand = $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID); // TODO
 
         foreach ($ordersCollection as $order)
         {
@@ -1888,7 +1887,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 array_push($orderList, $orderObject);
                 $payload = array(
-                    'command' => $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID),
+                    'command' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
                     'parameter' => $order->getId()
                 );
                 $reply = array(
@@ -1904,17 +1903,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($ordersCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($currentCommand, $totalListCount);
+            $listMoreCommand = $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID); // TODO
+            $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, $totalListCount);
             $this->setChatbotAPIModel($chatbotAPI);
             if ($listCount > 0)
             {
                 $payload = array(
-                    'command' => $currentCommand,
+                    'command' => $listMoreCommand,
                     'parameter' => ''
                 );
                 $reply = array(
                     'content_type' => 'text',
-                    'title' => $currentCommand,
+                    'title' => $listMoreCommand,
                     'payload' => json_encode($payload)
                 );
                 array_push($quickReplies, $reply);
