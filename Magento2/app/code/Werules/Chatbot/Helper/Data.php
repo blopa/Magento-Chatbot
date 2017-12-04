@@ -153,8 +153,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $messageCollection = $this->_messageModel->getCollection()
                         ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
                         ->addFieldToFilter('direction', array('eq' => $this->_define::INCOMING))
-                        ->setOrder('created_at', 'desc');
+                        ->setOrder('created_at', 'asc');
                     $this->logger(count($messageCollection));
+                    foreach ($messageCollection as $m)
+                    {
+                        $this->logger($m->getCreatedAt());
+                        // TODO
+                    }
                 }
                 $result = $this->processIncomingMessage($message);
             }
