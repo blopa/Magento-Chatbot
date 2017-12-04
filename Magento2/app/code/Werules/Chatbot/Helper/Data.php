@@ -143,7 +143,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if ($message->getDirection() == $this->_define::INCOMING)
                 $result = $this->processIncomingMessage($message);
             else //if ($message->getDirection() == $this->_define::OUTGOING)
-                $result = $this->processOutgoingMessage($message->getMessageId());
+                $result = $this->processOutgoingMessage($message);
         }
 
         return $result;
@@ -325,7 +325,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $contentObj = $this->getTextMessageArray($text);
             $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-            $this->processOutgoingMessage($outgoingMessage->getMessageId());
+            $this->processOutgoingMessage($outgoingMessage);
         }
     }
 
@@ -334,7 +334,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
         $contentObj = $this->getTextMessageArray($text);
         $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-        $this->processOutgoingMessage($outgoingMessage->getMessageId());
+        $this->processOutgoingMessage($outgoingMessage);
     }
 
     private function sendDisabledMessage($message)
@@ -348,7 +348,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $contentObj = $this->getErrorMessage();
 
         $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-        $this->processOutgoingMessage($outgoingMessage->getMessageId());
+        $this->processOutgoingMessage($outgoingMessage);
     }
 
     private function handleUnableToProcessRequest($message)
