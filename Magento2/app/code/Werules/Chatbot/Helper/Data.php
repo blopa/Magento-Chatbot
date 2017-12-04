@@ -107,7 +107,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
 //        $this->_storeConfig = $scopeConfig;
         $this->_define = new \Werules\Chatbot\Helper\Define;
-//        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
         parent::__construct($context);
     }
 
@@ -146,9 +145,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if ($message->getMessageId())
         {
             if ($message->getDirection() == $this->_define::INCOMING)
+            {
+
+                $messageQueueMode = $this->getQueueMessageMode();
+                if ($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE)
+                {
+                    $messageCollection = $this->_messageModel->getCollection()
+                        ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+                        ->addFieldToFilter('direction', array('eq' => $this->_define::INCOMING))
+                        ->setOrder('created_at', 'desc');
+                    $this->logger(count($messageCollection));
+                }
                 $result = $this->processIncomingMessage($message);
+            }
             else //if ($message->getDirection() == $this->_define::OUTGOING)
+            {
                 $result = $this->processOutgoingMessage($message);
+            }
         }
 
         return $result;
@@ -156,11 +169,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processIncomingMessage($message)
     {
-        $messageCollection = $this->_messageModel->getCollection()
-            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
-            ->addFieldToFilter('direction', array('eq' => $this->_define::INCOMING));
-        $this->logger(count($messageCollection));
-        die;
         $this->setConfigPrefix($message->getChatbotType());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
         $result = true;
@@ -554,6 +562,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         array_push($result, $responseMessage);
 
         return $result;
+    }
+
+    private function getQueueMessageMode()
+    {
+        if (isset($this->_messageQueueMode))
+            return $this->_messageQueueMode;
+
+        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
+        return $this->_messageQueueMode;
     }
 
     private function getStockByProductId($productId)
