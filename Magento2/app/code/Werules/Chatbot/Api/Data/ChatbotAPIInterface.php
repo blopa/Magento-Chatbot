@@ -34,6 +34,7 @@ interface ChatbotAPIInterface
     const CHATBOT_TYPE = 'chatbot_type';
     const UPDATED_AT = 'updated_at';
     const ENABLED = 'enabled';
+    const LAST_COMMAND_DETAILS = 'last_command_details';
     const CHAT_ID = 'chat_id';
 
 
@@ -49,26 +50,26 @@ interface ChatbotAPIInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setChatbotapiId($chatbotapiId);
-    
+
     /**
      * Get hash_key
      * @return string|null
      */
     public function getHashKey();
-    
+
     /**
      * Set hash_key
      * @param string $hash_key
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setHashKey($hash_key);
-    
+
     /**
      * Get logged
      * @return string|null
      */
     public function getLogged();
-    
+
     /**
      * Set logged
      * @param string $logged
@@ -179,4 +180,17 @@ interface ChatbotAPIInterface
      * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
      */
     public function setChatbotuserId($chatbotuser_id);
+
+    /**
+     * Get last_command_details
+     * @return string|null
+     */
+    public function getLastCommandDetails();
+
+    /**
+     * Set last_command_details
+     * @param string $last_command_details
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setLastCommandDetails($last_command_details);
 }

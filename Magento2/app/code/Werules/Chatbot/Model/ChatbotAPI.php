@@ -60,6 +60,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::CHATBOTAPI_ID, $chatbotapiId);
     }
+
     /**
      * Get hash_key
      * @return string
@@ -68,6 +69,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->getData(self::HASH_KEY);
     }
+
     /**
      * Set hash_key
      * @param string $hash_key
@@ -77,7 +79,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->setData(self::HASH_KEY, $hash_key);
     }
-    
+
     /**
      * Get logged
      * @return string
@@ -86,7 +88,7 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     {
         return $this->getData(self::LOGGED);
     }
-    
+
     /**
      * Set logged
      * @param string $logged
@@ -249,6 +251,25 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->setData(self::CHATBOTUSER_ID, $chatbotuser_id);
     }
 
+    /**
+     * Get last_command_details
+     * @return string
+     */
+    public function getLastCommandDetails()
+    {
+        return $this->getData(self::LAST_COMMAND_DETAILS);
+    }
+
+    /**
+     * Set last_command_details
+     * @param string $last_command_details
+     * @return \Werules\Chatbot\Api\Data\ChatbotAPIInterface
+     */
+    public function setLastCommandDetails($last_command_details)
+    {
+        return $this->setData(self::LAST_COMMAND_DETAILS, $last_command_details);
+    }
+
     public function initMessengerAPI($bot_token) // TODO TODO TODO
     {
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this
@@ -259,7 +280,63 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\witAI', array('token' => $token)); // TODO find a better way to to this
     }
 
-    // custom methods
+    // CUSTOM METHODS
+
+    public function updateChatbotAPIFallbackQty($fallbackQty)
+    {
+        $this->setFallbackQty($fallbackQty);
+        $this->save();
+
+        return true;
+    }
+
+    public function logOutChatbotCustomer()
+    {
+        $this->setChatbotuserId(null);
+        $this->setLogged($this->_define::NOT_LOGGED);
+        $this->save();
+
+        return true;
+    }
+
+    public function updateConversationState($state)
+    {
+        $this->setConversationState($state);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
+
+    public function updateLastCommandDetails($lastCommandObject)
+    {
+        $this->setLastCommandDetails(json_encode($lastCommandObject));
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
+
+    public function setChatbotAPILastCommandDetails($messageContent, $lastListQuantity = null)
+    {
+        // sets current command details for next call
+        if ($lastListQuantity === null)
+        {
+            $lastCommandObject = json_decode($this->getLastCommandDetails());
+            $lastListQuantity = $lastCommandObject->last_listed_quantity;
+        }
+
+        $lastCommandNewObject = array(
+            'last_message_content' => $messageContent,
+            'last_conversation_state' => $this->getConversationState(),
+            'last_listed_quantity' => $lastListQuantity,
+        );
+        $this->updateLastCommandDetails($lastCommandNewObject);
+    }
+
+    // API RELATED
 //    public function requestHandler($api_name)
 //    {
 //        $this->initChatbotAPI($this->_define::MESSENGER_INT, 'needed_TODO');

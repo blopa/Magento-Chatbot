@@ -149,9 +149,9 @@ class InstallSchema implements InstallSchemaInterface
             array('identity' => true,'nullable' => false,'primary' => true,'unsigned' => true,),
             'Entity ID'
         );
-	
-	
-	
+        
+
+        
         $table_werules_chatbot_chatbotapi->addColumn(
             'hash_key',
             \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
@@ -239,7 +239,6 @@ class InstallSchema implements InstallSchemaInterface
             [],
             'Updated At'
         );
-
         
 
         
@@ -295,7 +294,7 @@ class InstallSchema implements InstallSchemaInterface
         
         $table_werules_chatbot_chatbotapi->addColumn(
             'fallback_qty',
-            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
             null,
             ['default' => '0','nullable' => False],
             'Fallback Quantity'
@@ -367,6 +366,17 @@ class InstallSchema implements InstallSchemaInterface
             [],
             'Message Payload'
         );
+        
+
+        
+        $table_werules_chatbot_chatbotapi->addColumn(
+            'last_command_details',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            null,
+            ['nullable' => True],
+            'Listed Items Quantity'
+        );
+        
 
 // TODO uncomment this
 //        $table_werules_chatbot_message->addForeignKey(
@@ -376,7 +386,6 @@ class InstallSchema implements InstallSchemaInterface
 //            'chatbotapi_id',
 //            \Magento\Framework\DB\Ddl\Table::ACTION_CASCADE
 //        );
-
         $setup->getConnection()->createTable($table_werules_chatbot_chatbotapi);
 
         $setup->getConnection()->createTable($table_werules_chatbot_chatbotuser);

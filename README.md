@@ -37,6 +37,7 @@ A big thanks to [Eleirbag89](https://github.com/Eleirbag89/) who wrote [this](ht
 **PLEASE REPORT ALL BUGS that you find. It's hard to do QA only by myself**
 
 ## Features
+- Messages Queue
 - wit.ai integration for NLP
 - List store categories
 - List products from category
@@ -92,8 +93,21 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)
 
+#### Queue Workflow
+
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/chatbot_queue.png)
+
 ## Release Notes
 ### Magento2
+- **v1.0.2:**
+    - Add Messages Queue
+    - Add List More command
+    - Add error message when trying to list product from a nonexistent category
+    - Fix problem when trying to reorder
+    - Fix problem when trying to add a product to cart
+    - Fix other payload problems
+    - Small code improvements
+    - Fix parameter problem when processing outgoing message
 - **v1.0.1:**
     - Fix missing parameter on CLI installation
     - Fix get on Messenger payload message
