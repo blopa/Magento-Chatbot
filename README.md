@@ -107,6 +107,7 @@ Go to **System > General Settings  > Chatbot Settings**
     - Fix problem when trying to add a product to cart
     - Fix other payload problems
     - Small code improvements
+    - Fix parameter problem when processing outgoing message
 - **v1.0.1:**
     - Fix missing parameter on CLI installation
     - Fix get on Messenger payload message
