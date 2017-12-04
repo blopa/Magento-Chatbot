@@ -26,7 +26,7 @@ use Magento\Store\Model\ScopeInterface;
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
     protected $storeManager;
-    protected $objectManager;
+//    protected $objectManager;
     protected $_messageModelFactory;
     protected $_chatbotAPIFactory;
     protected $_chatbotUserFactory;
@@ -49,6 +49,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     // not from construct parameters
     protected $_define;
+    protected $_messageQueueMode;
     protected $_configPrefix;
     protected $_commandsList;
     protected $_completeCommandsList;
@@ -58,7 +59,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
-        \Magento\Framework\ObjectManagerInterface $objectManager,
+//        \Magento\Framework\ObjectManagerInterface $objectManager,
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
@@ -81,13 +82,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory  $productCollection
     )
     {
-        $this->objectManager = $objectManager;
         $this->_serializer = $serializer;
         $this->storeManager  = $storeManager;
         $this->_messageModelFactory  = $message;
         $this->_chatbotAPIFactory  = $chatbotAPI;
         $this->_chatbotUserFactory  = $chatbotUser;
-        $this->_define = new \Werules\Chatbot\Helper\Define;
         $this->_categoryHelper = $categoryHelper;
         $this->_categoryFactory = $categoryFactory;
         $this->_categoryCollectionFactory = $categoryCollectionFactory;
@@ -96,13 +95,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_quoteModel = $quoteModel;
         $this->_stockRegistry = $stockRegistry;
         $this->_stockFilter = $stockFilter;
+        $this->_imageHelper = $imageHelper;
+        $this->_priceHelper = $priceHelper;
+        $this->_productCollection = $productCollection;
+//        $this->objectManager = $objectManager;
 //        $this->_cartModel = $cartModel;
 //        $this->_cartManagementInterface = $cartManagementInterface;
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
 //        $this->_storeConfig = $scopeConfig;
-        $this->_imageHelper = $imageHelper;
-        $this->_priceHelper = $priceHelper;
-        $this->_productCollection = $productCollection;
+        $this->_define = new \Werules\Chatbot\Helper\Define;
+        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
         parent::__construct($context);
     }
 
@@ -1100,6 +1102,27 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chatbotAPI->save();
 
         return $chatbotAPI;
+    }
+
+    public function createIncomingMessage($messageObject)
+    {
+        $incomingMessage = $this->_messageModelFactory->create();
+        if (isset($messageObject->senderId))
+        {
+            $incomingMessage->setSenderId($messageObject->senderId);
+            $incomingMessage->setContent($messageObject->content);
+            $incomingMessage->setChatbotType($messageObject->chatType);
+            $incomingMessage->setContentType($messageObject->contentType);
+            $incomingMessage->setStatus($messageObject->status);
+            $incomingMessage->setDirection($messageObject->direction);
+            $incomingMessage->setMessagePayload($messageObject->messagePayload);
+            $incomingMessage->setChatMessageId($messageObject->chatMessageId);
+            $incomingMessage->setCreatedAt($messageObject->createdAt);
+            $incomingMessage->setUpdatedAt($messageObject->updatedAt);
+            $incomingMessage->save();
+        }
+
+        return $incomingMessage;
     }
 
     public function createOutgoingMessage($message, $content)

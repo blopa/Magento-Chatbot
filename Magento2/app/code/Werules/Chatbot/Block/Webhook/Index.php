@@ -87,24 +87,28 @@ class Index extends \Magento\Framework\View\Element\Template
 
     protected function messageHandler($messageObject)
     {
-        $messageModel = $this->_messageModel->create();
-        $messageModel->setSenderId($messageObject->senderId);
-        $messageModel->setContent($messageObject->content);
-        $messageModel->setChatbotType($messageObject->chatType);
-        $messageModel->setContentType($messageObject->contentType);
-        $messageModel->setStatus($messageObject->status);
-        $messageModel->setDirection($messageObject->direction);
-        $messageModel->setMessagePayload($messageObject->messagePayload);
-        $messageModel->setChatMessageId($messageObject->chatMessageId);
-        $messageModel->setCreatedAt($messageObject->createdAt);
-        $messageModel->setUpdatedAt($messageObject->updatedAt);
+//        $messageModel = $this->_messageModel->create();
+//        $messageModel->setSenderId($messageObject->senderId);
+//        $messageModel->setContent($messageObject->content);
+//        $messageModel->setChatbotType($messageObject->chatType);
+//        $messageModel->setContentType($messageObject->contentType);
+//        $messageModel->setStatus($messageObject->status);
+//        $messageModel->setDirection($messageObject->direction);
+//        $messageModel->setMessagePayload($messageObject->messagePayload);
+//        $messageModel->setChatMessageId($messageObject->chatMessageId);
+//        $messageModel->setCreatedAt($messageObject->createdAt);
+//        $messageModel->setUpdatedAt($messageObject->updatedAt);
 
-        try {
-            $messageModel->save();
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+//        try {
+//            $messageModel->save();
+//        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+//            return $this->_helper->getJsonErrorResponse();
+//        }
+        $messageModel = $this->_helper->createIncomingMessage($messageObject);
+        if ($messageModel->getMessageId())
+            $result = $this->_helper->processMessage($messageModel->getMessageId());
+        else
             return $this->_helper->getJsonErrorResponse();
-        }
-        $result = $this->_helper->processMessage($messageModel->getMessageId());
 
         return $this->_helper->getJsonSuccessResponse();
     }
