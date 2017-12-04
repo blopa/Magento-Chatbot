@@ -31,22 +31,27 @@
 					<comment>Enable listing of categories with no products or unallowed products (this module supports only simple products for now).</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<!--<field id="enable_promotional_messages" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="4" translate="label comment tooltip" type="select">-->
+				<field id="message_queue_mode" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="4" translate="label comment tooltip" type="select">
+					<label>Message Queue Mode</label>
+					<comment>Message Queue mode.</comment>
+					<source_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\MessageQueueModeList</source_model>
+				</field>
+				<!--<field id="enable_promotional_messages" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="5" translate="label comment tooltip" type="select">-->
 					<!--<label>Enable Promotional Messages</label>-->
 					<!--<comment>Enable the option for the customer to choose to receive or not promotional messages.</comment>-->
 					<!--<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
 				<!--</field>-->
-				<field id="enable_post_log" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="5" translate="label comment tooltip" type="select">
+				<field id="enable_post_log" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="6" translate="label comment tooltip" type="select">
 					<label>Enable Log</label>
 					<comment>Log will be at root/var/log/.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<field id="enable_wit_ai" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="6" translate="label comment tooltip" type="select">
+				<field id="enable_wit_ai" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="7" translate="label comment tooltip" type="select">
 					<label>Enable wit.ai</label>
 					<comment>Enable wit.ai Natural Language Processor.</comment>
 					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 				</field>
-				<field id="wit_ai_token" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="7" translate="label comment tooltip" type="text">
+				<field id="wit_ai_token" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="text">
 					<depends>
 						<field id="werules_chatbot_general/general/enable_wit_ai">1</field>
 					</depends>

@@ -85,4 +85,10 @@ class Define
 
     // API
     const MAX_MESSAGE_ELEMENTS = 7;
+
+    // MESSAGE QUEUE MODES
+    const QUEUE_NONE = 0;
+    const QUEUE_SIMPLE_RESTRICTIVE = 1;
+    const QUEUE_RESTRICTIVE = 2;
+    const QUEUE_NON_RESTRICTIVE = 3;
 }
