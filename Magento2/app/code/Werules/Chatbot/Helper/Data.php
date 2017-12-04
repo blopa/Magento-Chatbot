@@ -28,6 +28,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $storeManager;
 //    protected $objectManager;
     protected $_messageModelFactory;
+    protected $_messageModel;
     protected $_chatbotAPIFactory;
     protected $_chatbotUserFactory;
     protected $_serializer;
@@ -63,7 +64,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Serialize\Serializer\Json $serializer,
         \Werules\Chatbot\Model\ChatbotAPIFactory $chatbotAPI,
         \Werules\Chatbot\Model\ChatbotUserFactory $chatbotUser,
-        \Werules\Chatbot\Model\MessageFactory $message,
+        \Werules\Chatbot\Model\MessageFactory $messageFactory,
+        \Werules\Chatbot\Model\Message $message,
         \Magento\Catalog\Helper\Category $categoryHelper,
         \Magento\Catalog\Model\CategoryFactory $categoryFactory,
         \Magento\Catalog\Model\ResourceModel\Category\CollectionFactory $categoryCollectionFactory,
@@ -84,7 +86,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $this->_serializer = $serializer;
         $this->storeManager  = $storeManager;
-        $this->_messageModelFactory  = $message;
+        $this->_messageModel  = $message;
+        $this->_messageModelFactory  = $messageFactory;
         $this->_chatbotAPIFactory  = $chatbotAPI;
         $this->_chatbotUserFactory  = $chatbotUser;
         $this->_categoryHelper = $categoryHelper;
@@ -104,7 +107,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $this->_cartRepositoryInterface = $cartRepositoryInterface;
 //        $this->_storeConfig = $scopeConfig;
         $this->_define = new \Werules\Chatbot\Helper\Define;
-        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
+//        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
         parent::__construct($context);
     }
 
@@ -153,6 +156,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function processIncomingMessage($message)
     {
+        $messageCollection = $this->_messageModel->getCollection()
+            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+            ->addFieldToFilter('direction', array('eq' => $this->_define::INCOMING));
+        $this->logger(count($messageCollection));
+        die;
         $this->setConfigPrefix($message->getChatbotType());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
         $result = true;
