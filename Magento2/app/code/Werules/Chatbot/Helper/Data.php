@@ -168,6 +168,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->sendDisabledByCustomerMessage($message);
         else
         {
+            // all good, let's process the request
             $this->setChatbotAPIModel($chatbotAPI);
             $result = $this->prepareOutgoingMessage($message);
         }
@@ -1835,6 +1836,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $response = $chatbotAPI->logOutChatbotCustomer();
+        $this->setChatbotAPIModel($chatbotAPI);
         $result = array();
         if ($response)
         {
