@@ -66,12 +66,29 @@ class Worker
             ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
         ;
         foreach ($messageCollection as $message) {
-            $result = true;
+            $result = array();
             $datetime = date('Y-m-d H:i:s');
             if ($message->getStatus() == $this->_define::NOT_PROCESSED)
             {
                 $message->updateMessageStatus($this->_define::PROCESSING);
-                $result = $this->_helper->processMessage($message->getMessageId()); // TODO
+                $messageQueueMode = $this->_helper->getQueueMessageMode();
+                if ($messageQueueMode == $this->_define::QUEUE_NONE)
+                {
+                    // TODO
+                }
+                else if ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE)
+                {
+                    if ($message->getDirection() == $this->_define::INCOMING)
+                        $result = $this->_helper->processIncomingMessage($message);
+                    else //if ($message->getDirection() == $this->_define::OUTGOING)
+                        $result = $this->_helper->processOutgoingMessage($message);
+                }
+                else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
+                {
+                    $result = $this->_helper->processIncomingMessageQueueBySenderId($message->getSenderId());
+                    if ($result)
+                        $result = $this->_helper->processOutgoingMessageQueueBySenderId($message->getSenderId());
+                }
             }
             else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
             {

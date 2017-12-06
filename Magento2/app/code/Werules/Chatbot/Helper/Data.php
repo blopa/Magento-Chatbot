@@ -146,11 +146,25 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach ($messageCollection as $message)
         {
             $result = $this->processIncomingMessage($message);
-            if (!$result)
+//            if ($result)
+//                $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+            if ($result)
             {
-                $result = false;
-                break;
+                foreach ($result as $outgoingMessage)
+                {
+                    $result = $this->processOutgoingMessage($outgoingMessage);
+                    if (!$result)
+                    {
+                        $result = false;
+                        break;
+                    }
+                }
             }
+            else //if (!$result)
+                $result = false;
+
+            if (!$result)
+                break;
         }
 
         return $result;
@@ -165,6 +179,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         foreach ($messageCollection as $message)
         {
             $result = $this->processOutgoingMessage($message);
+//            if ($result)
+//                $message->updateOutgoingMessageStatus($this->_define::PROCESSED);
             if (!$result)
             {
                 $result = false;
@@ -227,6 +243,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
 
+        if ($result)
+            $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+
 //        $this->logger("Message ID -> " . $message->getMessageId());
 //        $this->logger("Message Content -> " . $message->getContent());
 //        $this->logger("ChatbotAPI ID -> " . $chatbotAPI->getChatbotapiId());
@@ -241,7 +260,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         if ($responseContents)
         {
-            $result = $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+//            $result = $message->updateIncomingMessageStatus($this->_define::PROCESSED);
 //            if ($result) // TODO
 
             foreach ($responseContents as $content)
@@ -281,13 +300,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
 
         if ($result)
-        {
-//            $outgoingMessage->setStatus($this->_define::PROCESSED);
-//            $datetime = date('Y-m-d H:i:s');
-//            $outgoingMessage->setUpdatedAt($datetime);
-//            $outgoingMessage->save();
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
-        }
 
 //        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
 //        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
