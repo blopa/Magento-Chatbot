@@ -61,42 +61,51 @@ class Worker
 //                    ->addFieldToFilter('status', array('eq' => '0'));
 //            }
 //        }
-        $processingLimit = $this->_define::SECONDS_IN_MINUTE * 3;
-        $messageCollection = $this->_messageModel->getCollection()
-            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
-        ;
-        foreach ($messageCollection as $message) {
-            $result = array();
-            $datetime = date('Y-m-d H:i:s');
-            if ($message->getStatus() == $this->_define::NOT_PROCESSED)
+        $messageQueueMode = $this->_helper->getQueueMessageMode();
+        if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
+        {
+            $processingLimit = $this->_define::QUEUE_PROCESSING_LIMIT;
+            $messageCollection = $this->_messageModel->getCollection()
+                ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+            ;
+            foreach ($messageCollection as $message)
             {
-//                $message->updateMessageStatus($this->_define::PROCESSING);
-                $messageQueueMode = $this->_helper->getQueueMessageMode();
-                if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
+                $result = array();
+                $datetime = date('Y-m-d H:i:s');
+                if ( // if not processed neither in the processing queue limit
+                    ($message->getStatus() == $this->_define::NOT_PROCESSED) ||
+                    (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
+                )
                 {
+//                $message->updateMessageStatus($this->_define::PROCESSING);
                     if ($message->getDirection() == $this->_define::INCOMING)
                         $result = $this->_helper->processIncomingMessage($message);
                     else //if ($message->getDirection() == $this->_define::OUTGOING)
                         $result = $this->_helper->processOutgoingMessage($message);
                 }
-                else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
-                {
-                    $result = $this->_helper->processIncomingMessageQueueBySenderId($message->getSenderId());
-                    if ($result)
-                        $result = $this->_helper->processOutgoingMessageQueueBySenderId($message->getSenderId());
-                }
-            }
-            else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
-            {
-                // if a message is in 'processing' status for more than 3 minutes, try to reprocess it
-//                $message->updateMessageStatus($this->_define::PROCESSING); // already on 'processing' status
-                $result = $this->_helper->processMessage($message->getMessageId()); // TODO
-            }
 
-            if (!$result)
-                $message->updateMessageStatus($this->_define::NOT_PROCESSED);
+                if (!$result)
+                    $message->updateMessageStatus($this->_define::NOT_PROCESSED);
 //            else
 //                $this->_logger->addInfo('Result of MessageID ' . $message->getMessageId() . ':\n' . var_export($result, true));
+            }
+        }
+        else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
+        {
+            // get all messages with different sender_id values
+            $uniqueMessageCollection = $this->_messageModel->getCollection()
+                ->distinct(true)
+//                ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+            ;
+            $uniqueMessageCollection->getSelect()->group('sender_id');
+
+            foreach ($uniqueMessageCollection as $message)
+            {
+                // foreach unique sender_id, process all their queue messages
+                $result = $this->_helper->processIncomingMessageQueueBySenderId($message->getSenderId());
+                if ($result)
+                    $result = $this->_helper->processOutgoingMessageQueueBySenderId($message->getSenderId());
+            }
         }
 //        $this->_logger->addInfo("Chatbot Cronjob was executed.");
     }

@@ -146,6 +146,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->logger('total incoming: ' . count($messageCollection));
         foreach ($messageCollection as $message)
         {
+            $datetime = date('Y-m-d H:i:s');
+            $processingLimit = $this->_define::QUEUE_PROCESSING_LIMIT;
+            // if processed or not in the processing queue limit
+            if (($message->getStatus() == $this->_define::PROCESSED) || !(($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit)))
+                continue;
+
             $result = $this->processIncomingMessage($message);
 //            if ($result)
 //                $message->updateIncomingMessageStatus($this->_define::PROCESSED);
@@ -181,6 +187,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         foreach ($messageCollection as $message)
         {
+            $datetime = date('Y-m-d H:i:s');
+            $processingLimit = $this->_define::QUEUE_PROCESSING_LIMIT;
+            // if processed or not in the processing queue limit
+            if (($message->getStatus() == $this->_define::PROCESSED) || !(($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit)))
+                continue;
+
             $result = $this->processOutgoingMessage($message);
 //            if ($result)
 //                $message->updateOutgoingMessageStatus($this->_define::PROCESSED);
