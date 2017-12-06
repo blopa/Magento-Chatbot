@@ -108,11 +108,7 @@ class Index extends \Magento\Framework\View\Element\Template
         if ($messageModel->getMessageId())
         {
             $messageQueueMode = $this->_helper->getQueueMessageMode();
-            if ($messageQueueMode == $this->_define::QUEUE_NONE)
-            {
-                // TODO
-            }
-            else if ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE)
+            if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
             {
                 $outgoingMessages = $this->_helper->processIncomingMessage($messageModel);
                 foreach ($outgoingMessages as $outgoingMessage)

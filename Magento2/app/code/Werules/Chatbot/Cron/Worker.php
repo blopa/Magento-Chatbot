@@ -70,13 +70,9 @@ class Worker
             $datetime = date('Y-m-d H:i:s');
             if ($message->getStatus() == $this->_define::NOT_PROCESSED)
             {
-                $message->updateMessageStatus($this->_define::PROCESSING);
+//                $message->updateMessageStatus($this->_define::PROCESSING);
                 $messageQueueMode = $this->_helper->getQueueMessageMode();
-                if ($messageQueueMode == $this->_define::QUEUE_NONE)
-                {
-                    // TODO
-                }
-                else if ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE)
+                if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
                 {
                     if ($message->getDirection() == $this->_define::INCOMING)
                         $result = $this->_helper->processIncomingMessage($message);

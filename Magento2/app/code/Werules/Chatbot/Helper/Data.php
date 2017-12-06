@@ -143,6 +143,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $messageQueueMode = $this->getQueueMessageMode();
         $messageCollection = $this->getMessageCollectionBySenderIdAndDirection($senderId, $this->_define::INCOMING);
 
+        $this->logger('total incoming: ' . count($messageCollection));
         foreach ($messageCollection as $message)
         {
             $result = $this->processIncomingMessage($message);
@@ -150,15 +151,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //                $message->updateIncomingMessageStatus($this->_define::PROCESSED);
             if ($result)
             {
-                foreach ($result as $outgoingMessage)
-                {
-                    $result = $this->processOutgoingMessage($outgoingMessage);
-                    if (!$result)
-                    {
-                        $result = false;
-                        break;
-                    }
-                }
+//                $this->logger('total outgoing: ' . count($result));
+//                foreach ($result as $outgoingMessage)
+//                {
+//                    $this->logger('outgoing: ' . $outgoingMessage->getMessageId());
+//                    $result = $this->processOutgoingMessage($outgoingMessage);
+//                    if (!$result)
+//                    {
+//                        $result = false;
+//                        break;
+//                    }
+//                }
             }
             else //if (!$result)
                 $result = false;
@@ -210,7 +213,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function processIncomingMessage($message)
     {
-        $message->updateIncomingMessageStatus($this->_define::PROCESSING);
+        $messageQueueMode = $this->getQueueMessageMode();
+        if ($messageQueueMode == $this->_define::QUEUE_NONE)
+            $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+        else
+            $message->updateIncomingMessageStatus($this->_define::PROCESSING);
+
         $this->setConfigPrefix($message->getChatbotType());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
         $result = array();
@@ -284,9 +292,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function processOutgoingMessage($outgoingMessage)
     {
-        $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSING);
-        $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
+        $messageQueueMode = $this->getQueueMessageMode();
+        if ($messageQueueMode == $this->_define::QUEUE_NONE)
+            $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
+        else
+            $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSING);
 
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
         $result = array();
         if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
             $result = $chatbotAPI->sendMessage($outgoingMessage);

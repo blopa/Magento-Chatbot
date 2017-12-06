@@ -256,7 +256,7 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->updateMessageStatus($status);
     }
 
-    private function updateMessageStatus($status)
+    public function updateMessageStatus($status)
     {
         $this->setStatus($status);
         $datetime = date('Y-m-d H:i:s');
