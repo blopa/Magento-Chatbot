@@ -106,7 +106,27 @@ class Index extends \Magento\Framework\View\Element\Template
 //        }
         $messageModel = $this->_helper->createIncomingMessage($messageObject);
         if ($messageModel->getMessageId())
-            $result = $this->_helper->processMessage($messageModel->getMessageId());
+        {
+            $messageQueueMode = $this->_helper->getQueueMessageMode();
+            if ($messageQueueMode == $this->_define::QUEUE_NONE)
+            {
+                // TODO
+            }
+            else if ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE)
+            {
+                $outgoingMessages = $this->_helper->processIncomingMessage($messageModel);
+                foreach ($outgoingMessages as $outgoingMessage)
+                {
+                    $result = $this->_helper->processOutgoingMessage($outgoingMessage);
+                }
+            }
+            else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
+            {
+                $result = $this->_helper->processIncomingMessageQueueBySenderId($messageModel->getSenderId());
+                if ($result)
+                    $result = $this->_helper->processOutgoingMessageQueueBySenderId($messageModel->getSenderId());
+            }
+        }
         else
             return $this->_helper->getJsonErrorResponse();
 

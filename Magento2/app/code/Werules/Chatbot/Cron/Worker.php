@@ -71,13 +71,13 @@ class Worker
             if ($message->getStatus() == $this->_define::NOT_PROCESSED)
             {
                 $message->updateMessageStatus($this->_define::PROCESSING);
-                $result = $this->_helper->processMessage($message->getMessageId());
+                $result = $this->_helper->processMessage($message->getMessageId()); // TODO
             }
             else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
             {
                 // if a message is in 'processing' status for more than 3 minutes, try to reprocess it
 //                $message->updateMessageStatus($this->_define::PROCESSING); // already on 'processing' status
-                $result = $this->_helper->processMessage($message->getMessageId());
+                $result = $this->_helper->processMessage($message->getMessageId()); // TODO
             }
 
             if (!$result)

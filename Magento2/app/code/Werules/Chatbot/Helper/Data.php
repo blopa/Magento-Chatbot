@@ -137,63 +137,94 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
     }
 
-    public function processMessage($messageId)
+    public function processIncomingMessageQueueBySenderId($senderId)
     {
-        $message = $this->getMessageModelById($messageId);
         $result = array();
+        $messageQueueMode = $this->getQueueMessageMode();
+        $messageCollection = $this->getMessageCollectionBySenderIdAndDirection($senderId, $this->_define::INCOMING);
 
-        if ($message->getMessageId())
+        foreach ($messageCollection as $message)
         {
-            if ($message->getDirection() == $this->_define::INCOMING)
+            $result = $this->processIncomingMessage($message);
+            if (!$result)
             {
-
-                $messageQueueMode = $this->getQueueMessageMode();
-                if ($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE)
-                {
-                    $messageCollection = $this->_messageModel->getCollection()
-                        ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
-                        ->addFieldToFilter('direction', array('eq' => $this->_define::INCOMING))
-                        ->setOrder('created_at', 'asc');
-                    $this->logger(count($messageCollection));
-                    foreach ($messageCollection as $m)
-                    {
-                        $this->logger($m->getCreatedAt());
-                        // TODO
-                    }
-                }
-                $result = $this->processIncomingMessage($message);
-            }
-            else //if ($message->getDirection() == $this->_define::OUTGOING)
-            {
-                $result = $this->processOutgoingMessage($message);
+                $result = false;
+                break;
             }
         }
 
         return $result;
     }
 
-    private function processIncomingMessage($message)
+    public function processOutgoingMessageQueueBySenderId($senderId)
     {
+        $result = array();
+        $messageQueueMode = $this->getQueueMessageMode();
+        $messageCollection = $this->getMessageCollectionBySenderIdAndDirection($senderId, $this->_define::OUTGOING);
+
+        foreach ($messageCollection as $message)
+        {
+            $result = $this->processOutgoingMessage($message);
+            if (!$result)
+            {
+                $result = false;
+                break;
+            }
+        }
+
+        return $result;
+    }
+
+//    public function processMessage($messageId)
+//    {
+//        $message = $this->getMessageModelById($messageId);
+//        $result = false;
+//
+//        if ($message->getMessageId())
+//        {
+//            $message->updateMessageStatus($this->_define::PROCESSING);
+//            if ($message->getDirection() == $this->_define::INCOMING)
+//                $result = $this->processIncomingMessage($message);
+//            else //if ($message->getDirection() == $this->_define::OUTGOING)
+//                $result = $this->processOutgoingMessage($message);
+//        }
+//
+//        return $result;
+//    }
+
+    public function processIncomingMessage($message)
+    {
+        $message->updateIncomingMessageStatus($this->_define::PROCESSING);
         $this->setConfigPrefix($message->getChatbotType());
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
-        $result = true;
+        $result = array();
 
         if (!($chatbotAPI->getChatbotapiId()))
         {
             $chatbotAPI = $this->createChatbotAPI($chatbotAPI, $message);
-            $this->sendWelcomeMessage($message);
+            $welcomeMessage = $this->getWelcomeMessage($message);
+            if ($welcomeMessage)
+                array_push($result, $welcomeMessage);
         }
 
         $enabled = $this->getConfigValue($this->_configPrefix . '/general/enable');
         if ($enabled == $this->_define::DISABLED)
-            $this->sendDisabledMessage($message);
+            $outgoingMessages = $this->getDisabledMessage($message);
         else if ($chatbotAPI->getEnabled() == $this->_define::DISABLED)
-            $this->sendDisabledByCustomerMessage($message);
+            $outgoingMessages = $this->getDisabledByCustomerMessage($message);
         else
         {
             // all good, let's process the request
             $this->setChatbotAPIModel($chatbotAPI);
-            $result = $this->prepareOutgoingMessage($message);
+            $outgoingMessages = $this->prepareOutgoingMessage($message);
+        }
+
+        if ($outgoingMessages)
+        {
+            foreach ($outgoingMessages as $outgoingMessage)
+            {
+                array_push($result, $outgoingMessage);
+            }
         }
 
 //        $this->logger("Message ID -> " . $message->getMessageId());
@@ -206,13 +237,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function prepareOutgoingMessage($message)
     {
         $responseContents = $this->processMessageRequest($message);
-        $result = false;
+        $outgoingMessages = array();
 
         if ($responseContents)
         {
             $result = $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+//            if ($result) // TODO
 
-            $outgoingMessages = array();
             foreach ($responseContents as $content)
             {
                 // first guarantee outgoing message is saved
@@ -220,18 +251,21 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 array_push($outgoingMessages, $outgoingMessage);
             }
 
-            foreach ($outgoingMessages as $outMessage)
-            {
-                // then process outgoing message
-                $this->processOutgoingMessage($outMessage); // ignore output
-            }
+//            if (count($responseContents) != count($outgoingMessages)) // TODO
+
+//            foreach ($outgoingMessages as $outMessage)
+//            {
+//                // then process outgoing message
+//                $this->processOutgoingMessage($outMessage); // ignore output
+//            }
         }
 
-        return $result;
+        return $outgoingMessages;
     }
 
-    private function processOutgoingMessage($outgoingMessage)
+    public function processOutgoingMessage($outgoingMessage)
     {
+        $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSING);
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
 
         $result = array();
@@ -341,38 +375,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $responseContent;
     }
 
-    private function sendWelcomeMessage($message)
+    private function getWelcomeMessage($message)
     {
 //        $this->setHelperMessageAttributes($message);
+        $outgoingMessage = array();
         $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
         if ($text != '')
         {
             $contentObj = $this->getTextMessageArray($text);
             $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-            $this->processOutgoingMessage($outgoingMessage);
+//            $this->processOutgoingMessage($outgoingMessage);
         }
+
+        return $outgoingMessage;
     }
 
-    private function sendDisabledByCustomerMessage($message)
+    private function getDisabledByCustomerMessage($message)
     {
+        $outgoingMessages = array();
         $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
         $contentObj = $this->getTextMessageArray($text);
         $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-        $this->processOutgoingMessage($outgoingMessage);
-    }
+        if ($outgoingMessage)
+            array_push($outgoingMessages, $outgoingMessage);
+//        $this->processOutgoingMessage($outgoingMessage);
 
-    private function sendDisabledMessage($message)
-    {
-//        $this->setHelperMessageAttributes($message);
-        $text = $this->getConfigValue($this->_configPrefix . '/general/disabled_message');
-
-        if ($text != '')
-            $contentObj = $this->getTextMessageArray($text);
-        else
-            $contentObj = $this->getErrorMessage();
-
-        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-        $this->processOutgoingMessage($outgoingMessage);
+        return $outgoingMessages;
     }
 
     private function handleUnableToProcessRequest($message)
@@ -569,7 +597,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function getQueueMessageMode()
+    private function getDisabledMessage($message)
+    {
+        $outgoingMessages = array();
+//        $this->setHelperMessageAttributes($message);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/disabled_message');
+
+        if ($text != '')
+            $contentObj = $this->getTextMessageArray($text);
+        else
+            $contentObj = $this->getErrorMessage();
+
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+//        $this->processOutgoingMessage($outgoingMessage);
+        if ($outgoingMessage)
+            array_push($outgoingMessages, $outgoingMessage);
+
+        return $outgoingMessages;
+    }
+
+    private function getMessageCollectionBySenderIdAndDirection($senderId, $direction)
+    {
+        $messageCollection = $this->_messageModel->getCollection()
+            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+            ->addFieldToFilter('direction', array('eq' => $direction))
+            ->addFieldToFilter('sender_id', array('eq' => $senderId))
+            ->setOrder('created_at', 'asc');
+
+        return $messageCollection;
+    }
+
+    public function getQueueMessageMode()
     {
         if (isset($this->_messageQueueMode))
             return $this->_messageQueueMode;
