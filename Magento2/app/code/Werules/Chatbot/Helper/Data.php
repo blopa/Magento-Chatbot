@@ -226,9 +226,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function processIncomingMessage($message)
     {
         $messageQueueMode = $this->getQueueMessageMode();
-        if ($messageQueueMode == $this->_define::QUEUE_NONE)
+        if (($messageQueueMode == $this->_define::QUEUE_NONE) && ($message->getStatus() != $this->_define::PROCESSED))
             $message->updateIncomingMessageStatus($this->_define::PROCESSED);
-        else
+        else if ($message->getStatus() != $this->_define::PROCESSING)
             $message->updateIncomingMessageStatus($this->_define::PROCESSING);
 
         $this->setConfigPrefix($message->getChatbotType());
@@ -263,7 +263,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
         }
 
-        if ($result)
+        if (($result) && ($message->getStatus() != $this->_define::PROCESSED))
             $message->updateIncomingMessageStatus($this->_define::PROCESSED);
 
 //        $this->logger("Message ID -> " . $message->getMessageId());
@@ -305,9 +305,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function processOutgoingMessage($outgoingMessage)
     {
         $messageQueueMode = $this->getQueueMessageMode();
-        if ($messageQueueMode == $this->_define::QUEUE_NONE)
+        if ($messageQueueMode == $this->_define::QUEUE_NONE && ($outgoingMessage->getStatus() != $this->_define::PROCESSED))
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
-        else
+        else if ($outgoingMessage->getStatus() != $this->_define::PROCESSING)
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSING);
 
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
@@ -323,7 +323,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
             $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
 
-        if ($result)
+        if (($result) && ($outgoingMessage->getStatus() != $this->_define::PROCESSED))
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
 
 //        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());

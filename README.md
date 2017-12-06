@@ -99,6 +99,8 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.3:**
+    - Add Messages Queue Modes
 - **v1.0.2:**
     - Add Messages Queue
     - Add List More command

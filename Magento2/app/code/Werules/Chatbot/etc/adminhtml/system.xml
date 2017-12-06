@@ -11,7 +11,7 @@
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>General Settings</label>
 				<comment><![CDATA[
-					<h3>Magento Chatbot v1.0.2</h3>
+					<h3>Magento Chatbot v1.0.3</h3>
 					<p><b>To use this module you'll have to use SSL in your store.</b></p>
 				]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
@@ -66,7 +66,7 @@
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Messenger Settings</label>
-				<comment><![CDATA[<h3>Magento Chatbot v1.0.2</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
+				<comment><![CDATA[<h3>Magento Chatbot v1.0.3</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Enable Messenger Bot</label>
 					<comment>Enable Messenger bot.</comment>
