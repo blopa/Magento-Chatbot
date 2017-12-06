@@ -85,9 +85,8 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             else // process message
             {
                 $messengerInstance = $this->getMessengerInstance();
-                $postLog = ($this->getConfigValue('werules_chatbot_general/general/enable_post_log') == $this->_define::ENABLED);
-                if ($postLog)
-                    $this->_helper->logger($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
+                $this->logPostData($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
+
                 $messageObject = $this->createMessageObject($messengerInstance);
                 $result = $this->messageHandler($messageObject);
             }

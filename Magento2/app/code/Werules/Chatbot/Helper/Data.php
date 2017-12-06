@@ -143,7 +143,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $messageQueueMode = $this->getQueueMessageMode();
         $messageCollection = $this->getMessageCollectionBySenderIdAndDirection($senderId, $this->_define::INCOMING);
 
-        $this->logger('total incoming: ' . count($messageCollection));
         foreach ($messageCollection as $message)
         {
             $datetime = date('Y-m-d H:i:s');

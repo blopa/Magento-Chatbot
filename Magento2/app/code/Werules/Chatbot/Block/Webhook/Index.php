@@ -139,6 +139,13 @@ class Index extends \Magento\Framework\View\Element\Template
         return $this->_helper->getJsonErrorResponse();
     }
 
+    protected function logPostData($data, $file = 'werules_chatbot.log')
+    {
+        $postLog = ($this->getConfigValue('werules_chatbot_general/general/enable_post_log') == $this->_define::ENABLED);
+        if ($postLog)
+            $this->_helper->logger($data, $file);
+    }
+
 //    public function getDefine()
 //    {
 //        return $this->_define;
