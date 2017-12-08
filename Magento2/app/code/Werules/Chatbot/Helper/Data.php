@@ -322,8 +322,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
             $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
 
-        if (($result) && ($outgoingMessage->getStatus() != $this->_define::PROCESSED))
-            $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
+        if ($result)
+        {
+            if (isset($outgoingMessage->conversation_state))
+                $chatbotAPI->updateConversationState($outgoingMessage->conversation_state);
+
+            if ($outgoingMessage->getStatus() != $this->_define::PROCESSED)
+                $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
+        }
 
 //        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
 //        $this->logger("Outgoing Message Content -> " . $outgoingMessage->getContent());
@@ -591,11 +597,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $this->listOrderFromOrderId($messageContent, $senderId);
         }
 
-        if ($result)
-        {
-            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $this->setChatbotAPIModel($chatbotAPI);
-        }
+//        if ($result)
+//        {
+//            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
+//            $this->setChatbotAPIModel($chatbotAPI);
+//        }
 
         return $result;
     }
@@ -626,7 +632,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $responseMessage = array(
             'content_type' => $contentType,
-            'content' => $content
+            'content' => $content,
+            'conversation_state' => $this->_define::CONVERSATION_STARTED
         );
         array_push($result, $responseMessage);
 
@@ -726,6 +733,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if (($listCount > 0) && ($startAt != 0))
                     $extraListMessage = $this->getLastListItemMessage();
 
+            // TODO make this cleaner
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
             $this->setChatbotAPIModel($chatbotAPI);
@@ -747,7 +755,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $responseMessage['content'] = $content;
         $responseMessage = array(
             'content_type' => $contentType,
-            'content' => $content
+            'content' => $content,
+            'conversation_state' => $this->_define::CONVERSATION_STARTED
         );
         array_push($result, $responseMessage);
         if ($extraListMessage)
@@ -812,6 +821,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if (($listCount > 0) && ($startAt != 0))
                     $extraListMessage = $this->getLastListItemMessage();
 
+            // TODO make this cleaner
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
             $this->setChatbotAPIModel($chatbotAPI);
@@ -833,7 +843,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $responseMessage['content'] = $content;
         $responseMessage = array(
             'content_type' => $contentType,
-            'content' => $content
+            'content' => $content,
+            'conversation_state' => $this->_define::CONVERSATION_STARTED
         );
         array_push($result, $responseMessage);
         if ($extraListMessage)
@@ -1112,19 +1123,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $response = $this->sendZendEmail($text);
         if ($response)
-        {
-            $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Email sent.")
-            );
-        }
+            $text = __("Email sent.");
         else
-        {
-            $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Sorry, I wasn't able to send an email this time. Please try again later.")
-            );
-        }
+            $text = __("Sorry, I wasn't able to send an email this time. Please try again later.");
+
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => $text,
+            'conversation_state' => $this->_define::CONVERSATION_STARTED
+        );
 
         array_push($result, $responseMessage);
         return $result;
@@ -2080,6 +2087,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         else
         {
+            // TODO make this cleaner
             $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
             $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, 0);
             $this->setChatbotAPIModel($chatbotAPI);
@@ -2325,19 +2333,15 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function processCancelCommand($senderId)
     {
         $result = array();
-        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-        $response = $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-        $this->setChatbotAPIModel($chatbotAPI);
-        if ($response)
-        {
-            $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Ok, canceled.")
-            );
-            array_push($result, $responseMessage);
-        }
-        else
-            $result = $this->getErrorMessage();
+//        $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+//        $response = $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
+//        $this->setChatbotAPIModel($chatbotAPI);
+        $responseMessage = array(
+            'content_type' => $this->_define::CONTENT_TEXT,
+            'content' => __("Ok, canceled."),
+            'conversation_state' => $this->_define::CONVERSATION_STARTED
+        );
+        array_push($result, $responseMessage);
 
         return $result;
     }
@@ -2398,6 +2402,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if (in_array($conversationState, $listCommands))
             {
                 $messageContent = $lastCommandObject->last_message_content;
+                // TODO make this cleaner
                 $chatbotAPI->updateConversationState($conversationState);
                 $this->setChatbotAPIModel($chatbotAPI);
 
