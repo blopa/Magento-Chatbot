@@ -734,8 +734,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $extraListMessage = $this->getLastListItemMessage();
 
             // TODO make this cleaner
-            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
+//            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
+            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0, $this->_define::CONVERSATION_STARTED);
             $this->setChatbotAPIModel($chatbotAPI);
         }
 
@@ -822,8 +822,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $extraListMessage = $this->getLastListItemMessage();
 
             // TODO make this cleaner
-            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0);
+//            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
+            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0, $this->_define::CONVERSATION_STARTED);
             $this->setChatbotAPIModel($chatbotAPI);
         }
 
@@ -2063,8 +2063,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else
         {
             // TODO make this cleaner
-            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
-            $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, 0);
+//            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
+            $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, 0, $this->_define::CONVERSATION_STARTED);
             $this->setChatbotAPIModel($chatbotAPI);
         }
 
