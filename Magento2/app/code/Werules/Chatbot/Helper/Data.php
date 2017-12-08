@@ -420,34 +420,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $responseContent;
     }
 
-    private function getWelcomeMessage($message)
-    {
-//        $this->setHelperMessageAttributes($message);
-        $outgoingMessage = array();
-        $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
-        if ($text != '')
-        {
-            $contentObj = $this->getTextMessageArray($text);
-            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-//            $this->processOutgoingMessage($outgoingMessage);
-        }
-
-        return $outgoingMessage;
-    }
-
-    private function getDisabledByCustomerMessage($message)
-    {
-        $outgoingMessages = array();
-        $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
-        $contentObj = $this->getTextMessageArray($text);
-        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-        if ($outgoingMessage)
-            array_push($outgoingMessages, $outgoingMessage);
-//        $this->processOutgoingMessage($outgoingMessage);
-
-        return $outgoingMessages;
-    }
-
     private function handleUnableToProcessRequest($message)
     {
 //        $responseContent = array();
@@ -641,54 +613,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         array_push($result, $responseMessage);
 
         return $result;
-    }
-
-    private function getDisabledMessage($message)
-    {
-        $outgoingMessages = array();
-//        $this->setHelperMessageAttributes($message);
-        $text = $this->getConfigValue($this->_configPrefix . '/general/disabled_message');
-
-        if ($text != '')
-            $contentObj = $this->getTextMessageArray($text);
-        else
-            $contentObj = $this->getErrorMessage();
-
-        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
-//        $this->processOutgoingMessage($outgoingMessage);
-        if ($outgoingMessage)
-            array_push($outgoingMessages, $outgoingMessage);
-
-        return $outgoingMessages;
-    }
-
-    private function getMessageCollectionBySenderIdAndDirection($senderId, $direction)
-    {
-        $messageCollection = $this->_messageModel->getCollection()
-            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
-            ->addFieldToFilter('direction', array('eq' => $direction))
-            ->addFieldToFilter('sender_id', array('eq' => $senderId))
-            ->setOrder('created_at', 'asc');
-
-        return $messageCollection;
-    }
-
-    public function getQueueMessageMode()
-    {
-        if (isset($this->_messageQueueMode))
-            return $this->_messageQueueMode;
-
-        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
-        return $this->_messageQueueMode;
-    }
-
-    private function getStockByProductId($productId)
-    {
-        $stockQty = $this->_stockRegistry->getStockItem($productId);
-        if ($stockQty)
-            return $stockQty;
-
-        return 0;
     }
 
     private function listProductsFromSearch($messageContent, $senderId)
@@ -1335,6 +1259,81 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // GETS
+    private function getWelcomeMessage($message)
+    {
+//        $this->setHelperMessageAttributes($message);
+        $outgoingMessage = array();
+        $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
+        if ($text != '')
+        {
+            $contentObj = $this->getTextMessageArray($text);
+            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+//            $this->processOutgoingMessage($outgoingMessage);
+        }
+
+        return $outgoingMessage;
+    }
+
+    private function getDisabledByCustomerMessage($message)
+    {
+        $outgoingMessages = array();
+        $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
+        $contentObj = $this->getTextMessageArray($text);
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+        if ($outgoingMessage)
+            array_push($outgoingMessages, $outgoingMessage);
+//        $this->processOutgoingMessage($outgoingMessage);
+
+        return $outgoingMessages;
+    }
+
+    private function getDisabledMessage($message)
+    {
+        $outgoingMessages = array();
+//        $this->setHelperMessageAttributes($message);
+        $text = $this->getConfigValue($this->_configPrefix . '/general/disabled_message');
+
+        if ($text != '')
+            $contentObj = $this->getTextMessageArray($text);
+        else
+            $contentObj = $this->getErrorMessage();
+
+        $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+//        $this->processOutgoingMessage($outgoingMessage);
+        if ($outgoingMessage)
+            array_push($outgoingMessages, $outgoingMessage);
+
+        return $outgoingMessages;
+    }
+
+    private function getMessageCollectionBySenderIdAndDirection($senderId, $direction)
+    {
+        $messageCollection = $this->_messageModel->getCollection()
+            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+            ->addFieldToFilter('direction', array('eq' => $direction))
+            ->addFieldToFilter('sender_id', array('eq' => $senderId))
+            ->setOrder('created_at', 'asc');
+
+        return $messageCollection;
+    }
+
+    public function getQueueMessageMode()
+    {
+        if (isset($this->_messageQueueMode))
+            return $this->_messageQueueMode;
+
+        $this->_messageQueueMode = $this->getConfigValue('werules_chatbot_general/general/message_queue_mode');
+        return $this->_messageQueueMode;
+    }
+
+    private function getStockByProductId($productId)
+    {
+        $stockQty = $this->_stockRegistry->getStockItem($productId);
+        if ($stockQty)
+            return $stockQty;
+
+        return 0;
+    }
 
     private function getCommandConversationState($command)
     {
@@ -1900,13 +1899,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $chatbotUser;
     }
 
-    private function getMessageModelById($messageId)
-    {
-        $message = $this->_messageModelFactory->create();
-        $message->load($messageId);
-
-        return $message;
-    }
+//    private function getMessageModelById($messageId)
+//    {
+//        $message = $this->_messageModelFactory->create();
+//        $message->load($messageId);
+//
+//        return $message;
+//    }
 
     // COMMANDS FUNCTIONS
     private function processListCategoriesCommand()
