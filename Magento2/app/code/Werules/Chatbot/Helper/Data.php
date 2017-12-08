@@ -518,10 +518,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                             if ($parameterValue)
                             {
                                 if ($parameter['confidence'] >= $confidence) // check parameter confidence
-                                    $result = $this->handleCommandsWithParameters($message, $commandString, $parameterValue, $commandCode);
+                                    $result = $this->handleCommandsWithParameters($message, $parameterValue, $commandCode);
                             }
                             else
-                                $result = $this->processCommands($commandString, $message->getSenderId(), false, $commandCode);
+                                $result = $this->processCommands($commandString, $message->getSenderId(), $commandCode);
 
                             if ($result)
                             {
@@ -912,58 +912,40 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function processCommands($messageContent, $senderId, $setStateOnly = false, $command = '', $payload = false)
+    private function processCommands($messageContent, $senderId, $commandCode = '', $payload = false)
     {
 //        $messageContent = $message->getContent();
         $result = array();
-        $state = false;
-        if (!$command)
-            $command = $this->getCurrentCommand($messageContent);
+        if (!$commandCode)
+            $commandCode = $this->getCurrentCommand($messageContent);
 
         if (!$payload)
             $payload = $this->getCurrentMessagePayload();
 
-        if ($command)
+        if ($commandCode)
         {
-            if ($command == $this->_define::START_COMMAND_ID)
+            if ($commandCode == $this->_define::START_COMMAND_ID)
+                $result = $this->processStartCommand();
+            else if ($commandCode == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+                $result = $this->processListCategoriesCommand();
+            else if ($commandCode == $this->_define::SEARCH_COMMAND_ID)
+                $result = $this->processSearchCommand();
+            else if ($commandCode == $this->_define::LOGIN_COMMAND_ID)
             {
-                if (!$setStateOnly)
-                    $result = $this->processStartCommand();
-            }
-            else if ($command == $this->_define::LIST_CATEGORIES_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processListCategoriesCommand();
-                $state = $this->_define::CONVERSATION_LIST_CATEGORIES;
-            }
-            else if ($command == $this->_define::SEARCH_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processSearchCommand();
-                $state = $this->_define::CONVERSATION_SEARCH;
-            }
-            else if ($command == $this->_define::LOGIN_COMMAND_ID)
-            {
-                if (!$setStateOnly)
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
+                    $result = $this->processLoginCommand($senderId);
+                else
                 {
-                    $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-                    if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
-                        $result = $this->processLoginCommand($senderId);
-                    else
-                    {
-                        $text = __("You are already logged.");
-                        $result = $this->getTextMessageArray($text);
-                    }
+                    $text = __("You are already logged.");
+                    $result = $this->getTextMessageArray($text);
                 }
             }
-            else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID)
+            else if ($commandCode == $this->_define::LIST_ORDERS_COMMAND_ID)
             {
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processListOrdersCommand($senderId);
-                }
+                    $result = $this->processListOrdersCommand($senderId);
                 else
                     $result = $this->getNotLoggedMessage();
             }
@@ -971,122 +953,84 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            {
 //                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
 //                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-//                {
-//                    if (!$setStateOnly)
-//                        $result = $this->processReorderCommand();
-//                }
+//                    $result = $this->processReorderCommand();
 //                else
-//                        $result = $this->getNotLoggedMessage();
+//                    $result = $this->getNotLoggedMessage();
 //            }
-            else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID)
+            else if ($commandCode == $this->_define::ADD_TO_CART_COMMAND_ID)
             {
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    if (!$setStateOnly)
-                    {
-                        if ($payload)
-                            $result = $this->processAddToCartCommand($senderId, $payload);
-                        else
-                            $result = $this->getErrorMessage();
-                    }
+                    if ($payload)
+                        $result = $this->processAddToCartCommand($senderId, $payload);
+                    else
+                        $result = $this->getErrorMessage();
                 }
                 else
                     $result = $this->getNotLoggedMessage();
             }
-            else if ($command == $this->_define::CHECKOUT_COMMAND_ID)
+            else if ($commandCode == $this->_define::CHECKOUT_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                    $result = $this->processCheckoutCommand($senderId);
+                else
+                    $result = $this->getNotLoggedMessage();
+            }
+            else if ($commandCode == $this->_define::CLEAR_CART_COMMAND_ID)
+                $result = $this->processClearCartCommand($senderId);
+            else if ($commandCode == $this->_define::TRACK_ORDER_COMMAND_ID)
+            {
+                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
+                    $result = $this->processTrackOrderCommand();
+                else
+                    $result = $this->getNotLoggedMessage();
+            }
+            else if ($commandCode == $this->_define::SUPPORT_COMMAND_ID)
+                $result = $this->processSupportCommand();
+            else if ($commandCode == $this->_define::SEND_EMAIL_COMMAND_ID)
+                $result = $this->processSendEmailCommand();
+            else if ($commandCode == $this->_define::CANCEL_COMMAND_ID)
+                $result = $this->processCancelCommand($senderId);
+            else if ($commandCode == $this->_define::HELP_COMMAND_ID)
+                $result = $this->processHelpCommand();
+            else if ($commandCode == $this->_define::ABOUT_COMMAND_ID)
+                $result = $this->processAboutCommand();
+            else if ($commandCode == $this->_define::LOGOUT_COMMAND_ID)
             {
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
                 {
-                    if (!$setStateOnly)
-                        $result = $this->processCheckoutCommand($senderId);
+                    $result = $this->processLogoutCommand($senderId);
                 }
                 else
                     $result = $this->getNotLoggedMessage();
             }
-            else if ($command == $this->_define::CLEAR_CART_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processClearCartCommand($senderId);
-            }
-            else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
-            {
-                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processTrackOrderCommand();
-                    $state = $this->_define::CONVERSATION_TRACK_ORDER;
-                }
-                else
-                    $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::SUPPORT_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processSupportCommand();
-            }
-            else if ($command == $this->_define::SEND_EMAIL_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processSendEmailCommand();
-                $state = $this->_define::CONVERSATION_EMAIL;
-            }
-            else if ($command == $this->_define::CANCEL_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processCancelCommand($senderId);
-            }
-            else if ($command == $this->_define::HELP_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processHelpCommand();
-            }
-            else if ($command == $this->_define::ABOUT_COMMAND_ID)
-            {
-                if (!$setStateOnly)
-                    $result = $this->processAboutCommand();
-            }
-            else if ($command == $this->_define::LOGOUT_COMMAND_ID)
-            {
-                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processLogoutCommand($senderId);
-                }
-                else
-                    $result = $this->getNotLoggedMessage();
-            }
-            else if ($command == $this->_define::REGISTER_COMMAND_ID)
+            else if ($commandCode == $this->_define::REGISTER_COMMAND_ID)
             {
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::NOT_LOGGED)
-                {
-                    if (!$setStateOnly)
-                        $result = $this->processRegisterCommand();
-                }
+                    $result = $this->processRegisterCommand();
                 else
                 {
                     $text = __("You are already registered.");
                     $result = $this->getTextMessageArray($text);
                 }
             }
-            else if ($command == $this->_define::LIST_MORE_COMMAND_ID)
+            else if ($commandCode == $this->_define::LIST_MORE_COMMAND_ID)
             {
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
-
-                if (!$setStateOnly)
-                    $result = $this->processListMore($lastCommandObject, $senderId);
+                $result = $this->processListMore($lastCommandObject, $senderId);
             }
             else // should never fall in here
-            {
                 $result = $this->getConfusedMessage();
-            }
         }
-        if ($state && (($result) || $setStateOnly)) // TODO
+
+        $state = $this->getCommandConversationState($commandCode);
+        if (($state !== null) && $result) // TODO
         {
             $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
             $chatbotAPI->updateConversationState($state);
@@ -1096,11 +1040,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function handleCommandsWithParameters($message, $command, $keyword, $commandCode)
+    private function handleCommandsWithParameters($message, $keyword, $commandCode)
     {
-        $result = $this->processCommands($command, $message->getSenderId(), true, $commandCode); // should return empty array
-        if ($result)
-            return $result; // if this happens, means there's an error message
+        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
+        $state = $this->getCommandConversationState($commandCode);
+        if ($state)
+            $chatbotAPI->updateConversationState($state);
 
         $result = $this->handleConversationState($message->getContent(), $message->getSenderId(), $keyword);
         return $result;
@@ -1362,6 +1307,36 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // GETS
+
+    private function getCommandConversationState($command)
+    {
+        $result = null;
+        if ($command == $this->_define::START_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+            $result = $this->_define::CONVERSATION_LIST_CATEGORIES;
+        else if ($command == $this->_define::SEARCH_COMMAND_ID)
+            $result = $this->_define::CONVERSATION_SEARCH;
+        else if ($command == $this->_define::LOGIN_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::LIST_ORDERS_COMMAND_ID){}// doesn't change conversation state
+//        else if ($command == $this->_define::REORDER_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::ADD_TO_CART_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::CHECKOUT_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::CLEAR_CART_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::TRACK_ORDER_COMMAND_ID)
+            $result = $this->_define::CONVERSATION_TRACK_ORDER;
+        else if ($command == $this->_define::SUPPORT_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::SEND_EMAIL_COMMAND_ID)
+            $result = $this->_define::CONVERSATION_EMAIL;
+        else if ($command == $this->_define::CANCEL_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::HELP_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::ABOUT_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::LOGOUT_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::REGISTER_COMMAND_ID){}// doesn't change conversation state
+        else if ($command == $this->_define::LIST_MORE_COMMAND_ID){}// doesn't change conversation state
+
+        return $result;
+    }
+
     private function getCurrentMessagePayload()
     {
         if (isset($this->_messagePayload))
@@ -2402,7 +2377,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             if (in_array($conversationState, $listCommands))
             {
                 $messageContent = $lastCommandObject->last_message_content;
-                // TODO make this cleaner
+                // change conversation state to use handleConversationState flow
                 $chatbotAPI->updateConversationState($conversationState);
                 $this->setChatbotAPIModel($chatbotAPI);
 
