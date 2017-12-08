@@ -374,9 +374,18 @@ class InstallSchema implements InstallSchemaInterface
             \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
             null,
             ['nullable' => True],
-            'Listed Items Quantity'
+            'Last Command Details'
         );
-        
+
+
+        $table_werules_chatbot_message->addColumn(
+            'sent_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+            null,
+            ['nullable' => True],
+            'Sent At'
+        );
+
 
 // TODO uncomment this
 //        $table_werules_chatbot_message->addForeignKey(

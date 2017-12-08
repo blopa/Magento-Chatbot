@@ -244,6 +244,25 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::MESSAGE_PAYLOAD, $message_payload);
     }
 
+    /**
+     * Get sent_at
+     * @return string
+     */
+    public function getSentAt()
+    {
+        return $this->getData(self::SENT_AT);
+    }
+
+    /**
+     * Set sent_at
+     * @param string $sent_at
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setSentAt($sent_at)
+    {
+        return $this->setData(self::SENT_AT, $sent_at);
+    }
+    
     // CUSTOM METHODS
 
     public function updateIncomingMessageStatus($status)

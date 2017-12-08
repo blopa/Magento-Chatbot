@@ -21,9 +21,9 @@
 
 namespace Werules\Chatbot\Setup;
 
-use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\UpgradeSchemaInterface;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
@@ -43,7 +43,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $connection = $setup->getConnection();
 
             // Check if the table already exists
-            if ($connection->isTableExists($tableName) == true) {
+            if ($connection->isTableExists($tableName) == true)
+            {
                 $connection->addColumn(
                     $tableName,
                     'last_command_details',
@@ -51,6 +52,31 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'type' => \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
                         'length' => null,
                         'comment' => 'Last Command Details',
+                        'nullable' => true
+                    )
+                );
+            }
+        }
+//        $setup->endSetup();
+
+//        $setup->startSetup();
+        if (version_compare($context->getVersion(), "1.0.3", "<")) {
+
+            //Your upgrade script
+            // Get module table
+            $tableName = $setup->getTable('werules_chatbot_message');
+            $connection = $setup->getConnection();
+
+            // Check if the table already exists
+            if ($connection->isTableExists($tableName) == true)
+            {
+                $connection->addColumn(
+                    $tableName,
+                    'sent_at',
+                    array(
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                        'length' => null,
+                        'comment' => 'Sent At',
                         'nullable' => true
                     )
                 );

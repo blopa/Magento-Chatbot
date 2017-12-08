@@ -24,10 +24,11 @@ namespace Werules\Chatbot\Api\Data;
 interface MessageInterface
 {
 
-    const MESSAGE_ID = 'message_id';
-    const CONTENT_TYPE = 'content_type';
     const CONTENT = 'content';
+    const CONTENT_TYPE = 'content_type';
+    const SENT_AT = 'sent_at';
     const STATUS = 'status';
+    const MESSAGE_ID = 'message_id';
     const CREATED_AT = 'created_at';
     const SENDER_ID = 'sender_id';
     const DIRECTION = 'direction';
@@ -179,4 +180,17 @@ interface MessageInterface
      * @return \Werules\Chatbot\Api\Data\MessageInterface
      */
     public function setMessagePayload($message_payload);
+    
+    /**
+     * Get sent_at
+     * @return string|null
+     */
+    public function getSentAt();
+    
+    /**
+     * Set sent_at
+     * @param string $sent_at
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setSentAt($sent_at);
 }
