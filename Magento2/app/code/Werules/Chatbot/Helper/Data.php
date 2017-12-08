@@ -694,7 +694,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromSearch($messageContent, $senderId)
     {
         $result = array();
-        $newLastCommandObject = array();
+//        $newLastCommandObject = array();
         $productList = array();
         $extraListMessage = array();
         $productCollection = $this->getProductCollectionByName($messageContent);
@@ -727,8 +727,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($productCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
-            $this->setChatbotAPIModel($chatbotAPI);
+//            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
+//            $this->setChatbotAPIModel($chatbotAPI);
+            $newLastCommandObject = array(
+                'last_message_content' => $messageContent,
+                'last_conversation_state' => $chatbotAPI->getConversationState(),
+                'last_listed_quantity' => $totalListCount,
+            );
             if ($listCount > 0)
                 $extraListMessage = $this->getListMoreMessage();
         }
@@ -779,7 +784,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromCategory($messageContent, $messagePayload, $senderId)
     {
         $result = array();
-        $newLastCommandObject = array();
+//        $newLastCommandObject = array();
         $extraListMessage = array();
         $productCarousel = array();
         if ($messagePayload)
@@ -823,8 +828,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($productCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
-            $this->setChatbotAPIModel($chatbotAPI);
+//            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
+//            $this->setChatbotAPIModel($chatbotAPI);
+            $newLastCommandObject = array(
+                'last_message_content' => $messageContent,
+                'last_conversation_state' => $chatbotAPI->getConversationState(),
+                'last_listed_quantity' => $totalListCount,
+            );
             if ($listCount > 0)
                 $extraListMessage = $this->getListMoreMessage();
         }
@@ -1239,7 +1249,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // SETS
-
     private function setLastCommandDetails($currentMessage)
     {
         $command = $this->getCurrentCommand($currentMessage->getContent());
@@ -2017,7 +2026,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $ordersCollection = $this->getOrdersFromCustomerId($chatbotUser->getCustomerId());
         $result = array();
-        $newLastCommandObject = array();
+//        $newLastCommandObject = array();
         $orderList = array();
         $quickReplies = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
@@ -2064,8 +2073,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $totalListCount = $listCount + $startAt;
         if (count($ordersCollection) > $totalListCount)
         {
-            $chatbotAPI->setChatbotAPILastCommandDetails($listOrdersCommand, $totalListCount);
-            $this->setChatbotAPIModel($chatbotAPI);
+//            $chatbotAPI->setChatbotAPILastCommandDetails($listOrdersCommand, $totalListCount);
+//            $this->setChatbotAPIModel($chatbotAPI);
+            $newLastCommandObject = array(
+                'last_message_content' => $listOrdersCommand,
+                'last_conversation_state' => $chatbotAPI->getConversationState(),
+                'last_listed_quantity' => $totalListCount,
+            );
             if ($listCount > 0)
             {
                 $payload = array(
