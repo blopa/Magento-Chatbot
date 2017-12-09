@@ -36,6 +36,7 @@ interface MessageInterface
     const UPDATED_AT = 'updated_at';
     const MESSAGE_PAYLOAD = 'message_payload';
     const CHAT_MESSAGE_ID = 'chat_message_id';
+    const CURRENT_COMMAND_DETAILS = 'current_command_details';
 
 
     /**
@@ -193,4 +194,17 @@ interface MessageInterface
      * @return \Werules\Chatbot\Api\Data\MessageInterface
      */
     public function setSentAt($sent_at);
+    
+    /**
+     * Get current_command_details
+     * @return string|null
+     */
+    public function getCurrentCommandDetails();
+    
+    /**
+     * Set current_command_details
+     * @param string $current_command_details
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setCurrentCommandDetails($current_command_details);
 }
