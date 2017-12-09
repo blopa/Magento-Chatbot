@@ -61,6 +61,26 @@ class Worker
 //                    ->addFieldToFilter('status', array('eq' => '0'));
 //            }
 //        }
+        if ($this->_helper->getConfigValue('werules_chatbot_danger/general/clear_message_pending') == $this->_define::CLEAR_MESSAGE_QUEUE)
+        {
+            $messageSenderId = $this->_helper->getConfigValue('werules_chatbot_danger/general/clear_message_sender_id');
+            if ($messageSenderId)
+            {
+                $messageCollection = $this->_messageModel->getCollection()
+                    ->addFieldToFilter('sender_id', array('eq' => $messageSenderId))
+                ;
+            }
+            else
+                $messageCollection = $this->_messageModel->getCollection();
+
+            foreach ($messageCollection as $message)
+            {
+                $message->updateMessageStatus($this->_define::PROCESSED);
+            }
+
+            $this->_helper->setConfigValue('werules_chatbot_danger/general/clear_message_pending', $this->_define::DONT_CLEAR_MESSAGE_QUEUE);
+        }
+
         $messageQueueMode = $this->_helper->getQueueMessageMode();
         if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
         {

@@ -95,4 +95,7 @@ class Define
     const QUEUE_SIMPLE_RESTRICTIVE = 1;
     const QUEUE_RESTRICTIVE = 2;
     const QUEUE_NON_RESTRICTIVE = 3;
+
+    const DONT_CLEAR_MESSAGE_QUEUE = 0;
+    const CLEAR_MESSAGE_QUEUE = 1;
 }

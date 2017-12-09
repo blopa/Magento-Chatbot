@@ -101,6 +101,7 @@ Go to **System > General Settings  > Chatbot Settings**
 ### Magento2
 - **v1.0.3:**
     - Add Messages Queue Modes
+    - Add option to Clear Message Queue
 - **v1.0.2:**
     - Add Messages Queue
     - Add List More command
@@ -265,6 +266,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
     - Add Welcome Message Options
     - Add Command Listing on Help Command
     - Add Enable Default Replies
+    - Add more options to filter clearing message queue
 
 ## License
 MIT License

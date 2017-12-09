@@ -10,10 +10,7 @@
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>General Settings</label>
-				<comment><![CDATA[
-					<h3>Magento Chatbot v1.0.3</h3>
-					<p><b>To use this module you'll have to use SSL in your store.</b></p>
-				]]></comment>
+				<comment><![CDATA[<h3>Magento Chatbot v1.0.3</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Enable Module</label>
 					<comment>Enable module.</comment>
@@ -214,6 +211,27 @@
 				<field id="about_message" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="14" translate="label comment tooltip" type="text">
 					<label>About Message</label>
 					<comment>Message will be sent when customer asks informations about the store. Please check the maximum size for messages on Facebook API, otherwise your message might not be sent.</comment>
+				</field>
+			</group>
+		</section>
+		<section id="werules_chatbot_danger" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip">
+			<label>Danger Zone</label>
+			<tab>werules</tab>
+			<resource>Werules_Chatbot::config_werules_chatbot</resource>
+			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
+				<label>Danger Zone</label>
+				<comment><![CDATA[<h3>Magento Chatbot v1.0.3</h3><p>To use this module you'll have to use SSL in your store.</p><p style='color: red;'>Only change values here if you know what you're doing.</p><h3 id='werules_scheduled_clearing' style='color: red; display: none;'>A 'Message Clearing Process' is scheduled for the next minute. Please wait.</h3>]]></comment>
+				<field id="clear_message_pending" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
+					<label>Clear Message Pending List</label>
+					<comment>Clear message pending list. After changing this value and saving, a process to clear message pending list will be schedule for the next minute.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="clear_message_sender_id" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip" type="text">
+					<depends>
+						<field id="werules_chatbot_danger/general/clear_message_pending">1</field>
+					</depends>
+					<label>Sender Chat ID</label>
+					<comment>If you like, you can specify a Sender Chat ID to filter the message clearing process.</comment>
 				</field>
 			</group>
 		</section>
