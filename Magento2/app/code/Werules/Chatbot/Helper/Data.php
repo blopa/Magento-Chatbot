@@ -303,6 +303,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function processOutgoingMessage($outgoingMessage)
     {
+        $result = true;
         $messageQueueMode = $this->getQueueMessageMode();
         if ($messageQueueMode == $this->_define::QUEUE_NONE && ($outgoingMessage->getStatus() != $this->_define::PROCESSED))
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
@@ -310,17 +311,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSING);
 
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
-        $result = array();
-        if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
-            $result = $chatbotAPI->sendMessage($outgoingMessage);
-        else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
-            $result = $chatbotAPI->sendQuickReply($outgoingMessage);
-        else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
-            $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
-        else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
-            $result = $chatbotAPI->sendReceiptList($outgoingMessage);
-        else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
-            $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
+        if (isset($outgoingMessage->content) && isset($outgoingMessage->content_type))
+        {
+            if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
+                $result = $chatbotAPI->sendMessage($outgoingMessage);
+            else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
+                $result = $chatbotAPI->sendQuickReply($outgoingMessage);
+            else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
+                $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
+            else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
+                $result = $chatbotAPI->sendReceiptList($outgoingMessage);
+            else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
+                $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
+        }
 
         if ($result)
         {
@@ -344,13 +347,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         // ORDER -> cancel_command, conversation_state, commands, wit_ai, errors
 
         $responseContent = array();
+        $lastMessageDetails = array();
         $commandResponses = array();
         $errorMessages = array();
         $conversationStateResponses = array();
         $payloadCommandResponses = array();
         $NLPResponses = array();
         $this->setHelperMessageAttributes($message);
-        $this->setLastCommandDetails($message);
+
+        $lastMessageDetails = $this->getLastCommandDetailsForMessage($message);
+        if ($lastMessageDetails)
+            array_push($responseContent, $lastMessageDetails);
 
         // first of all must check if it's a cancel command
         $command = $this->getCurrentCommand($message->getContent());
@@ -1173,9 +1180,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // SETS
-    private function setLastCommandDetails($currentMessage)
+    private function getLastCommandDetailsForMessage($currentMessage)
     {
         $command = $this->getCurrentCommand($currentMessage->getContent());
+        $result = array();
         if ($command != $this->_define::LIST_MORE_COMMAND_ID)
         {
             $listingConversationStates = array(
@@ -1186,13 +1194,29 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
             if (isset($lastCommandObject->last_conversation_state))
             {
-                if ((!(in_array($lastCommandObject->last_conversation_state, $listingConversationStates))) || ($command == $this->_define::LIST_ORDERS_COMMAND_ID))
+                if (!(in_array($lastCommandObject->last_conversation_state, $listingConversationStates)) || ($command == $this->_define::LIST_ORDERS_COMMAND_ID))
                 {
-                    $chatbotAPI->setChatbotAPILastCommandDetails($currentMessage->getContent());
-                    $this->setChatbotAPIModel($chatbotAPI);
+//                    $chatbotAPI->setChatbotAPILastCommandDetails($currentMessage->getContent());
+//                    $this->setChatbotAPIModel($chatbotAPI);
+                    $lastCommandObject = json_decode($this->getLastCommandDetails());
+                    if (isset($lastCommandObject->last_listed_quantity))
+                        $lastListQuantity = $lastCommandObject->last_listed_quantity;
+                    else
+                        $lastListQuantity = 0;
+
+                    $lastCommandNewObject = array(
+                        'last_message_content' => $currentMessage->getContent(),
+                        'last_conversation_state' => $chatbotAPI->getConversationState(),
+                        'last_listed_quantity' => $lastListQuantity
+                    );
+                    array_push($result,
+                        array('last_command_details' => json_encode($lastCommandNewObject))
+                    );
                 }
             }
         }
+
+        return $result;
     }
 
     private function setCommandsList($commandsList)
