@@ -332,19 +332,21 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
     public function setChatbotAPILastCommandDetails($messageContent = null, $lastListQuantity = null, $conversationState = null, $commandParameter = null)
     {
         // sets current command details for next call
-        if (($lastListQuantity === null) || ($messageContent === null) || ($commandParameter === null))
-        {
-            $lastCommandObject = json_decode($this->getLastCommandDetails());
-            if ($lastListQuantity === null)
-                $lastListQuantity = $lastCommandObject->last_listed_quantity;
-            if ($messageContent === null)
-                $messageContent = $lastCommandObject->last_command_text;
-            if ($commandParameter === null)
-                $commandParameter = $lastCommandObject->last_command_parameter;
-        }
-
+//        if (($lastListQuantity === null) || ($messageContent === null) || ($commandParameter === null) || ($conversationState === null))
+//        {
+        $lastCommandObject = json_decode($this->getLastCommandDetails());
+        if ($lastListQuantity === null)
+            $lastListQuantity = $lastCommandObject->last_listed_quantity;
+        if ($messageContent === null)
+            $messageContent = $lastCommandObject->last_command_text;
+        if ($commandParameter === null)
+            $commandParameter = $lastCommandObject->last_command_parameter;
         if ($conversationState === null)
-            $conversationState = $this->getConversationState();
+            $conversationState = $lastCommandObject->last_conversation_state;
+//        }
+
+//        if ($conversationState === null)
+//            $conversationState = $this->getConversationState();
 
         $lastCommandNewObject = array(
             'last_command_text' => $messageContent,
