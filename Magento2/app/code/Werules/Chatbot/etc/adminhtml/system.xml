@@ -10,7 +10,10 @@
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>General Settings</label>
-				<comment><![CDATA[<h3>Magento Chatbot v1.0.3</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
+				<comment><![CDATA[
+				<h3>Magento Chatbot v1.0.3</h3>
+				<p>To use this module you'll have to use SSL in your store.</p>
+				]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Enable Module</label>
 					<comment>Enable module.</comment>
@@ -63,7 +66,10 @@
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Messenger Settings</label>
-				<comment><![CDATA[<h3>Magento Chatbot v1.0.3</h3><p>To use this module you'll have to use SSL in your store.</p>]]></comment>
+				<comment><![CDATA[
+				<h3>Magento Chatbot v1.0.3</h3>
+				<p>To use this module you'll have to use SSL in your store.</p>
+				]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Enable Messenger Bot</label>
 					<comment>Enable Messenger bot.</comment>
@@ -220,7 +226,15 @@
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Danger Zone</label>
-				<comment><![CDATA[<h3>Magento Chatbot v1.0.3</h3><p>To use this module you'll have to use SSL in your store.</p><p style='color: red;'>Only change values here if you know what you're doing.</p><h3 id='werules_scheduled_clearing' style='color: red; display: none;'>A 'Message Clearing Process' is scheduled for the next minute. Please wait.</h3>]]></comment>
+				<comment><![CDATA[
+				<h3>Magento Chatbot v1.0.3</h3>
+				<p>To use this module you'll have to use SSL in your store.</p>
+				<p style='color: red;'><b>Only change values here if you know what you're doing.</b></p>
+				<div id='werules_scheduled_clearing' style='display: none; background: #fffbbb; border: solid #d1d1d1; border-width: 0.1rem; position: relative; padding: 0 1.5rem 0 3rem;'>
+					<h2 style='color: red;'>A 'Message Clearing Process' is scheduled for the next minute. Please wait.</h2>
+					<p>If a minute has passed and nothing happened, please check your cron configuration in your server.</p>
+				</div>
+				]]></comment>
 				<field id="clear_message_pending" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
 					<label>Clear Message Pending List</label>
 					<comment>Clear message pending list. After changing this value and saving, a process to clear message pending list will be schedule for the next minute.</comment>
