@@ -230,7 +230,7 @@
 				<h3>Magento Chatbot v1.0.3</h3>
 				<p>To use this module you'll have to use SSL in your store.</p>
 				<p style='color: red;'><b>Only change values here if you know what you're doing.</b></p>
-				<div id='werules_scheduled_clearing' style='display: none; background: #fffbbb; border: solid #d1d1d1; border-width: 0.1rem; position: relative; padding: 0 1.5rem 0 3rem;'>
+				<div class='message-system-inner' id='werules_scheduled_clearing' style='display: none; border-width: 0.1rem; padding: 0 1.5rem 0 3rem;'>
 					<h2 style='color: red;'>A 'Message Clearing Process' is scheduled for the next minute. Please wait.</h2>
 					<p>If a minute has passed and nothing happened, please check your cron configuration in your server.</p>
 				</div>
