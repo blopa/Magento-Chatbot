@@ -338,14 +338,14 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             if ($lastListQuantity === null)
                 $lastListQuantity = $lastCommandObject->last_listed_quantity;
             if ($messageContent === null)
-                $messageContent = $lastCommandObject->last_message_content;
+                $messageContent = $lastCommandObject->last_command_text;
         }
 
         if ($conversationState === null)
             $conversationState = $this->getConversationState();
 
         $lastCommandNewObject = array(
-            'last_message_content' => $messageContent,
+            'last_command_text' => $messageContent,
             'last_conversation_state' => $conversationState,
             'last_listed_quantity' => $lastListQuantity
         );

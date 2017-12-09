@@ -61,12 +61,14 @@ class Define
     const LOGOUT_COMMAND_ID = 15;
     const REGISTER_COMMAND_ID = 16;
     const LIST_MORE_COMMAND_ID = 17;
-    const LAST_COMMAND_DETAILS_DEFAULT = '{"last_message_content":"","last_conversation_state":0,"last_listed_quantity":0}';
+    const LAST_COMMAND_DETAILS_DEFAULT = '{"last_command_text":"","last_conversation_state":0,"last_listed_quantity":0}';
 //    array(
-//        'last_message_content' => '',
+//        'last_command_text' => '',
 //        'last_conversation_state' => 0,
 //        'last_listed_quantity' => 0,
 //    );
+    const CURRENT_COMMAND_DETAILS_DEFAULT = '{}';
+//    json_encode(array())
 
     // message content types
     const CONTENT_TEXT = 0;

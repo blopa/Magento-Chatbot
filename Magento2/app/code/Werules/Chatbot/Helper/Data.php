@@ -311,27 +311,54 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSING);
 
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($outgoingMessage->getSenderId());
-        if (isset($outgoingMessage->content) && isset($outgoingMessage->content_type))
-        {
-            if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
-                $result = $chatbotAPI->sendMessage($outgoingMessage);
-            else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
-                $result = $chatbotAPI->sendQuickReply($outgoingMessage);
-            else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
-                $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
-            else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
-                $result = $chatbotAPI->sendReceiptList($outgoingMessage);
-            else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
-                $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
-        }
+
+        if ($outgoingMessage->getContentType() == $this->_define::CONTENT_TEXT)
+            $result = $chatbotAPI->sendMessage($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::QUICK_REPLY)
+            $result = $chatbotAPI->sendQuickReply($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::IMAGE_WITH_OPTIONS)
+            $result = $chatbotAPI->sendImageWithOptions($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::RECEIPT_LAYOUT)
+            $result = $chatbotAPI->sendReceiptList($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
+            $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
 
         if ($result)
         {
-            if (isset($outgoingMessage->conversation_state))
-                $chatbotAPI->updateConversationState($outgoingMessage->conversation_state);
+            if ($outgoingMessage->getCurrentCommandDetails())
+            {
+                $currentCommandDetails = json_decode($outgoingMessage->getCurrentCommandDetails());
 
-            if (isset($outgoingMessage->last_command_details))
-                $chatbotAPI->updateLastCommandDetails($outgoingMessage->last_command_details);
+                if (isset($currentCommandDetails->conversation_state))
+                {
+                    if ($chatbotAPI->getConversationState() != $currentCommandDetails->conversation_state)
+                        $chatbotAPI->updateConversationState($currentCommandDetails->conversation_state);
+                }
+
+                if (isset($currentCommandDetails->list_more_conversation_state))
+                    $lastConversationState = $currentCommandDetails->list_more_conversation_state;
+                else
+                    $lastConversationState = null;
+
+                if (isset($currentCommandDetails->listed_quantity))
+                    $lastListedQuantity = $currentCommandDetails->listed_quantity;
+                else
+                    $lastListedQuantity = null;
+
+                if (isset($currentCommandDetails->command_text))
+                    $lastCommandText = $currentCommandDetails->command_text;
+                else
+                    $lastCommandText = null;
+
+//                $newLastCommandDetails = array(
+//                    'last_conversation_state' => $lastConversationState,
+//                    'last_listed_quantity' => $lastListedQuantity,
+//                    'last_command_text' => $lastCommandText
+//                );
+//                $chatbotAPI->updateLastCommandDetails(json_encode($newLastCommandDetails));
+
+                $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState);
+            }
 
             if ($outgoingMessage->getStatus() != $this->_define::PROCESSED)
                 $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
@@ -354,9 +381,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $NLPResponses = array();
         $this->setHelperMessageAttributes($message);
 
-        $lastMessageDetails = $this->getLastCommandDetailsForMessage($message); // this message is only set to save current command details
-        if ($lastMessageDetails)
-            array_push($responseContent, $lastMessageDetails);
+//        $lastMessageDetails = $this->getLastCommandDetailsForMessage($message); // this message is only set to save current command details
+//        if ($lastMessageDetails)
+//            array_push($responseContent, $lastMessageDetails);
 
         // first of all must check if it's a cancel command
         $command = $this->getCurrentCommand($message->getContent());
@@ -520,7 +547,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                                 {
                                                     $extraMessage = array(
                                                         'content_type' => $this->_define::CONTENT_TEXT,
-                                                        'content' => $extraText
+                                                        'content' => $extraText,
+                                                        'current_command_details' => json_encode(array())
                                                     );
                                                     array_unshift($result, $extraMessage);
                                                 }
@@ -536,7 +564,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                     {
                                         $extraMessage = array(
                                             'content_type' => $this->_define::CONTENT_TEXT,
-                                            'content' => $extraText
+                                            'content' => $extraText,
+                                            'current_command_details' => json_encode(array())
                                         );
                                         array_unshift($result, $extraMessage);
                                     }
@@ -575,7 +604,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_TRACK_ORDER)
         {
-            $result = $this->listOrderFromOrderId($messageContent, $senderId);
+            $result = $this->listOrderDetailsFromOrderId($messageContent, $senderId);
         }
 
 //        if ($result)
@@ -587,13 +616,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-    private function listOrderFromOrderId($messageContent, $senderId)
+    private function listOrderDetailsFromOrderId($orderId, $senderId)
     {
         $result = array();
         $orderList = array();
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $ordersCollection = $this->getOrdersFromCustomerId($chatbotUser->getCustomerId());
-        $ordersCollection->addFieldToFilter('increment_id', $messageContent);
+        $ordersCollection->addFieldToFilter('increment_id', $orderId);
         if (count($ordersCollection) > 0)
         {
             $orderObject = $this->getImageWithOptionsOrderObject($ordersCollection->getFirstItem());
@@ -614,7 +643,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $contentType,
             'content' => $content,
-            'conversation_state' => $this->_define::CONVERSATION_STARTED
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_STARTED,
+                'listed_quantity' => 1
+            ))
         );
         array_push($result, $responseMessage);
 
@@ -659,11 +691,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
 //            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
 //            $this->setChatbotAPIModel($chatbotAPI);
-            $newLastCommandObject = array(
-                'last_message_content' => $messageContent,
-                'last_conversation_state' => $chatbotAPI->getConversationState(),
-                'last_listed_quantity' => $totalListCount,
-            );
+            $conversationState = $chatbotAPI->getConversationState();
             if ($listCount > 0)
                 $extraListMessage = $this->getListMoreMessage();
         }
@@ -676,11 +704,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
 //            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0, $this->_define::CONVERSATION_STARTED);
 //            $this->setChatbotAPIModel($chatbotAPI);
-            $newLastCommandObject = array(
-                'last_message_content' => $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID),
-                'last_conversation_state' => $this->_define::CONVERSATION_STARTED,
-                'last_listed_quantity' => 0,
-            );
+            $totalListCount = 0;
+            $conversationState = $this->_define::CONVERSATION_STARTED;
         }
 
         if ($listCount > 0)
@@ -700,10 +725,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $contentType,
             'content' => $content,
-            'conversation_state' => $this->_define::CONVERSATION_STARTED
+            'current_command_details' => json_encode(array(
+                'list_more_conversation_state' => $conversationState, // TODO check problem with continuing with same conversation state
+                'listed_quantity' => $totalListCount
+            ))
         );
-        if ($newLastCommandObject)
-            $responseMessage['last_command_details'] = json_encode($newLastCommandObject);
         array_push($result, $responseMessage);
         if ($extraListMessage)
             array_push($result, reset($extraListMessage)); // TODO reset -> gets first item of array
@@ -760,11 +786,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
 //            $chatbotAPI->setChatbotAPILastCommandDetails($messageContent, $totalListCount);
 //            $this->setChatbotAPIModel($chatbotAPI);
-            $newLastCommandObject = array(
-                'last_message_content' => $messageContent,
-                'last_conversation_state' => $chatbotAPI->getConversationState(),
-                'last_listed_quantity' => $totalListCount,
-            );
+            $conversationState = $chatbotAPI->getConversationState();
             if ($listCount > 0)
                 $extraListMessage = $this->getListMoreMessage();
         }
@@ -777,11 +799,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
 //            $chatbotAPI->setChatbotAPILastCommandDetails($this->getCommandText($this->_define::LIST_MORE_COMMAND_ID), 0, $this->_define::CONVERSATION_STARTED);
 //            $this->setChatbotAPIModel($chatbotAPI);
-            $newLastCommandObject = array(
-                'last_message_content' => $this->getCommandText($this->_define::LIST_MORE_COMMAND_ID),
-                'last_conversation_state' => $this->_define::CONVERSATION_STARTED,
-                'last_listed_quantity' => 0,
-            );
+            $totalListCount = 0;
+            $conversationState = $this->_define::CONVERSATION_STARTED;
         }
 
         if ($listCount > 0)
@@ -801,10 +820,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $contentType,
             'content' => $content,
-            'conversation_state' => $this->_define::CONVERSATION_STARTED
+            'current_command_details' => json_encode(array(
+                'list_more_conversation_state' => $conversationState, // TODO check problem with continuing with same conversation state
+                'listed_quantity' => $totalListCount
+            ))
         );
-        if ($newLastCommandObject)
-            $responseMessage['last_command_details'] = json_encode($newLastCommandObject);
         array_push($result, $responseMessage);
         if ($extraListMessage)
             array_push($result, reset($extraListMessage)); // TODO reset -> gets first item of array
@@ -1034,7 +1054,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => $text,
-            'conversation_state' => $this->_define::CONVERSATION_STARTED
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_STARTED
+            ))
         );
 
         array_push($result, $responseMessage);
@@ -1148,6 +1170,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $incomingMessage->setContent($messageObject->content);
             $incomingMessage->setChatbotType($messageObject->chatType);
             $incomingMessage->setContentType($messageObject->contentType);
+            $incomingMessage->setCurrentCommandDetails($messageObject->currentCommandDetails);
             $incomingMessage->setStatus($messageObject->status);
             $incomingMessage->setDirection($messageObject->direction);
             $incomingMessage->setMessagePayload($messageObject->messagePayload);
@@ -1166,6 +1189,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $outgoingMessage->setSenderId($message->getSenderId());
         $outgoingMessage->setContent($content['content']);
         $outgoingMessage->setContentType($content['content_type']); // TODO
+        $outgoingMessage->setCurrentCommandDetails($content['current_command_details']); // TODO
         $outgoingMessage->setStatus($this->_define::PROCESSING);
         $outgoingMessage->setDirection($this->_define::OUTGOING);
         $outgoingMessage->setChatMessageId($message->getChatMessageId());
@@ -1446,7 +1470,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => $text
+            'content' => $text,
+            'current_command_details' => json_encode(array())
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1970,7 +1995,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::QUICK_REPLY,
             'content' => json_encode($contentObject),
-            'conversation_state' => $this->_define::CONVERSATION_LIST_CATEGORIES
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_LIST_CATEGORIES,
+//                'listed_quantity' => count($quickReplies) // TODO
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1981,7 +2009,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'you just sent the START command!' // TODO
+            'content' => 'you just sent the START command!', // TODO
+            'current_command_details' => json_encode(array())
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1993,7 +2022,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Sure, send me the name of the product you're looking for."),
-            'conversation_state' => $this->_define::CONVERSATION_SEARCH
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_SEARCH
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2007,7 +2038,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $loginUrl = $this->getStoreURL('chatbot/customer/login/hash/' . $chatbotAPI->getHashKey());
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("To link your account to this Chatbot, access %1", $loginUrl)
+            'content' => __("To link your account to this Chatbot, access %1", $loginUrl),
+            'current_command_details' => json_encode(array())
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2023,7 +2055,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Ok, you're logged out.")
+                'content' => __("Ok, you're logged out."),
+                'current_command_details' => json_encode(array())
             );
             array_push($result, $responseMessage);
         }
@@ -2039,7 +2072,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $registerUrl = $this->getStoreURL('customer/account/create');
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("Access %1 to register a new account on our shop.", $registerUrl)
+            'content' => __("Access %1 to register a new account on our shop.", $registerUrl),
+            'current_command_details' => json_encode(array())
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2060,7 +2094,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
-        if ($lastCommandObject->last_message_content == $listOrdersCommand)
+        if ($lastCommandObject->last_command_text == $listOrdersCommand)
             $startAt = $lastCommandObject->last_listed_quantity;
         else
             $startAt = 0;
@@ -2099,11 +2133,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
 //            $chatbotAPI->setChatbotAPILastCommandDetails($listOrdersCommand, $totalListCount);
 //            $this->setChatbotAPIModel($chatbotAPI);
-            $newLastCommandObject = array(
-                'last_message_content' => $listOrdersCommand,
-                'last_conversation_state' => $chatbotAPI->getConversationState(),
-                'last_listed_quantity' => $totalListCount,
-            );
+            $conversationState = $chatbotAPI->getConversationState();
             if ($listCount > 0)
             {
                 $payload = array(
@@ -2124,11 +2154,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //            $chatbotAPI->updateConversationState($this->_define::CONVERSATION_STARTED);
 //            $chatbotAPI->setChatbotAPILastCommandDetails($listMoreCommand, 0, $this->_define::CONVERSATION_STARTED);
 //            $this->setChatbotAPIModel($chatbotAPI);
-            $newLastCommandObject = array(
-                'last_message_content' => $listMoreCommand,
-                'last_conversation_state' => $this->_define::CONVERSATION_STARTED,
-                'last_listed_quantity' => 0,
-            );
+            $totalListCount = 0;
+            $conversationState = $this->_define::CONVERSATION_STARTED;
         }
 
         if ($listCount > 0)
@@ -2144,10 +2171,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $responseMessage = array(
             'content_type' => $contentType,
-            'content' => $content
+            'content' => $content,
+            'current_command_details' => json_encode(array(
+                'list_more_conversation_state' => $conversationState, // TODO check problem with continuing with same conversation state
+                'listed_quantity' => $totalListCount
+            ))
         );
-        if ($newLastCommandObject)
-            $responseMessage['last_command_details'] = json_encode($newLastCommandObject);
         array_push($result, $responseMessage);
 
         if ($quickReplies)
@@ -2157,7 +2186,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $contentObject->quick_replies = $quickReplies;
             $responseMessage = array(
                 'content_type' => $this->_define::QUICK_REPLY,
-                'content' => json_encode($contentObject)
+                'content' => json_encode($contentObject),
+                'current_command_details' => json_encode(array())
             );
             array_push($result, $responseMessage);
         }
@@ -2188,7 +2218,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 $responseMessage = array(
                     'content_type' => $this->_define::CONTENT_TEXT,
-                    'content' => __("All products from order %1 that are in stock were added to your cart.", $order->getIncrementId())
+                    'content' => __("All products from order %1 that are in stock were added to your cart.", $order->getIncrementId()),
+                    'current_command_details' => json_encode(array())
                 );
                 array_push($result, $responseMessage);
             }
@@ -2211,7 +2242,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'.", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID))
+                'content' => __("Ok, I just add the product to your cart, to checkout send '%1'.", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID)),
+                'current_command_details' => json_encode(array())
             );
             array_push($result, $responseMessage);
         }
@@ -2245,7 +2277,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $contentObject->buttons = $buttons;
                 $responseMessage = array(
                     'content_type' => $this->_define::TEXT_WITH_OPTIONS,
-                    'content' => json_encode($contentObject)
+                    'content' => json_encode($contentObject),
+                    'current_command_details' => json_encode(array())
                 );
                 array_push($result, $responseMessage);
             }
@@ -2292,7 +2325,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //                $contentObject->buttons = $buttons;
 //                $responseMessage = array(
 //                    'content_type' => $this->_define::LIST_WITH_IMAGE,
-//                    'content' => json_encode($contentObject)
+//                    'content' => json_encode($contentObject),
+//                    'current_command_details' => json_encode(array())
 //                );
 //                array_push($result, $responseMessage);
 //            }
@@ -2305,7 +2339,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //
 //            $responseMessage = array(
 //                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
-//                'content' => json_encode($listObjectList)
+//                'content' => json_encode($listObjectList),
+//                'current_command_details' => json_encode(array())
 //            );
 //            array_push($result, $responseMessage);
 //        }
@@ -2327,7 +2362,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => __("Cart cleared.")
+                'content' => __("Cart cleared."),
+                'current_command_details' => json_encode(array())
             );
             array_push($result, $responseMessage);
         }
@@ -2343,7 +2379,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Ok, send me the order number you're looking for."),
-            'conversation_state' => $this->_define::CONVERSATION_TRACK_ORDER
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_TRACK_ORDER
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2354,7 +2392,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The SUPPORT command is still under development' // TODO
+            'content' => 'The SUPPORT command is still under development', // TODO
+            'current_command_details' => json_encode(array())
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2366,7 +2405,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Sure, send me the email content."),
-            'conversation_state' => $this->_define::CONVERSATION_EMAIL
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_EMAIL
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2381,7 +2422,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Ok, canceled."),
-            'conversation_state' => $this->_define::CONVERSATION_STARTED
+            'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_STARTED
+            ))
         );
         array_push($result, $responseMessage);
 
@@ -2396,7 +2439,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => $text
+                'content' => $text,
+                'current_command_details' => json_encode(array())
             );
             array_push($result, $responseMessage);
         }
@@ -2414,7 +2458,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => $text
+                'content' => $text,
+                'current_command_details' => json_encode(array())
             );
             array_push($result, $responseMessage);
         }
@@ -2443,14 +2488,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
             if (in_array($conversationState, $listCommands))
             {
-                $messageContent = $lastCommandObject->last_message_content;
+                $messageContent = $lastCommandObject->last_command_text;
                 // change conversation state to use handleConversationState flow
                 $chatbotAPI->updateConversationState($conversationState);
                 $this->setChatbotAPIModel($chatbotAPI);
 
                 $result = $this->handleConversationState($messageContent, $senderId);
             }
-            else if ($lastCommandObject->last_message_content == $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID))
+            else if ($lastCommandObject->last_command_text == $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID))
             {
                 $result = $this->processListOrdersCommand($senderId);
             }

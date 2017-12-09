@@ -117,6 +117,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $messageObject->direction = $this->_define::INCOMING;
         $messageObject->chatType = $this->_define::MESSENGER_INT; // TODO
         $messageObject->contentType = $this->_define::CONTENT_TEXT; // TODO
+        $messageObject->currentCommandDetails = $this->_define::CURRENT_COMMAND_DETAILS_DEFAULT; // TODO
         $messageObject->messagePayload = $this->getMessengerPayload($messenger); // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
         $datetime = date('Y-m-d H:i:s');
