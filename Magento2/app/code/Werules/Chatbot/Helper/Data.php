@@ -347,7 +347,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         // ORDER -> cancel_command, conversation_state, commands, wit_ai, errors
 
         $responseContent = array();
-        $lastMessageDetails = array();
         $commandResponses = array();
         $errorMessages = array();
         $conversationStateResponses = array();
@@ -355,7 +354,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $NLPResponses = array();
         $this->setHelperMessageAttributes($message);
 
-        $lastMessageDetails = $this->getLastCommandDetailsForMessage($message);
+        $lastMessageDetails = $this->getLastCommandDetailsForMessage($message); // this message is only set to save current command details
         if ($lastMessageDetails)
             array_push($responseContent, $lastMessageDetails);
 
