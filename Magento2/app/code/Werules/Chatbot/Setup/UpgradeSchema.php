@@ -42,7 +42,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $tableName = $setup->getTable('werules_chatbot_chatbotapi');
             $connection = $setup->getConnection();
 
-            // Check if the table already exists
+            // Check if the table werules_chatbot_chatbotapi already exists
             if ($connection->isTableExists($tableName) == true)
             {
                 $connection->addColumn(
@@ -67,7 +67,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $tableName = $setup->getTable('werules_chatbot_message');
             $connection = $setup->getConnection();
 
-            // Check if the table already exists
+            // Check if the table werules_chatbot_message already exists
             if ($connection->isTableExists($tableName) == true)
             {
                 $connection->addColumn(
@@ -78,6 +78,16 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'length' => null,
                         'comment' => 'Sent At',
                         'nullable' => true
+                    )
+                );
+                $connection->addColumn(
+                    $tableName,
+                    'current_command_details',
+                    array(
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                        'length' => null,
+                        'comment' => 'Current Command Details',
+                        'nullable' => false
                     )
                 );
             }

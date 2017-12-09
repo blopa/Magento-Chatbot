@@ -395,8 +395,8 @@ class InstallSchema implements InstallSchemaInterface
             ['nullable' => False],
             'Current Command Details'
         );
-	
-	
+
+
 // TODO uncomment this
 //        $table_werules_chatbot_message->addForeignKey(
 //            $installer->getFkName('werules_chatbot_message', 'chatbotapi_id', 'werules_chatbot_chatbotapi', 'chatbotapi_id'),
