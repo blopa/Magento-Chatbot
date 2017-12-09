@@ -336,28 +336,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
 
                 if (isset($currentCommandDetails->list_more_conversation_state))
+                {
                     $lastConversationState = $currentCommandDetails->list_more_conversation_state;
-                else
-                    $lastConversationState = null;
 
-                if (isset($currentCommandDetails->listed_quantity))
-                    $lastListedQuantity = $currentCommandDetails->listed_quantity;
-                else
-                    $lastListedQuantity = null;
+                    if (isset($currentCommandDetails->listed_quantity))
+                        $lastListedQuantity = $currentCommandDetails->listed_quantity;
+                    else
+                        $lastListedQuantity = null;
 
-                if (isset($currentCommandDetails->command_text))
-                    $lastCommandText = $currentCommandDetails->command_text;
-                else
-                    $lastCommandText = null;
+                    if (isset($currentCommandDetails->command_text))
+                        $lastCommandText = $currentCommandDetails->command_text;
+                    else
+                        $lastCommandText = null;
 
-//                $newLastCommandDetails = array(
-//                    'last_conversation_state' => $lastConversationState,
-//                    'last_listed_quantity' => $lastListedQuantity,
-//                    'last_command_text' => $lastCommandText
-//                );
-//                $chatbotAPI->updateLastCommandDetails(json_encode($newLastCommandDetails));
+                    $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState);
 
-                $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState);
+                }
             }
 
             if ($outgoingMessage->getStatus() != $this->_define::PROCESSED)

@@ -67,7 +67,7 @@ class Define
 //        'last_conversation_state' => 0,
 //        'last_listed_quantity' => 0,
 //    );
-    const CURRENT_COMMAND_DETAILS_DEFAULT = '{}';
+    const CURRENT_COMMAND_DETAILS_DEFAULT = '[]';
 //    json_encode(array())
 
     // message content types
@@ -87,7 +87,7 @@ class Define
     const CONVERSATION_TRACK_ORDER = 4;
 
     // API
-    const MAX_MESSAGE_ELEMENTS = 7;
+    const MAX_MESSAGE_ELEMENTS = 1;
 
     // MESSAGE QUEUE MODES
     const QUEUE_NONE = 0;
