@@ -262,7 +262,26 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
     {
         return $this->setData(self::SENT_AT, $sent_at);
     }
-    
+
+    /**
+     * Get current_command_details
+     * @return string
+     */
+    public function getCurrentCommandDetails()
+    {
+        return $this->getData(self::CURRENT_COMMAND_DETAILS);
+    }
+
+    /**
+     * Set current_command_details
+     * @param string $current_command_details
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setCurrentCommandDetails($current_command_details)
+    {
+        return $this->setData(self::CURRENT_COMMAND_DETAILS, $current_command_details);
+    }
+
     // CUSTOM METHODS
 
     public function updateIncomingMessageStatus($status)
