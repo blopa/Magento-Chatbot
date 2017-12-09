@@ -1197,7 +1197,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 {
 //                    $chatbotAPI->setChatbotAPILastCommandDetails($currentMessage->getContent());
 //                    $this->setChatbotAPIModel($chatbotAPI);
-                    $lastCommandObject = json_decode($this->getLastCommandDetails());
+                    $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
                     if (isset($lastCommandObject->last_listed_quantity))
                         $lastListQuantity = $lastCommandObject->last_listed_quantity;
                     else
