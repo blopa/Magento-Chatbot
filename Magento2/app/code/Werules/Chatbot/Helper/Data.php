@@ -349,7 +349,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     else
                         $lastCommandText = null;
 
-                    $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState);
+                    if (isset($currentCommandDetails->command_parameter))
+                        $lastCommandParameter = $currentCommandDetails->command_parameter;
+                    else
+                        $lastCommandParameter = null;
+
+                    $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState, $lastCommandParameter);
 
                 }
             }
@@ -542,7 +547,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                                     $extraMessage = array(
                                                         'content_type' => $this->_define::CONTENT_TEXT,
                                                         'content' => $extraText,
-                                                        'current_command_details' => json_encode(array())
+                                                        'current_command_details' => json_encode(array(
+                                                            'command_text' => $this->getCommandText($commandCode)
+                                                        ))
                                                     );
                                                     array_unshift($result, $extraMessage);
                                                 }
@@ -559,7 +566,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                                         $extraMessage = array(
                                             'content_type' => $this->_define::CONTENT_TEXT,
                                             'content' => $extraText,
-                                            'current_command_details' => json_encode(array())
+                                            'current_command_details' => json_encode(array(
+                                                'command_text' => $this->getCommandText($commandCode)
+                                            ))
                                         );
                                         array_unshift($result, $extraMessage);
                                     }
@@ -639,6 +648,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => $content,
             'current_command_details' => json_encode(array(
                 'conversation_state' => $this->_define::CONVERSATION_STARTED,
+//                'command_text' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
                 'listed_quantity' => 1
             ))
         );
@@ -721,7 +731,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => $content,
             'current_command_details' => json_encode(array(
                 'list_more_conversation_state' => $conversationState, // TODO check problem with continuing with same conversation state
-                'listed_quantity' => $totalListCount
+                'command_parameter' => $messageContent,
+//                'command_text' => $this->getCommandText($this->_define::SEARCH_COMMAND_ID),
+                'listed_quantity' => $totalListCount,
+                'conversation_state' => $this->_define::CONVERSATION_STARTED
             ))
         );
         array_push($result, $responseMessage);
@@ -816,7 +829,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => $content,
             'current_command_details' => json_encode(array(
                 'list_more_conversation_state' => $conversationState, // TODO check problem with continuing with same conversation state
-                'listed_quantity' => $totalListCount
+                'command_parameter' => $messageContent,
+//                'command_text' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID),
+                'listed_quantity' => $totalListCount,
+                'conversation_state' => $this->_define::CONVERSATION_STARTED
             ))
         );
         array_push($result, $responseMessage);
@@ -1049,7 +1065,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => $text,
             'current_command_details' => json_encode(array(
-                'conversation_state' => $this->_define::CONVERSATION_STARTED
+                'conversation_state' => $this->_define::CONVERSATION_STARTED,
+//                'command_text' => $this->getCommandText($this->_define::SEND_EMAIL_COMMAND_ID)
             ))
         );
 
@@ -1991,6 +2008,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => json_encode($contentObject),
             'current_command_details' => json_encode(array(
                 'conversation_state' => $this->_define::CONVERSATION_LIST_CATEGORIES,
+                'command_text' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID)
 //                'listed_quantity' => count($quickReplies) // TODO
             ))
         );
@@ -2004,7 +2022,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => 'you just sent the START command!', // TODO
-            'current_command_details' => json_encode(array())
+            'current_command_details' => json_encode(array(
+                'command_text' => $this->getCommandText($this->_define::START_COMMAND_ID)
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2017,7 +2037,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Sure, send me the name of the product you're looking for."),
             'current_command_details' => json_encode(array(
-                'conversation_state' => $this->_define::CONVERSATION_SEARCH
+                'conversation_state' => $this->_define::CONVERSATION_SEARCH,
+                'command_text' => $this->getCommandText($this->_define::SEARCH_COMMAND_ID)
             ))
         );
         array_push($result, $responseMessage);
@@ -2033,7 +2054,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("To link your account to this Chatbot, access %1", $loginUrl),
-            'current_command_details' => json_encode(array())
+            'current_command_details' => json_encode(array(
+                'command_text' => $this->getCommandText($this->_define::LOGIN_COMMAND_ID)
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2050,7 +2073,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
                 'content' => __("Ok, you're logged out."),
-                'current_command_details' => json_encode(array())
+                'current_command_details' => json_encode(array(
+                    'command_text' => $this->getCommandText($this->_define::LOGOUT_COMMAND_ID)
+                ))
             );
             array_push($result, $responseMessage);
         }
@@ -2067,7 +2092,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Access %1 to register a new account on our shop.", $registerUrl),
-            'current_command_details' => json_encode(array())
+            'current_command_details' => json_encode(array(
+                'command_text' => $this->getCommandText($this->_define::REGISTER_COMMAND_ID)
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2168,7 +2195,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => $content,
             'current_command_details' => json_encode(array(
                 'list_more_conversation_state' => $conversationState, // TODO check problem with continuing with same conversation state
+                'command_text' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
                 'listed_quantity' => $totalListCount
+//                'conversation_state' => $this->_define::CONVERSATION_STARTED,
             ))
         );
         array_push($result, $responseMessage);
@@ -2181,7 +2210,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = array(
                 'content_type' => $this->_define::QUICK_REPLY,
                 'content' => json_encode($contentObject),
-                'current_command_details' => json_encode(array())
+                'current_command_details' => json_encode(array(
+                    'command_text' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID)
+                ))
             );
             array_push($result, $responseMessage);
         }
@@ -2213,7 +2244,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $responseMessage = array(
                     'content_type' => $this->_define::CONTENT_TEXT,
                     'content' => __("All products from order %1 that are in stock were added to your cart.", $order->getIncrementId()),
-                    'current_command_details' => json_encode(array())
+                    'current_command_details' => json_encode(array(
+                        'command_text' => $this->getCommandText($this->_define::REORDER_COMMAND_ID)
+                    ))
                 );
                 array_push($result, $responseMessage);
             }
@@ -2237,7 +2270,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
                 'content' => __("Ok, I just add the product to your cart, to checkout send '%1'.", $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID)),
-                'current_command_details' => json_encode(array())
+                'current_command_details' => json_encode(array(
+                    'command_text' => $this->getCommandText($this->_define::ADD_TO_CART_COMMAND_ID)
+                ))
             );
             array_push($result, $responseMessage);
         }
@@ -2272,7 +2307,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $responseMessage = array(
                     'content_type' => $this->_define::TEXT_WITH_OPTIONS,
                     'content' => json_encode($contentObject),
-                    'current_command_details' => json_encode(array())
+                    'current_command_details' => json_encode(array(
+                        'command_text' => $this->getCommandText($this->_define::CHECKOUT_COMMAND_ID)
+                    ))
                 );
                 array_push($result, $responseMessage);
             }
@@ -2288,65 +2325,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
-//    private function processCheckoutCommand($senderId)
-//    {
-//        $chatbotUser = $this->getChatbotuserBySenderId($senderId);
-//        $quote = $this->getQuoteByCustomerId($chatbotUser->getCustomerId());
-//        $orderItems = $quote->getItemsCollection();
-////        $orderItems = $this->getCartItemsByCustomerId($chatbotUser->getCustomerId());
-//        $result = array();
-//        $listObjectList = array();
-//        if (count($orderItems) > 1)
-//        {
-//            foreach ($orderItems as $orderItem)
-//            {
-//                $listObject = $this->getItemListImageProductObject($orderItem->getProduct());
-//                if ($listObject)
-//                    array_push($listObjectList, $listObject);
-//            }
-//            $buttons = array(
-//                array(
-//                    'type' => 'web_url',
-//                    'title' => __("Checkout"),
-//                    'url' => $this->getStoreURL('checkout/cart')
-//                )
-//            );
-//
-//            if ($listObjectList)
-//            {
-//                $contentObject = new \stdClass();
-//                $contentObject->list = $listObjectList;
-//                $contentObject->buttons = $buttons;
-//                $responseMessage = array(
-//                    'content_type' => $this->_define::LIST_WITH_IMAGE,
-//                    'content' => json_encode($contentObject),
-//                    'current_command_details' => json_encode(array())
-//                );
-//                array_push($result, $responseMessage);
-//            }
-//        }
-//        else if (count($orderItems) == 1)
-//        {
-//            $orderItem = $orderItems->getFirstItem();
-//            $imageWithOptionsProdObj = $this->getUnitWithImageProductObject($orderItem->getProduct());
-//            array_push($listObjectList, $imageWithOptionsProdObj);
-//
-//            $responseMessage = array(
-//                'content_type' => $this->_define::IMAGE_WITH_OPTIONS,
-//                'content' => json_encode($listObjectList),
-//                'current_command_details' => json_encode(array())
-//            );
-//            array_push($result, $responseMessage);
-//        }
-//        else // if (count($orderItems) <= 0)
-//        {
-//            $text = __("Your cart is empty.");
-//            $result = $this->getTextMessageArray($text);
-//        }
-//
-//        return $result;
-//    }
-
     private function processClearCartCommand($senderId)
     {
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
@@ -2357,7 +2335,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
                 'content' => __("Cart cleared."),
-                'current_command_details' => json_encode(array())
+                'current_command_details' => json_encode(array(
+                    'command_text' => $this->getCommandText($this->_define::CLEAR_CART_COMMAND_ID)
+                ))
             );
             array_push($result, $responseMessage);
         }
@@ -2374,7 +2354,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Ok, send me the order number you're looking for."),
             'current_command_details' => json_encode(array(
-                'conversation_state' => $this->_define::CONVERSATION_TRACK_ORDER
+                'conversation_state' => $this->_define::CONVERSATION_TRACK_ORDER,
+                'command_text' => $this->getCommandText($this->_define::TRACK_ORDER_COMMAND_ID)
             ))
         );
         array_push($result, $responseMessage);
@@ -2387,7 +2368,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => 'The SUPPORT command is still under development', // TODO
-            'current_command_details' => json_encode(array())
+            'current_command_details' => json_encode(array(
+                'command_text' => $this->getCommandText($this->_define::SUPPORT_COMMAND_ID)
+            ))
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2400,7 +2383,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Sure, send me the email content."),
             'current_command_details' => json_encode(array(
-                'conversation_state' => $this->_define::CONVERSATION_EMAIL
+                'conversation_state' => $this->_define::CONVERSATION_EMAIL,
+                'command_text' => $this->getCommandText($this->_define::SEND_EMAIL_COMMAND_ID)
             ))
         );
         array_push($result, $responseMessage);
@@ -2417,7 +2401,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content_type' => $this->_define::CONTENT_TEXT,
             'content' => __("Ok, canceled."),
             'current_command_details' => json_encode(array(
-                'conversation_state' => $this->_define::CONVERSATION_STARTED
+                'conversation_state' => $this->_define::CONVERSATION_STARTED,
+                'command_text' => $this->getCommandText($this->_define::CANCEL_COMMAND_ID)
             ))
         );
         array_push($result, $responseMessage);
@@ -2434,7 +2419,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
                 'content' => $text,
-                'current_command_details' => json_encode(array())
+                'current_command_details' => json_encode(array(
+                    'command_text' => $this->getCommandText($this->_define::HELP_COMMAND_ID)
+                ))
             );
             array_push($result, $responseMessage);
         }
@@ -2453,7 +2440,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $responseMessage = array(
                 'content_type' => $this->_define::CONTENT_TEXT,
                 'content' => $text,
-                'current_command_details' => json_encode(array())
+                'current_command_details' => json_encode(array(
+                    'command_text' => $this->getCommandText($this->_define::ABOUT_COMMAND_ID)
+                ))
             );
             array_push($result, $responseMessage);
         }
