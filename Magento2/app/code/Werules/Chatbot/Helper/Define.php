@@ -88,7 +88,7 @@ class Define
     const CONVERSATION_TRACK_ORDER = 4;
 
     // API
-    const MAX_MESSAGE_ELEMENTS = 1;
+    const MAX_MESSAGE_ELEMENTS = 7;
 
     // MESSAGE QUEUE MODES
     const QUEUE_NONE = 0;

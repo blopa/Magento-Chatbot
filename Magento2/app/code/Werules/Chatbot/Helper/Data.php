@@ -1984,8 +1984,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => json_encode($contentObject),
             'current_command_details' => json_encode(array(
                 'conversation_state' => $this->_define::CONVERSATION_LIST_CATEGORIES,
-                'command_text' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID)
-//                'listed_quantity' => count($quickReplies) // TODO
+                'command_text' => $this->getCommandText($this->_define::LIST_CATEGORIES_COMMAND_ID),
+                'listed_quantity' => 0
+//                'listed_quantity' => count($quickReplies) // TODO only if we add feature to list more categories
             ))
         );
         array_push($result, $responseMessage);
@@ -2014,7 +2015,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => __("Sure, send me the name of the product you're looking for."),
             'current_command_details' => json_encode(array(
                 'conversation_state' => $this->_define::CONVERSATION_SEARCH,
-                'command_text' => $this->getCommandText($this->_define::SEARCH_COMMAND_ID)
+                'command_text' => $this->getCommandText($this->_define::SEARCH_COMMAND_ID),
+                'listed_quantity' => 0
             ))
         );
         array_push($result, $responseMessage);
