@@ -120,7 +120,8 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $messageObject->currentCommandDetails = $this->_define::CURRENT_COMMAND_DETAILS_DEFAULT; // TODO
         $messageObject->messagePayload = $this->getMessengerPayload($messenger); // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
-        $messageObject->sentAt = $messenger->getMessageTimestamp();
+        $this->_helper->logger('message timestamp: '.$messenger->getMessageTimestamp());
+        $messageObject->sentAt = (int)$messenger->getMessageTimestamp();
         $datetime = date('Y-m-d H:i:s');
         $messageObject->createdAt = $datetime;
         $messageObject->updatedAt = $datetime;

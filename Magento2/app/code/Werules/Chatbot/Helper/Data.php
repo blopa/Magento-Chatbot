@@ -39,6 +39,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $_productCollection;
     protected $_customerRepositoryInterface;
     protected $_quoteModel;
+    protected $_configWriter;
     protected $_imageHelper;
     protected $_stockRegistry;
     protected $_stockFilter;
@@ -77,6 +78,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        \Magento\Quote\Api\CartManagementInterface $cartManagementInterface,
 //        \Magento\Quote\Api\CartRepositoryInterface $cartRepositoryInterface,
 //        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        \Magento\Framework\App\Config\Storage\WriterInterface $configWriter,
         \Magento\Catalog\Helper\Image $imageHelper,
         \Magento\CatalogInventory\Api\StockRegistryInterface $stockRegistry,
         \Magento\CatalogInventory\Helper\Stock $stockFilter,
@@ -98,6 +100,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->_quoteModel = $quoteModel;
         $this->_stockRegistry = $stockRegistry;
         $this->_stockFilter = $stockFilter;
+        $this->_configWriter = $configWriter;
         $this->_imageHelper = $imageHelper;
         $this->_priceHelper = $priceHelper;
         $this->_productCollection = $productCollection;
@@ -152,25 +155,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 continue;
 
             $outgoingMessageList = $this->processIncomingMessage($message);
-//            if ($result)
-//                $message->updateIncomingMessageStatus($this->_define::PROCESSED);
-            if ($outgoingMessageList)
-            {
-//                $this->logger('total outgoing: ' . count($result));
-//                foreach ($result as $outgoingMessage)
-//                {
-//                    $this->logger('outgoing: ' . $outgoingMessage->getMessageId());
-//                    $result = $this->processOutgoingMessage($outgoingMessage);
-//                    if (!$result)
-//                    {
-//                        $result = false;
-//                        break;
-//                    }
-//                }
-            }
-            else //if (!$outgoingMessageList)
-                $outgoingMessageList = array();
-
             if (!$outgoingMessageList)
             {
                 if ($messageQueueMode != $this->_define::QUEUE_SIMPLE_RESTRICTIVE)
@@ -196,8 +180,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 continue;
 
             $result = $this->processOutgoingMessage($message);
-//            if ($result)
-//                $message->updateOutgoingMessageStatus($this->_define::PROCESSED);
             if (!$result)
             {
                 if ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE)
@@ -1244,6 +1226,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // SETS
+    public function setConfigValue($field, $value)
+    {
+        $this->_configWriter->save($field, $value);
+    }
+
     private function setCommandsList($commandsList)
     {
         $this->_commandsList = $commandsList;
