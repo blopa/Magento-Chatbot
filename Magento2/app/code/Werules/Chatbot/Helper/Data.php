@@ -148,7 +148,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $datetime = date('Y-m-d H:i:s');
             $processingLimit = $this->_define::QUEUE_PROCESSING_LIMIT;
             // if processed or not in the processing queue limit
-	    if (($message->getStatus() == $this->_define::PROCESSED) || (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit)))
+        if (($message->getStatus() == $this->_define::PROCESSED) || (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit)))
                 continue;
 
             $result = $this->processIncomingMessage($message);
@@ -879,9 +879,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if ($commandCode == $this->_define::START_COMMAND_ID)
                 $result = $this->processStartCommand();
-            else if ($commandCode == $this->_define::LIST_CATEGORIES_COMMAND_ID)
+            else if ($commandCode == $this->_define::LIST_CATEGORIES_COMMAND_ID) // changes conversation state
                 $result = $this->processListCategoriesCommand();
-            else if ($commandCode == $this->_define::SEARCH_COMMAND_ID)
+            else if ($commandCode == $this->_define::SEARCH_COMMAND_ID) // changes conversation state
                 $result = $this->processSearchCommand();
             else if ($commandCode == $this->_define::LOGIN_COMMAND_ID)
             {
@@ -933,7 +933,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($commandCode == $this->_define::CLEAR_CART_COMMAND_ID)
                 $result = $this->processClearCartCommand($senderId);
-            else if ($commandCode == $this->_define::TRACK_ORDER_COMMAND_ID)
+            else if ($commandCode == $this->_define::TRACK_ORDER_COMMAND_ID) // changes conversation state
             {
                 $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
                 if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
@@ -943,7 +943,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             }
             else if ($commandCode == $this->_define::SUPPORT_COMMAND_ID)
                 $result = $this->processSupportCommand();
-            else if ($commandCode == $this->_define::SEND_EMAIL_COMMAND_ID)
+            else if ($commandCode == $this->_define::SEND_EMAIL_COMMAND_ID) // changes conversation state
                 $result = $this->processSendEmailCommand();
             else if ($commandCode == $this->_define::CANCEL_COMMAND_ID)
                 $result = $this->processCancelCommand();
@@ -982,13 +982,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $result = $this->getConfusedMessage();
         }
 
-        $state = $this->getCommandConversationState($commandCode);
-        if (($state !== null) && $result) // TODO
-        {
-            $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
-            $chatbotAPI->updateConversationState($state);
-            $this->setChatbotAPIModel($chatbotAPI);
-        }
+//        $state = $this->getCommandConversationState($commandCode);
+//        if (($state !== null) && $result) // TODO
+//        {
+//            $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
+//            $chatbotAPI->updateConversationState($state);
+//            $this->setChatbotAPIModel($chatbotAPI);
+//        }
 
         return $result;
     }
@@ -1946,7 +1946,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        $responseMessage['content'] = json_encode($contentObject);
         $responseMessage = array(
             'content_type' => $this->_define::QUICK_REPLY,
-            'content' => json_encode($contentObject)
+            'content' => json_encode($contentObject),
+            'conversation_state' => $this->_define::CONVERSATION_LIST_CATEGORIES
         );
         array_push($result, $responseMessage);
         return $result;
@@ -1968,7 +1969,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("Sure, send me the name of the product you're looking for.")
+            'content' => __("Sure, send me the name of the product you're looking for."),
+            'conversation_state' => $this->_define::CONVERSATION_SEARCH
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2317,7 +2319,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("Ok, send me the order number you're looking for.")
+            'content' => __("Ok, send me the order number you're looking for."),
+            'conversation_state' => $this->_define::CONVERSATION_TRACK_ORDER
         );
         array_push($result, $responseMessage);
         return $result;
@@ -2339,7 +2342,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => __("Sure, send me the email content.")
+            'content' => __("Sure, send me the email content."),
+            'conversation_state' => $this->_define::CONVERSATION_EMAIL
         );
         array_push($result, $responseMessage);
         return $result;
