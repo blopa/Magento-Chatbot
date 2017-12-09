@@ -647,7 +647,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => $content,
             'current_command_details' => json_encode(array(
                 'conversation_state' => $this->_define::CONVERSATION_STARTED,
-//                'command_text' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
+                'command_text' => $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID),
                 'listed_quantity' => 1
             ))
         );
@@ -659,7 +659,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromSearch($messageContent, $senderId)
     {
         $result = array();
-//        $newLastCommandObject = array();
         $productList = array();
         $extraListMessage = array();
         $productCollection = $this->getProductCollectionByName($messageContent);
@@ -754,7 +753,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function listProductsFromCategory($messageContent, $messagePayload, $senderId)
     {
         $result = array();
-//        $newLastCommandObject = array();
         $extraListMessage = array();
         $productCarousel = array();
         if ($messagePayload)
@@ -1081,7 +1079,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             'content' => $text,
             'current_command_details' => json_encode(array(
                 'conversation_state' => $this->_define::CONVERSATION_STARTED,
-//                'command_text' => $this->getCommandText($this->_define::SEND_EMAIL_COMMAND_ID)
+                'command_text' => $this->getCommandText($this->_define::SEND_EMAIL_COMMAND_ID)
             ))
         );
 
@@ -2083,7 +2081,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $chatbotUser = $this->getChatbotuserBySenderId($senderId);
         $ordersCollection = $this->getOrdersFromCustomerId($chatbotUser->getCustomerId());
         $result = array();
-//        $newLastCommandObject = array();
         $orderList = array();
         $quickReplies = array();
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
