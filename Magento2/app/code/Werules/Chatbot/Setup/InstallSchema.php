@@ -380,7 +380,7 @@ class InstallSchema implements InstallSchemaInterface
 
         $table_werules_chatbot_message->addColumn(
             'sent_at',
-            \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
             null,
             ['nullable' => True],
             'Sent At'

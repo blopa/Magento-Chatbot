@@ -303,4 +303,14 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
 
         return true;
     }
+
+    public function updateSentAt($timestamp)
+    {
+        $this->setSentAt($timestamp);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
 }

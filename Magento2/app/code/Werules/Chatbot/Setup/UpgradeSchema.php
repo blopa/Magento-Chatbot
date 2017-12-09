@@ -74,7 +74,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     $tableName,
                     'sent_at',
                     array(
-                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
                         'length' => null,
                         'comment' => 'Sent At',
                         'nullable' => true

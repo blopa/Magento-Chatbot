@@ -360,6 +360,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
             if ($outgoingMessage->getStatus() != $this->_define::PROCESSED)
                 $outgoingMessage->updateOutgoingMessageStatus($this->_define::PROCESSED);
+
+            $outgoingMessage->updateSentAt(time());
         }
 
 //        $this->logger("Outgoing Message ID -> " . $outgoingMessage->getMessageId());
@@ -1199,6 +1201,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $incomingMessage->setDirection($messageObject->direction);
             $incomingMessage->setMessagePayload($messageObject->messagePayload);
             $incomingMessage->setChatMessageId($messageObject->chatMessageId);
+            $incomingMessage->setSentAt($messageObject->sentAt);
             $incomingMessage->setCreatedAt($messageObject->createdAt);
             $incomingMessage->setUpdatedAt($messageObject->updatedAt);
             $incomingMessage->save();
@@ -1218,6 +1221,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $outgoingMessage->setDirection($this->_define::OUTGOING);
         $outgoingMessage->setChatMessageId($message->getChatMessageId());
         $outgoingMessage->setChatbotType($message->getChatbotType());
+//        $outgoingMessage->setSentAt(time());
         $datetime = date('Y-m-d H:i:s');
         $outgoingMessage->setCreatedAt($datetime);
         $outgoingMessage->setUpdatedAt($datetime);
