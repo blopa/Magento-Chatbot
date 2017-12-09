@@ -139,7 +139,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function processIncomingMessageQueueBySenderId($senderId)
     {
-        $result = array();
+        $outgoingMessageList = array();
         $messageQueueMode = $this->getQueueMessageMode();
         $messageCollection = $this->getMessageCollectionBySenderIdAndDirection($senderId, $this->_define::INCOMING);
 
@@ -151,10 +151,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (($message->getStatus() == $this->_define::PROCESSED) || (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit)))
                 continue;
 
-            $result = $this->processIncomingMessage($message);
+            $outgoingMessageList = $this->processIncomingMessage($message);
 //            if ($result)
 //                $message->updateIncomingMessageStatus($this->_define::PROCESSED);
-            if ($result)
+            if ($outgoingMessageList)
             {
 //                $this->logger('total outgoing: ' . count($result));
 //                foreach ($result as $outgoingMessage)
@@ -168,14 +168,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //                    }
 //                }
             }
-            else //if (!$result)
-                $result = array();
+            else //if (!$outgoingMessageList)
+                $outgoingMessageList = array();
 
-            if (!$result)
-                break;
+            if (!$outgoingMessageList)
+            {
+                if ($messageQueueMode != $this->_define::QUEUE_SIMPLE_RESTRICTIVE)
+                    break;
+            }
         }
 
-        return $result;
+        return $outgoingMessageList;
     }
 
     public function processOutgoingMessageQueueBySenderId($senderId)
@@ -197,8 +200,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //                $message->updateOutgoingMessageStatus($this->_define::PROCESSED);
             if (!$result)
             {
-                $result = false;
-                break;
+                if ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE)
+                {
+                    // only breaks the loop if it's a message that changes conversation state
+                    if ($message->getCurrentCommandDetails())
+                    {
+                        $currentCommandDetails = json_decode($message->getCurrentCommandDetails());
+                        if (isset($currentCommandDetails->conversation_state))
+                            break;
+                    }
+                }
+                else
+                    break;
             }
         }
 

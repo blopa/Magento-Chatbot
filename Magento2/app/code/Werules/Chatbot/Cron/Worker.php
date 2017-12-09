@@ -92,7 +92,7 @@ class Worker
         }
         else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
         {
-            // get all messages with different sender_id values
+            // get all messages with different sender_id values (aka list of all sender_id)
             $uniqueMessageCollection = $this->_messageModel->getCollection()->distinct(true);
             $uniqueMessageCollection->getSelect()->group('sender_id');
 
