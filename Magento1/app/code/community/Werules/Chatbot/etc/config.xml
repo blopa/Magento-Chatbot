@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Werules_Chatbot>
-		<version>1.0.0</version>
+			<version>1.0.0</version>
 		</Werules_Chatbot>
 	</modules>
 	<frontend>
@@ -48,56 +48,53 @@
 		</routers>
 	</frontend>
 	<global>
-		<helpers>
-			<chatbot>
-				<class>Werules_Chatbot_Helper</class>
-			</chatbot>
-		</helpers>
-		<blocks>
-			<chatbot>
-				<class>Werules_Chatbot_Block</class>
-			</chatbot>
-		</blocks>
-		<models>
-		<chatbot>
-			<class>Werules_Chatbot_Model</class>
-			<resourceModel>chatbot_mysql4</resourceModel>
-		</chatbot>
-		<chatbot_mysql4>
-			<class>Werules_Chatbot_Model_Mysql4</class>
-			<entities>
-				<message>
-					<table>werules_chatbot_message</table>
-				</message>
-				<chatbotuser>
-					<table>werules_chatbot_chatbotuser</table>
-				</chatbotuser>
-				<chatbotapi>
-					<table>werules_chatbot_chatbotapi</table>
-				</chatbotapi>
-			</entities>
-		</chatbot_mysql4>
-		</models>
 		<resources>
-			<chatbot_setup>
+			<werules_chatbot_setup>
 				<setup>
-				<module>Werules_Chatbot</module>
+					<module>Werules_Chatbot</module>
+					<class>Werules_Chatbot_Model_Resource_Setup</class>
 				</setup>
-				<connection>
-				<use>core_setup</use>
-				</connection>
-			</chatbot_setup>
-			<chatbot_write>
-				<connection>
-				<use>core_write</use>
-				</connection>
-			</chatbot_write>
-			<chatbot_read>
-				<connection>
-				<use>core_read</use>
-				</connection>
-			</chatbot_read>
+			</werules_chatbot_setup>
 		</resources>
+		<blocks>
+			<werules_chatbot>
+				<class>Werules_Chatbot_Block</class>
+			</werules_chatbot>
+		</blocks>
+		<helpers>
+			<werules_chatbot>
+				<class>Werules_Chatbot_Helper</class>
+			</werules_chatbot>
+		</helpers>
+		<models>
+			<werules_chatbot>
+				<class>Werules_Chatbot_Model</class>
+				<resourceModel>werules_chatbot_resource</resourceModel>
+			</werules_chatbot>
+			<werules_chatbot_resource>
+				<class>Werules_Chatbot_Model_Resource</class>
+				<entities>
+					<message>
+						<table>werules_chatbot_message</table>
+					</message>
+					<chatbotuser>
+						<table>werules_chatbot_chatbotuser</table>
+					</chatbotuser>
+					<chatbotapi>
+						<table>werules_chatbot_chatbotapi</table>
+					</chatbotapi>
+					<message_store>
+						<table>werules_chatbot_message_store</table>
+					</message_store>
+					<chatbotuser_store>
+						<table>werules_chatbot_chatbotuser_store</table>
+					</chatbotuser_store>
+					<chatbotapi_store>
+						<table>werules_chatbot_chatbotapi_store</table>
+					</chatbotapi_store>
+				</entities>
+			</werules_chatbot_resource>
+		</models>
 	</global>
 	<crontab>
 		<jobs>
@@ -111,4 +108,33 @@
 			</werules_chatbot_worker>
 		</jobs>
 	</crontab>
-</config> 
+	<adminhtml>
+		<layout>
+			<updates>
+				<werules_chatbot>
+					<file>werules_chatbot.xml</file>
+				</werules_chatbot>
+			</updates>
+		</layout>
+		<translate>
+			<modules>
+				<Werules_Chatbot>
+					<files>
+						<default>Werules_Chatbot.csv</default>
+					</files>
+				</Werules_Chatbot>
+			</modules>
+		</translate>
+	</adminhtml>
+	<admin>
+		<routers>
+			<adminhtml>
+				<args>
+					<modules>
+						<Werules_Chatbot before="Mage_Adminhtml">Werules_Chatbot_Adminhtml</Werules_Chatbot>
+					</modules>
+				</args>
+			</adminhtml>
+		</routers>
+	</admin>
+</config>

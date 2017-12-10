@@ -21,10 +21,82 @@
 
 class Werules_Chatbot_Model_Chatbotuser extends Mage_Core_Model_Abstract
 {
-    protected function _construct(){
+    /**
+     * Entity code.
+     * Can be used as part of method name for entity processing
+     */
+    const ENTITY    = 'werules_chatbot_chatbotuser';
+    const CACHE_TAG = 'werules_chatbot_chatbotuser';
 
-       $this->_init("chatbot/chatbotuser");
+    /**
+     * Prefix of model events names
+     *
+     * @var string
+     */
+    protected $_eventPrefix = 'werules_chatbot_chatbotuser';
 
+    /**
+     * Parameter name in event
+     *
+     * @var string
+     */
+    protected $_eventObject = 'chatbotuser';
+
+    /**
+     * constructor
+     *
+     * @access public
+     * @return void
+     * @author Ultimate Module Creator
+     */
+    public function _construct()
+    {
+        parent::_construct();
+        $this->_init('werules_chatbot/chatbotuser');
     }
 
+    /**
+     * before save chatbotuser
+     *
+     * @access protected
+     * @return Werules_Chatbot_Model_Chatbotuser
+     * @author Ultimate Module Creator
+     */
+    protected function _beforeSave()
+    {
+        parent::_beforeSave();
+        $now = Mage::getSingleton('core/date')->gmtDate();
+        if ($this->isObjectNew()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+        return $this;
+    }
+
+    /**
+     * save chatbotuser relation
+     *
+     * @access public
+     * @return Werules_Chatbot_Model_Chatbotuser
+     * @author Ultimate Module Creator
+     */
+    protected function _afterSave()
+    {
+        return parent::_afterSave();
+    }
+
+    /**
+     * get default values
+     *
+     * @access public
+     * @return array
+     * @author Ultimate Module Creator
+     */
+    public function getDefaultValues()
+    {
+        $values = array();
+        $values['status'] = 1;
+        return $values;
+    }
+    
 }

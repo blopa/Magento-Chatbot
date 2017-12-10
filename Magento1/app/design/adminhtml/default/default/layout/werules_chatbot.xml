@@ -1,5 +1,100 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
+	<adminhtml_chatbot_message_index>
+		<reference name="menu">
+			<action method="setActive">
+				<menupath>system/config/werules_chatbot/message</menupath>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="werules_chatbot/adminhtml_message" name="message" />
+
+		</reference>
+	</adminhtml_chatbot_message_index>
+	<adminhtml_chatbot_message_grid>
+		<block type="core/text_list" name="root" output="toHtml">
+			<block type="werules_chatbot/adminhtml_message_grid" name="message_grid"/>
+		</block>
+	</adminhtml_chatbot_message_grid>
+	<!-- Message add/edit action -->
+	<adminhtml_chatbot_message_edit>
+		<update handle="editor"/>
+		<reference name="menu">
+			<action method="setActive">
+				<menupath>system/config/werules_chatbot/message</menupath>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="werules_chatbot/adminhtml_message_edit" name="message_edit"></block>
+		</reference>
+		<reference name="left">
+			<block type="werules_chatbot/adminhtml_message_edit_tabs" name="message_tabs"></block>
+		</reference>
+	</adminhtml_chatbot_message_edit>
+
+	<adminhtml_chatbot_chatbotuser_index>
+		<reference name="menu">
+			<action method="setActive">
+				<menupath>system/config/werules_chatbot/chatbotuser</menupath>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="werules_chatbot/adminhtml_chatbotuser" name="chatbotuser" />
+
+		</reference>
+	</adminhtml_chatbot_chatbotuser_index>
+	<adminhtml_chatbot_chatbotuser_grid>
+		<block type="core/text_list" name="root" output="toHtml">
+			<block type="werules_chatbot/adminhtml_chatbotuser_grid" name="chatbotuser_grid"/>
+		</block>
+	</adminhtml_chatbot_chatbotuser_grid>
+	<!-- Chatbotuser add/edit action -->
+	<adminhtml_chatbot_chatbotuser_edit>
+		<update handle="editor"/>
+		<reference name="menu">
+			<action method="setActive">
+				<menupath>system/config/werules_chatbot/chatbotuser</menupath>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="werules_chatbot/adminhtml_chatbotuser_edit" name="chatbotuser_edit"></block>
+		</reference>
+		<reference name="left">
+			<block type="werules_chatbot/adminhtml_chatbotuser_edit_tabs" name="chatbotuser_tabs"></block>
+		</reference>
+	</adminhtml_chatbot_chatbotuser_edit>
+
+	<adminhtml_chatbot_chatbotapi_index>
+		<reference name="menu">
+			<action method="setActive">
+				<menupath>system/config/werules_chatbot/chatbotapi</menupath>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="werules_chatbot/adminhtml_chatbotapi" name="chatbotapi" />
+
+		</reference>
+	</adminhtml_chatbot_chatbotapi_index>
+	<adminhtml_chatbot_chatbotapi_grid>
+		<block type="core/text_list" name="root" output="toHtml">
+			<block type="werules_chatbot/adminhtml_chatbotapi_grid" name="chatbotapi_grid"/>
+		</block>
+	</adminhtml_chatbot_chatbotapi_grid>
+	<!-- Chatbotapi add/edit action -->
+	<adminhtml_chatbot_chatbotapi_edit>
+		<update handle="editor"/>
+		<reference name="menu">
+			<action method="setActive">
+				<menupath>system/config/werules_chatbot/chatbotapi</menupath>
+			</action>
+		</reference>
+		<reference name="content">
+			<block type="werules_chatbot/adminhtml_chatbotapi_edit" name="chatbotapi_edit"></block>
+		</reference>
+		<reference name="left">
+			<block type="werules_chatbot/adminhtml_chatbotapi_edit_tabs" name="chatbotapi_tabs"></block>
+		</reference>
+	</adminhtml_chatbot_chatbotapi_edit>
 	<default> <!-- TODO load this only on the module page -->
 		<reference name="head">
 			<action method="addJs"><script>werules/chatbot/chatbot.js</script></action>

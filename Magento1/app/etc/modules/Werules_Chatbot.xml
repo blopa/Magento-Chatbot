@@ -5,6 +5,9 @@
 			<active>true</active>
 			<codePool>community</codePool>
 			<version>1.0.0</version>
+			<depends>
+				<Mage_Core />
+			</depends>
 		</Werules_Chatbot>
 	</modules>
 </config>
