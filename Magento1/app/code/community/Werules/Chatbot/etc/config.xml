@@ -77,10 +77,14 @@
 	</global>
 	<crontab>
 		<jobs>
-			<chatbot_execute>
-				<schedule><cron_expr>*/1 * * * *</cron_expr></schedule>
-				<run><model>chatbot/cron::execute</model></run>
-			</chatbot_execute>
+			<werules_chatbot_worker>
+				<schedule>
+					<cron_expr>*/1 * * * *</cron_expr> <!-- every minute -->
+				</schedule>
+				<run>
+					<model>chatbot/cron::execute</model>
+				</run>
+			</werules_chatbot_worker>
 		</jobs>
 	</crontab>
 </config> 
