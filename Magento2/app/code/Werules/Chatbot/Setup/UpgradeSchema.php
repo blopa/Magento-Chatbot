@@ -21,9 +21,9 @@
 
 namespace Werules\Chatbot\Setup;
 
-use Magento\Framework\Setup\UpgradeSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\Setup\UpgradeSchemaInterface;
 
 class UpgradeSchema implements UpgradeSchemaInterface
 {
@@ -42,8 +42,9 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $tableName = $setup->getTable('werules_chatbot_chatbotapi');
             $connection = $setup->getConnection();
 
-            // Check if the table already exists
-            if ($connection->isTableExists($tableName) == true) {
+            // Check if the table werules_chatbot_chatbotapi already exists
+            if ($connection->isTableExists($tableName) == true)
+            {
                 $connection->addColumn(
                     $tableName,
                     'last_command_details',
@@ -52,6 +53,41 @@ class UpgradeSchema implements UpgradeSchemaInterface
                         'length' => null,
                         'comment' => 'Last Command Details',
                         'nullable' => true
+                    )
+                );
+            }
+        }
+//        $setup->endSetup();
+
+//        $setup->startSetup();
+        if (version_compare($context->getVersion(), "1.0.3", "<")) {
+
+            //Your upgrade script
+            // Get module table
+            $tableName = $setup->getTable('werules_chatbot_message');
+            $connection = $setup->getConnection();
+
+            // Check if the table werules_chatbot_message already exists
+            if ($connection->isTableExists($tableName) == true)
+            {
+                $connection->addColumn(
+                    $tableName,
+                    'sent_at',
+                    array(
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                        'length' => null,
+                        'comment' => 'Sent At',
+                        'nullable' => true
+                    )
+                );
+                $connection->addColumn(
+                    $tableName,
+                    'current_command_details',
+                    array(
+                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                        'length' => null,
+                        'comment' => 'Current Command Details',
+                        'nullable' => false
                     )
                 );
             }

@@ -41,5 +41,11 @@
 				<enable_hub_challenge>1</enable_hub_challenge>
 			</general>
 		</werules_chatbot_messenger>
+		<werules_chatbot_danger>
+			<general>
+				<clear_message_pending>0</clear_message_pending>
+				<clear_message_sender_id/>
+			</general>
+		</werules_chatbot_danger>
 	</default>
 </config>
