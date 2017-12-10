@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<default> <!-- TODO load this only on the module page -->
+		<reference name="head">
+			<action method="addJs"><script>werules/chatbot/chatbot.js</script></action>
+			<action method="addCss"><script>css/werules_chatbot/chatbot.css</script></action>
+		</reference>
+	</default>
+</layout>

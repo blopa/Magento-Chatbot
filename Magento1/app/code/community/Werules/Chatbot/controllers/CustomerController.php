@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Werules_Chatbot_IndexController extends Mage_Core_Controller_Front_Action{
+class Werules_Chatbot_CustomerController extends Mage_Core_Controller_Front_Action{
     public function IndexAction() {
 
       $this->loadLayout();
