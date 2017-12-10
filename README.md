@@ -99,6 +99,14 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.3:**
+    - Add Messages Queue Modes
+    - Add option to Clear Message Queue
+    - Add price to product list
+    - Add condition to only handle messages from Messenger
+    - Add new configuration tab
+    - Fix some bugs
+    - Add bugs to fix later
 - **v1.0.2:**
     - Add Messages Queue
     - Add List More command
@@ -263,6 +271,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
     - Add Welcome Message Options
     - Add Command Listing on Help Command
     - Add Enable Default Replies
+    - Add more options to filter clearing message queue
+    - Add handler for other posts from Messenger
 
 ## License
 MIT License

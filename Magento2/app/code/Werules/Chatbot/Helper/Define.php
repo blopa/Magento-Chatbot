@@ -40,6 +40,8 @@ class Define
     const SECONDS_IN_HOUR = 3600;
     const SECONDS_IN_MINUTE = 60;
     const DEFAULT_MIN_CONFIDENCE = 0.7;
+    const BREAK_LINE = '\n'; // chr(10)
+    const QUEUE_PROCESSING_LIMIT = self::SECONDS_IN_MINUTE * 3;
 
     // commands
     const START_COMMAND_ID = 0;
@@ -60,12 +62,15 @@ class Define
     const LOGOUT_COMMAND_ID = 15;
     const REGISTER_COMMAND_ID = 16;
     const LIST_MORE_COMMAND_ID = 17;
-    const LAST_COMMAND_DETAILS_DEFAULT = '{"last_message_content":"","last_conversation_state":0,"last_listed_quantity":0}';
+    const LAST_COMMAND_DETAILS_DEFAULT = '{"last_command_parameter":"","last_command_text":"","last_conversation_state":0,"last_listed_quantity":0}';
 //    array(
-//        'last_message_content' => '',
+//        'last_command_parameter' => '',
+//        'last_command_text' => '',
 //        'last_conversation_state' => 0,
 //        'last_listed_quantity' => 0,
 //    );
+    const CURRENT_COMMAND_DETAILS_DEFAULT = '[]';
+//    json_encode(array())
 
     // message content types
     const CONTENT_TEXT = 0;
@@ -85,4 +90,13 @@ class Define
 
     // API
     const MAX_MESSAGE_ELEMENTS = 7;
+
+    // MESSAGE QUEUE MODES
+    const QUEUE_NONE = 0;
+    const QUEUE_SIMPLE_RESTRICTIVE = 1;
+    const QUEUE_RESTRICTIVE = 2;
+    const QUEUE_NON_RESTRICTIVE = 3;
+
+    const DONT_CLEAR_MESSAGE_QUEUE = 0;
+    const CLEAR_MESSAGE_QUEUE = 1;
 }

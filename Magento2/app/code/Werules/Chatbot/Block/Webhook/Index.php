@@ -87,26 +87,46 @@ class Index extends \Magento\Framework\View\Element\Template
 
     protected function messageHandler($messageObject)
     {
-        $messageModel = $this->_messageModel->create();
-        $messageModel->setSenderId($messageObject->senderId);
-        $messageModel->setContent($messageObject->content);
-        $messageModel->setChatbotType($messageObject->chatType);
-        $messageModel->setContentType($messageObject->contentType);
-        $messageModel->setStatus($messageObject->status);
-        $messageModel->setDirection($messageObject->direction);
-        $messageModel->setMessagePayload($messageObject->messagePayload);
-        $messageModel->setChatMessageId($messageObject->chatMessageId);
-        $messageModel->setCreatedAt($messageObject->createdAt);
-        $messageModel->setUpdatedAt($messageObject->updatedAt);
+//        $messageModel = $this->_messageModel->create();
+//        $messageModel->setSenderId($messageObject->senderId);
+//        $messageModel->setContent($messageObject->content);
+//        $messageModel->setChatbotType($messageObject->chatType);
+//        $messageModel->setContentType($messageObject->contentType);
+//        $messageModel->setStatus($messageObject->status);
+//        $messageModel->setDirection($messageObject->direction);
+//        $messageModel->setMessagePayload($messageObject->messagePayload);
+//        $messageModel->setChatMessageId($messageObject->chatMessageId);
+//        $messageModel->setCreatedAt($messageObject->createdAt);
+//        $messageModel->setUpdatedAt($messageObject->updatedAt);
 
-        try {
-            $messageModel->save();
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
-            return $this->_helper->getJsonErrorResponse();
+//        try {
+//            $messageModel->save();
+//        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+//            return $this->_helper->getJsonErrorResponse();
+//        }
+        $messageModel = $this->_helper->createIncomingMessage($messageObject);
+        if ($messageModel->getMessageId())
+        {
+            $messageQueueMode = $this->_helper->getQueueMessageMode();
+            if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
+            {
+                $outgoingMessages = $this->_helper->processIncomingMessage($messageModel);
+                foreach ($outgoingMessages as $outgoingMessage)
+                {
+                    $result = $this->_helper->processOutgoingMessage($outgoingMessage);
+                }
+            }
+            else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
+            {
+                $result = $this->_helper->processIncomingMessageQueueBySenderId($messageModel->getSenderId());
+                if ($result)
+                    $result = $this->_helper->processOutgoingMessageQueueBySenderId($messageModel->getSenderId());
+            }
         }
-        $result = $this->_helper->processMessage($messageModel->getMessageId());
+        else
+            return $this->_helper->getJsonErrorResponse();
 
-        return $this->_helper->getJsonSuccessResponse();
+        return $this->getJsonSuccessResponse();
     }
 
     public function getConfigValue($code)
@@ -117,6 +137,18 @@ class Index extends \Magento\Framework\View\Element\Template
     protected function getJsonErrorResponse()
     {
         return $this->_helper->getJsonErrorResponse();
+    }
+
+    protected function getJsonSuccessResponse()
+    {
+        return $this->_helper->getJsonSuccessResponse();
+    }
+
+    protected function logPostData($data, $file = 'werules_chatbot.log')
+    {
+        $postLog = ($this->getConfigValue('werules_chatbot_general/general/enable_post_log') == $this->_define::ENABLED);
+        if ($postLog)
+            $this->_helper->logger($data, $file);
     }
 
 //    public function getDefine()

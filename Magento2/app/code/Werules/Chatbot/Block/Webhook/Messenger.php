@@ -85,11 +85,13 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             else // process message
             {
                 $messengerInstance = $this->getMessengerInstance();
-                $postLog = ($this->getConfigValue('werules_chatbot_general/general/enable_post_log') == $this->_define::ENABLED);
-                if ($postLog)
-                    $this->_helper->logger($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
+                $this->logPostData($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
+
                 $messageObject = $this->createMessageObject($messengerInstance);
-                $result = $this->messageHandler($messageObject);
+                if (isset($messageObject->content))
+                    $result = $this->messageHandler($messageObject);
+                else
+                    $result = $this->getJsonSuccessResponse(); // return success to avoid receiving the same message again
             }
 //        }
 //        else
@@ -108,18 +110,26 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
     protected function createMessageObject($messenger)
     {
         $messageObject = new \stdClass();
-        $messageObject->senderId = $messenger->ChatID();
         if ($messenger->Text())
             $content = $messenger->Text();
         else
             $content = $messenger->getPostbackTitle();
+        if (!$content)
+            return $messageObject;
+
+        $messageObject->senderId = $messenger->ChatID();
         $messageObject->content = $content;
         $messageObject->status = $this->_define::PROCESSING;
         $messageObject->direction = $this->_define::INCOMING;
         $messageObject->chatType = $this->_define::MESSENGER_INT; // TODO
         $messageObject->contentType = $this->_define::CONTENT_TEXT; // TODO
+        $messageObject->currentCommandDetails = $this->_define::CURRENT_COMMAND_DETAILS_DEFAULT; // TODO
         $messageObject->messagePayload = $this->getMessengerPayload($messenger); // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
+        if ($messenger->getMessageTimestamp())
+            $messageObject->sentAt = (int)$messenger->getMessageTimestamp();
+        else
+            $messageObject->sentAt = time();
         $datetime = date('Y-m-d H:i:s');
         $messageObject->createdAt = $datetime;
         $messageObject->updatedAt = $datetime;

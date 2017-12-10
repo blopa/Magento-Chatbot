@@ -25,6 +25,7 @@ interface ChatbotAPIInterface
 {
 
     const CHATBOTUSER_ID = 'chatbotuser_id';
+    const LAST_COMMAND_DETAILS = 'last_command_details';
     const FALLBACK_QTY = 'fallback_qty';
     const CHATBOTAPI_ID = 'chatbotapi_id';
     const CREATED_AT = 'created_at';
@@ -34,7 +35,6 @@ interface ChatbotAPIInterface
     const CHATBOT_TYPE = 'chatbot_type';
     const UPDATED_AT = 'updated_at';
     const ENABLED = 'enabled';
-    const LAST_COMMAND_DETAILS = 'last_command_details';
     const CHAT_ID = 'chat_id';
 
 

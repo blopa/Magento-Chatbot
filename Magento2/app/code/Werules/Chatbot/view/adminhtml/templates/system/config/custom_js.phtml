@@ -28,6 +28,14 @@
     if (custom_key)
         updateCustomKeyUrl(custom_key.value);
 
+    var scheduled_clear = document.getElementById('werules_chatbot_danger_general_clear_message_pending');
+    if (scheduled_clear.value === '1')
+    {
+        var schedule_message = document.getElementById('werules_scheduled_clearing');
+        if (schedule_message)
+            document.getElementById('werules_scheduled_clearing').style.display = 'block';
+    }
+
     function updateCustomKeyUrl(custom_key)
     {
         var messenger_url = document.getElementById('werules_messenger_url');

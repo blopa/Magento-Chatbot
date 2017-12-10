@@ -61,29 +61,68 @@ class Worker
 //                    ->addFieldToFilter('status', array('eq' => '0'));
 //            }
 //        }
-        $processingLimit = $this->_define::SECONDS_IN_MINUTE * 3;
-        $messageCollection = $this->_messageModel->getCollection()
-            ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
-        ;
-        foreach ($messageCollection as $message) {
-            $result = true;
-            $datetime = date('Y-m-d H:i:s');
-            if ($message->getStatus() == $this->_define::NOT_PROCESSED)
+        if ($this->_helper->getConfigValue('werules_chatbot_danger/general/clear_message_pending') == $this->_define::CLEAR_MESSAGE_QUEUE)
+        {
+            $messageSenderId = $this->_helper->getConfigValue('werules_chatbot_danger/general/clear_message_sender_id');
+            if ($messageSenderId)
             {
-                $message->updateMessageStatus($this->_define::PROCESSING);
-                $result = $this->_helper->processMessage($message->getMessageId());
+                $messageCollection = $this->_messageModel->getCollection()
+                    ->addFieldToFilter('sender_id', array('eq' => $messageSenderId))
+                ;
             }
-            else if (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
+            else
+                $messageCollection = $this->_messageModel->getCollection();
+
+            foreach ($messageCollection as $message)
             {
-                // if a message is in 'processing' status for more than 3 minutes, try to reprocess it
-//                $message->updateMessageStatus($this->_define::PROCESSING); // already on 'processing' status
-                $result = $this->_helper->processMessage($message->getMessageId());
+                $message->updateMessageStatus($this->_define::PROCESSED);
             }
 
-            if (!$result)
-                $message->updateMessageStatus($this->_define::NOT_PROCESSED);
+            $this->_helper->setConfigValue('werules_chatbot_danger/general/clear_message_pending', $this->_define::DONT_CLEAR_MESSAGE_QUEUE);
+        }
+
+        $messageQueueMode = $this->_helper->getQueueMessageMode();
+        if (($messageQueueMode == $this->_define::QUEUE_NONE) || ($messageQueueMode == $this->_define::QUEUE_NON_RESTRICTIVE))
+        {
+            $processingLimit = $this->_define::QUEUE_PROCESSING_LIMIT;
+            $messageCollection = $this->_messageModel->getCollection()
+                ->addFieldToFilter('status', array('neq' => $this->_define::PROCESSED))
+            ;
+            foreach ($messageCollection as $message)
+            {
+                $result = array();
+                $datetime = date('Y-m-d H:i:s');
+                if ( // if not processed neither in the processing queue limit
+                    ($message->getStatus() == $this->_define::NOT_PROCESSED) ||
+                    (($message->getStatus() == $this->_define::PROCESSING) && ((strtotime($datetime) - strtotime($message->getUpdatedAt())) > $processingLimit))
+                )
+                {
+//                $message->updateMessageStatus($this->_define::PROCESSING);
+                    if ($message->getDirection() == $this->_define::INCOMING)
+                        $result = $this->_helper->processIncomingMessage($message);
+                    else //if ($message->getDirection() == $this->_define::OUTGOING)
+                        $result = $this->_helper->processOutgoingMessage($message);
+                }
+
+                if (!$result)
+                    $message->updateMessageStatus($this->_define::NOT_PROCESSED);
 //            else
 //                $this->_logger->addInfo('Result of MessageID ' . $message->getMessageId() . ':\n' . var_export($result, true));
+            }
+        }
+        else if (($messageQueueMode == $this->_define::QUEUE_RESTRICTIVE) || ($messageQueueMode == $this->_define::QUEUE_SIMPLE_RESTRICTIVE))
+        {
+            // get all messages with different sender_id values (aka list of all sender_id)
+            $uniqueMessageCollection = $this->_messageModel->getCollection()->distinct(true);
+            $uniqueMessageCollection->getSelect()->group('sender_id');
+
+            foreach ($uniqueMessageCollection as $message)
+            {
+                // foreach unique sender_id, process all their queue messages
+                $result = $this->_helper->processIncomingMessageQueueBySenderId($message->getSenderId());
+                if ($result)
+                    $result = $this->_helper->processOutgoingMessageQueueBySenderId($message->getSenderId());
+            }
         }
 //        $this->_logger->addInfo("Chatbot Cronjob was executed.");
     }

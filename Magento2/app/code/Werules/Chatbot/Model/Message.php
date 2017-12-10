@@ -244,6 +244,44 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->setData(self::MESSAGE_PAYLOAD, $message_payload);
     }
 
+    /**
+     * Get sent_at
+     * @return string
+     */
+    public function getSentAt()
+    {
+        return $this->getData(self::SENT_AT);
+    }
+
+    /**
+     * Set sent_at
+     * @param string $sent_at
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setSentAt($sent_at)
+    {
+        return $this->setData(self::SENT_AT, $sent_at);
+    }
+
+    /**
+     * Get current_command_details
+     * @return string
+     */
+    public function getCurrentCommandDetails()
+    {
+        return $this->getData(self::CURRENT_COMMAND_DETAILS);
+    }
+
+    /**
+     * Set current_command_details
+     * @param string $current_command_details
+     * @return \Werules\Chatbot\Api\Data\MessageInterface
+     */
+    public function setCurrentCommandDetails($current_command_details)
+    {
+        return $this->setData(self::CURRENT_COMMAND_DETAILS, $current_command_details);
+    }
+
     // CUSTOM METHODS
 
     public function updateIncomingMessageStatus($status)
@@ -256,9 +294,19 @@ class Message extends \Magento\Framework\Model\AbstractModel implements MessageI
         return $this->updateMessageStatus($status);
     }
 
-    private function updateMessageStatus($status)
+    public function updateMessageStatus($status)
     {
         $this->setStatus($status);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
+
+    public function updateSentAt($timestamp)
+    {
+        $this->setSentAt($timestamp);
         $datetime = date('Y-m-d H:i:s');
         $this->setUpdatedAt($datetime);
         $this->save();

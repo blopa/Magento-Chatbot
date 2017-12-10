@@ -311,6 +311,16 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function updateLastCommandDetails($lastCommandObject)
     {
+        $this->setLastCommandDetails($lastCommandObject);
+        $datetime = date('Y-m-d H:i:s');
+        $this->setUpdatedAt($datetime);
+        $this->save();
+
+        return true;
+    }
+
+    public function updateLastCommandDetailsObject($lastCommandObject)
+    {
         $this->setLastCommandDetails(json_encode($lastCommandObject));
         $datetime = date('Y-m-d H:i:s');
         $this->setUpdatedAt($datetime);
@@ -319,21 +329,32 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return true;
     }
 
-    public function setChatbotAPILastCommandDetails($messageContent, $lastListQuantity = null)
+    public function setChatbotAPILastCommandDetails($messageContent = null, $lastListQuantity = null, $conversationState = null, $commandParameter = null)
     {
         // sets current command details for next call
+//        if (($lastListQuantity === null) || ($messageContent === null) || ($commandParameter === null) || ($conversationState === null))
+//        {
+        $lastCommandObject = json_decode($this->getLastCommandDetails());
         if ($lastListQuantity === null)
-        {
-            $lastCommandObject = json_decode($this->getLastCommandDetails());
             $lastListQuantity = $lastCommandObject->last_listed_quantity;
-        }
+        if ($messageContent === null)
+            $messageContent = $lastCommandObject->last_command_text;
+        if ($commandParameter === null)
+            $commandParameter = $lastCommandObject->last_command_parameter;
+        if ($conversationState === null)
+            $conversationState = $lastCommandObject->last_conversation_state;
+//        }
+
+//        if ($conversationState === null)
+//            $conversationState = $this->getConversationState();
 
         $lastCommandNewObject = array(
-            'last_message_content' => $messageContent,
-            'last_conversation_state' => $this->getConversationState(),
+            'last_command_text' => $messageContent,
+            'last_conversation_state' => $conversationState,
             'last_listed_quantity' => $lastListQuantity,
+            'last_command_parameter' => $commandParameter
         );
-        $this->updateLastCommandDetails($lastCommandNewObject);
+        $this->updateLastCommandDetailsObject($lastCommandNewObject);
     }
 
     // API RELATED
@@ -359,10 +380,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendMessage($message)
     {
-        $result = array();
+        $result = true;
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendMessageToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
         }
 
         return $result;
@@ -380,10 +403,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendQuickReply($message)
     {
-        $result = array();
+        $result = true;
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendQuickReplyToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
         }
 
         return $result;
@@ -407,10 +432,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendReceiptList($message)
     {
-        $result = array();
+        $result = true;
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendReceiptListToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
         }
 
         return $result;
@@ -493,10 +520,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendMessageWithOptions($message)
     {
-        $result = array();
+        $result = true;
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendMessageWithOptionsToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
         }
 
         return $result;
@@ -504,10 +533,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
     public function sendImageWithOptions($message)
     {
-        $result = array();
+        $result = true;
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendImageWithOptionsToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
         }
 
         return $result;
