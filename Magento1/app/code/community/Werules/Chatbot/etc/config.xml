@@ -6,6 +6,37 @@
 		</Werules_Chatbot>
 	</modules>
 	<frontend>
+		<translate>
+			<modules>
+				<Werules_Chatbot>
+					<files>
+						<default>Werules_Chatbot.csv</default>
+					</files>
+				</Werules_Chatbot>
+			</modules>
+		</translate>
+		<layout>
+			<updates>
+				<chatbot>
+					<file>chatbot_customer_index.xml</file>
+				</chatbot>
+			</updates>
+			<updates>
+				<chatbot>
+					<file>chatbot_webhook_index.xml</file>
+				</chatbot>
+			</updates>
+			<updates>
+				<chatbot>
+					<file>chatbot_webhook_messenger.xml</file>
+				</chatbot>
+			</updates>
+			<updates>
+				<chatbot>
+					<file>chatbot_webhook_telegram.xml</file>
+				</chatbot>
+			</updates>
+		</layout>
 		<routers>
 		<chatbot>
 			<use>standard</use>
@@ -15,13 +46,6 @@
 			</args>
 		</chatbot>
 		</routers>
-			<layout>
-			<updates>
-				<chatbot>
-				<file>chatbot.xml</file>
-				</chatbot>
-			</updates>
-			</layout>
 	</frontend>
 	<global>
 		<helpers>

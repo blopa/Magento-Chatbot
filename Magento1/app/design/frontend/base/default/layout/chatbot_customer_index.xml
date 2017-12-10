@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<layout version="1.0.0">
+	<customer_account>
+		<reference name="customer_account_navigation">
+			<action method="addLink">
+				<name>chatbot_settings</name>
+				<path>chatbot/customer/index</path>
+				<label>Chatbot Settings</label>
+			</action>
+		</reference>
+	</customer_account>
+	<chatbot_customer_index> <!-- module/controller/action -->
+		<update handle="customer_account" />
+		<reference name="my.account.wrapper">
+			<block type="core/template" name="chatbot_settings" template="chatbot/settings.phtml"/>
+		</reference>
+	</chatbot_customer_index>
+</layout>

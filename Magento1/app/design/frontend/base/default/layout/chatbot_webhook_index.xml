@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<layout version="1.0.0">
+	<chatbot_webhook_index> <!-- module/controller/action -->
+		<remove name="head" />
+		<remove name="right" />
+		<remove name="left" />
+		<remove name="header" />
+		<remove name="footer" />
+		<remove name="customer_form_login" />
+		<remove name="customer_form_register" />
+		<remove name="customer_form_register_ajax" /> <!-- remove ajax register block from https://github.com/digitalpianism/ajaxlogin module -->
+		<reference name="content">
+			<block type="core/template" name="chatbot_content" template="chatbot/index.phtml"/>
+		</reference>
+	</chatbot_webhook_index>
+</layout>
