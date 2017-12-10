@@ -948,11 +948,11 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 else
                     $result = $this->getNotLoggedMessage();
             }
-//            else if ($command == $this->_define::REORDER_COMMAND_ID)
+//            else if ($commandCode == $this->_define::REORDER_COMMAND_ID)
 //            {
 //                $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
 //                if ($chatbotAPI->getLogged() == $this->_define::LOGGED)
-//                    $result = $this->processReorderCommand();
+//                    $result = $this->processReorderCommand($payload, $senderId);
 //                else
 //                    $result = $this->getNotLoggedMessage();
 //            }
@@ -1057,7 +1057,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function handleCommands($message)
     {
-        $result = $this->processCommands($message->getContent(), $message->getSenderId());
+        // TODO uncomment this to dirty accepet typed orders number
+//        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
+//        $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
+//        if ($lastCommandObject->last_command_text == $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID))
+//            $result = $this->processCommands('', $message->getSenderId(), $this->_define::REORDER_COMMAND_ID, $message->getContent());
+//        else
+            $result = $this->processCommands($message->getContent(), $message->getSenderId());
 
         return $result;
     }
