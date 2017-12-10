@@ -40,6 +40,7 @@ class Define
     const SECONDS_IN_HOUR = 3600;
     const SECONDS_IN_MINUTE = 60;
     const DEFAULT_MIN_CONFIDENCE = 0.7;
+    const BREAK_LINE = '\n'; // chr(10)
     const QUEUE_PROCESSING_LIMIT = self::SECONDS_IN_MINUTE * 3;
 
     // commands

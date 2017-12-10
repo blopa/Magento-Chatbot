@@ -102,6 +102,7 @@ Go to **System > General Settings  > Chatbot Settings**
 - **v1.0.3:**
     - Add Messages Queue Modes
     - Add option to Clear Message Queue
+    - Add price to product list
 - **v1.0.2:**
     - Add Messages Queue
     - Add List More command

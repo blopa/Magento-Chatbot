@@ -670,7 +670,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        else
 //            $startAt = 0;
 
-        if ($lastCommandObject->last_command_text == $searchCommandText)
+        if (strtolower($lastCommandObject->last_command_text) == strtolower($searchCommandText))
             $startAt = $lastCommandObject->last_listed_quantity;
         else
             $startAt = 0;
@@ -775,7 +775,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 //        else
 //            $startAt = 0;
 
-        if ($lastCommandObject->last_command_text == $listCategoriesText)
+        if (strtolower($lastCommandObject->last_command_text) == strtolower($listCategoriesText))
             $startAt = $lastCommandObject->last_listed_quantity;
         else
             $startAt = 0;
@@ -1060,7 +1060,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         // TODO uncomment this to dirty accepet typed orders number
 //        $chatbotAPI = $this->getChatbotAPIModelBySenderId($message->getSenderId());
 //        $lastCommandObject = json_decode($chatbotAPI->getLastCommandDetails());
-//        if ($lastCommandObject->last_command_text == $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID))
+//        if (strtolower($lastCommandObject->last_command_text) == strtolower($this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID)))
 //            $result = $this->processCommands('', $message->getSenderId(), $this->_define::REORDER_COMMAND_ID, $message->getContent());
 //        else
             $result = $this->processCommands($message->getContent(), $message->getSenderId());
@@ -1781,11 +1781,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
 
+            $subtitle = $this->excerpt($product->getShortDescription(), 60);
+            $price = $this->_priceHelper->currency($product->getPrice(), true, false);
             $element = array(
                 'title' => $productName,
                 'item_url' => $productUrl,
                 'image_url' => $productImage,
-                'subtitle' => $this->excerpt($product->getShortDescription(), 60),
+                'subtitle' => $subtitle . chr(10) . $price,
                 'buttons' => $options
             );
             //array_push($result, $element);
@@ -2100,7 +2102,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         if (!isset($lastCommandObject->last_listed_quantity))
             return $result;
 
-        if ($lastCommandObject->last_command_text == $listOrdersCommand)
+        if (strtolower($lastCommandObject->last_command_text) == strtolower($listOrdersCommand))
             $startAt = $lastCommandObject->last_listed_quantity;
         else
             $startAt = 0;
@@ -2464,7 +2466,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
                 $result = $this->handleConversationState($lastCommandObject->last_command_parameter, $senderId);
             }
-            else if ($lastCommandObject->last_command_text == $this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID))
+            else if (strtolower($lastCommandObject->last_command_text) == strtolower($this->getCommandText($this->_define::LIST_ORDERS_COMMAND_ID)))
                 $result = $this->processListOrdersCommand($senderId);
         }
 
