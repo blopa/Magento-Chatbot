@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<layout version="1.0.0">
+	<chatbot_index_index>
+		<reference name="root">
+			<action method="setTemplate"><template>page/1column.phtml</template></action>
+		</reference>
+		<reference name="content">
+			<block type="chatbot/index" name="chatbot_index" template="chatbot/index.phtml"/>
+		</reference>
+	</chatbot_index_index>
+</layout>

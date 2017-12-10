@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+	<config>
+		<acl>
+			<resources>
+				<admin>
+					<children>
+						<system>
+							<children>
+								<config>
+									<children>
+										<werules_chatbot_general translate="title" module="chatbot">
+											<title>General Settings Section</title>
+											<sort_order>0</sort_order>
+										</werules_chatbot_general>
+										<werules_chatbot_messenger translate="title" module="chatbot">
+											<title>Messenger Settings Section</title>
+											<sort_order>1</sort_order>
+										</werules_chatbot_messenger>
+										<werules_chatbot_danger translate="title" module="chatbot">
+											<title>Danger Zone Section</title>
+											<sort_order>2</sort_order>
+										</werules_chatbot_danger>
+									</children>
+								</config>
+							</children>
+						</system>
+					</children>
+				</admin>
+			</resources>
+		</acl>
+	</config>

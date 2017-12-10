@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<config>
+	<tabs>
+		<werules_chatbot translate="label" module="chatbot">
+			<label>Chatbot Integration</label>
+			<sort_order>0</sort_order>
+		</werules_chatbot>
+	</tabs>
+	<sections>
+		<werules_chatbot_danger translate="label" module="chatbot">
+			<label>Danger Zone</label>
+			<tab>werules_chatbot</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>2</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<general translate="label">
+					<label>Danger Zone</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>2</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<clear_message_pending translate="label">
+							<label>Clear Message Pending List</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_enabledisable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Clear message pending list. After changing this value and saving, a process to clear message pending list will be schedule for the next minute.</comment>
+						</clear_message_pending>
+					</fields>
+				</general>
+			</groups>
+		</werules_chatbot_danger>
+		<werules_chatbot_general translate="label" module="chatbot">
+			<label>General Settings</label>
+			<tab>werules_chatbot</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>0</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<general translate="label">
+					<label>General Settings</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>0</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<enable translate="label">
+							<label>Enable Module</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_enabledisable</source_model>
+							<sort_order>0</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable module.</comment>
+						</enable>
+					</fields>
+				</general>
+			</groups>
+		</werules_chatbot_general>
+		<werules_chatbot_messenger translate="label" module="chatbot">
+			<label>Messenger Settings</label>
+			<tab>werules_chatbot</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>1</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<general translate="label">
+				<label>Messenger Settings</label>
+				<frontend_type>text</frontend_type>
+				<sort_order>1</sort_order>
+				<show_in_default>1</show_in_default>
+				<show_in_website>1</show_in_website>
+				<show_in_store>1</show_in_store>
+				<fields>
+					<enable translate="label">
+						<label>Enable Messenger Bot</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_enabledisable</source_model>
+						<sort_order>0</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable Messenger bot.</comment>
+					</enable>
+				</fields>
+				</general>
+			</groups>
+		</werules_chatbot_messenger>
+	</sections>
+</config>
