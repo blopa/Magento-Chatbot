@@ -38,25 +38,25 @@
 			</updates>
 		</layout>
 		<routers>
-		<chatbot>
-			<use>standard</use>
-			<args>
-				<module>Werules_Chatbot</module>
-				<frontName>chatbot</frontName>
-			</args>
-		</chatbot>
+			<chatbot>
+				<use>standard</use>
+				<args>
+					<module>Werules_Chatbot</module>
+					<frontName>chatbot</frontName>
+				</args>
+			</chatbot>
 		</routers>
 	</frontend>
 	<global>
 		<helpers>
-		<chatbot>
-			<class>Werules_Chatbot_Helper</class>
-		</chatbot>
+			<chatbot>
+				<class>Werules_Chatbot_Helper</class>
+			</chatbot>
 		</helpers>
 		<blocks>
-		<chatbot>
-			<class>Werules_Chatbot_Block</class>
-		</chatbot>
+			<chatbot>
+				<class>Werules_Chatbot_Block</class>
+			</chatbot>
 		</blocks>
 		<models>
 		<chatbot>
