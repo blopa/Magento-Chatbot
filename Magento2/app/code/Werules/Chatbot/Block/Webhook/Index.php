@@ -126,7 +126,7 @@ class Index extends \Magento\Framework\View\Element\Template
         else
             return $this->_helper->getJsonErrorResponse();
 
-        return $this->_helper->getJsonSuccessResponse();
+        return $this->getJsonSuccessResponse();
     }
 
     public function getConfigValue($code)
@@ -137,6 +137,11 @@ class Index extends \Magento\Framework\View\Element\Template
     protected function getJsonErrorResponse()
     {
         return $this->_helper->getJsonErrorResponse();
+    }
+
+    protected function getJsonSuccessResponse()
+    {
+        return $this->_helper->getJsonSuccessResponse();
     }
 
     protected function logPostData($data, $file = 'werules_chatbot.log')

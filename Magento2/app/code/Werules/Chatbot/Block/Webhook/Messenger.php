@@ -88,7 +88,10 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
                 $this->logPostData($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
 
                 $messageObject = $this->createMessageObject($messengerInstance);
-                $result = $this->messageHandler($messageObject);
+                if (isset($messageObject->content))
+                    $result = $this->messageHandler($messageObject);
+                else
+                    $result = $this->getJsonSuccessResponse(); // return success to avoid receiving the same message again
             }
 //        }
 //        else
@@ -107,11 +110,14 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
     protected function createMessageObject($messenger)
     {
         $messageObject = new \stdClass();
-        $messageObject->senderId = $messenger->ChatID();
         if ($messenger->Text())
             $content = $messenger->Text();
         else
             $content = $messenger->getPostbackTitle();
+        if (!$content)
+            return $messageObject;
+
+        $messageObject->senderId = $messenger->ChatID();
         $messageObject->content = $content;
         $messageObject->status = $this->_define::PROCESSING;
         $messageObject->direction = $this->_define::INCOMING;
