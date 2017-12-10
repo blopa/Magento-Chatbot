@@ -1,26 +1,24 @@
 <?php
 /**
- * Werules_Chatbot extension
- * 
- * NOTICE OF LICENSE
- * 
- * This source file is subject to the MIT License
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/mit-license.php
- * 
- * @category       Werules
- * @package        Werules_Chatbot
- * @copyright      Copyright (c) 2017
- * @license        http://opensource.org/licenses/mit-license.php MIT License
- */
-/**
- * Message admin controller
+ * Magento Chatbot Integration
+ * Copyright (C) 2017
  *
- * @category    Werules
- * @package     Werules_Chatbot
- * @author      Ultimate Module Creator
+ * This file is part of Werules/Chatbot.
+ *
+ * Werules/Chatbot is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbot_Controller_Adminhtml_Chatbot
 {
     /**
@@ -45,7 +43,6 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
      */
     public function indexAction()
     {
@@ -60,7 +57,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function gridAction()
     {
@@ -72,7 +69,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function editAction()
     {
@@ -109,7 +106,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function newAction()
     {
@@ -121,7 +118,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function saveAction()
     {
@@ -167,7 +164,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function deleteAction()
     {
@@ -203,7 +200,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function massDeleteAction()
     {
@@ -238,7 +235,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function massStatusAction()
     {
@@ -275,7 +272,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function exportCsvAction()
     {
@@ -290,7 +287,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function exportExcelAction()
     {
@@ -305,7 +302,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function exportXmlAction()
     {
@@ -320,7 +317,7 @@ class Werules_Chatbot_Adminhtml_Chatbot_MessageController extends Werules_Chatbo
      *
      * @access protected
      * @return boolean
-     * @author Ultimate Module Creator
+
      */
     protected function _isAllowed()
     {

@@ -40,7 +40,6 @@
 							</config>
 						</children>
 					</system>
-
 				</children>
 			</admin>
 		</resources>
@@ -75,6 +74,5 @@
 				</config>
 			</children>
 		</system>
-
 	</menu>
 </config>

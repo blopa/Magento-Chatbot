@@ -28,7 +28,7 @@ class Werules_Chatbot_Model_Resource_Chatbotapi_Collection extends Mage_Core_Mod
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     protected function _construct()
     {
@@ -44,7 +44,7 @@ class Werules_Chatbot_Model_Resource_Chatbotapi_Collection extends Mage_Core_Mod
      * @param int|Mage_Core_Model_Store $store
      * @param bool $withAdmin
      * @return Werules_Chatbot_Model_Resource_Chatbotapi_Collection
-     * @author Ultimate Module Creator
+
      */
     public function addStoreFilter($store, $withAdmin = true)
     {
@@ -69,7 +69,7 @@ class Werules_Chatbot_Model_Resource_Chatbotapi_Collection extends Mage_Core_Mod
      *
      * @access protected
      * @return Werules_Chatbot_Model_Resource_Chatbotapi_Collection
-     * @author Ultimate Module Creator
+
      */
     protected function _renderFiltersBefore()
     {
@@ -96,7 +96,7 @@ class Werules_Chatbot_Model_Resource_Chatbotapi_Collection extends Mage_Core_Mod
      * @param string $labelField
      * @param array $additional
      * @return array
-     * @author Ultimate Module Creator
+
      */
     protected function _toOptionArray($valueField='entity_id', $labelField='chatbotapi_id', $additional=array())
     {
@@ -110,7 +110,7 @@ class Werules_Chatbot_Model_Resource_Chatbotapi_Collection extends Mage_Core_Mod
      * @param string $valueField
      * @param string $labelField
      * @return array
-     * @author Ultimate Module Creator
+
      */
     protected function _toOptionHash($valueField='entity_id', $labelField='chatbotapi_id')
     {
@@ -123,7 +123,7 @@ class Werules_Chatbot_Model_Resource_Chatbotapi_Collection extends Mage_Core_Mod
      *
      * @access public
      * @return Varien_Db_Select
-     * @author Ultimate Module Creator
+
      */
     public function getSelectCountSql()
     {

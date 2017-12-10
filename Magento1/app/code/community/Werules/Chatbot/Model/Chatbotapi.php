@@ -47,7 +47,7 @@ class Werules_Chatbot_Model_Chatbotapi extends Mage_Core_Model_Abstract
      *
      * @access public
      * @return void
-     * @author Ultimate Module Creator
+
      */
     public function _construct()
     {
@@ -60,7 +60,7 @@ class Werules_Chatbot_Model_Chatbotapi extends Mage_Core_Model_Abstract
      *
      * @access protected
      * @return Werules_Chatbot_Model_Chatbotapi
-     * @author Ultimate Module Creator
+
      */
     protected function _beforeSave()
     {
@@ -78,7 +78,7 @@ class Werules_Chatbot_Model_Chatbotapi extends Mage_Core_Model_Abstract
      *
      * @access public
      * @return Werules_Chatbot_Model_Chatbotapi
-     * @author Ultimate Module Creator
+
      */
     protected function _afterSave()
     {
@@ -90,7 +90,7 @@ class Werules_Chatbot_Model_Chatbotapi extends Mage_Core_Model_Abstract
      *
      * @access public
      * @return array
-     * @author Ultimate Module Creator
+
      */
     public function getDefaultValues()
     {

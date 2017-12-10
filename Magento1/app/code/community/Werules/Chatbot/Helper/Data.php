@@ -27,7 +27,6 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
      * @access public
      * @param $options
      * @return array
-     * @author Ultimate Module Creator
      */
     public function convertOptions($options)
     {

@@ -26,7 +26,7 @@ class Werules_Chatbot_Model_Resource_Message extends Mage_Core_Model_Resource_Db
      * constructor
      *
      * @access public
-     * @author Ultimate Module Creator
+
      */
     public function _construct()
     {
@@ -39,7 +39,7 @@ class Werules_Chatbot_Model_Resource_Message extends Mage_Core_Model_Resource_Db
      * @access public
      * @param int $messageId
      * @return array
-     * @author Ultimate Module Creator
+
      */
     public function lookupStoreIds($messageId)
     {
@@ -56,7 +56,7 @@ class Werules_Chatbot_Model_Resource_Message extends Mage_Core_Model_Resource_Db
      * @access public
      * @param Mage_Core_Model_Abstract $object
      * @return Werules_Chatbot_Model_Resource_Message
-     * @author Ultimate Module Creator
+
      */
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
@@ -98,7 +98,7 @@ class Werules_Chatbot_Model_Resource_Message extends Mage_Core_Model_Resource_Db
      * @access protected
      * @param Mage_Core_Model_Abstract $object
      * @return Werules_Chatbot_Model_Resource_Message
-     * @author Ultimate Module Creator
+
      */
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
