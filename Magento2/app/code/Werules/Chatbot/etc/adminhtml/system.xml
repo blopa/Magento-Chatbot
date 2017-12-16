@@ -172,7 +172,7 @@
 					<label>Default Replies</label>
 					<comment>Replies to be send to the customer whenever matches one of the requirements.</comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
-					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
+					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\DefaultReplies</frontend_model>
 				</field>
 				<field id="enable_nlp_replies" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label comment tooltip" type="select">
 					<label>Enable Natural Language Processor Replies (wit.ai)</label>
