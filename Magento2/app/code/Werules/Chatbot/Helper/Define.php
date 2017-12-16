@@ -101,4 +101,11 @@ class Define
 
     const DONT_CLEAR_MESSAGE_QUEUE = 0;
     const CLEAR_MESSAGE_QUEUE = 1;
+
+    // DEFAULT REPLIES MODES
+    const EQUALS_TO = 0;
+    const STARTS_WITH = 1;
+    const ENDS_WITH = 2;
+    const CONTAINS = 3;
+    const MATCH_REGEX = 4;
 }

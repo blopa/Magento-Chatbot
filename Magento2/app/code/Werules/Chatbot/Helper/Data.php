@@ -121,6 +121,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $logger->info(var_export($text, true));
     }
 
+    public function startsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0)
+            return true;
+
+        return substr($haystack, 0, $length) === $needle;
+    }
+
+    public function endsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0)
+            return true;
+
+        return (substr($haystack, -$length) === $needle);
+    }
+
     public function excerpt($text, $size)
     {
         if (strlen($text) > $size)
@@ -376,6 +394,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $errorMessages = array();
         $conversationStateResponses = array();
         $payloadCommandResponses = array();
+        $defaultRepliesResponses = array();
         $NLPResponses = array();
         $this->setHelperMessageAttributes($message);
 
@@ -411,6 +430,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             foreach ($payloadCommandResponses as $payloadCommandResponse)
             {
                 array_push($responseContent, $payloadCommandResponse);
+            }
+        }
+
+        $enableDefaultReplies = $this->getConfigValue($this->_configPrefix . '/general/enable_default_replies');
+        if ($enableDefaultReplies == $this->_define::ENABLED)
+        {
+            if (count($responseContent) <= 0)
+                $defaultRepliesResponses = $this->handleDefaultReplies($message);
+            if ($defaultRepliesResponses)
+            {
+                foreach ($defaultRepliesResponses as $defaultReplyResponse)
+                {
+                    array_push($responseContent, $defaultReplyResponse);
+                }
             }
         }
 
@@ -515,7 +548,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 if (isset($intent['confidence']))
                 {
-                    $entityData = $this->getCommandNLPEntityData($commandCode);
+                    $entityData = $this->getCommandNLPEntityData($commandCode); // get all NPL configs from backend
                     if (isset($entityData['confidence']))
                     {
                         $confidence = $entityData['confidence'];
@@ -1054,6 +1087,73 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI->updateConversationState($state);
 
         $result = $this->handleConversationState($message->getContent(), $message->getSenderId(), $keyword);
+        return $result;
+    }
+
+    private function handleDefaultReplies($message)
+    {
+        $result = array();
+        $defaultReplies = $this->getDefaultRepliesData();
+        $text = $message->getContent();
+
+        foreach ($defaultReplies as $defaultReply)
+        {
+            if (isset($defaultReply['enable_reply']))
+            {
+                if ($defaultReply['enable_reply'] == $this->_define::ENABLED)
+                {
+                    // MODES:
+//                    EQUALS_TO
+//                    STARTS_WITH
+//                    ENDS_WITH
+//                    CONTAINS
+//                    MATCH_REGEX
+
+                    $matched = false;
+                    $match = $defaultReply["match_sintax"];
+                    if ($defaultReply["match_case"] != $this->_define::ENABLED)
+                    {
+                        $match = strtolower($match);
+                        $text = strtolower($text);
+                    }
+
+                    if ($defaultReply['match_mode'] == $this->_define::EQUALS_TO)
+                    {
+                        if ($text == $match)
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::STARTS_WITH)
+                    {
+                        if ($this->startsWith($text, $match))
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::ENDS_WITH)
+                    {
+
+                        if ($this->endsWith($text, $match))
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::CONTAINS)
+                    {
+                        if (strpos($text, $match) !== false)
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::MATCH_REGEX)
+                    {
+                        if (preg_match($match, $text))
+                            $matched = true;
+                    }
+
+                    if ($matched)
+                    {
+                        $replyText = $defaultReply['reply_text'];
+                        $result = $this->getTextMessageArray($replyText);
+                        break;
+                    }
+                }
+            }
+        }
+
         return $result;
     }
 
@@ -1925,6 +2025,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
 
         return $result;
+    }
+
+    private function getDefaultRepliesData()
+    {
+        $defaultReplies = array();
+        $serializedDefaultReplies = $this->getConfigValue($this->_configPrefix . '/general/default_replies');
+        if ($serializedDefaultReplies)
+            $defaultReplies = $this->_serializer->unserialize($serializedDefaultReplies);
+
+        return $defaultReplies;
     }
 
     private function getChatbotAPIModelBySenderId($senderId)
