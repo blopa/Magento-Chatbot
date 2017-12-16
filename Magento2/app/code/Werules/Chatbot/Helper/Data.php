@@ -1147,7 +1147,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     if ($matched)
                     {
                         $replyText = $defaultReply['reply_text'];
-                        $result = $this->getTextMessageArray($replyText);
+                        if ($replyText)
+                            $result = $this->getTextMessageArray($replyText);
                         break;
                     }
                 }
