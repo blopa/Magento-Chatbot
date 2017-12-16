@@ -861,7 +861,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function prepareCommandsList()
     {
-        if (isset($this->_commandsList) || isset($this->_completeCommandsList))
+        if (isset($this->_commandsList) && isset($this->_completeCommandsList))
             return true;
 
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
@@ -2425,9 +2425,41 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $text = $this->getConfigValue($this->_configPrefix . '/general/help_message');
         if ($text)
         {
+            $listCommands = $this->getConfigValue($this->_configPrefix . '/general/enable_help_command_list');
+            if ($listCommands == $this->_define::ENABLED)
+            {
+                $quickReplies = array();
+                $enabledCommands = $this->getCommandsList();
+                foreach ($enabledCommands as $commandId => $command)
+                {
+                    if (count($quickReplies) >= $this->_define::MAX_MESSAGE_ELEMENTS)
+                        break;
+
+                    $payload = array(
+                        'command' => $commandId
+                    );
+                    $quickReply = array(
+                        'content_type' => 'text', // TODO messenger pattern
+                        'title' => $command['command_code'],
+                        'payload' => json_encode($payload)
+                    );
+                    array_push($quickReplies, $quickReply);
+                }
+
+                $contentObject = new \stdClass();
+                $contentObject->message = $text;
+                $contentObject->quick_replies = $quickReplies;
+                $content = json_encode($contentObject);
+                $contentType = $this->_define::QUICK_REPLY;
+            }
+            else
+            {
+                $contentType = $this->_define::CONTENT_TEXT;
+                $content = $text;
+            }
             $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => $text,
+                'content_type' => $contentType,
+                'content' => $content,
                 'current_command_details' => json_encode(array(
                     'command_text' => $this->getCommandText($this->_define::HELP_COMMAND_ID)
                 ))
