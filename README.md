@@ -2,7 +2,7 @@
 
 **Chatbots!** They're all the rage: Telegram has them, Facebook wants them, and it seems like every computer coder wants to make them. But what are they? And why is every company suddenly hot on this new A.I. trend?
 
-<img src="/screenshots/chat.gif?raw=true" width="550px">
+<img src="/screenshots/chat.gif?raw=true" width="300px">
 
 > Chatbots are computer programs that you interact with via a chat interface. Using a chatbot is as simple as having a conversation with it. You can ask it questions or give it commands, and it'll respond to you and carry out your actions. Chatbots can be run in any number of chat apps, including Facebook Messenger, your phone's text messaging app, and most others.
 
