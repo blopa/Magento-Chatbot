@@ -149,14 +149,14 @@
 					<label>Help Message</label>
 					<comment>Message will be sent when customer asks for help. Please check the maximum size for messages on Facebook API, otherwise your message might not be sent.</comment>
 				</field>
-				<!--<field id="enable_help_command_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="16" translate="label comment tooltip" type="select">-->
-					<!--<label>Enable Command Listing on Help Command</label>-->
-					<!--<comment>Enable command listing when customer ask for help.</comment>-->
-					<!--<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
-				<!--</field>-->
+				<field id="enable_help_command_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="16" translate="label comment tooltip" type="select">
+					<label>Enable Command Listing on Help Command</label>
+					<comment>Enable command listing when customer ask for help.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
 				<field id="commands_list" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="17" translate="label comment tooltip" type="text">
 					<label>Commands List</label>
-					<comment>Code of the commands and it's alias. Alias must be split by comma. eg.: &quot;support,chat,talk,sac&quot;.</comment>
+					<comment>Code of the commands and it's alias. Alias must be split by comma. eg.: "support,chat,talk,sac".</comment>
 					<backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
 					<frontend_model>Werules\Chatbot\Block\Adminhtml\System\Config\Form\Field\Commands</frontend_model>
 				</field>
