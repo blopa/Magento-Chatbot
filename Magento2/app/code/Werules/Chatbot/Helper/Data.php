@@ -2029,8 +2029,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function getDefaultRepliesData()
     {
+        $defaultReplies = array();
         $serializedDefaultReplies = $this->getConfigValue($this->_configPrefix . '/general/default_replies');
-        $defaultReplies = $this->_serializer->unserialize($serializedDefaultReplies);
+        if ($serializedDefaultReplies)
+            $defaultReplies = $this->_serializer->unserialize($serializedDefaultReplies);
 
         return $defaultReplies;
     }
