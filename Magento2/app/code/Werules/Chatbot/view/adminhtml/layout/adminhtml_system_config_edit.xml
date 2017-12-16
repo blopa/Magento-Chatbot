@@ -1,6 +1,9 @@
 <?xml version="1.0" ?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="styles"/>
+    <head>
+        <css src="Werules_Chatbot::system/config/custom_css.css"/>
+    </head>
     <body>
         <referenceContainer name="js">
             <block class="Magento\Backend\Block\Template" template="Werules_Chatbot::system/config/custom_js.phtml"/>
