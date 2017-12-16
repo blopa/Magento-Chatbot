@@ -317,6 +317,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $chatbotAPI->sendReceiptList($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
             $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::NO_REPLY_MESSAGE)
+            $result = true;
 
         if ($result)
         {
@@ -350,7 +352,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 else
                     $lastCommandParameter = null;
 
-                $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState, $lastCommandParameter);
+                if ($currentCommandDetails)
+                    $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState, $lastCommandParameter);
             }
 
             if ($outgoingMessage->getStatus() != $this->_define::PROCESSED)
@@ -604,6 +607,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_TRACK_ORDER)
         {
             $result = $this->listOrderDetailsFromOrderId($messageContent, $senderId);
+        }
+        else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SUPPORT)
+        {
+            $result = $this->getNoMessage();
         }
 
 //        if ($result)
@@ -1301,6 +1308,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // GETS
+    private function getNoMessage()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::NO_REPLY_MESSAGE,
+            'content' => '',
+            'current_command_details' => json_encode(array())
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
     private function getWelcomeMessage($message)
     {
 //        $this->setHelperMessageAttributes($message);
@@ -2356,8 +2375,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The SUPPORT command is still under development', // TODO
+            'content' => __("You're on support mode. In a few words, please explain what would you like help with. To cancel send '%1'.", $this->getCommandText($this->_define::CANCEL_COMMAND_ID)),
             'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_SUPPORT,
                 'command_text' => $this->getCommandText($this->_define::SUPPORT_COMMAND_ID)
             ))
         );

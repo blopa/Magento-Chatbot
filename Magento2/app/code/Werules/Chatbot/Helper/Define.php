@@ -80,6 +80,7 @@ class Define
     const RECEIPT_LAYOUT = 4;
     const LIST_WITH_IMAGE = 5;
     const TEXT_WITH_OPTIONS = 6;
+    const NO_REPLY_MESSAGE = 7;
 
     // conversation states
     const CONVERSATION_STARTED = 0;
@@ -87,6 +88,7 @@ class Define
     const CONVERSATION_SEARCH = 2;
     const CONVERSATION_EMAIL = 3;
     const CONVERSATION_TRACK_ORDER = 4;
+    const CONVERSATION_SUPPORT = 5;
 
     // API
     const MAX_MESSAGE_ELEMENTS = 7;
