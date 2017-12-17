@@ -1434,6 +1434,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
         if ($text != '')
         {
+//            $contentObj = $this->getTextMessageArray($text);
+//            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
             $enableMessageOptions = $this->getConfigValue($this->_configPrefix . '/general/enable_message_options');
             if ($enableMessageOptions == $this->_define::ENABLED)
             {

@@ -82,7 +82,7 @@ class WelcomeOptions extends \Magento\Config\Block\System\Config\Form\Field\Fiel
     protected function _prepareArrayRow(\Magento\Framework\DataObject $row)
     {
         $optionExtraAttr = array();
-        $optionExtraAttr['option_' . $this->_getRendererEnable()->calcOptionHash($row->getData('enable_reply'))] = 'selected="selected"';
+        $optionExtraAttr['option_' . $this->_getRendererEnable()->calcOptionHash($row->getData('enable_option'))] = 'selected="selected"';
 
         $row->setData(
             'option_extra_attrs', $optionExtraAttr
