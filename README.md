@@ -99,6 +99,11 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.4:**
+    - Add Support command
+    - Add option to list commands on Help Command
+    - Add Default Replies
+    - Add Welcome Message Options
 - **v1.0.3:**
     - Add Messages Queue Modes
     - Add option to Clear Message Queue
@@ -265,12 +270,8 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
     - Add compatibility with products with custom options
     - Add "abandoned cart" messages
     - Add `CDATA` and `<tooltip>` to configuration descriptions
-    - Add Support
     - Add Promotional Messages
     - Add Enable Facebook Messenger Box
-    - Add Welcome Message Options
-    - Add Command Listing on Help Command
-    - Add Enable Default Replies
     - Add more options to filter clearing message queue
     - Add handler for other posts from Messenger
 

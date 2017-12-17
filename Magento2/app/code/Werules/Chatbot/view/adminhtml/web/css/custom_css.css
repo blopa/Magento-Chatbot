@@ -1,0 +1,5 @@
+/*backend css*/
+
+.werules-placeholder:empty:before{
+	content: "Regex or text";
+}

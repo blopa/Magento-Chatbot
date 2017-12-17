@@ -80,6 +80,7 @@ class Define
     const RECEIPT_LAYOUT = 4;
     const LIST_WITH_IMAGE = 5;
     const TEXT_WITH_OPTIONS = 6;
+    const NO_REPLY_MESSAGE = 7;
 
     // conversation states
     const CONVERSATION_STARTED = 0;
@@ -87,6 +88,7 @@ class Define
     const CONVERSATION_SEARCH = 2;
     const CONVERSATION_EMAIL = 3;
     const CONVERSATION_TRACK_ORDER = 4;
+    const CONVERSATION_SUPPORT = 5;
 
     // API
     const MAX_MESSAGE_ELEMENTS = 7;
@@ -99,4 +101,11 @@ class Define
 
     const DONT_CLEAR_MESSAGE_QUEUE = 0;
     const CLEAR_MESSAGE_QUEUE = 1;
+
+    // DEFAULT REPLIES MODES
+    const EQUALS_TO = 0;
+    const STARTS_WITH = 1;
+    const ENDS_WITH = 2;
+    const CONTAINS = 3;
+    const MATCH_REGEX = 4;
 }

@@ -121,6 +121,24 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $logger->info(var_export($text, true));
     }
 
+    public function startsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0)
+            return true;
+
+        return substr($haystack, 0, $length) === $needle;
+    }
+
+    public function endsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0)
+            return true;
+
+        return (substr($haystack, -$length) === $needle);
+    }
+
     public function excerpt($text, $size)
     {
         if (strlen($text) > $size)
@@ -234,7 +252,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI = $this->createChatbotAPI($chatbotAPI, $message);
             $welcomeMessage = $this->getWelcomeMessage($message);
             if ($welcomeMessage)
+            {
+                if ($message->getStatus() != $this->_define::PROCESSED)
+                    $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+
                 array_push($result, $welcomeMessage);
+                return $result;
+            }
         }
 
         $enabled = $this->getConfigValue($this->_configPrefix . '/general/enable');
@@ -317,6 +341,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $result = $chatbotAPI->sendReceiptList($outgoingMessage);
         else if ($outgoingMessage->getContentType() == $this->_define::TEXT_WITH_OPTIONS) // LIST_WITH_IMAGE
             $result = $chatbotAPI->sendMessageWithOptions($outgoingMessage);
+        else if ($outgoingMessage->getContentType() == $this->_define::NO_REPLY_MESSAGE)
+            $result = true;
 
         if ($result)
         {
@@ -350,7 +376,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 else
                     $lastCommandParameter = null;
 
-                $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState, $lastCommandParameter);
+                if ($currentCommandDetails)
+                    $chatbotAPI->setChatbotAPILastCommandDetails($lastCommandText, $lastListedQuantity, $lastConversationState, $lastCommandParameter);
             }
 
             if ($outgoingMessage->getStatus() != $this->_define::PROCESSED)
@@ -373,6 +400,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $errorMessages = array();
         $conversationStateResponses = array();
         $payloadCommandResponses = array();
+        $defaultRepliesResponses = array();
         $NLPResponses = array();
         $this->setHelperMessageAttributes($message);
 
@@ -408,6 +436,20 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             foreach ($payloadCommandResponses as $payloadCommandResponse)
             {
                 array_push($responseContent, $payloadCommandResponse);
+            }
+        }
+
+        $enableDefaultReplies = $this->getConfigValue($this->_configPrefix . '/general/enable_default_replies');
+        if ($enableDefaultReplies == $this->_define::ENABLED)
+        {
+            if (count($responseContent) <= 0)
+                $defaultRepliesResponses = $this->handleDefaultReplies($message);
+            if ($defaultRepliesResponses)
+            {
+                foreach ($defaultRepliesResponses as $defaultReplyResponse)
+                {
+                    array_push($responseContent, $defaultReplyResponse);
+                }
             }
         }
 
@@ -512,7 +554,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             {
                 if (isset($intent['confidence']))
                 {
-                    $entityData = $this->getCommandNLPEntityData($commandCode);
+                    $entityData = $this->getCommandNLPEntityData($commandCode); // get all NPL configs from backend
                     if (isset($entityData['confidence']))
                     {
                         $confidence = $entityData['confidence'];
@@ -604,6 +646,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_TRACK_ORDER)
         {
             $result = $this->listOrderDetailsFromOrderId($messageContent, $senderId);
+        }
+        else if ($chatbotAPI->getConversationState() == $this->_define::CONVERSATION_SUPPORT)
+        {
+            $result = $this->getNoMessage();
         }
 
 //        if ($result)
@@ -854,7 +900,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     private function prepareCommandsList()
     {
-        if (isset($this->_commandsList) || isset($this->_completeCommandsList))
+        if (isset($this->_commandsList) && isset($this->_completeCommandsList))
             return true;
 
         $serializedCommands = $this->getConfigValue($this->_configPrefix . '/general/commands_list');
@@ -1047,6 +1093,74 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI->updateConversationState($state);
 
         $result = $this->handleConversationState($message->getContent(), $message->getSenderId(), $keyword);
+        return $result;
+    }
+
+    private function handleDefaultReplies($message)
+    {
+        $result = array();
+        $defaultReplies = $this->getDefaultRepliesData();
+        $text = $message->getContent();
+
+        foreach ($defaultReplies as $defaultReply)
+        {
+            if (isset($defaultReply['enable_reply']))
+            {
+                if ($defaultReply['enable_reply'] == $this->_define::ENABLED)
+                {
+                    // MODES:
+//                    EQUALS_TO
+//                    STARTS_WITH
+//                    ENDS_WITH
+//                    CONTAINS
+//                    MATCH_REGEX
+
+                    $matched = false;
+                    $match = $defaultReply["match_sintax"];
+                    if ($defaultReply["match_case"] != $this->_define::ENABLED)
+                    {
+                        $match = strtolower($match);
+                        $text = strtolower($text);
+                    }
+
+                    if ($defaultReply['match_mode'] == $this->_define::EQUALS_TO)
+                    {
+                        if ($text == $match)
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::STARTS_WITH)
+                    {
+                        if ($this->startsWith($text, $match))
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::ENDS_WITH)
+                    {
+
+                        if ($this->endsWith($text, $match))
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::CONTAINS)
+                    {
+                        if (strpos($text, $match) !== false)
+                            $matched = true;
+                    }
+                    else if ($defaultReply['match_mode'] == $this->_define::MATCH_REGEX)
+                    {
+                        if (preg_match($match, $text))
+                            $matched = true;
+                    }
+
+                    if ($matched)
+                    {
+                        $replyText = $defaultReply['reply_text'];
+                        if ($replyText)
+                            $result = $this->getTextMessageArray($replyText);
+                        break;
+                    }
+                }
+            }
+        }
+
         return $result;
     }
 
@@ -1301,6 +1415,18 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     // GETS
+    private function getNoMessage()
+    {
+        $result = array();
+        $responseMessage = array(
+            'content_type' => $this->_define::NO_REPLY_MESSAGE,
+            'content' => '',
+            'current_command_details' => json_encode(array())
+        );
+        array_push($result, $responseMessage);
+        return $result;
+    }
+
     private function getWelcomeMessage($message)
     {
 //        $this->setHelperMessageAttributes($message);
@@ -1308,8 +1434,43 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
         if ($text != '')
         {
-            $contentObj = $this->getTextMessageArray($text);
-            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+//            $contentObj = $this->getTextMessageArray($text);
+//            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+            $enableMessageOptions = $this->getConfigValue($this->_configPrefix . '/general/enable_message_options');
+            if ($enableMessageOptions == $this->_define::ENABLED)
+            {
+                $quickReplies = array();
+                $welcomeMessageOptions = $this->getWelcomeMessageOptionsData();
+                foreach ($welcomeMessageOptions as $optionId => $messageOption)
+                {
+                    if (count($quickReplies) >= $this->_define::MAX_MESSAGE_ELEMENTS)
+                        break;
+
+                    $quickReply = array(
+                        'content_type' => 'text', // TODO messenger pattern
+                        'title' => $messageOption['option_text'],
+                        'payload' => json_encode(array())
+                    );
+                    array_push($quickReplies, $quickReply);
+                }
+
+                $contentObject = new \stdClass();
+                $contentObject->message = $text;
+                $contentObject->quick_replies = $quickReplies;
+                $content = json_encode($contentObject);
+                $contentType = $this->_define::QUICK_REPLY;
+            }
+            else
+            {
+                $contentType = $this->_define::CONTENT_TEXT;
+                $content = $text;
+            }
+            $responseMessage = array(
+                'content_type' => $contentType,
+                'content' => $content,
+                'current_command_details' => json_encode(array())
+            );
+            $outgoingMessage = $this->createOutgoingMessage($message, $responseMessage);
 //            $this->processOutgoingMessage($outgoingMessage);
         }
 
@@ -1908,6 +2069,26 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $result;
     }
 
+    private function getDefaultRepliesData()
+    {
+        $defaultReplies = array();
+        $serializedDefaultReplies = $this->getConfigValue($this->_configPrefix . '/general/default_replies');
+        if ($serializedDefaultReplies)
+            $defaultReplies = $this->_serializer->unserialize($serializedDefaultReplies);
+
+        return $defaultReplies;
+    }
+
+    private function getWelcomeMessageOptionsData()
+    {
+        $welcomeMessageOptions = array();
+        $serializedWelcomeMessageOptions = $this->getConfigValue($this->_configPrefix . '/general/message_options');
+        if ($serializedWelcomeMessageOptions)
+            $welcomeMessageOptions = $this->_serializer->unserialize($serializedWelcomeMessageOptions);
+
+        return $welcomeMessageOptions;
+    }
+
     private function getChatbotAPIModelBySenderId($senderId)
     {
         if (isset($this->_chatbotAPIModel))
@@ -2356,8 +2537,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $result = array();
         $responseMessage = array(
             'content_type' => $this->_define::CONTENT_TEXT,
-            'content' => 'The SUPPORT command is still under development', // TODO
+            'content' => __("You're on support mode. In a few words, please explain what would you like help with. To cancel send '%1'.", $this->getCommandText($this->_define::CANCEL_COMMAND_ID)),
             'current_command_details' => json_encode(array(
+                'conversation_state' => $this->_define::CONVERSATION_SUPPORT,
                 'command_text' => $this->getCommandText($this->_define::SUPPORT_COMMAND_ID)
             ))
         );
@@ -2405,9 +2587,42 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $text = $this->getConfigValue($this->_configPrefix . '/general/help_message');
         if ($text)
         {
+            $listCommands = $this->getConfigValue($this->_configPrefix . '/general/enable_help_command_list');
+            if ($listCommands == $this->_define::ENABLED)
+            {
+                $quickReplies = array();
+                $enabledCommands = $this->getCommandsList();
+                foreach ($enabledCommands as $commandId => $command)
+                {
+                    if (count($quickReplies) >= $this->_define::MAX_MESSAGE_ELEMENTS)
+                        break;
+
+                    $payload = array(
+                        'command' => $commandId,
+//                        'parameter' => ''
+                    );
+                    $quickReply = array(
+                        'content_type' => 'text', // TODO messenger pattern
+                        'title' => $command['command_code'],
+                        'payload' => json_encode($payload)
+                    );
+                    array_push($quickReplies, $quickReply);
+                }
+
+                $contentObject = new \stdClass();
+                $contentObject->message = $text;
+                $contentObject->quick_replies = $quickReplies;
+                $content = json_encode($contentObject);
+                $contentType = $this->_define::QUICK_REPLY;
+            }
+            else
+            {
+                $contentType = $this->_define::CONTENT_TEXT;
+                $content = $text;
+            }
             $responseMessage = array(
-                'content_type' => $this->_define::CONTENT_TEXT,
-                'content' => $text,
+                'content_type' => $contentType,
+                'content' => $content,
                 'current_command_details' => json_encode(array(
                     'command_text' => $this->getCommandText($this->_define::HELP_COMMAND_ID)
                 ))
