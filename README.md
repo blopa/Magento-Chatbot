@@ -103,6 +103,7 @@ Go to **System > General Settings  > Chatbot Settings**
     - Add Support command
     - Add option to list commands on Help Command
     - Add Default Replies
+    - Add Welcome Message Options
 - **v1.0.3:**
     - Add Messages Queue Modes
     - Add option to Clear Message Queue
@@ -271,7 +272,6 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
     - Add `CDATA` and `<tooltip>` to configuration descriptions
     - Add Promotional Messages
     - Add Enable Facebook Messenger Box
-    - Add Welcome Message Options
     - Add more options to filter clearing message queue
     - Add handler for other posts from Messenger
 

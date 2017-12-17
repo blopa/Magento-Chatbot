@@ -252,7 +252,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $chatbotAPI = $this->createChatbotAPI($chatbotAPI, $message);
             $welcomeMessage = $this->getWelcomeMessage($message);
             if ($welcomeMessage)
+            {
+                if ($message->getStatus() != $this->_define::PROCESSED)
+                    $message->updateIncomingMessageStatus($this->_define::PROCESSED);
+
                 array_push($result, $welcomeMessage);
+                return $result;
+            }
         }
 
         $enabled = $this->getConfigValue($this->_configPrefix . '/general/enable');
@@ -1428,8 +1434,43 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $text = $this->getConfigValue($this->_configPrefix . '/general/welcome_message');
         if ($text != '')
         {
-            $contentObj = $this->getTextMessageArray($text);
-            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+//            $contentObj = $this->getTextMessageArray($text);
+//            $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
+            $enableMessageOptions = $this->getConfigValue($this->_configPrefix . '/general/enable_message_options');
+            if ($enableMessageOptions == $this->_define::ENABLED)
+            {
+                $quickReplies = array();
+                $welcomeMessageOptions = $this->getWelcomeMessageOptionsData();
+                foreach ($welcomeMessageOptions as $optionId => $messageOption)
+                {
+                    if (count($quickReplies) >= $this->_define::MAX_MESSAGE_ELEMENTS)
+                        break;
+
+                    $quickReply = array(
+                        'content_type' => 'text', // TODO messenger pattern
+                        'title' => $messageOption['option_text'],
+                        'payload' => json_encode(array())
+                    );
+                    array_push($quickReplies, $quickReply);
+                }
+
+                $contentObject = new \stdClass();
+                $contentObject->message = $text;
+                $contentObject->quick_replies = $quickReplies;
+                $content = json_encode($contentObject);
+                $contentType = $this->_define::QUICK_REPLY;
+            }
+            else
+            {
+                $contentType = $this->_define::CONTENT_TEXT;
+                $content = $text;
+            }
+            $responseMessage = array(
+                'content_type' => $contentType,
+                'content' => $content,
+                'current_command_details' => json_encode(array())
+            );
+            $outgoingMessage = $this->createOutgoingMessage($message, $responseMessage);
 //            $this->processOutgoingMessage($outgoingMessage);
         }
 
@@ -2038,6 +2079,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $defaultReplies;
     }
 
+    private function getWelcomeMessageOptionsData()
+    {
+        $welcomeMessageOptions = array();
+        $serializedWelcomeMessageOptions = $this->getConfigValue($this->_configPrefix . '/general/message_options');
+        if ($serializedWelcomeMessageOptions)
+            $welcomeMessageOptions = $this->_serializer->unserialize($serializedWelcomeMessageOptions);
+
+        return $welcomeMessageOptions;
+    }
+
     private function getChatbotAPIModelBySenderId($senderId)
     {
         if (isset($this->_chatbotAPIModel))
@@ -2547,7 +2598,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                         break;
 
                     $payload = array(
-                        'command' => $commandId
+                        'command' => $commandId,
+//                        'parameter' => ''
                     );
                     $quickReply = array(
                         'content_type' => 'text', // TODO messenger pattern
