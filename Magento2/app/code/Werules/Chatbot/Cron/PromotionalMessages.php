@@ -26,6 +26,7 @@ class PromotionalMessages
 
     protected $_logger;
     protected $_messageModel;
+    protected $_promotionalMessagesModel;
     protected $_helper;
     protected $_define;
 
@@ -37,12 +38,14 @@ class PromotionalMessages
     public function __construct(
         \Psr\Log\LoggerInterface $logger,
         \Werules\Chatbot\Model\Message $message,
+        \Werules\Chatbot\Model\PromotionalMessages $promotionalMessages,
         \Werules\Chatbot\Helper\Data $helperData,
         \Werules\Chatbot\Helper\Define $define
     )
     {
         $this->_logger = $logger;
         $this->_messageModel = $message;
+        $this->_promotionalMessagesModel = $promotionalMessages;
         $this->_helper = $helperData;
         $this->_define = $define;
     }
@@ -54,7 +57,7 @@ class PromotionalMessages
      */
     public function execute()
     {
-        $promotionalMessageCollection = $this->_messageModel->getCollection()
+        $promotionalMessageCollection = $this->_promotionalMessagesModel->getCollection()
                     ->addFieldToFilter('status', array('eq' => $this->_define::NOT_SENT));
 
         if (count($promotionalMessageCollection) > 0)
@@ -76,9 +79,12 @@ class PromotionalMessages
 
                     if ($result)
                     {
-                        $promotionalMessage->setStatus($this->_define::SENT);
-                        $promotionalMessage->setUpdatedAt(date('Y-m-d H:i:s'));
-                        $promotionalMessage->save();
+                        if ($promotionalMessage->getStatus() != $this->_define::SENT)
+                        {
+                            $promotionalMessage->setStatus($this->_define::SENT);
+                            $promotionalMessage->setUpdatedAt(date('Y-m-d H:i:s'));
+                            $promotionalMessage->save();
+                        }
                     }
                 }
             }
