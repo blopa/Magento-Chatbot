@@ -91,13 +91,37 @@
 			<argument name="data" xsi:type="array">
 				<item name="config" xsi:type="array">
 					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">content</item>
+					<item name="label" translate="true" xsi:type="string">Content</item>
 					<item name="editor" xsi:type="array">
 						<item name="editorType" xsi:type="string">text</item>
 						<item name="validation" xsi:type="array">
 							<item name="required-entry" xsi:type="boolean">true</item>
 						</item>
 					</item>
+				</item>
+			</argument>
+		</column>
+		<column name="status">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">Status</item>
+				</item>
+			</argument>
+		</column>
+		<column name="created_at">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">Created At</item>
+				</item>
+			</argument>
+		</column>
+		<column name="updated_at">
+			<argument name="data" xsi:type="array">
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">text</item>
+					<item name="label" translate="true" xsi:type="string">Updated At</item>
 				</item>
 			</argument>
 		</column>
@@ -108,29 +132,5 @@
 				</item>
 			</argument>
 		</actionsColumn>
-		<column name="created_at">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">created_at</item>
-				</item>
-			</argument>
-		</column>
-		<column name="updated_at">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">updated_at</item>
-				</item>
-			</argument>
-		</column>
-		<column name="status">
-			<argument name="data" xsi:type="array">
-				<item name="config" xsi:type="array">
-					<item name="filter" xsi:type="string">text</item>
-					<item name="label" translate="true" xsi:type="string">status</item>
-				</item>
-			</argument>
-		</column>
 	</columns>
 </listing>

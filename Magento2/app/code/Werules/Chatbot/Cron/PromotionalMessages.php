@@ -24,16 +24,27 @@ namespace Werules\Chatbot\Cron;
 class PromotionalMessages
 {
 
-    protected $logger;
+    protected $_logger;
+    protected $_messageModel;
+    protected $_helper;
+    protected $_define;
 
     /**
      * Constructor
      *
      * @param \Psr\Log\LoggerInterface $logger
      */
-    public function __construct(\Psr\Log\LoggerInterface $logger)
+    public function __construct(
+        \Psr\Log\LoggerInterface $logger,
+        \Werules\Chatbot\Model\Message $message,
+        \Werules\Chatbot\Helper\Data $helperData,
+        \Werules\Chatbot\Helper\Define $define
+    )
     {
-        $this->logger = $logger;
+        $this->_logger = $logger;
+        $this->_messageModel = $message;
+        $this->_helper = $helperData;
+        $this->_define = $define;
     }
 
     /**
@@ -43,6 +54,34 @@ class PromotionalMessages
      */
     public function execute()
     {
-        $this->logger->addInfo("Cronjob PromotionalMessages is executed.");
+        $promotionalMessageCollection = $this->_messageModel->getCollection()
+                    ->addFieldToFilter('status', array('eq' => $this->_define::NOT_SENT));
+
+        if (count($promotionalMessageCollection) > 0)
+        {
+            $uniqueMessageCollection = $this->_messageModel->getCollection()->distinct(true);
+            $uniqueMessageCollection->getSelect()->group('sender_id');
+            foreach ($promotionalMessageCollection as $promotionalMessage)
+            {
+                $messageContent = $promotionalMessage->getContent();
+                foreach ($uniqueMessageCollection as $message)
+                {
+                    $content = array(
+                        'content_type' => $this->_define::CONTENT_TEXT,
+                        'content' => $messageContent,
+                        'current_command_details' => json_encode(array()),
+                    );
+                    $outgoingMessage = $this->_helper->createOutgoingMessage($message, $content);
+                    $result = $this->_helper->processOutgoingMessage($outgoingMessage);
+
+                    if ($result)
+                    {
+                        $promotionalMessage->setStatus($this->_define::SENT);
+                        $promotionalMessage->setUpdatedAt(date('Y-m-d H:i:s'));
+                        $promotionalMessage->save();
+                    }
+                }
+            }
+        }
     }
 }

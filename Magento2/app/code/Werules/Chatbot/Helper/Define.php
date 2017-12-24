@@ -42,6 +42,8 @@ class Define
     const DEFAULT_MIN_CONFIDENCE = 0.7;
     const BREAK_LINE = '\n'; // chr(10)
     const QUEUE_PROCESSING_LIMIT = self::SECONDS_IN_MINUTE * 3;
+    const NOT_SENT = 0;
+    const SENT = 1;
 
     // commands
     const START_COMMAND_ID = 0;

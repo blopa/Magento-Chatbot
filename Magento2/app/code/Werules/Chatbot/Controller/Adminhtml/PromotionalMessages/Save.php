@@ -49,7 +49,8 @@ class Save extends \Magento\Backend\App\Action
     {
         /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
-        $data = $this->getRequest()->getPostValue();
+//        $data = $this->getRequest()->getPostValue();
+        $data = $this->getCompleteData($this->getRequest()->getPostValue());
         if ($data) {
             $id = $this->getRequest()->getParam('promotionalmessages_id');
         
@@ -58,7 +59,6 @@ class Save extends \Magento\Backend\App\Action
                 $this->messageManager->addErrorMessage(__('This Promotionalmessages no longer exists.'));
                 return $resultRedirect->setPath('*/*/');
             }
-        
             $model->setData($data);
         
             try {
@@ -80,5 +80,19 @@ class Save extends \Magento\Backend\App\Action
             return $resultRedirect->setPath('*/*/edit', ['promotionalmessages_id' => $this->getRequest()->getParam('promotionalmessages_id')]);
         }
         return $resultRedirect->setPath('*/*/');
+    }
+
+    private function getCompleteData($data)
+    {
+        if (!$data)
+            return array();
+
+        $newData = $data;
+        $datetime = date('Y-m-d H:i:s');
+        $newData['created_at'] = $datetime;
+        $newData['updated_at'] = $datetime;
+        $newData['status'] = 0;
+
+        return $newData;
     }
 }
