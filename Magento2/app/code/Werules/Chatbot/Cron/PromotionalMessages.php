@@ -71,7 +71,10 @@ class PromotionalMessages
                 {
                     $chatbotUser = $this->_helper->getChatbotuserBySenderId($message->getSenderId());
                     if ($chatbotUser->getEnablePromotionalMessages() == $this->_define::DISABLED)
+                    {
+                        $this->_helper->logger(__("Customer ID %1 choose to not receive promotional messages.", $chatbotUser->getCustomerId()), 'werules_chatbot_promotional_messages.log');
                         continue;
+                    }
 
                     $content = array(
                         'content_type' => $this->_define::CONTENT_TEXT,
@@ -90,6 +93,8 @@ class PromotionalMessages
                             $promotionalMessage->save();
                         }
                     }
+                    else
+                        $this->_helper->logger(__("Unable to send message to Chatbot Chat ID %1.", $message->getSenderId()), 'werules_chatbot_promotional_messages.log');
                 }
             }
         }
