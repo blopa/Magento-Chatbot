@@ -99,6 +99,8 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.5:**
+    - Add Promotional Messages
 - **v1.0.4:**
     - Add Support command
     - Add option to list commands on Help Command

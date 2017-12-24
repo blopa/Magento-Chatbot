@@ -19,26 +19,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Setup;
+namespace Werules\Chatbot\Cron;
 
-use Magento\Framework\Setup\UpgradeDataInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\ModuleDataSetupInterface;
-
-class UpgradeData implements UpgradeDataInterface
+class PromotionalMessages
 {
 
+    protected $logger;
+
     /**
-     * {@inheritdoc}
+     * Constructor
+     *
+     * @param \Psr\Log\LoggerInterface $logger
      */
-    public function upgrade(
-        ModuleDataSetupInterface $setup,
-        ModuleContextInterface $context
-    ) {
-        $setup->startSetup();
-        if (version_compare($context->getVersion(), "1.0.5", "<")) {
-        //Your upgrade script
-        }
-        $setup->endSetup();
+    public function __construct(\Psr\Log\LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * Execute the cron
+     *
+     * @return void
+     */
+    public function execute()
+    {
+        $this->logger->addInfo("Cronjob PromotionalMessages is executed.");
     }
 }

@@ -92,6 +92,55 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 );
             }
         }
+//        $setup->endSetup();
+
+//        $setup->startSetup();
+        if (version_compare($context->getVersion(), "1.0.5", "<")) {
+            $installer = $setup;
+            $installer->startSetup();
+
+            $table = $installer->getConnection()
+                ->newTable($installer->getTable('werules_chatbot_promotionalmessages'));
+
+            $table->addColumn(
+                'promotionalmessages_id',
+                \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+                null,
+                array('identity' => true,'nullable' => false,'primary' => true,'unsigned' => true,),
+                'Entity ID'
+            );
+            $table->addColumn(
+                'content',
+                \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                640,
+                ['nullable' => False],
+                'Message Content'
+            );
+            $table->addColumn(
+                'created_at',
+                \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                null,
+                [],
+                'Created At'
+            );
+            $table->addColumn(
+                'updated_at',
+                \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+                null,
+                [],
+                'Updated At'
+            );
+            $table->addColumn(
+                'status',
+                \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                null,
+                [],
+                'Status'
+            );
+
+            $installer->getConnection()->createTable($table);
+            $installer->endSetup();
+        }
         $setup->endSetup();
     }
 }

@@ -19,26 +19,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Setup;
+namespace Werules\Chatbot\Block\Adminhtml\PromotionalMessages\Edit;
 
-use Magento\Framework\Setup\UpgradeDataInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\ModuleDataSetupInterface;
+use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
 
-class UpgradeData implements UpgradeDataInterface
+class BackButton extends GenericButton implements ButtonProviderInterface
 {
 
     /**
-     * {@inheritdoc}
+     * @return array
      */
-    public function upgrade(
-        ModuleDataSetupInterface $setup,
-        ModuleContextInterface $context
-    ) {
-        $setup->startSetup();
-        if (version_compare($context->getVersion(), "1.0.5", "<")) {
-        //Your upgrade script
-        }
-        $setup->endSetup();
+    public function getButtonData()
+    {
+        return [
+            'label' => __('Back'),
+            'on_click' => sprintf("location.href = '%s';", $this->getBackUrl()),
+            'class' => 'back',
+            'sort_order' => 10
+        ];
+    }
+
+    /**
+     * Get URL for back (reset) button
+     *
+     * @return string
+     */
+    public function getBackUrl()
+    {
+        return $this->getUrl('*/*/');
     }
 }

@@ -21,7 +21,7 @@
 
 namespace Werules\Chatbot\Cron;
 
-class Worker
+class QueueWorker
 {
 
     protected $_logger;
