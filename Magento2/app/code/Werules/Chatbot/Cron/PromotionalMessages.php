@@ -69,6 +69,10 @@ class PromotionalMessages
                 $messageContent = $promotionalMessage->getContent();
                 foreach ($uniqueMessageCollection as $message)
                 {
+                    $chatbotUser = $this->_helper->getChatbotuserBySenderId($message->getSenderId());
+                    if ($chatbotUser->getEnablePromotionalMessages() == $this->_define::DISABLED)
+                        continue;
+
                     $content = array(
                         'content_type' => $this->_define::CONTENT_TEXT,
                         'content' => $messageContent,
