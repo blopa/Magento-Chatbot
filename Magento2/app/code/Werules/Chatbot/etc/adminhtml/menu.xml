@@ -2,8 +2,9 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
 	<menu>
 		<add id="Werules::top_level" module="Werules_Chatbot" resource="Magento_Backend::content" sortOrder="9999" title="Werules"/>
-		<add action="werules_chatbot/message/index" id="Werules::werules_chatbot_message" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="Message"/>
-		<add action="werules_chatbot/chatbotuser/index" id="Werules::werules_chatbot_chatbotuser" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="ChatbotUser"/>
-		<add action="werules_chatbot/chatbotapi/index" id="Werules::werules_chatbot_chatbotapi" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="ChatbotAPI"/>
+		<!--<add action="werules_chatbot/message/index" id="Werules::werules_chatbot_message" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="Message"/>-->
+		<!--<add action="werules_chatbot/chatbotuser/index" id="Werules::werules_chatbot_chatbotuser" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="ChatbotUser"/>-->
+		<!--<add action="werules_chatbot/chatbotapi/index" id="Werules::werules_chatbot_chatbotapi" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="ChatbotAPI"/>-->
+		<add action="werules_chatbot/promotionalmessages/index" id="Werules::werules_chatbot_promotionalmessages" module="Werules_Chatbot" parent="Werules::top_level" resource="Magento_Backend::content" sortOrder="9999" title="PromotionalMessages"/>
 	</menu>
 </config>

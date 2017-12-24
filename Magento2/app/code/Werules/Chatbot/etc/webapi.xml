@@ -78,4 +78,28 @@
 			<resource ref="Werules_Chatbot::ChatbotUser_delete"/>
 		</resources>
 	</route>
+	<route method="POST" url="/V1/werules-chatbot/promotionalmessages">
+		<service class="Werules\Chatbot\Api\PromotionalMessagesRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::PromotionalMessages_save"/>
+		</resources>
+	</route>
+	<route method="GET" url="/V1/werules-chatbot/:promotionalmessagesId">
+		<service class="Werules\Chatbot\Api\PromotionalMessagesRepositoryInterface" method="getById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::PromotionalMessages_view"/>
+		</resources>
+	</route>
+	<route method="PUT" url="/V1/werules-chatbot/:promotionalmessagesId">
+		<service class="Werules\Chatbot\Api\PromotionalMessagesRepositoryInterface" method="save"/>
+		<resources>
+			<resource ref="Werules_Chatbot::PromotionalMessages_update"/>
+		</resources>
+	</route>
+	<route method="DELETE" url="/V1/werules-chatbot/:promotionalmessagesId">
+		<service class="Werules\Chatbot\Api\PromotionalMessagesRepositoryInterface" method="deleteById"/>
+		<resources>
+			<resource ref="Werules_Chatbot::PromotionalMessages_delete"/>
+		</resources>
+	</route>
 </routes>

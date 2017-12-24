@@ -24,19 +24,19 @@ namespace Werules\Chatbot\Api\Data;
 interface MessageInterface
 {
 
-    const CONTENT = 'content';
-    const CONTENT_TYPE = 'content_type';
-    const SENT_AT = 'sent_at';
-    const STATUS = 'status';
-    const MESSAGE_ID = 'message_id';
-    const CREATED_AT = 'created_at';
-    const SENDER_ID = 'sender_id';
     const DIRECTION = 'direction';
-    const CHATBOT_TYPE = 'chatbot_type';
     const UPDATED_AT = 'updated_at';
-    const MESSAGE_PAYLOAD = 'message_payload';
     const CHAT_MESSAGE_ID = 'chat_message_id';
+    const CONTENT_TYPE = 'content_type';
+    const CREATED_AT = 'created_at';
+    const SENT_AT = 'sent_at';
+    const CHATBOT_TYPE = 'chatbot_type';
+    const MESSAGE_ID = 'message_id';
+    const MESSAGE_PAYLOAD = 'message_payload';
+    const SENDER_ID = 'sender_id';
+    const CONTENT = 'content';
     const CURRENT_COMMAND_DETAILS = 'current_command_details';
+    const STATUS = 'status';
 
 
     /**

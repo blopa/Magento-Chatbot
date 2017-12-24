@@ -3,6 +3,13 @@
 	<acl>
 		<resources>
 			<resource id="Magento_Backend::admin">
+				<resource id="Magento_Backend::stores">
+					<resource id="Magento_Backend::stores_settings">
+						<resource id="Magento_Config::config">
+							<resource id="Werules_Chatbot::config_werules_chatbot" title="werules_chatbot_general"/>
+						</resource>
+					</resource>
+				</resource>
 				<resource id="Werules_Chatbot::Message" sortOrder="10" title="Message">
 					<resource id="Werules_Chatbot::Message_save" sortOrder="10" title="Save Message"/>
 					<resource id="Werules_Chatbot::Message_delete" sortOrder="20" title="Delete Message"/>
@@ -21,12 +28,11 @@
 					<resource id="Werules_Chatbot::ChatbotAPI_update" sortOrder="30" title="Update ChatbotAPI"/>
 					<resource id="Werules_Chatbot::ChatbotAPI_view" sortOrder="40" title="View ChatbotAPI"/>
 				</resource>
-				<resource id="Magento_Backend::stores">
-					<resource id="Magento_Backend::stores_settings">
-						<resource id="Magento_Config::config">
-							<resource id="Werules_Chatbot::config_werules_chatbot" title="werules_chatbot_general"/>
-						</resource>
-					</resource>
+				<resource id="Werules_Chatbot::PromotionalMessages" sortOrder="10" title="PromotionalMessages">
+					<resource id="Werules_Chatbot::PromotionalMessages_save" sortOrder="10" title="Save PromotionalMessages"/>
+					<resource id="Werules_Chatbot::PromotionalMessages_delete" sortOrder="20" title="Delete PromotionalMessages"/>
+					<resource id="Werules_Chatbot::PromotionalMessages_update" sortOrder="30" title="Update PromotionalMessages"/>
+					<resource id="Werules_Chatbot::PromotionalMessages_view" sortOrder="40" title="View PromotionalMessages"/>
 				</resource>
 			</resource>
 		</resources>

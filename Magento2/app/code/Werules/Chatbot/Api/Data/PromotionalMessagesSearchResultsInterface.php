@@ -19,26 +19,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Setup;
+namespace Werules\Chatbot\Api\Data;
 
-use Magento\Framework\Setup\UpgradeDataInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\ModuleDataSetupInterface;
-
-class UpgradeData implements UpgradeDataInterface
+interface PromotionalMessagesSearchResultsInterface extends \Magento\Framework\Api\SearchResultsInterface
 {
 
+
     /**
-     * {@inheritdoc}
+     * Get PromotionalMessages list.
+     * @return \Werules\Chatbot\Api\Data\PromotionalMessagesInterface[]
      */
-    public function upgrade(
-        ModuleDataSetupInterface $setup,
-        ModuleContextInterface $context
-    ) {
-        $setup->startSetup();
-        if (version_compare($context->getVersion(), "1.0.5", "<")) {
-        //Your upgrade script
-        }
-        $setup->endSetup();
-    }
+    public function getItems();
+
+    /**
+     * Set content list.
+     * @param \Werules\Chatbot\Api\Data\PromotionalMessagesInterface[] $items
+     * @return $this
+     */
+    public function setItems(array $items);
 }

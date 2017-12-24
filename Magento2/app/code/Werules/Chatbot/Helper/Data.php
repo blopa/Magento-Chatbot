@@ -2110,7 +2110,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $chatbotAPI;
     }
 
-    private function getChatbotuserBySenderId($senderId)
+    public function getChatbotuserBySenderId($senderId)
     {
         $chatbotAPI = $this->getChatbotAPIModelBySenderId($senderId);
         $chatbotUser = $this->_chatbotUserFactory->create();
