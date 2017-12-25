@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
+        <referenceContainer name="after.body.start">
+            <!--<block class='Company\Module\Block\Module' name="company_module" as="company_module" template="Company_Module::tracking.phtml"/>-->
+            <block class="Werules\Chatbot\Block\Chatbox\Messenger" name="chatbox.facebook_js_sdk" template="Werules_Chatbot::chatbox/facebook_js_sdk.phtml"/>
+        </referenceContainer>
         <referenceContainer name="before.body.end">
             <!--<block class='Company\Module\Block\Module' name="company_module" as="company_module" template="Company_Module::tracking.phtml"/>-->
             <block class="Werules\Chatbot\Block\Chatbox\Messenger" name="chatbox.messenger" template="Werules_Chatbot::chatbox/messenger.phtml"/>
