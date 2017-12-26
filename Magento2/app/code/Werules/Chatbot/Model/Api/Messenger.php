@@ -304,10 +304,10 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
     }
 
     public function getPageDetails() {
-        return $this->endpoint("me",
-            array(
-                'fields' => array('id', 'name', 'fan_count', 'picture', 'is_verified')
-            )
+        return $this->endpoint(
+            "me",
+            array(),
+            false
         );
     }
 

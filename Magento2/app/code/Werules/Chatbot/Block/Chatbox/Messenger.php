@@ -49,20 +49,35 @@ class Messenger extends \Magento\Framework\View\Element\Template
 
     public function getFacebookPageId()
     {
+        $pageId = $this->getConfigValue('werules_chatbot_messenger/general/page_id');
+        if ($pageId)
+            return $pageId;
+
         $messengerInstance = $this->getMessengerInstance();
         $pageDetails = $messengerInstance->getPageDetails();
-        $this->_helper->logger($pageDetails);
-        die;
+        if (isset($pageDetails['id']))
+        {
+            $pageId = $pageDetails['id'];
+            $this->setConfigValue('werules_chatbot_messenger/general/page_id', $pageId);
+            return $pageId;
+        }
+
+        return '';
     }
 
     public function getFacebookAppId()
     {
-        $appId = $this->getConfigValue('werules_chatbot_general/general/app_id');
+        $appId = $this->getConfigValue('werules_chatbot_messenger/general/app_id');
         return $appId;
     }
 
     public function getConfigValue($code)
     {
         return $this->_helper->getConfigValue($code);
+    }
+
+    public function setConfigValue($field, $value)
+    {
+        $this->_helper->setConfigValue($field, $value);
     }
 }
