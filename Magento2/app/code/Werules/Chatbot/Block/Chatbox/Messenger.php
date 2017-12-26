@@ -40,7 +40,7 @@ class Messenger extends \Magento\Framework\View\Element\Template
         parent::__construct($context, $data);
     }
 
-    protected function getMessengerInstance()
+    private function getMessengerInstance()
     {
         $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
         $messenger = $this->_chatbotAPI->initMessengerAPI($api_token);
@@ -101,12 +101,12 @@ class Messenger extends \Magento\Framework\View\Element\Template
         return false;
     }
 
-    public function getConfigValue($code)
+    private function getConfigValue($code)
     {
         return $this->_helper->getConfigValue($code);
     }
 
-    public function setConfigValue($field, $value)
+    private function setConfigValue($field, $value)
     {
         $this->_helper->setConfigValue($field, $value);
     }
