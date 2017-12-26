@@ -101,13 +101,13 @@
 				</field>
 				<field id="page_id" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="7" translate="label comment tooltip" type="text">
 					<label>Facebook Page ID</label>
-					<comment>Facebook Page ID. If you don't know, leave it blank.</comment>
+					<comment>Facebook Page ID. If you don't know, leave it blank and we fill it for you.</comment>
 				</field>
-				<!--<field id="enable_messenger_box" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="select">-->
-					<!--<label>Enable Facebook Messenger Box</label>-->
-					<!--<comment>Enable Facebook Messenger box</comment>-->
-					<!--<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>-->
-				<!--</field>-->
+				<field id="enable_messenger_box" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="select">
+					<label>Enable Messenger Chat Box</label>
+					<comment>Enable Messenger chat box.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
 				<!--<field id="messenger_box_width" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="9" translate="label comment tooltip" type="text">-->
 					<!--<depends>-->
 						<!--<field id="werules_chatbot_messenger/general/enable_messenger_box">1</field>-->

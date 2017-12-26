@@ -71,6 +71,15 @@ class Messenger extends \Magento\Framework\View\Element\Template
         return $appId;
     }
 
+    public function isChatboxEnabled()
+    {
+        $enable = $this->getConfigValue('werules_chatbot_messenger/general/enable_messenger_box');
+        if ($enable)
+            return true;
+
+        return false;
+    }
+
     public function getConfigValue($code)
     {
         return $this->_helper->getConfigValue($code);
