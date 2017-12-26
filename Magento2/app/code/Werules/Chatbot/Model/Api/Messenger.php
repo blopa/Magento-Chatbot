@@ -303,6 +303,14 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
         );
     }
 
+    public function getPageDetails() {
+        return $this->endpoint("me",
+            array(
+                'fields' => array('id', 'name', 'fan_count', 'picture', 'is_verified')
+            )
+        );
+    }
+
     /// Get the text of the current message
     public function Text() {
         if (isset($this->data["entry"][0]["messaging"][0]["message"]["text"]))

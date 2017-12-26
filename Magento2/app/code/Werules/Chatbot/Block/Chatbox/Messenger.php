@@ -23,11 +23,46 @@ namespace Werules\Chatbot\Block\Chatbox;
 
 class Messenger extends \Magento\Framework\View\Element\Template
 {
+    protected $_helper;
+    protected $_define;
+    protected $_chatbotAPI;
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
+        \Werules\Chatbot\Helper\Data $helperData,
+        \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
         array $data = array()
     )
     {
+        $this->_chatbotAPI = $chatbotAPI;
+        $this->_helper = $helperData;
+        $this->_define = new \Werules\Chatbot\Helper\Define;
         parent::__construct($context, $data);
+    }
+
+    protected function getMessengerInstance()
+    {
+        $api_token = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
+        $messenger = $this->_chatbotAPI->initMessengerAPI($api_token);
+        return $messenger;
+    }
+
+    public function getFacebookPageId()
+    {
+        $messengerInstance = $this->getMessengerInstance();
+        $pageDetails = $messengerInstance->getPageDetails();
+        $this->_helper->logger($pageDetails);
+        die;
+    }
+
+    public function getFacebookAppId()
+    {
+        $appId = $this->getConfigValue('werules_chatbot_general/general/app_id');
+        return $appId;
+    }
+
+    public function getConfigValue($code)
+    {
+        return $this->_helper->getConfigValue($code);
     }
 }
