@@ -103,6 +103,11 @@
 					<label>Facebook Page ID</label>
 					<comment>Facebook Page ID. If you don't know, leave it blank and we fill it for you.</comment>
 				</field>
+				<field id="domain_whitelisted" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="select">
+					<label>Whitelisted Domain?</label>
+					<comment>Is this domain whitelisted on Facebook? If not, don't worry, we'll whitelist it for you and update this setting.</comment>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
 				<field id="enable_messenger_box" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="8" translate="label comment tooltip" type="select">
 					<label>Enable Messenger Chat Box</label>
 					<comment>Enable Messenger chat box.</comment>

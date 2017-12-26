@@ -33,6 +33,7 @@ class Define
     const OUTGOING = 1;
     const DISABLED = 0;
     const ENABLED = 1;
+    const WHITELABELED = 1;
     const NOT_LOGGED = 0;
     const NOT_ADMIN = 0;
     const ADMIN = 1;

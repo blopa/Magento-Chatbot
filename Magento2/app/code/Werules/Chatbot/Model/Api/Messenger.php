@@ -303,6 +303,20 @@ class Messenger extends \Magento\Framework\Model\AbstractModel {
         );
     }
 
+//    $whitelist = array(
+//        'www.github.com',
+//        'www.facebook.com'
+//    )
+    public function addDomainsToWhitelist(array $whitelist) {
+        return $this->endpoint("me/thread_settings",
+            array(
+                'setting_type' => 'domain_whitelisting',
+                'whitelisted_domains' => $whitelist,
+                'domain_action_type' => 'add'
+            )
+        );
+    }
+
     public function getPageDetails() {
         return $this->endpoint(
             "me",

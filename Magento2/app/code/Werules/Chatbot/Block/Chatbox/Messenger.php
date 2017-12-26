@@ -71,10 +71,31 @@ class Messenger extends \Magento\Framework\View\Element\Template
         return $appId;
     }
 
+    public function isDomainWhitelabeled()
+    {
+        $enable = $this->getConfigValue('werules_chatbot_messenger/general/domain_whitelisted');
+        if ($enable)
+            return true;
+
+        $messengerInstance = $this->getMessengerInstance();
+//        $url = parse_url($_SERVER['SERVER_NAME'], PHP_URL_HOST);
+        $url = $_SERVER['SERVER_NAME'];
+        $domain = array($url);
+        $result = $messengerInstance->addDomainsToWhitelist($domain);
+        if (!isset($result['error']))
+        {
+            $this->setConfigValue('werules_chatbot_messenger/general/domain_whitelisted', $this->_define::WHITELABELED);
+            return true;
+        }
+
+        return false;
+    }
+
     public function isChatboxEnabled()
     {
         $enable = $this->getConfigValue('werules_chatbot_messenger/general/enable_messenger_box');
-        if ($enable)
+        $isWhitelabeled = $this->isDomainWhitelabeled();
+        if ($enable && $isWhitelabeled)
             return true;
 
         return false;
