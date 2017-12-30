@@ -17,6 +17,7 @@
 				<enable>0</enable>
 				<disabled_message>Sorry, I'm not available at the moment. Please try again later.</disabled_message>
 				<api_key/>
+				<page_id/>
 				<bot_username/>
 				<enable_messenger_box>0</enable_messenger_box>
 				<messenger_box_width>200</messenger_box_width>
