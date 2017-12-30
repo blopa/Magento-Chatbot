@@ -18,6 +18,10 @@
 			<groups>
 				<general translate="label">
 					<label>General Settings</label>
+					<comment><![CDATA[
+					<h3>Magento Chatbot v1.0.0</h3>
+					<p>To use this module you'll have to use SSL in your store.</p>
+					]]></comment>
 					<frontend_type>text</frontend_type>
 					<sort_order>0</sort_order>
 					<show_in_default>1</show_in_default>
@@ -34,6 +38,58 @@
 							<show_in_store>1</show_in_store>
 							<comment>Enable module.</comment>
 						</enable>
+						<custom_key translate="label">
+							<label>Your Secret Key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<validate>validate-alphanum</validate>
+							<comment>This is Your Custom Secret Key Used For The Webhook URL, to Activate/Deactivate The API Webhook For Telegram, And to Use as Your Challenge Hub For Facebook. Alphanumeric Only! Access http://(YOUR_STORE_URL)/chatbot/chatdata/(API)/webhook/(YOUR_CUSTOM_KEY) to Set The Webhook, change API to "telegram" or "facebook".</comment>
+						</custom_key>
+						<list_empty_categories translate="label">
+							<label>List Empty Categories</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable listing of categories with no products or unallowed products (this module supports only simple products for now).</comment>
+						</list_empty_categories>
+						<!--<message_queue_mode translate="label">-->
+							<!--<sort_order>3</sort_order>-->
+						<!--</message_queue_mode>-->
+						<enable_post_log translate="label">
+							<label>Enable Log</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>4</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Log will be at root/var/log/.</comment>
+						</enable_post_log>
+						<enable_wit_ai translate="label">
+							<label>Enable wit.ai</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>5</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Enable wit.ai Natural Language Processor.</comment>
+						</enable_wit_ai>
+						<wit_ai_token translate="label">
+							<label>wit.ai Server Access Token</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>6</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>wit.ai Server Access Token.</comment>
+						</wit_ai_token>
 					</fields>
 				</general>
 			</groups>
