@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <config>
 	<tabs>
-		<werules_chatbot translate="label" module="chatbot">
+		<werules_chatbot translate="label" module="werules_chatbot">
 			<label>Chatbot Integration</label>
 			<sort_order>0</sort_order>
 		</werules_chatbot>
 	</tabs>
 	<sections>
-		<werules_chatbot_danger translate="label" module="chatbot">
+		<werules_chatbot_danger translate="label" module="werules_chatbot">
 			<label>Danger Zone</label>
 			<tab>werules_chatbot</tab>
 			<frontend_type>text</frontend_type>
@@ -38,7 +38,7 @@
 				</general>
 			</groups>
 		</werules_chatbot_danger>
-		<werules_chatbot_general translate="label" module="chatbot">
+		<werules_chatbot_general translate="label" module="werules_chatbot">
 			<label>General Settings</label>
 			<tab>werules_chatbot</tab>
 			<frontend_type>text</frontend_type>
@@ -69,7 +69,7 @@
 				</general>
 			</groups>
 		</werules_chatbot_general>
-		<werules_chatbot_messenger translate="label" module="chatbot">
+		<werules_chatbot_messenger translate="label" module="werules_chatbot">
 			<label>Messenger Settings</label>
 			<tab>werules_chatbot</tab>
 			<frontend_type>text</frontend_type>

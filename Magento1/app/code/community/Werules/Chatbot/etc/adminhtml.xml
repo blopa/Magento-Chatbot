@@ -1,78 +1,78 @@
-<?xml version="1.0"?>
-<config>
-	<acl>
-		<resources>
-			<admin>
-				<children>
-					<system>
-						<children>
-							<config>
-								<children>
-									<werules_chatbot translate="title" module="werules_chatbot">
-										<title>Chatbot</title>
-									</werules_chatbot>
-								</children>
-							</config>
-						</children>
-					</system>
-					<system>
-						<children>
-							<config>
-								<children>
-									<werules_chatbot translate="title" module="werules_chatbot">
-										<title>Chatbot Settings</title>
-										<children>
-											<message translate="title" module="werules_chatbot">
-												<title>Message</title>
-												<sort_order>0</sort_order>
-											</message>
-											<chatbotuser translate="title" module="werules_chatbot">
-												<title>ChatbotUser</title>
-												<sort_order>10</sort_order>
-											</chatbotuser>
-											<chatbotapi translate="title" module="werules_chatbot">
-												<title>ChatbotAPI</title>
-												<sort_order>20</sort_order>
-											</chatbotapi>
-										</children>
-									</werules_chatbot>
-								</children>
-							</config>
-						</children>
-					</system>
-				</children>
-			</admin>
-		</resources>
-	</acl>
-	<menu>
-		<system>
-			<children>
-				<config>
-					<children>
-						<werules_chatbot translate="title" module="werules_chatbot">
-							<title>Chatbot Settings</title>
-							<sort_order>10</sort_order>
-							<children>
-								<message translate="title" module="werules_chatbot">
-									<title>Message</title>
-									<action>adminhtml/chatbot_message</action>
-									<sort_order>0</sort_order>
-								</message>
-								<chatbotuser translate="title" module="werules_chatbot">
-									<title>ChatbotUser</title>
-									<action>adminhtml/chatbot_chatbotuser</action>
-									<sort_order>10</sort_order>
-								</chatbotuser>
-								<chatbotapi translate="title" module="werules_chatbot">
-									<title>ChatbotAPI</title>
-									<action>adminhtml/chatbot_chatbotapi</action>
-									<sort_order>20</sort_order>
-								</chatbotapi>
-							</children>
-						</werules_chatbot>
-					</children>
-				</config>
-			</children>
-		</system>
-	</menu>
-</config>
+<!--<?xml version="1.0"?>-->
+<!--<config>-->
+	<!--<acl>-->
+		<!--<resources>-->
+			<!--<admin>-->
+				<!--<children>-->
+					<!--<system>-->
+						<!--<children>-->
+							<!--<config>-->
+								<!--<children>-->
+									<!--<werules_chatbot translate="title" module="werules_chatbot">-->
+										<!--<title>Chatbot</title>-->
+									<!--</werules_chatbot>-->
+								<!--</children>-->
+							<!--</config>-->
+						<!--</children>-->
+					<!--</system>-->
+					<!--<system>-->
+						<!--<children>-->
+							<!--<config>-->
+								<!--<children>-->
+									<!--<werules_chatbot translate="title" module="werules_chatbot">-->
+										<!--<title>Chatbot Settings</title>-->
+										<!--<children>-->
+											<!--<message translate="title" module="werules_chatbot">-->
+												<!--<title>Message</title>-->
+												<!--<sort_order>0</sort_order>-->
+											<!--</message>-->
+											<!--<chatbotuser translate="title" module="werules_chatbot">-->
+												<!--<title>ChatbotUser</title>-->
+												<!--<sort_order>10</sort_order>-->
+											<!--</chatbotuser>-->
+											<!--<chatbotapi translate="title" module="werules_chatbot">-->
+												<!--<title>ChatbotAPI</title>-->
+												<!--<sort_order>20</sort_order>-->
+											<!--</chatbotapi>-->
+										<!--</children>-->
+									<!--</werules_chatbot>-->
+								<!--</children>-->
+							<!--</config>-->
+						<!--</children>-->
+					<!--</system>-->
+				<!--</children>-->
+			<!--</admin>-->
+		<!--</resources>-->
+	<!--</acl>-->
+	<!--<menu>-->
+		<!--<system>-->
+			<!--<children>-->
+				<!--<config>-->
+					<!--<children>-->
+						<!--<werules_chatbot translate="title" module="werules_chatbot">-->
+							<!--<title>Chatbot Settings</title>-->
+							<!--<sort_order>10</sort_order>-->
+							<!--<children>-->
+								<!--<message translate="title" module="werules_chatbot">-->
+									<!--<title>Message</title>-->
+									<!--<action>adminhtml/chatbot_message</action>-->
+									<!--<sort_order>0</sort_order>-->
+								<!--</message>-->
+								<!--<chatbotuser translate="title" module="werules_chatbot">-->
+									<!--<title>ChatbotUser</title>-->
+									<!--<action>adminhtml/chatbot_chatbotuser</action>-->
+									<!--<sort_order>10</sort_order>-->
+								<!--</chatbotuser>-->
+								<!--<chatbotapi translate="title" module="werules_chatbot">-->
+									<!--<title>ChatbotAPI</title>-->
+									<!--<action>adminhtml/chatbot_chatbotapi</action>-->
+									<!--<sort_order>20</sort_order>-->
+								<!--</chatbotapi>-->
+							<!--</children>-->
+						<!--</werules_chatbot>-->
+					<!--</children>-->
+				<!--</config>-->
+			<!--</children>-->
+		<!--</system>-->
+	<!--</menu>-->
+<!--</config>-->
