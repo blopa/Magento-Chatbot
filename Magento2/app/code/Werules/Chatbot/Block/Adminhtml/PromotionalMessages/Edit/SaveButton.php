@@ -1,7 +1,7 @@
 <?php
 /**
  * Magento Chatbot Integration
- * Copyright (C) 2017  
+ * Copyright (C) 2018
  * 
  * This file is part of Werules/Chatbot.
  * 
