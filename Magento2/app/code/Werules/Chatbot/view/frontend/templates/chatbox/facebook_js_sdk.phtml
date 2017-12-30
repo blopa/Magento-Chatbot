@@ -1,3 +1,11 @@
+<?php
+/**
+ * @var $block \Werules\Chatbot\Block\Chatbox\Messenger
+ */
+    $locale = $this->getLocaleCode();
+    if (!$locale)
+        $locale = 'en_US'; // fallback
+?>
 <?php if ($this->isChatboxEnabled()): ?>
     <script>
         // Facebook SDK for JavaScript
@@ -14,7 +22,7 @@
             var js, fjs = d.getElementsByTagName(s)[0];
             if (d.getElementById(id)) {return;}
             js = d.createElement(s); js.id = id;
-            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            js.src = "https://connect.facebook.net/<?php echo $locale ?>/sdk.js";
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
     </script>

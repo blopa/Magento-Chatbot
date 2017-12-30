@@ -26,16 +26,19 @@ class Messenger extends \Magento\Framework\View\Element\Template
     protected $_helper;
     protected $_define;
     protected $_chatbotAPI;
+    protected $_store;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Werules\Chatbot\Helper\Data $helperData,
+        \Magento\Store\Api\Data\StoreInterface $store,
         \Werules\Chatbot\Model\ChatbotAPI $chatbotAPI,
         array $data = array()
     )
     {
         $this->_chatbotAPI = $chatbotAPI;
         $this->_helper = $helperData;
+        $this->_store = $store;
         $this->_define = new \Werules\Chatbot\Helper\Define;
         parent::__construct($context, $data);
     }
@@ -71,7 +74,7 @@ class Messenger extends \Magento\Framework\View\Element\Template
         return $appId;
     }
 
-    public function isDomainWhitelabeled()
+    public function isDomainWhitelisted()
     {
         $enable = $this->getConfigValue('werules_chatbot_messenger/general/domain_whitelisted');
         if ($enable)
@@ -94,8 +97,8 @@ class Messenger extends \Magento\Framework\View\Element\Template
     public function isChatboxEnabled()
     {
         $enable = $this->getConfigValue('werules_chatbot_messenger/general/enable_messenger_box');
-        $isWhitelabeled = $this->isDomainWhitelabeled();
-        if ($enable && $isWhitelabeled)
+        $isWhitelisted = $this->isDomainWhitelisted();
+        if ($enable && $isWhitelisted)
             return true;
 
         return false;
@@ -109,5 +112,10 @@ class Messenger extends \Magento\Framework\View\Element\Template
     private function setConfigValue($field, $value)
     {
         $this->_helper->setConfigValue($field, $value);
+    }
+
+    public function getLocaleCode()
+    {
+        return $this->_store->getLocaleCode();
     }
 }
