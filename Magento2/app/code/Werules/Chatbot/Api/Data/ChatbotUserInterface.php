@@ -24,15 +24,15 @@ namespace Werules\Chatbot\Api\Data;
 interface ChatbotUserInterface
 {
 
-    const CHATBOTUSER_ID = 'chatbotuser_id';
+    const UPDATED_AT = 'updated_at';
     const CUSTOMER_ID = 'customer_id';
-    const CREATED_AT = 'created_at';
-    const SESSION_ID = 'session_id';
-    const ENABLE_SUPPORT = 'enable_support';
     const QUOTE_ID = 'quote_id';
     const ADMIN = 'admin';
-    const UPDATED_AT = 'updated_at';
+    const ENABLE_SUPPORT = 'enable_support';
+    const CREATED_AT = 'created_at';
     const ENABLE_PROMOTIONAL_MESSAGES = 'enable_promotional_messages';
+    const SESSION_ID = 'session_id';
+    const CHATBOTUSER_ID = 'chatbotuser_id';
 
 
     /**

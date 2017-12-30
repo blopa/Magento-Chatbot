@@ -405,6 +405,62 @@ class InstallSchema implements InstallSchemaInterface
 //            'chatbotapi_id',
 //            \Magento\Framework\DB\Ddl\Table::ACTION_CASCADE
 //        );
+
+
+        $table_werules_chatbot_promotionalmessages = $setup->getConnection()->newTable($setup->getTable('werules_chatbot_promotionalmessages'));
+
+        
+        $table_werules_chatbot_promotionalmessages->addColumn(
+            'promotionalmessages_id',
+            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+            null,
+            array('identity' => true,'nullable' => false,'primary' => true,'unsigned' => true,),
+            'Entity ID'
+        );
+        
+
+        
+        $table_werules_chatbot_promotionalmessages->addColumn(
+            'content',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+            640,
+            ['nullable' => False],
+            'Message Content'
+        );
+        
+
+        
+        $table_werules_chatbot_promotionalmessages->addColumn(
+            'created_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+            null,
+            [],
+            'Created At'
+        );
+        
+
+        
+        $table_werules_chatbot_promotionalmessages->addColumn(
+            'updated_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_DATETIME,
+            null,
+            [],
+            'Updated At'
+        );
+        
+
+        
+        $table_werules_chatbot_promotionalmessages->addColumn(
+            'status',
+            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            null,
+            ['default' => 0,'nullable' => False],
+            'Status'
+        );
+        
+
+        $setup->getConnection()->createTable($table_werules_chatbot_promotionalmessages);
+
         $setup->getConnection()->createTable($table_werules_chatbot_chatbotapi);
 
         $setup->getConnection()->createTable($table_werules_chatbot_chatbotuser);

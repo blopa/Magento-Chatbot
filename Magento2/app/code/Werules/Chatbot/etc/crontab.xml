@@ -1,8 +1,11 @@
 <?xml version="1.0" ?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
 	<group id="default">
-		<job instance="Werules\Chatbot\Cron\Worker" method="execute" name="werules_chatbot_worker">
+		<job instance="Werules\Chatbot\Cron\QueueWorker" method="execute" name="werules_chatbot_queueworker">
 			<schedule>*/1 * * * *</schedule>
+		</job>
+		<job instance="Werules\Chatbot\Cron\PromotionalMessages" method="execute" name="werules_chatbot_promotionalmessages">
+			<schedule>*/5 * * * *</schedule>
 		</job>
 	</group>
 </config>

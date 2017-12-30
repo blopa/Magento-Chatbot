@@ -15,6 +15,7 @@
 				<item name="werules_chatbot_message_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\Message\Grid\Collection</item>
 				<item name="werules_chatbot_chatbotuser_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotUser\Grid\Collection</item>
 				<item name="werules_chatbot_chatbotapi_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotAPI\Grid\Collection</item>
+				<item name="werules_chatbot_promotionalmessages_grid_data_source" xsi:type="string">Werules\Chatbot\Model\ResourceModel\PromotionalMessages\Grid\Collection</item>
 			</argument>
 		</arguments>
 	</type>
@@ -28,6 +29,12 @@
 		<arguments>
 			<argument name="mainTable" xsi:type="string">werules_chatbot_chatbotapi</argument>
 			<argument name="resourceModel" xsi:type="string">Werules\Chatbot\Model\ResourceModel\ChatbotAPI\Collection</argument>
+		</arguments>
+	</virtualType>
+	<virtualType name="Werules\Chatbot\Model\ResourceModel\PromotionalMessages\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+		<arguments>
+			<argument name="mainTable" xsi:type="string">werules_chatbot_promotionalmessages</argument>
+			<argument name="resourceModel" xsi:type="string">Werules\Chatbot\Model\ResourceModel\PromotionalMessages\Collection</argument>
 		</arguments>
 	</virtualType>
 </config>

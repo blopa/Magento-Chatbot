@@ -19,26 +19,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Werules\Chatbot\Setup;
+namespace Werules\Chatbot\Model\ResourceModel\PromotionalMessages;
 
-use Magento\Framework\Setup\UpgradeDataInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\ModuleDataSetupInterface;
-
-class UpgradeData implements UpgradeDataInterface
+class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
 {
 
     /**
-     * {@inheritdoc}
+     * Define resource model
+     *
+     * @return void
      */
-    public function upgrade(
-        ModuleDataSetupInterface $setup,
-        ModuleContextInterface $context
-    ) {
-        $setup->startSetup();
-        if (version_compare($context->getVersion(), "1.0.5", "<")) {
-        //Your upgrade script
-        }
-        $setup->endSetup();
+    protected function _construct()
+    {
+        $this->_init(
+            'Werules\Chatbot\Model\PromotionalMessages',
+            'Werules\Chatbot\Model\ResourceModel\PromotionalMessages'
+        );
     }
 }
