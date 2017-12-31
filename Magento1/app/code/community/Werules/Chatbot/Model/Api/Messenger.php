@@ -31,7 +31,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Werules_Chatbot_Model_Api_Messenger extends Mage_Core_Model_Mysql4_Abstract {
+class Werules_Chatbot_Model_Api_Messenger {
 
     private $bot_token;
     private $api_version = "v2.11";

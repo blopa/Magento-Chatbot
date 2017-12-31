@@ -297,6 +297,9 @@
 					</enable_nlp_replies>
 					<nlp_entity_prefix translate="label">
 						<label>Natural Language Processor Entity Prefix</label>
+						<depends>
+							<enable_nlp_replies>1</enable_nlp_replies>
+						</depends>
 						<frontend_type>text</frontend_type>
 						<sort_order>21</sort_order>
 						<show_in_default>1</show_in_default>

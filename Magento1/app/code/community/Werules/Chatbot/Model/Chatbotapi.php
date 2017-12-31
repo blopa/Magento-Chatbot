@@ -99,6 +99,7 @@ class Werules_Chatbot_Model_Chatbotapi extends Mage_Core_Model_Abstract
         return $values;
     }
 
+    // CUSTOM FUNCTIONS
     public function initMessengerAPI($bot_token) // TODO TODO TODO
     {
         return new Werules_Chatbot_Model_Api_Messenger($bot_token);

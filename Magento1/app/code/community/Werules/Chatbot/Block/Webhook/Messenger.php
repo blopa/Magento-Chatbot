@@ -36,6 +36,9 @@ class Werules_Chatbot_Block_Webhook_Messenger extends Werules_Chatbot_Block_Webh
         else // process message
         {
             $messengerInstance = $this->getMessengerInstance();
+            if (!$messengerInstance->getPostData())
+                return $this->getJsonErrorResponse();
+
             $this->logPostData($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
 
             $messageObject = $this->createMessageObject($messengerInstance);
