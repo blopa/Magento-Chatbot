@@ -78,7 +78,7 @@ class Werules_Chatbot_Block_Webhook_Messenger extends Werules_Chatbot_Block_Webh
         $messageObject->messagePayload = $this->getMessengerPayload($messenger); // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
         if ($messenger->getMessageTimestamp())
-            $messageObject->sentAt = (int)$messenger->getMessageTimestamp();
+            $messageObject->sentAt = substr($messenger->getMessageTimestamp(), 0, 10);
         else
             $messageObject->sentAt = time();
         $datetime = date('Y-m-d H:i:s');

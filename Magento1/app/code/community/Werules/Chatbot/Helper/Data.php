@@ -74,7 +74,9 @@ class Werules_Chatbot_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function createIncomingMessage($messageObject)
     {
-        $incomingMessage = $this->_messageModelFactory->create();
+        $this->logger('messageObject -> ');
+        $this->logger($messageObject);
+        $incomingMessage = $this->_messageModelFactory;
         if (isset($messageObject->senderId))
         {
             $incomingMessage->setSenderId($messageObject->senderId);

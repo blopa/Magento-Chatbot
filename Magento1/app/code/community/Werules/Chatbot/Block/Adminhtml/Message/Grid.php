@@ -165,7 +165,7 @@ class Werules_Chatbot_Block_Adminhtml_Message_Grid extends Mage_Adminhtml_Block_
             array(
                 'header' => Mage::helper('werules_chatbot')->__('Sent At'),
                 'index'  => 'sent_at',
-                'type'=> 'date',
+                'type'=> 'datetime',
 
             )
         );

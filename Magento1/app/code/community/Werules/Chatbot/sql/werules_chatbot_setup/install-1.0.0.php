@@ -99,7 +99,7 @@ $table = $this->getConnection()
     )
     ->addColumn(
         'sent_at',
-        Varien_Db_Ddl_Table::TYPE_DATETIME, 255,
+        Varien_Db_Ddl_Table::TYPE_TIMESTAMP, 255,
         array(
             'nullable'  => false,
         ),
