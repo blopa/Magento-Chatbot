@@ -105,6 +105,10 @@
 			<groups>
 				<general translate="label">
 				<label>Messenger Settings</label>
+				<comment><![CDATA[
+				<h3>Magento Chatbot v1.0.0</h3>
+				<p>To use this module you'll have to use SSL in your store.</p>
+				]]></comment>
 				<frontend_type>text</frontend_type>
 				<sort_order>1</sort_order>
 				<show_in_default>1</show_in_default>
