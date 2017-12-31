@@ -21,7 +21,7 @@
 					<comment><![CDATA[
 					<h3>Magento Chatbot v1.0.0</h3>
 					<p>To use this module you'll have to use SSL in your store.</p>
-				<hr>
+					<hr>
 					]]></comment>
 					<frontend_type>text</frontend_type>
 					<sort_order>0</sort_order>
@@ -47,7 +47,10 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
 							<validate>validate-alphanum</validate>
-							<comment>This is Your Custom Secret Key Used For The Webhook URL, to Activate/Deactivate The API Webhook For Telegram, And to Use as Your Challenge Hub For Facebook. Alphanumeric Only! Access http://(YOUR_STORE_URL)/chatbot/chatdata/(API)/webhook/(YOUR_CUSTOM_KEY) to Set The Webhook, change API to "telegram" or "facebook".</comment>
+							<comment><![CDATA[
+								<a href="javascript:generateCustomKey()">Generate</a>
+								<p>This is your secret key used for the webhook URL and Facebook Verification Hub. Click <a id="werules_messenger_url" href="#" target="_blank">here</a> to get instructions on how to configure your endpoint for Messenger or <a id="werules_telegram_url" href="#" target="_blank">here</a> to configure it for Telegram.</p>
+							]]></comment>
 						</custom_key>
 						<list_empty_categories translate="label">
 							<label>List Empty Categories</label>
