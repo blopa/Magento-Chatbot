@@ -19,24 +19,48 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Werules_Chatbot_IndexController extends Mage_Core_Controller_Front_Action{
-    public function IndexAction() {
+class Werules_Chatbot_WebhookController extends Mage_Core_Controller_Front_Action{
+//    public function IndexAction() {
+//
+//      $this->loadLayout();
+//      $this->getLayout()->getBlock("head")->setTitle($this->__("Titlename"));
+//            $breadcrumbs = $this->getLayout()->getBlock("breadcrumbs");
+//      $breadcrumbs->addCrumb("home", array(
+//                "label" => $this->__("Home Page"),
+//                "title" => $this->__("Home Page"),
+//                "link"  => Mage::getBaseUrl()
+//           ));
+//
+//      $breadcrumbs->addCrumb("titlename", array(
+//                "label" => $this->__("Titlename"),
+//                "title" => $this->__("Titlename")
+//           ));
+//
+//      $this->renderLayout();
+//
+//    }
+    public function IndexAction()
+    {
+        $this->loadLayout();
+        $this->getLayout()->getBlock('root')->setTemplate("chatbot/index.phtml"); // use root block to output pure values without html tags
+        $this->renderLayout();
+    }
 
-      $this->loadLayout();
-      $this->getLayout()->getBlock("head")->setTitle($this->__("Titlename"));
-            $breadcrumbs = $this->getLayout()->getBlock("breadcrumbs");
-      $breadcrumbs->addCrumb("home", array(
-                "label" => $this->__("Home Page"),
-                "title" => $this->__("Home Page"),
-                "link"  => Mage::getBaseUrl()
-           ));
+    public function MessengerAction()
+    {
+        $this->loadLayout();
+        $this->getLayout()->getBlock('root')->setTemplate("chatbot/messenger.phtml"); // use root block to output pure values without html tags
+        $this->renderLayout();
+    }
 
-      $breadcrumbs->addCrumb("titlename", array(
-                "label" => $this->__("Titlename"),
-                "title" => $this->__("Titlename")
-           ));
-
-      $this->renderLayout();
-
+    public function TelegramAction()
+    {
+        $this->loadLayout();
+        $this->getLayout()->getBlock('root')->setTemplate("chatbot/telegram.phtml"); // use root block to output pure values without html tags
+        //$this->getLayout()->getBlock('root')->setTemplate("werules_chatbot_view.phtml")->setTitle(Mage::helper('core')->__('Chatbot')); // use root block to output pure values without html tags
+        //$this->getLayout()->getBlock('head')->setTitle(Mage::helper('core')->__('Chatbot'));
+        //$this->getLayout()->getBlock('head')->setTitle($this->__('My Title')); // then this works
+        //$this->getLayout()->unsetBlock('head');
+        $this->renderLayout();
     }
 }
