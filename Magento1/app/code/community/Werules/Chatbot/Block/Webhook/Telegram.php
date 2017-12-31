@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-class Werules_Chatbot_Block_Telegram extends Mage_Core_Block_Template
+class Werules_Chatbot_Block_Webhook_Telegram extends Mage_Core_Block_Template
 {
 
 }
