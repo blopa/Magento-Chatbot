@@ -21,6 +21,7 @@
 					<comment><![CDATA[
 					<h3>Magento Chatbot v1.0.0</h3>
 					<p>To use this module you'll have to use SSL in your store.</p>
+				<hr>
 					]]></comment>
 					<frontend_type>text</frontend_type>
 					<sort_order>0</sort_order>
@@ -82,6 +83,9 @@
 							<comment>Enable wit.ai Natural Language Processor.</comment>
 						</enable_wit_ai>
 						<wit_ai_token translate="label">
+							<depends>
+								<enable_wit_ai>1</enable_wit_ai>
+							</depends>
 							<label>wit.ai Server Access Token</label>
 							<frontend_type>text</frontend_type>
 							<sort_order>6</sort_order>
@@ -108,6 +112,7 @@
 				<comment><![CDATA[
 				<h3>Magento Chatbot v1.0.0</h3>
 				<p>To use this module you'll have to use SSL in your store.</p>
+				<hr>
 				]]></comment>
 				<frontend_type>text</frontend_type>
 				<sort_order>1</sort_order>
@@ -136,6 +141,9 @@
 						<comment>Enable Hub Challenge verification.</comment>
 					</enable_hub_challenge>
 					<disabled_message translate="label">
+						<depends>
+							<enable>0</enable>
+						</depends>
 						<label>Unavailability Message</label>
 						<frontend_type>text</frontend_type>
 						<sort_order>2</sort_order>
@@ -222,6 +230,9 @@
 						<comment>Enable welcome message options.</comment>
 					</enable_message_options>
 					<!--<message_options translate="label">-->
+						<!--<depends>-->
+							<!--<enable_message_options>1</enable_message_options>-->
+						<!--</depends>-->
 						<!--<sort_order>13</sort_order>-->
 					<!--</message_options>-->
 					<about_message translate="label">
@@ -266,6 +277,9 @@
 						<comment>Enable default replies.</comment>
 					</enable_default_replies>
 					<!--<default_replies translate="label">-->
+						<!--<depends>-->
+							<!--<enable_default_replies>1</enable_default_replies>-->
+						<!--</depends>-->
 						<!--<sort_order>19</sort_order>-->
 					<!--</default_replies>-->
 					<enable_nlp_replies translate="label">
@@ -289,6 +303,9 @@
 						<comment>Natural Language Processor entity prefix is a prefix name to flag that the request is coming from Messenger.</comment>
 					</nlp_entity_prefix>
 					<!--<nlp_replies translate="label">-->
+						<!--<depends>-->
+							<!--<enable_nlp_replies>1</enable_nlp_replies>-->
+						<!--</depends>-->
 						<!--<sort_order>22</sort_order>-->
 					<!--</nlp_replies>-->
 					<fallback_message translate="label">
@@ -333,6 +350,7 @@
 						<h2 style='color: red;'>A 'Message Clearing Process' is scheduled for the next minute. Please wait.</h2>
 						<p>If a minute has passed and nothing happened, please check your cron configuration in your server.</p>
 					</div>
+					<hr>
 					]]></comment>
 					<frontend_type>text</frontend_type>
 					<sort_order>2</sort_order>
@@ -351,6 +369,9 @@
 							<comment>Clear message pending list. After changing this value and saving, a process to clear message pending list will be schedule for the next minute.</comment>
 						</clear_message_pending>
 						<clear_message_sender_id translate="label">
+							<depends>
+								<clear_message_pending>1</clear_message_pending>
+							</depends>
 							<label>Sender Chat ID</label>
 							<frontend_type>text</frontend_type>
 							<sort_order>1</sort_order>
