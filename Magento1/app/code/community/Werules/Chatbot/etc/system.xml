@@ -121,28 +121,191 @@
 						<show_in_store>1</show_in_store>
 						<comment>Enable Messenger bot.</comment>
 					</enable>
-					<!--<enable_hub_challenge translate="label"></enable_hub_challenge>-->
-					<!--<disabled_message translate="label"></disabled_message>-->
-					<!--<app_id translate="label"></app_id>-->
-					<!--<api_key translate="label"></api_key>-->
-					<!--<bot_username translate="label"></bot_username>-->
-					<!--<page_id translate="label"></page_id>-->
-					<!--<domain_whitelisted translate="label"></domain_whitelisted>-->
-					<!--<enable_messenger_box translate="label"></enable_messenger_box>-->
-					<!--<welcome_message translate="label"></welcome_message>-->
-					<!--<enable_message_options translate="label"></enable_message_options>-->
-					<!--<message_options translate="label"></message_options>-->
-					<!--<about_message translate="label"></about_message>-->
-					<!--<help_message translate="label"></help_message>-->
-					<!--<enable_help_command_list translate="label"></enable_help_command_list>-->
-					<!--<commands_list translate="label"></commands_list>-->
-					<!--<enable_default_replies translate="label"></enable_default_replies>-->
-					<!--<default_replies translate="label"></default_replies>-->
-					<!--<enable_nlp_replies translate="label"></enable_nlp_replies>-->
-					<!--<nlp_entity_prefix translate="label"></nlp_entity_prefix>-->
-					<!--<nlp_replies translate="label"></nlp_replies>-->
-					<!--<fallback_message translate="label"></fallback_message>-->
-					<!--<fallback_message_quantity translate="label"></fallback_message_quantity>-->
+					<enable_hub_challenge translate="label">
+						<label>Enable Hub Challenge Verification</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_enabledisable</source_model>
+						<sort_order>1</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable Hub Challenge verification.</comment>
+					</enable_hub_challenge>
+					<disabled_message translate="label">
+						<label>Unavailability Message</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>2</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Message to send when bot is disabled. Leave it empty to send no message. Please check the maximum size for messages on Messenger API, otherwise your message might not be sent.</comment>
+					</disabled_message>
+					<app_id translate="label">
+						<label>Facebook Application ID</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>3</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Your Facebook Application ID.</comment>
+					</app_id>
+					<api_key translate="label">
+						<label>Page Access Token</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>4</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Your page access token.</comment>
+					</api_key>
+					<bot_username translate="label">
+						<label>Facebook Page Username</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>5</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Facebook page username. If you don't know, leave it blank.</comment>
+					</bot_username>
+					<page_id translate="label">
+						<label>Facebook Page ID</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>6</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Facebook Page ID. If you don't know, leave it blank and we fill it for you.</comment>
+					</page_id>
+					<domain_whitelisted translate="label">
+						<label>Whitelisted Domain?</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_yesno</source_model>
+						<sort_order>7</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Is this domain whitelisted on Facebook? If not, don't worry, we'll whitelist it for you and update this setting.</comment>
+					</domain_whitelisted>
+					<enable_messenger_box translate="label">
+						<label>Enable Messenger Chat Box</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_yesno</source_model>
+						<sort_order>8</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable Messenger chat box.</comment>
+					</enable_messenger_box>
+					<!--<enable_referral translate="label"></enable_referral>-->
+					<!--<referral_message translate="label"></referral_message>-->
+					<welcome_message translate="label">
+						<label>Welcome Message</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>11</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>First message the bot will send to your client. please check the maximum size for messages on Facebook API, otherwise your message might not be sent. you can use "{customername}" to send the customer name.</comment>
+					</welcome_message>
+					<enable_message_options translate="label">
+						<label>Enable Welcome Message Options</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_yesno</source_model>
+						<sort_order>12</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable welcome message options.</comment>
+					</enable_message_options>
+					<!--<message_options translate="label">-->
+						<!--<sort_order>13</sort_order>-->
+					<!--</message_options>-->
+					<about_message translate="label">
+						<label>About Message</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>14</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Message will be sent when customer asks informations about the store. Please check the maximum size for messages on Facebook API, otherwise your message might not be sent.</comment>
+					</about_message>
+					<help_message translate="label">
+						<label>Help Message</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>15</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Message will be sent when customer asks for help. Please check the maximum size for messages on Facebook API, otherwise your message might not be sent.</comment>
+					</help_message>
+					<enable_help_command_list translate="label">
+						<label>Enable Command Listing on Help Command</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_yesno</source_model>
+						<sort_order>16</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable command listing when customer ask for help.</comment>
+					</enable_help_command_list>
+					<!--<commands_list translate="label">-->
+						<!--<sort_order>17</sort_order>-->
+					<!--</commands_list>-->
+					<enable_default_replies translate="label">
+						<label>Enable Default Replies</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_yesno</source_model>
+						<sort_order>18</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable default replies.</comment>
+					</enable_default_replies>
+					<!--<default_replies translate="label">-->
+						<!--<sort_order>19</sort_order>-->
+					<!--</default_replies>-->
+					<enable_nlp_replies translate="label">
+						<label>Enable Natural Language Processor Replies (wit.ai)</label>
+						<frontend_type>select</frontend_type>
+						<source_model>adminhtml/system_config_source_yesno</source_model>
+						<sort_order>20</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Enable Natural Language Processor replies.</comment>
+					</enable_nlp_replies>
+					<nlp_entity_prefix translate="label">
+						<label>Natural Language Processor Entity Prefix</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>21</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<validate>validate-no-html-tags</validate>
+						<comment>Natural Language Processor entity prefix is a prefix name to flag that the request is coming from Messenger.</comment>
+					</nlp_entity_prefix>
+					<!--<nlp_replies translate="label">-->
+						<!--<sort_order>22</sort_order>-->
+					<!--</nlp_replies>-->
+					<fallback_message translate="label">
+						<label>Fallback Message</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>23</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<comment>Message will be sent when the bot don't understand customer messages for the Nst time.</comment>
+					</fallback_message>
+					<fallback_message_quantity translate="label">
+						<label>Fallback Quantity</label>
+						<frontend_type>text</frontend_type>
+						<sort_order>24</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<validate>input-number validate-number</validate>
+						<comment>Number of fallbacks before sending the fallback message.</comment>
+					</fallback_message_quantity>
 				</fields>
 				</general>
 			</groups>
