@@ -39,6 +39,8 @@ class Werules_Chatbot_Helper_Define
     public $DEFAULT_MIN_CONFIDENCE = 0.7;
     public $BREAK_LINE = '\n'; // chr(10)
     public $QUEUE_PROCESSING_LIMIT = 180;//$SECONDS_IN_MINUTE * 3;
+    public $NOT_SENT = 0;
+    public $SENT = 1;
 
     // commands
     public $START_COMMAND_ID = 0;
@@ -77,6 +79,7 @@ class Werules_Chatbot_Helper_Define
     public $RECEIPT_LAYOUT = 4;
     public $LIST_WITH_IMAGE = 5;
     public $TEXT_WITH_OPTIONS = 6;
+    public $NO_REPLY_MESSAGE = 7;
 
     // conversation states
     public $CONVERSATION_STARTED = 0;
@@ -84,6 +87,7 @@ class Werules_Chatbot_Helper_Define
     public $CONVERSATION_SEARCH = 2;
     public $CONVERSATION_EMAIL = 3;
     public $CONVERSATION_TRACK_ORDER = 4;
+    public $CONVERSATION_SUPPORT = 5;
 
     // API
     public $MAX_MESSAGE_ELEMENTS = 7;
@@ -96,4 +100,11 @@ class Werules_Chatbot_Helper_Define
 
     public $DONT_CLEAR_MESSAGE_QUEUE = 0;
     public $CLEAR_MESSAGE_QUEUE = 1;
+
+    // DEFAULT REPLIES MODES
+    public $EQUALS_TO = 0;
+    public $STARTS_WITH = 1;
+    public $ENDS_WITH = 2;
+    public $CONTAINS = 3;
+    public $MATCH_REGEX = 4;
 }
