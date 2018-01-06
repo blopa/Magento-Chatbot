@@ -126,7 +126,7 @@ Go to **System > General Settings  > Chatbot Settings**
     - Small code improvements
     - Fix parameter problem when processing outgoing message
 - **v1.0.1:**
-    - Fix missing parameter on CLI installation
+    - Fix missing parameter on CLI installation (issue [#120](https://github.com/blopa/Magento-Chatbot/issues/120))
     - Fix get on Messenger payload message
 - **v1.0.0:**
     - First working version
