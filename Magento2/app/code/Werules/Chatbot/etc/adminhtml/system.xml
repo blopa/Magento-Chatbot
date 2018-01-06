@@ -6,7 +6,7 @@
 		</tab>
 		<section id="werules_chatbot_general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip">
 			<label>General Settings</label>
-			<tab>werules</tab>
+			<tab>werules_chatbot</tab>
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>General Settings</label>
@@ -62,7 +62,7 @@
 		</section>
 		<section id="werules_chatbot_messenger" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label comment tooltip">
 			<label>Messenger Settings</label>
-			<tab>werules</tab>
+			<tab>werules_chatbot</tab>
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Messenger Settings</label>
@@ -235,7 +235,7 @@
 		</section>
 		<section id="werules_chatbot_danger" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="3" translate="label comment tooltip">
 			<label>Danger Zone</label>
-			<tab>werules</tab>
+			<tab>werules_chatbot</tab>
 			<resource>Werules_Chatbot::config_werules_chatbot</resource>
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Danger Zone</label>
