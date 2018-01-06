@@ -83,6 +83,8 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
             else // process message
             {
                 $messengerInstance = $this->getMessengerInstance();
+                if (!$messengerInstance->getPostData())
+                    return $this->getJsonErrorResponse();
                 $this->logPostData($messengerInstance->getPostData(), 'werules_chatbot_messenger.log');
 
                 $messageObject = $this->createMessageObject($messengerInstance);
@@ -125,7 +127,7 @@ class Messenger extends \Werules\Chatbot\Block\Webhook\Index
         $messageObject->messagePayload = $this->getMessengerPayload($messenger); // TODO
         $messageObject->chatMessageId = $messenger->MessageID();
         if ($messenger->getMessageTimestamp())
-            $messageObject->sentAt = (int)$messenger->getMessageTimestamp();
+            $messageObject->sentAt = substr($messenger->getMessageTimestamp(), 0, 10);
         else
             $messageObject->sentAt = time();
         $datetime = date('Y-m-d H:i:s');

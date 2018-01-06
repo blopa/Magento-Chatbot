@@ -100,6 +100,7 @@ Go to **System > General Settings  > Chatbot Settings**
 - **v1.0.6:**
     - Update license
     - Fix issue [#142](https://github.com/blopa/Magento-Chatbot/issues/142)
+    - Minor bugs fixes
 - **v1.0.5:**
     - Add Promotional Messages
     - Add Messenger Chatbox
