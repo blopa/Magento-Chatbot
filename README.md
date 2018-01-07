@@ -12,8 +12,6 @@
 ## IMPORTANT
 We're currently refactoring all our codebase and database structure, so we renamed the `Magento1` folder to `Magento1_deprecated`, the new Magento1 module should be ready before January/2018. To access the deprecated Magento1 version click [here](https://github.com/blopa/Magento-Chatbot/tree/master/Magento1_deprecated)
 
-Please notice that this first version is still not stable, but it should be in December/2017.
-
 ## About
 This repository is the source code for the Magento Chatbot (Telegram, Messenger, Whatsapp, WeChat and Skype), with this module you can fully integrate your Magento store with the most popular chat apps in the market. This means that by simply installing this module and a few clicks you can have a new way to show and sell your products to your clients.
 Very easy to use! Try now, it's FREE.
@@ -99,6 +97,10 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.6:**
+    - Update license
+    - Fix issue [#142](https://github.com/blopa/Magento-Chatbot/issues/142)
+    - Minor bugs fixes
 - **v1.0.5:**
     - Add Promotional Messages
     - Add Messenger Chatbox
@@ -125,7 +127,7 @@ Go to **System > General Settings  > Chatbot Settings**
     - Small code improvements
     - Fix parameter problem when processing outgoing message
 - **v1.0.1:**
-    - Fix missing parameter on CLI installation
+    - Fix missing parameter on CLI installation (issue [#120](https://github.com/blopa/Magento-Chatbot/issues/120))
     - Fix get on Messenger payload message
 - **v1.0.0:**
     - First working version
@@ -280,7 +282,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
 ## License
 MIT License
 
-Copyright (c) 2017 blopa
+Copyright (c) 2018 blopa
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
