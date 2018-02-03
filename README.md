@@ -89,11 +89,11 @@ Go to **System > General Settings  > Chatbot Settings**
 ## Screenshot
 #### General Settings
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/general_settings.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/m2/general_settings.png)
 
 #### Messenger Settings
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/messenger_settings.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/m2/messenger_settings.png)
 
 #### Conversation
 
