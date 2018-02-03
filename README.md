@@ -87,6 +87,14 @@ Go to **System > General Settings  > Chatbot Settings**
 - Natural Language Processor Replies: Replies to be send to the customer whenever matches one of the requirements.
 
 ## Screenshot
+#### General Settings
+
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/general_settings.jpg)
+
+#### Messenger Settings
+
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/messenger_settings.jpg)
+
 #### Conversation
 
 ![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/conversation.jpg)

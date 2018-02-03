@@ -125,19 +125,19 @@ Go to **System > General Settings  > Chatbot Settings**
 ## Screenshot
 General Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/general_configuration.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/m1_deprecated/general_configuration.jpg)
 
 wit.ai Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/witai_configuration.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/m1_deprecated/witai_configuration.jpg)
 
 Telegram Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/telegram_configuration.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/m1_deprecated/telegram_configuration.jpg)
 
 Facebook Messenger Configuration
 
-![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/facebook_configuration.jpg)
+![ScreenShot](https://raw.githubusercontent.com/blopa/Magento-Chatbot/master/screenshots/m1_deprecated/facebook_configuration.jpg)
 
 Conversation
 
