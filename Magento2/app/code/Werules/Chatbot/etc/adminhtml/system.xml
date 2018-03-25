@@ -11,7 +11,7 @@
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>General Settings</label>
 				<comment><![CDATA[
-				<h3>Magento Chatbot v1.0.6</h3>
+				<h3>Magento Chatbot v1.0.7</h3>
 				<p>To use this module you'll have to use SSL in your store.</p>
 				]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
@@ -67,7 +67,7 @@
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Messenger Settings</label>
 				<comment><![CDATA[
-				<h3>Magento Chatbot v1.0.6</h3>
+				<h3>Magento Chatbot v1.0.7</h3>
 				<p>To use this module you'll have to use SSL in your store.</p>
 				]]></comment>
 				<field id="enable" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="1" translate="label comment tooltip" type="select">
@@ -240,7 +240,7 @@
 			<group id="general" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label comment tooltip">
 				<label>Danger Zone</label>
 				<comment><![CDATA[
-				<h3>Magento Chatbot v1.0.6</h3>
+				<h3>Magento Chatbot v1.0.7</h3>
 				<p>To use this module you'll have to use SSL in your store.</p>
 				<p style='color: red;'><b>You should only change settings here if you know what you're doing.</b></p>
 				<div class='message-system-inner' id='werules_scheduled_clearing' style='display: none; border-width: 0.1rem; padding: 0 1.5rem 0 3rem;'>

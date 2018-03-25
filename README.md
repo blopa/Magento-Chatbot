@@ -105,6 +105,8 @@ Go to **System > General Settings  > Chatbot Settings**
 
 ## Release Notes
 ### Magento2
+- **v1.0.7:**
+    - Fix unserialization problem [#146](https://github.com/blopa/Magento-Chatbot/issues/146) (thanks [xmav](https://github.com/xmav))
 - **v1.0.6:**
     - Update license
     - Fix issue [#142](https://github.com/blopa/Magento-Chatbot/issues/142)
