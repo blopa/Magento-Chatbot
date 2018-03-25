@@ -27,36 +27,31 @@
         updateCustomKeyUrl(custom_key.value);
 
     var scheduled_clear = document.getElementById('werules_chatbot_danger_general_clear_message_pending');
-    if (scheduled_clear)
-    {
-        if (scheduled_clear.value === '1')
-        {
+    if (scheduled_clear) {
+        if (scheduled_clear.value === '1') {
             var schedule_message = document.getElementById('werules_scheduled_clearing');
             if (schedule_message)
                 document.getElementById('werules_scheduled_clearing').style.display = 'block';
         }
     }
 
-    function updateCustomKeyUrl(custom_key)
-    {
+    function updateCustomKeyUrl(custom_key) {
         var messenger_url = document.getElementById('werules_messenger_url');
         var telegram_url = document.getElementById('werules_telegram_url');
         var store_url = '<?php echo $baseUrl; ?>';
 //        messenger_url.href = store_url + 'chatbot/webhook/endpoint/api/messenger/key/' + custom_key;
-        messenger_url.href = 'https://werules.github.io/chatbot/?key=' + custom_key;
-        telegram_url.href = store_url + 'chatbot/webhook/endpoint/api/messenger/key/' + custom_key;
+        messenger_url.href = 'https://werules.github.io/chatbot/?key=' + custom_key + '&base_url=' + store_url;
+        // telegram_url.href = store_url + 'chatbot/webhook/endpoint/api/messenger/key/' + custom_key; // TODO
     }
 
-    function generateCustomKey()
-    {
+    function generateCustomKey() {
         var key_input = document.getElementById('werules_chatbot_general_general_custom_key');
         var custom_key = getRandomCustomKey(Math.floor(Math.random() *  4));
         key_input.value = custom_key;
 //        updateCustomKeyUrl(custom_key);
     }
 
-    function getRandomCustomKey(qty)
-    {
+    function getRandomCustomKey(qty) {
         var key = '';
         for (var i = 0; i <= qty; i++)
             key += Math.random().toString(36).substring(2, 15);
