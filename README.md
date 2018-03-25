@@ -289,6 +289,7 @@ A: Thank you! You can help by codding more features, creating pull requests, or 
     - Add more options to filter clearing message queue
     - Add handler for other posts from Messenger
     - Send Email when customer asks for support
+    - Add support to {customername} variable
 
 ## License
 MIT License
