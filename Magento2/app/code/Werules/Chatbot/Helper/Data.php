@@ -1370,6 +1370,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         {
             if ($chatbotType == $this->_define::MESSENGER_INT)
                 $this->_configPrefix = 'werules_chatbot_messenger';
+            else if ($chatbotType == $this->_define::TELEGRAM_INT)
+                $this->_configPrefix = 'werules_chatbot_telegram';
         }
     }
 
@@ -1478,7 +1480,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private function getDisabledByCustomerMessage($message)
     {
         $outgoingMessages = array();
-        $text = __("To chat with me, please enable Messenger on your account chatbot settings.");
+        $text = __("To chat with me, please enable it on your account chatbot settings."); // TODO
         $contentObj = $this->getTextMessageArray($text);
         $outgoingMessage = $this->createOutgoingMessage($message, reset($contentObj)); // TODO reset -> gets first item of array
         if ($outgoingMessage)

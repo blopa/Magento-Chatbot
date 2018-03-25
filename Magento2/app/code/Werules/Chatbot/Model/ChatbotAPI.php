@@ -273,6 +273,11 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\Messenger', array('bot_token' => $bot_token)); // TODO find a better way to to this
     }
 
+    public function initTelegramAPI($bot_token) // TODO TODO TODO
+    {
+        return $this->_objectManager->create('Werules\Chatbot\Model\Api\Telegram', array('bot_token' => $bot_token)); // TODO find a better way to to this
+    }
+
     public function initWitAIAPI($token) // TODO TODO TODO
     {
         return $this->_objectManager->create('Werules\Chatbot\Model\Api\witAI', array('token' => $token)); // TODO find a better way to to this
@@ -374,6 +379,10 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 //            $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
 //            $this->_apiModel = $this->initMessengerAPI($apiToken);
 //        }
+//        else if ($chatbot_type == $this->_define::TELEGRAM_INT)
+//        {
+//
+//        }
 //    }
 
     public function sendMessage($message)
@@ -385,6 +394,22 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             if (isset($result['error']))
                 $result = false;
         }
+        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+        {
+            $result = $this->sendMessageToTelegram($message);
+            if (isset($result['error']))
+                $result = false;
+        }
+
+        return $result;
+    }
+
+    public function sendMessageToTelegram($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_telegram/general/api_key');
+        $this->_apiModel = $this->initTelegramAPI($apiToken);
+
+        $result = $this->_apiModel->sendMessage(array('chat_id' => $message->getSenderId(), 'text' => $message->getContent()));
 
         return $result;
     }
@@ -408,8 +433,21 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             if (isset($result['error']))
                 $result = false;
         }
+        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+        {
+            $result = $this->sendQuickReplyToTelegram($message);
+            if (isset($result['error']))
+                $result = false;
+        }
 
         return $result;
+    }
+
+    public function sendQuickReplyToTelegram($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_telegram/general/api_key');
+        $this->_apiModel = $this->initTelegramAPI($apiToken);
+        // TODO
     }
 
     public function sendQuickReplyToMessenger($message)
@@ -434,6 +472,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendReceiptListToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
+        }
+        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+        {
+            $result = $this->sendReceiptListToTelegram($message);
             if (isset($result['error']))
                 $result = false;
         }
@@ -512,6 +556,10 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 //        {
 //            $result = $this->sendGenericListToMessenger($message);
 //        }
+//        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+//        {
+//            $result = $this->sendGenericListToTelegram($message);
+//        }
 //
 //        return $result;
 //    }
@@ -522,6 +570,12 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
         {
             $result = $this->sendMessageWithOptionsToMessenger($message);
+            if (isset($result['error']))
+                $result = false;
+        }
+        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+        {
+            $result = $this->sendMessageWithOptionsToTelegram($message);
             if (isset($result['error']))
                 $result = false;
         }
@@ -538,8 +592,21 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
             if (isset($result['error']))
                 $result = false;
         }
+        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+        {
+            $result = $this->sendImageWithOptionsToTelegram($message);
+            if (isset($result['error']))
+                $result = false;
+        }
 
         return $result;
+    }
+
+    public function sendReceiptListToTelegram($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_telegram/general/api_key');
+        $this->_apiModel = $this->initTelegramAPI($apiToken);
+        // TODO
     }
 
     public function sendReceiptListToMessenger($message)
@@ -605,6 +672,13 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         return $result;
     }
 
+    public function sendMessageWithOptionsToTelegram($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_telegram/general/api_key');
+        $this->_apiModel = $this->initTelegramAPI($apiToken);
+        // TODO
+    }
+
     public function sendMessageWithOptionsToMessenger($message)
     {
         $apiToken = $this->_helper->getConfigValue('werules_chatbot_messenger/general/api_key');
@@ -618,6 +692,13 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
         $result = $this->_apiModel->sendButtonTemplate($message->getSenderId(), $text, $buttons);
 
         return $result;
+    }
+
+    public function sendImageWithOptionsToTelegram($message)
+    {
+        $apiToken = $this->_helper->getConfigValue('werules_chatbot_telegram/general/api_key');
+        $this->_apiModel = $this->initTelegramAPI($apiToken);
+        // TODO
     }
 
     public function sendImageWithOptionsToMessenger($message)
@@ -707,6 +788,8 @@ class ChatbotAPI extends \Magento\Framework\Model\AbstractModel implements Chatb
 
         if ($this->getChatbotType() == $this->_define::MESSENGER_INT)
             $prefix = $this->_helper->getConfigValue('werules_chatbot_messenger/general/nlp_entity_prefix');
+        else if ($this->getChatbotType() == $this->_define::TELEGRAM_INT)
+            $prefix = $this->_helper->getConfigValue('werules_chatbot_telegram/general/nlp_entity_prefix');
 
         if (isset($response['_text']))
         {
